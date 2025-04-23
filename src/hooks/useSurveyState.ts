@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from 'react';
-import { Survey, Question } from '@/types/survey';
+import { Survey } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSurveyTitle } from './survey/useSurveyTitle';
+import { useQuestionManagement } from './survey/useQuestionManagement';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
@@ -20,78 +22,31 @@ export const useSurveyState = (surveyId: string | undefined) => {
     isPublished: false
   });
 
+  const {
+    questions,
+    setQuestions,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+    duplicateQuestion
+  } = useQuestionManagement(survey.questions);
+
   useEffect(() => {
     if (surveyData) {
-      setSurvey({
+      const newSurvey = {
         id: surveyData.id,
         title: surveyData.title || surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
         questions: surveyData.questions || [],
         isPublished: surveyData.isPublished || false
-      });
+      };
+      setSurvey(newSurvey);
+      setQuestions(newSurvey.questions);
     }
-  }, [surveyData]);
+  }, [surveyData, setQuestions]);
 
   const handleDescriptionChange = (description: string) => {
     setSurvey((prev) => ({ ...prev, description }));
-  };
-
-  const addQuestion = () => {
-    const newQuestion: Question = {
-      id: Date.now().toString(),
-      type: 'text',
-      text: '',
-      isRequired: false,
-      options: []
-    };
-    
-    setSurvey((prev) => ({
-      ...prev,
-      questions: [...prev.questions, newQuestion]
-    }));
-  };
-
-  const updateQuestion = (updatedQuestion: Question) => {
-    setSurvey((prev) => ({
-      ...prev,
-      questions: prev.questions.map(q => 
-        q.id === updatedQuestion.id ? updatedQuestion : q
-      )
-    }));
-  };
-
-  const deleteQuestion = (questionId: string) => {
-    setSurvey((prev) => ({
-      ...prev,
-      questions: prev.questions.filter(q => q.id !== questionId)
-    }));
-  };
-
-  const duplicateQuestion = (questionToDuplicate: Question) => {
-    const newQuestion: Question = {
-      ...questionToDuplicate,
-      id: Date.now().toString(),
-      options: questionToDuplicate.options.map(option => ({
-        ...option,
-        id: `${Date.now()}-${option.id}`
-      }))
-    };
-
-    setSurvey((prev) => {
-      const questionIndex = prev.questions.findIndex(q => q.id === questionToDuplicate.id);
-      const updatedQuestions = [...prev.questions];
-      updatedQuestions.splice(questionIndex + 1, 0, newQuestion);
-      
-      return {
-        ...prev,
-        questions: updatedQuestions
-      };
-    });
-
-    toast({
-      title: "Question duplicated",
-      description: "The question has been duplicated successfully.",
-    });
   };
 
   const togglePublish = () => {
@@ -114,9 +69,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
         await updateSurvey({
           surveyId,
           updates: { 
-            name: survey.title, // Use title for the name field
+            name: survey.title,
             description: survey.description,
-            questions: survey.questions,
+            questions: questions, // Use questions from useQuestionManagement
             isPublished: survey.isPublished
           }
         });
@@ -139,8 +94,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   };
 
+  // Create a new survey object that includes the latest questions
+  const currentSurvey: Survey = {
+    ...survey,
+    questions
+  };
+
   return {
-    survey,
+    survey: currentSurvey,
     handleTitleChange,
     handleDescriptionChange,
     addQuestion,
