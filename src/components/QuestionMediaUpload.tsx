@@ -44,11 +44,17 @@ const QuestionMediaUpload: React.FC<QuestionMediaUploadProps> = ({ onFileSelecte
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 w-full">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button type="button" variant="outline" size="sm" onClick={handleImageClick}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={handleImageClick} 
+              className="flex-1"
+            >
               <Image size={16} className="mr-2" />
               Add Image
             </Button>
@@ -62,7 +68,13 @@ const QuestionMediaUpload: React.FC<QuestionMediaUploadProps> = ({ onFileSelecte
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button type="button" variant="outline" size="sm" onClick={handleVideoClick}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={handleVideoClick} 
+              className="flex-1"
+            >
               <Video size={16} className="mr-2" />
               Add Video
             </Button>
