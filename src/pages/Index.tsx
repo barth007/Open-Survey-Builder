@@ -146,8 +146,8 @@ const Index = () => {
                       onClick={togglePublish} 
                       className={`
                         ${survey.isPublished 
-                          ? "border-transparent bg-green-500 bg-opacity-50 text-green-700" 
-                          : "border-transparent bg-orange-500 bg-opacity-50 text-orange-700"}
+                          ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20" 
+                          : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20"}
                         rounded-r-none border-r
                       `}
                     >
