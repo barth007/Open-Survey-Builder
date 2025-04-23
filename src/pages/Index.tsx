@@ -6,7 +6,7 @@ import QuestionCard from '@/components/QuestionCard';
 import AddQuestionButton from '@/components/AddQuestionButton';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Save } from "lucide-react";
+import { Eye, Save, Link } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
