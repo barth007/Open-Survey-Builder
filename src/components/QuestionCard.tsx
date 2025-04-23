@@ -211,7 +211,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               {question.options.map((option) => (
                 <div key={option.id} className="flex items-start gap-2">
                   {question.type === 'multipleChoice' ? (
-                    <RadioGroupItem value={option.id} id={option.id} disabled />
+                    <RadioGroup>
+                      <RadioGroupItem value={option.id} id={option.id} disabled />
+                    </RadioGroup>
                   ) : (
                     <Checkbox disabled id={option.id} />
                   )}
