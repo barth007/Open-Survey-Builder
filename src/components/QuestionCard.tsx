@@ -47,6 +47,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
+  const [hasUrlChanged, setHasUrlChanged] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
@@ -186,11 +187,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const handleFigmaUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFigmaUrl(e.target.value);
+    setHasUrlChanged(e.target.value !== question.figmaPrototypeUrl);
+  };
+
   const handleFigmaUrlSave = () => {
     onQuestionChange({
       ...question,
       figmaPrototypeUrl: figmaUrl
     });
+    setHasUrlChanged(false);
   };
 
   const openFigmaPrototype = () => {
@@ -295,19 +302,33 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <LinkIcon size={16} className="text-abyss" />
             <Input
               value={figmaUrl}
-              onChange={(e) => setFigmaUrl(e.target.value)}
+              onChange={handleFigmaUrlChange}
               placeholder="Figma Prototype URL (optional)"
               className="flex-1 text-sm border-ice"
             />
-            <Button 
-              onClick={handleFigmaUrlSave} 
-              size="sm" 
-              variant="outline"
-              className="border-abyss text-abyss hover:bg-abyss hover:text-white"
-            >
-              <Check size={16} className="mr-1" />
-              Save
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleFigmaUrlSave} 
+                size="sm" 
+                variant="outline"
+                disabled={!hasUrlChanged}
+                className="border-abyss text-abyss hover:bg-abyss hover:text-white"
+              >
+                <Check size={16} className="mr-1" />
+                Save
+              </Button>
+              {figmaUrl && (
+                <Button 
+                  onClick={openFigmaPrototype} 
+                  size="sm" 
+                  variant="outline"
+                  className="border-sunset text-sunset hover:bg-sunset hover:text-white"
+                >
+                  <ExternalLink size={16} className="mr-1" />
+                  Open
+                </Button>
+              )}
+            </div>
           </div>
           
           {figmaUrl && (
