@@ -269,6 +269,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             <QuestionTypeMenu
               currentType={question.type}
               onTypeChange={handleTypeChange}
+              className="w-full"
             />
           </div>
           <div className="w-full">

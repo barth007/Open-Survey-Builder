@@ -15,15 +15,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { QuestionType } from '@/types/survey';
+import { cn } from "@/lib/utils";
 
 interface QuestionTypeMenuProps {
   currentType: QuestionType;
   onTypeChange: (type: QuestionType) => void;
+  className?: string;
 }
 
 const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
   currentType,
   onTypeChange,
+  className,
 }) => {
   const getTypeLabel = () => {
     switch (currentType) {
@@ -47,7 +50,10 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          className={cn("flex items-center gap-2 w-full", className)}
+        >
           {getTypeLabel()}
           <ChevronDown size={16} />
         </Button>
