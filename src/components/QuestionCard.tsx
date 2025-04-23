@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -11,8 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash, GripVertical, Link, Copy } from "lucide-react";
-import { Question, ConditionalLogic } from '@/types/survey';
+import { Trash, GripVertical, Link, Copy, Check } from "lucide-react";
+import { 
+  Question, 
+  ConditionalLogic, 
+  QuestionType, 
+  QuestionOption,
+  LIKERT_5_LABELS,
+  LIKERT_7_LABELS,
+  LIKERT_10_LABELS
+} from '@/types/survey';
 import QuestionTypeMenu from './QuestionTypeMenu';
 import MediaUploadButton from './MediaUploadButton';
 import QuestionMediaUpload from './QuestionMediaUpload';
