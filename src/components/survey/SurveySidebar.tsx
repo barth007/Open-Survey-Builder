@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
@@ -15,37 +14,12 @@ import {
 } from "@/components/ui/sidebar";
 
 import { useToast } from "@/hooks/use-toast";
-import type { Survey, SurveyFolder } from '@/types/survey-organization';
-
-// Mock data - replace with real data later
-const MOCK_DATA: { folders: SurveyFolder[]; unorganizedSurveys: Survey[] } = {
-  folders: [
-    {
-      id: '1',
-      name: 'Customer Feedback',
-      createdAt: new Date(),
-      surveys: [
-        { id: '1', name: 'Product Satisfaction', createdAt: new Date(), folderId: '1' },
-        { id: '2', name: 'Website Usability', createdAt: new Date(), folderId: '1' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Employee Surveys',
-      createdAt: new Date(),
-      surveys: [
-        { id: '3', name: 'Work Environment', createdAt: new Date(), folderId: '2' },
-      ],
-    },
-  ],
-  unorganizedSurveys: [
-    { id: '4', name: 'General Feedback', createdAt: new Date() },
-  ],
-};
+import { useSurveyData } from '@/hooks/useSurveyData';
 
 export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const { surveyData, isLoading, createSurvey, deleteSurvey, deleteFolder } = useSurveyData();
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders((current) => {
@@ -59,32 +33,64 @@ export function SurveySidebar() {
     });
   };
 
-  const handleDeleteSurvey = (surveyId: string, e: React.MouseEvent) => {
+  const handleDeleteSurvey = async (surveyId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toast({
-      title: "Survey deleted",
-      description: `Survey ${surveyId} has been deleted.`,
-    });
+    try {
+      await deleteSurvey(surveyId);
+      toast({
+        title: "Success",
+        description: "Survey deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete survey",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteFolder = (folderId: string, e: React.MouseEvent) => {
+  const handleDeleteFolder = async (folderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toast({
-      title: "Folder deleted",
-      description: `Folder ${folderId} has been deleted.`,
-    });
+    try {
+      await deleteFolder(folderId);
+      toast({
+        title: "Success",
+        description: "Folder deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete folder",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCreateSurvey = (folderId?: string) => {
-    toast({
-      title: "Survey created",
-      description: folderId 
-        ? `New survey created in folder ${folderId}`
-        : "New survey created in root",
-    });
+  const handleCreateSurvey = async (folderId?: string) => {
+    try {
+      await createSurvey({
+        name: "New Survey",
+        folderId
+      });
+      toast({
+        title: "Success",
+        description: "Survey created successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create survey",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Sidebar>
@@ -94,7 +100,7 @@ export function SurveySidebar() {
           <SidebarGroupLabel>Folders</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {MOCK_DATA.folders.map((folder) => (
+              {surveyData?.folders.map((folder) => (
                 <SidebarMenuItem key={folder.id}>
                   <SidebarMenuButton 
                     onClick={() => toggleFolder(folder.id)}
@@ -157,7 +163,7 @@ export function SurveySidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {MOCK_DATA.unorganizedSurveys.map((survey) => (
+              {surveyData?.unorganizedSurveys.map((survey) => (
                 <SidebarMenuItem key={survey.id}>
                   <SidebarMenuButton asChild>
                     <Link to={`/survey/${survey.id}`} className="w-full justify-start">
