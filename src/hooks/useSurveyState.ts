@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
@@ -31,8 +30,21 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyData]);
 
-  const handleTitleChange = (title: string) => {
+  const handleTitleChange = async (title: string) => {
     setSurvey((prev) => ({ ...prev, title }));
+    
+    if (surveyId) {
+      try {
+        await updateSurvey({
+          surveyId,
+          updates: { name: title }
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      } catch (error) {
+        console.error("Error updating survey title:", error);
+      }
+    }
   };
 
   const handleDescriptionChange = (description: string) => {

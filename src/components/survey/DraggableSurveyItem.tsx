@@ -133,10 +133,7 @@ export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSur
           <Tooltip>
             <TooltipTrigger asChild>
               <SidebarMenuAction
-                className={cn(
-                  "transition-opacity mr-1",
-                  isHovered ? "opacity-100" : "opacity-0"
-                )}
+                className="mr-1"
                 onClick={onDelete}
               >
                 <Trash2 className="h-4 w-4" />
