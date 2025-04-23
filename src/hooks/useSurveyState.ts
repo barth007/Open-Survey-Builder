@@ -1,7 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
+import { useQuerySurvey } from './survey/useQuerySurvey';
 
 export const useSurveyState = () => {
   const { toast } = useToast();

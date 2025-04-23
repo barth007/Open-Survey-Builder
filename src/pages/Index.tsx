@@ -8,10 +8,13 @@ import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams } from 'react-router-dom';
+import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
+  const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
+  
   const {
     survey,
     handleTitleChange,
@@ -24,6 +27,28 @@ const Index = () => {
     handleSave
   } = useSurveyState();
 
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-pebble flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-pebble flex items-center justify-center">
+        <div className="text-center p-8 max-w-md text-magma">
+          <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
+          <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state when no survey is selected
   if (!surveyId) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
