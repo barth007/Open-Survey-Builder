@@ -14,9 +14,10 @@ import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
 interface DraggableSurveyItemProps {
   survey: Survey;
   onDelete: (e: React.MouseEvent) => void;
+  folderId?: string;
 }
 
-export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemProps) {
+export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSurveyItemProps) {
   const { id: currentSurveyId } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(survey.name);
@@ -32,7 +33,13 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     transform,
     transition,
     isDragging
-  } = useSortable({ id: survey.id });
+  } = useSortable({ 
+    id: survey.id,
+    data: {
+      survey,
+      folderId
+    }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -91,6 +98,8 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-survey-id={survey.id}
+      data-folder-id={folderId || "null"}
     >
       <SidebarMenuItem className="w-full flex-1">
         <SidebarMenuButton asChild className="w-full">

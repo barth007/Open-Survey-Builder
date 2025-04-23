@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, MouseSensor, useSensor, useSensors, closestCenter, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -9,16 +10,19 @@ import { CreateFolderDialog } from './CreateFolderDialog';
 import { FoldersSection } from './FoldersSection';
 import { UnorganizedSurveysSection } from './UnorganizedSurveysSection';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Survey } from '@/types/survey-organization';
 
 export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [activeDragSurvey, setActiveDragSurvey] = useState<Survey | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { surveyData, isLoading, error, createSurvey, createFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
+  const { surveyData, isLoading, error, createSurvey, createFolder, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   
+  // Configure mouse sensor with a delay to avoid accidental drags
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10,
@@ -120,12 +124,40 @@ export function SurveySidebar() {
     }
   };
 
-  const handleDragEnd = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    // Find the survey being dragged
+    const activeSurvey = findSurveyById(active.id as string);
+    if (activeSurvey) {
+      setActiveDragSurvey(activeSurvey);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     
-    if (active.id !== over.id) {
-      updateSurveyOrder(active.id, over.id);
+    setActiveDragSurvey(null);
+    
+    if (over && active.id !== over.id) {
+      updateSurveyOrder(active.id.toString(), over.id.toString());
     }
+  };
+
+  // Helper function to find a survey by ID across all folders and unorganized surveys
+  const findSurveyById = (id: string): Survey | null => {
+    if (!surveyData) return null;
+    
+    // Check unorganized surveys first
+    const unorganizedMatch = surveyData.unorganizedSurveys.find(s => s.id === id);
+    if (unorganizedMatch) return unorganizedMatch;
+    
+    // Then check in folders
+    for (const folder of surveyData.folders) {
+      const folderMatch = folder.surveys.find(s => s.id === id);
+      if (folderMatch) return folderMatch;
+    }
+    
+    return null;
   };
 
   if (isLoading) {
@@ -140,23 +172,29 @@ export function SurveySidebar() {
         <h2 className="text-lg font-semibold">Survey Builder</h2>
       </SidebarHeader>
       <SidebarContent>
-        <FoldersSection
-          folders={surveyData?.folders || []}
-          openFolders={openFolders}
-          onToggleFolder={toggleFolder}
-          onOpenCreateDialog={() => setIsFolderDialogOpen(true)}
-          onCreateSurvey={handleCreateSurvey}
-          onDeleteSurvey={handleDeleteSurvey}
-          onDragEnd={handleDragEnd}
+        <DndContext
           sensors={sensors}
-        />
-        <UnorganizedSurveysSection
-          surveys={surveyData?.unorganizedSurveys || []}
-          onCreateSurvey={() => handleCreateSurvey()}
-          onDeleteSurvey={handleDeleteSurvey}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          sensors={sensors}
-        />
+          modifiers={[restrictToVerticalAxis]}
+        >
+          <FoldersSection
+            folders={surveyData?.folders || []}
+            openFolders={openFolders}
+            onToggleFolder={toggleFolder}
+            onOpenCreateDialog={() => setIsFolderDialogOpen(true)}
+            onCreateSurvey={handleCreateSurvey}
+            onDeleteSurvey={handleDeleteSurvey}
+            onDeleteFolder={deleteFolder}
+          />
+          <UnorganizedSurveysSection
+            surveys={surveyData?.unorganizedSurveys || []}
+            onCreateSurvey={() => handleCreateSurvey()}
+            onDeleteSurvey={handleDeleteSurvey}
+          />
+          {/* We can add a DragOverlay here for future visual enhancements */}
+        </DndContext>
       </SidebarContent>
       
       <CreateFolderDialog

@@ -18,8 +18,7 @@ interface FoldersSectionProps {
   onOpenCreateDialog: () => void;
   onCreateSurvey: (folderId: string) => void;
   onDeleteSurvey: (surveyId: string, e: React.MouseEvent) => void;
-  onDragEnd: (event: any) => void;
-  sensors: any;
+  onDeleteFolder?: (folderId: string) => void;
 }
 
 export function FoldersSection({
@@ -29,8 +28,7 @@ export function FoldersSection({
   onOpenCreateDialog,
   onCreateSurvey,
   onDeleteSurvey,
-  onDragEnd,
-  sensors,
+  onDeleteFolder,
 }: FoldersSectionProps) {
   return (
     <SidebarGroup>
@@ -64,8 +62,7 @@ export function FoldersSection({
               onToggle={onToggleFolder}
               onCreateSurvey={onCreateSurvey}
               onDeleteSurvey={onDeleteSurvey}
-              onDragEnd={onDragEnd}
-              sensors={sensors}
+              onDeleteFolder={onDeleteFolder}
             />
           ))}
         </SidebarMenu>

@@ -8,11 +8,9 @@ import {
   SidebarMenuAction,
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { DraggableSurveyItem } from './DraggableSurveyItem';
 import { cn } from '@/lib/utils';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DraggableSurveyItem } from './DraggableSurveyItem';
 
 interface FolderItemProps {
   id: string;
@@ -23,8 +21,6 @@ interface FolderItemProps {
   onCreateSurvey: (folderId: string) => void;
   onDeleteSurvey: (surveyId: string, e: React.MouseEvent) => void;
   onDeleteFolder?: (folderId: string) => void;
-  onDragEnd: (event: any) => void;
-  sensors: any;
 }
 
 export function FolderItem({
@@ -36,8 +32,6 @@ export function FolderItem({
   onCreateSurvey,
   onDeleteSurvey,
   onDeleteFolder,
-  onDragEnd,
-  sensors,
 }: FolderItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -100,27 +94,21 @@ export function FolderItem({
       </div>
 
       {isOpen && surveys.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={onDragEnd}
-          modifiers={[restrictToVerticalAxis]}
+        <SortableContext
+          items={surveys}
+          strategy={verticalListSortingStrategy}
         >
-          <SortableContext
-            items={surveys}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="pl-4 space-y-1 mt-1">
-              {surveys.map((survey) => (
-                <DraggableSurveyItem
-                  key={survey.id}
-                  survey={survey}
-                  onDelete={(e) => onDeleteSurvey(survey.id, e)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+          <div className="pl-4 space-y-1 mt-1" data-folder-id={id}>
+            {surveys.map((survey) => (
+              <DraggableSurveyItem
+                key={survey.id}
+                survey={survey}
+                onDelete={(e) => onDeleteSurvey(survey.id, e)}
+                folderId={id}
+              />
+            ))}
+          </div>
+        </SortableContext>
       )}
     </SidebarMenuItem>
   );

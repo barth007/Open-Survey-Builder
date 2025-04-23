@@ -9,25 +9,19 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { DraggableSurveyItem } from './DraggableSurveyItem';
 
 interface UnorganizedSurveysSectionProps {
   surveys: Survey[];
   onCreateSurvey: () => void;
   onDeleteSurvey: (surveyId: string, e: React.MouseEvent) => void;
-  onDragEnd: (event: any) => void;
-  sensors: any;
 }
 
 export function UnorganizedSurveysSection({
   surveys,
   onCreateSurvey,
   onDeleteSurvey,
-  onDragEnd,
-  sensors,
 }: UnorganizedSurveysSectionProps) {
   return (
     <SidebarGroup>
@@ -50,27 +44,20 @@ export function UnorganizedSurveysSection({
         </TooltipProvider>
       </SidebarGroupLabel>
       <SidebarGroupContent>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={onDragEnd}
-          modifiers={[restrictToVerticalAxis]}
+        <SortableContext
+          items={surveys}
+          strategy={verticalListSortingStrategy}
         >
-          <SortableContext
-            items={surveys}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-1">
-              {surveys.map((survey) => (
-                <DraggableSurveyItem
-                  key={survey.id}
-                  survey={survey}
-                  onDelete={(e) => onDeleteSurvey(survey.id, e)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+          <div className="space-y-1" data-folder-id={null}>
+            {surveys.map((survey) => (
+              <DraggableSurveyItem
+                key={survey.id}
+                survey={survey}
+                onDelete={(e) => onDeleteSurvey(survey.id, e)}
+              />
+            ))}
+          </div>
+        </SortableContext>
       </SidebarGroupContent>
     </SidebarGroup>
   );
