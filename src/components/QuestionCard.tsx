@@ -330,20 +330,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               )}
             </div>
           </div>
-          
-          {figmaUrl && (
-            <div className="mt-2">
-              <Button 
-                onClick={openFigmaPrototype} 
-                size="sm" 
-                variant="outline"
-                className="border-sunset text-sunset hover:bg-sunset hover:text-white"
-              >
-                <ExternalLink size={16} className="mr-1" />
-                Open Figma Prototype
-              </Button>
-            </div>
-          )}
         </div>
 
         <div className="mt-4">
