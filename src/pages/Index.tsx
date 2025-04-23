@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Question, Survey, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
@@ -8,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Save, Link } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link as RouterLink } from "react-router-dom";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const Index = () => {
   const { toast } = useToast();
@@ -166,24 +168,25 @@ const Index = () => {
         
         return (
           <div className="mt-4">
-            <div className={`grid grid-cols-${likertLabels.length} gap-1`}>
-              {likertLabels.map((label, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <input
-                    type="radio"
-                    name={`likert-${question.id}`}
-                    id={`likert-${question.id}-${i}`}
-                    className="mx-auto"
-                  />
-                  <label 
-                    htmlFor={`likert-${question.id}-${i}`} 
-                    className="text-xs text-center mt-1"
-                  >
-                    {label}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <RadioGroup name={`likert-${question.id}`}>
+              <div className={`grid grid-cols-${likertLabels.length} gap-1`}>
+                {likertLabels.map((label, i) => (
+                  <div key={i} className="flex flex-col items-center">
+                    <RadioGroupItem
+                      value={`${i}`}
+                      id={`likert-${question.id}-${i}`}
+                      className="mx-auto"
+                    />
+                    <label 
+                      htmlFor={`likert-${question.id}-${i}`} 
+                      className="text-xs text-center mt-1"
+                    >
+                      {label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
           </div>
         );
       

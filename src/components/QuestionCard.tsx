@@ -294,16 +294,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
           {isLikertType && (
             <div className="mt-4">
-              <div className="grid grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-2 mt-2">
-                {question.options.map((option, index) => (
-                  <div key={option.id} className="flex flex-col items-center">
-                    <RadioGroupItem value={option.id} id={option.id} disabled className="mx-auto" />
-                    <Label htmlFor={option.id} className="text-xs text-center mt-1">
-                      {option.text}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              <RadioGroup>
+                <div className="grid grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-2 mt-2">
+                  {question.options.map((option, index) => (
+                    <div key={option.id} className="flex flex-col items-center">
+                      <RadioGroupItem value={option.id} id={option.id} disabled className="mx-auto" />
+                      <Label htmlFor={option.id} className="text-xs text-center mt-1">
+                        {option.text}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </RadioGroup>
             </div>
           )}
         </div>
