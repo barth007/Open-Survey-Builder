@@ -1,28 +1,25 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { Check, Trash, GripVertical, Image, Video, Link, Copy } from "lucide-react";
+import { Trash, GripVertical, Link, Copy } from "lucide-react";
+import { Question, ConditionalLogic } from '@/types/survey';
 import QuestionTypeMenu from './QuestionTypeMenu';
-import { Question, QuestionOption, QuestionType, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import MediaUploadButton from './MediaUploadButton';
 import QuestionMediaUpload from './QuestionMediaUpload';
 
 interface QuestionCardProps {
   question: Question;
+  questions: Question[];
   onQuestionChange: (updatedQuestion: Question) => void;
   onDeleteQuestion: (id: string) => void;
   onDuplicateQuestion?: (question: Question) => void;
@@ -31,6 +28,7 @@ interface QuestionCardProps {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
+  questions,
   onQuestionChange,
   onDeleteQuestion,
   onDuplicateQuestion,
@@ -38,6 +36,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
+
+  const availableQuestions = questions.filter(q => q.id !== question.id);
 
   const handleTextChange = (text: string) => {
     onQuestionChange({ ...question, text });
@@ -48,7 +48,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const handleTypeChange = (type: QuestionType) => {
-    // When changing to a Likert scale, pre-populate with appropriate options
     if (type === 'likert5' || type === 'likert7' || type === 'likert10') {
       let labels: string[] = [];
       
@@ -116,8 +115,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const handleMediaUpload = (optionId: string, file: File, type: 'image' | 'video' | 'gif') => {
-    // In a real app, you would upload this file to a server and get a URL
-    // For demo purposes, we'll create an object URL
     const url = URL.createObjectURL(file);
     
     onQuestionChange({
@@ -137,8 +134,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const handleQuestionMediaUpload = (file: File, type: 'image' | 'video') => {
-    // In a real app, you would upload this file to a server and get a URL
-    // For demo purposes, we'll create an object URL
     const url = URL.createObjectURL(file);
     
     onQuestionChange({
@@ -175,6 +170,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
+  const handleConditionalLogicChange = (field: keyof ConditionalLogic, value: string) => {
+    const updatedLogic: ConditionalLogic = {
+      ...(question.conditionalLogic || { operator: 'equals', dependsOn: '' }),
+      [field]: value,
+    };
+
+    onQuestionChange({
+      ...question,
+      conditionalLogic: updatedLogic,
+    });
+  };
+
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';
 
   return (
@@ -194,7 +201,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         </div>
 
-        {/* Question Description */}
         <div className="mt-2 mb-4">
           <Textarea
             value={question.description || ''}
@@ -205,7 +211,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         </div>
 
-        {/* Question Media */}
         <div className="mt-2 mb-4">
           <QuestionMediaUpload onFileSelected={handleQuestionMediaUpload} />
           
@@ -236,7 +241,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           )}
         </div>
 
-        {/* Figma Prototype URL */}
         <div className="flex items-center gap-2">
           <Link size={16} className="text-abyss" />
           <Input
@@ -256,34 +260,90 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           </Button>
         </div>
 
-        {/* Max Selections for Checkboxes */}
-        {question.type === 'checkboxes' && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <Label htmlFor={`max-selections-${question.id}`} className="text-sm text-carbon">
-                Max selections allowed:
-              </Label>
-              <Select
-                value={question.maxSelections?.toString() || "no-limit"}
-                onValueChange={handleMaxSelectionsChange}
-              >
-                <SelectTrigger id={`max-selections-${question.id}`} className="w-32 border-ice">
-                  <SelectValue placeholder="No limit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no-limit">No limit</SelectItem>
-                  {[1, 2, 3, 4, 5].map(num => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="mt-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor={`max-selections-${question.id}`} className="text-sm text-carbon">
+              Max selections allowed:
+            </Label>
+            <Select
+              value={question.maxSelections?.toString() || "no-limit"}
+              onValueChange={handleMaxSelectionsChange}
+            >
+              <SelectTrigger id={`max-selections-${question.id}`} className="w-32 border-ice">
+                <SelectValue placeholder="No limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no-limit">No limit</SelectItem>
+                {[1, 2, 3, 4, 5].map(num => (
+                  <SelectItem key={num} value={num.toString()}>
+                    {num}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        )}
+        </div>
 
         <div className="mt-4">
+          <div className="mb-4 p-3 bg-ice rounded-md">
+            <h4 className="text-sm font-medium mb-2">Conditional Logic</h4>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label className="w-24">Show when</Label>
+                <Select
+                  value={question.conditionalLogic?.dependsOn || ''}
+                  onValueChange={(value) => handleConditionalLogicChange('dependsOn', value)}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select question" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Always show</SelectItem>
+                    {availableQuestions.map((q) => (
+                      <SelectItem key={q.id} value={q.id}>
+                        {q.text.substring(0, 30)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {question.conditionalLogic?.dependsOn && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Label className="w-24">Operator</Label>
+                    <Select
+                      value={question.conditionalLogic?.operator || 'equals'}
+                      onValueChange={(value) => handleConditionalLogicChange('operator', value)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="notEquals">Does not equal</SelectItem>
+                        <SelectItem value="isAnswered">Is answered</SelectItem>
+                        <SelectItem value="isNotAnswered">Is not answered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && (
+                    <div className="flex items-center gap-2">
+                      <Label className="w-24">Value</Label>
+                      <Input
+                        value={question.conditionalLogic?.value || ''}
+                        onChange={(e) => handleConditionalLogicChange('value', e.target.value)}
+                        placeholder="Enter value"
+                        className="w-[200px]"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
           {question.type === 'text' && (
             <Input disabled placeholder="Text answer will appear here" className="bg-muted/50" />
           )}
@@ -306,7 +366,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                       className="flex-1 border-ice"
                     />
                     
-                    {/* Display preview if option has media */}
                     {option.media && (
                       <div className="mt-2 p-2 border rounded-md bg-ice">
                         {option.media.type === 'image' || option.media.type === 'gif' ? (
@@ -326,7 +385,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     )}
                   </div>
                   
-                  {/* Media upload buttons */}
                   <div className="flex gap-1">
                     <MediaUploadButton 
                       type="image" 

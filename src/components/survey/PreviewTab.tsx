@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -11,7 +10,38 @@ interface PreviewTabProps {
 }
 
 const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+
+  const isQuestionVisible = (question: Question): boolean => {
+    if (!question.conditionalLogic) return true;
+    
+    const { dependsOn, operator, value } = question.conditionalLogic;
+    const answer = answers[dependsOn];
+
+    switch (operator) {
+      case 'equals':
+        return answer === value;
+      case 'notEquals':
+        return answer !== value;
+      case 'isAnswered':
+        return answer !== undefined && answer !== '';
+      case 'isNotAnswered':
+        return answer === undefined || answer === '';
+      default:
+        return true;
+    }
+  };
+
+  const handleAnswerChange = (questionId: string, value: string | string[]) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+
   const renderQuestionInput = (question: Question) => {
+    if (!isQuestionVisible(question)) return null;
+
     switch(question.type) {
       case 'text':
         return (
@@ -141,49 +171,51 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       <p className="text-gray-600 mb-6">{survey.description}</p>
 
       {survey.questions.map((question, index) => (
-        <div key={question.id} className="mb-6 pb-6 border-b border-ice last:border-b-0">
-          <h3 className="font-medium mb-2 text-carbon">
-            {index + 1}. {question.text} 
-            {question.isRequired && <span className="text-magma ml-1">*</span>}
-          </h3>
-          
-          {question.description && (
-            <p className="text-sm text-gray-600 mb-3">{question.description}</p>
-          )}
+        isQuestionVisible(question) && (
+          <div key={question.id} className="mb-6 pb-6 border-b border-ice last:border-b-0">
+            <h3 className="font-medium mb-2 text-carbon">
+              {index + 1}. {question.text} 
+              {question.isRequired && <span className="text-magma ml-1">*</span>}
+            </h3>
+            
+            {question.description && (
+              <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+            )}
 
-          {question.media && (
-            <div className="mb-4 mt-2">
-              {question.media.type === 'image' ? (
-                <img 
-                  src={question.media.url} 
-                  alt="Question media" 
-                  className="max-h-48 object-contain rounded-md" 
-                />
-              ) : (
-                <video 
-                  src={question.media.url} 
-                  controls 
-                  className="max-h-48 w-full rounded-md"
-                />
-              )}
-            </div>
-          )}
+            {question.media && (
+              <div className="mb-4 mt-2">
+                {question.media.type === 'image' ? (
+                  <img 
+                    src={question.media.url} 
+                    alt="Question media" 
+                    className="max-h-48 object-contain rounded-md" 
+                  />
+                ) : (
+                  <video 
+                    src={question.media.url} 
+                    controls 
+                    className="max-h-48 w-full rounded-md"
+                  />
+                )}
+              </div>
+            )}
 
-          {question.figmaPrototypeUrl && (
-            <div className="mb-4">
-              <a 
-                href={question.figmaPrototypeUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-sm text-abyss underline flex items-center gap-1"
-              >
-                <Link size={14} /> View Figma prototype
-              </a>
-            </div>
-          )}
+            {question.figmaPrototypeUrl && (
+              <div className="mb-4">
+                <a 
+                  href={question.figmaPrototypeUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-sm text-abyss underline flex items-center gap-1"
+                >
+                  <Link size={14} /> View Figma prototype
+                </a>
+              </div>
+            )}
 
-          {renderQuestionInput(question)}
-        </div>
+            {renderQuestionInput(question)}
+          </div>
+        )
       ))}
 
       {survey.questions.length > 0 && (

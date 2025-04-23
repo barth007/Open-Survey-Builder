@@ -1,4 +1,3 @@
-
 export type QuestionType = 'text' | 'multipleChoice' | 'checkboxes' | 'likert5' | 'likert7' | 'likert10';
 
 export type MediaType = 'image' | 'video' | 'gif';
@@ -12,27 +11,27 @@ export interface QuestionOption {
   id: string;
   text: string;
   media?: Media;
+  value?: string; // Added for conditional logic matching
+}
+
+export interface ConditionalLogic {
+  dependsOn: string; // Question ID this question depends on
+  operator: 'equals' | 'notEquals' | 'isAnswered' | 'isNotAnswered';
+  value?: string | string[]; // The value(s) that trigger this question
 }
 
 export interface Question {
   id: string;
   type: QuestionType;
   text: string;
-  description?: string; // Added description field
+  description?: string;
   isRequired: boolean;
   options: QuestionOption[];
-  maxSelections?: number; // For checkboxes: how many options can be selected
+  maxSelections?: number;
   figmaPrototypeUrl?: string;
-  media?: Media; // Media for the question itself
-  conditionalLogic?: ConditionalLogic; // Added conditional logic
-}
-
-export interface ConditionalLogic {
-  dependsOn: string; // Question ID this question depends on
-  showWhen: {
-    optionId: string; // Option ID that triggers this question to show
-    operator: 'equals' | 'notEquals' | 'contains' | 'notContains';
-  }[];
+  media?: Media;
+  conditionalLogic?: ConditionalLogic;
+  isVisible?: boolean; // Added to control visibility based on conditions
 }
 
 export interface Survey {

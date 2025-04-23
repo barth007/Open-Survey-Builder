@@ -37,6 +37,7 @@ const EditTab: React.FC<EditTabProps> = ({
         <QuestionCard
           key={question.id}
           question={question}
+          questions={survey.questions}
           onQuestionChange={onQuestionChange}
           onDeleteQuestion={onDeleteQuestion}
           onDuplicateQuestion={onDuplicateQuestion}
