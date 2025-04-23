@@ -1,16 +1,17 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSurveyTitle } from './survey/useSurveyTitle';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
   const { updateSurvey } = useMutateSurvey();
+  const { handleTitleChange } = useSurveyTitle(surveyId);
   const [survey, setSurvey] = useState<Survey>({
     id: surveyId || "survey-1",
     title: "Untitled Survey",
@@ -30,36 +31,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
       });
     }
   }, [surveyData]);
-
-  const handleTitleChange = async (title: string) => {
-    setSurvey((prev) => ({ ...prev, title }));
-    
-    if (surveyId) {
-      try {
-        await updateSurvey({
-          surveyId,
-          updates: { name: title }
-        });
-        
-        // Trigger a refetch of all surveys to update sidebar
-        queryClient.invalidateQueries({ queryKey: ['surveys'] });
-        // Specifically refetch this survey
-        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-        
-        toast({
-          title: "Survey Title Updated",
-          description: `Survey title changed to "${title}"`,
-        });
-      } catch (error) {
-        console.error("Error updating survey title:", error);
-        toast({
-          title: "Error",
-          description: "Could not update survey title",
-          variant: "destructive"
-        });
-      }
-    }
-  };
 
   const handleDescriptionChange = (description: string) => {
     setSurvey((prev) => ({ ...prev, description }));
