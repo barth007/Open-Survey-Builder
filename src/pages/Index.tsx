@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Save, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,7 +69,6 @@ const Index = () => {
     });
   };
 
-  // Track changes for various operations
   const handleQuestionChange = (updatedQuestion: any) => {
     updateQuestion(updatedQuestion);
     setHasChanges(true);
@@ -146,22 +144,20 @@ const Index = () => {
                   <div className="flex">
                     <Button 
                       onClick={togglePublish} 
-                      variant={survey.isPublished ? "outline" : "destructive"} 
                       className={`
                         ${survey.isPublished 
-                          ? "border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white" 
-                          : ""}
+                          ? "border-transparent bg-green-500 bg-opacity-50 text-green-700" 
+                          : "border-transparent bg-orange-500 bg-opacity-50 text-orange-700"}
                         rounded-r-none border-r
                       `}
                     >
                       {survey.isPublished ? "Unpublish" : "Publish"}
                     </Button>
                     <Button
-                      variant={survey.isPublished ? "default" : "secondary"}
                       className={`
                         ${survey.isPublished 
-                          ? "bg-gray-500 text-white hover:bg-gray-600" 
-                          : ""}
+                          ? "bg-gray-500 text-gray-700" 
+                          : "bg-gray-500 bg-opacity-40 text-gray-500 text-opacity-50"}
                         rounded-l-none pl-2
                       `}
                       disabled={!survey.isPublished}
