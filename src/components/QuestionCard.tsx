@@ -446,10 +446,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                       type="video" 
                       onFileSelected={(file) => handleMediaUpload(option.id, file, 'video')} 
                     />
-                    <MediaUploadButton 
-                      type="gif" 
-                      onFileSelected={(file) => handleMediaUpload(option.id, file, 'gif')} 
-                    />
                     <Button
                       variant="ghost"
                       size="icon"

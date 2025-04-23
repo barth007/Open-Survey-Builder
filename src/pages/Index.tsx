@@ -15,6 +15,7 @@ const Index = () => {
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [hasChanges, setHasChanges] = useState(false);
   
   const {
     survey,
@@ -38,12 +39,44 @@ const Index = () => {
 
   const handleSurveyTitleChange = (title: string) => {
     handleTitleChange(title);
+    setHasChanges(true);
     if (surveyId) {
       queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
         if (!oldData) return oldData;
         return { ...oldData, title, name: title };
       });
     }
+  };
+
+  const handleSaveWithReset = async () => {
+    await handleSave();
+    setHasChanges(false);
+  };
+
+  // Track changes for various operations
+  const handleQuestionChange = (updatedQuestion: any) => {
+    updateQuestion(updatedQuestion);
+    setHasChanges(true);
+  };
+
+  const handleDescriptionChangeWithTracking = (description: string) => {
+    handleDescriptionChange(description);
+    setHasChanges(true);
+  };
+
+  const handleAddQuestion = () => {
+    addQuestion();
+    setHasChanges(true);
+  };
+
+  const handleDeleteQuestion = (questionId: string) => {
+    deleteQuestion(questionId);
+    setHasChanges(true);
+  };
+
+  const handleDuplicateQuestion = (question: any) => {
+    duplicateQuestion(question);
+    setHasChanges(true);
   };
 
   if (isLoading) {
@@ -83,8 +116,9 @@ const Index = () => {
           <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
           <div className="flex gap-2">
             <Button 
-              onClick={handleSave} 
+              onClick={handleSaveWithReset} 
               className="flex gap-2 bg-sunset hover:opacity-90"
+              disabled={!hasChanges}
             >
               <Save size={18} />
               Save
@@ -112,11 +146,11 @@ const Index = () => {
             <EditTab
               survey={survey}
               onTitleChange={handleSurveyTitleChange}
-              onDescriptionChange={handleDescriptionChange}
-              onQuestionChange={updateQuestion}
-              onDeleteQuestion={deleteQuestion}
-              onDuplicateQuestion={duplicateQuestion}
-              onAddQuestion={addQuestion}
+              onDescriptionChange={handleDescriptionChangeWithTracking}
+              onQuestionChange={handleQuestionChange}
+              onDeleteQuestion={handleDeleteQuestion}
+              onDuplicateQuestion={handleDuplicateQuestion}
+              onAddQuestion={handleAddQuestion}
             />
           </TabsContent>
 
