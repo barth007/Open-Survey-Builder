@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 
 interface SurveyTitleProps {
   title: string;
@@ -18,6 +20,8 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   onDescriptionChange,
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+  const { id: surveyId } = useParams();
 
   // Focus the title input when the component mounts if it's empty
   useEffect(() => {
@@ -26,13 +30,20 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
     }
   }, [title]);
 
+  const handleTitleChange = (newTitle: string) => {
+    onTitleChange(newTitle);
+    
+    // Update the document title immediately for better UX
+    document.title = newTitle;
+  };
+
   return (
     <Card className="mb-6 border-t-4 border-t-indigo-500">
       <CardContent className="pt-6">
         <Input
           ref={titleInputRef}
           value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Survey Title"
           className="text-2xl font-bold border-none px-0 focus-visible:ring-0 mb-2"
         />

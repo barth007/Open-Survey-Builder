@@ -8,11 +8,13 @@ import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const {
     survey,
@@ -34,6 +36,21 @@ const Index = () => {
       document.title = survey.title;
     }
   }, [survey.title]);
+
+  // Custom title change handler to update the UI immediately
+  const handleSurveyTitleChange = (title: string) => {
+    // Update the survey title in the UI immediately
+    handleTitleChange(title);
+    
+    // This ensures the sidebar also gets the update
+    if (surveyId) {
+      // Optimistically update survey data in cache
+      queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
+        if (!oldData) return oldData;
+        return { ...oldData, title, name: title };
+      });
+    }
+  };
 
   // Handle loading state
   if (isLoading) {
@@ -113,7 +130,7 @@ const Index = () => {
           <TabsContent value="edit" className="space-y-4">
             <EditTab
               survey={survey}
-              onTitleChange={handleTitleChange}
+              onTitleChange={handleSurveyTitleChange}
               onDescriptionChange={handleDescriptionChange}
               onQuestionChange={updateQuestion}
               onDeleteQuestion={deleteQuestion}

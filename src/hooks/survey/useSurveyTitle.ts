@@ -17,10 +17,18 @@ export const useSurveyTitle = (surveyId: string | undefined) => {
         updates: { name: title }
       });
       
-      // Trigger a refetch of all surveys to update sidebar
+      // Immediately update the survey data in the cache to reflect the change
+      queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          name: title,
+          title: title // Ensure both name and title fields are updated
+        };
+      });
+      
+      // Also invalidate the surveys list to update the sidebar
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
-      // Specifically refetch this survey
-      queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
       
       toast({
         title: "Survey Title Updated",

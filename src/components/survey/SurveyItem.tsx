@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface DraggableSurveyItemProps {
   survey: Survey;
@@ -24,6 +25,12 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
   const [name, setName] = useState(survey.name);
   const navigate = useNavigate();
   const { updateSurvey } = useMutateSurvey();
+  const queryClient = useQueryClient();
+  
+  // Listen for updates to this survey in the cache
+  useEffect(() => {
+    setName(survey.name);
+  }, [survey.name]);
   
   const {
     attributes,
@@ -51,6 +58,20 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
           surveyId: survey.id,
           updates: { name }
         });
+        
+        // Immediately update survey data in cache
+        queryClient.setQueriesData({ queryKey: ['survey', survey.id] }, (oldData: any) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            name,
+            title: name
+          };
+        });
+        
+        // Also invalidate the surveys list
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        
       } catch (error) {
         setName(survey.name);
       }
