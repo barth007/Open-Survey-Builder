@@ -15,6 +15,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     isPublished: false
   });
 
+  // Update survey state when data is loaded from the API
   useEffect(() => {
     if (surveyData) {
       setSurvey({

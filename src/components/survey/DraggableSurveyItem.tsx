@@ -71,7 +71,6 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     }
   };
 
-  // Apply a more noticeable highlight style for the selected item
   return (
     <SidebarMenuItem 
       ref={setNodeRef} 
@@ -107,6 +106,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
         )}
       </SidebarMenuButton>
       
+      {/* Move TooltipProvider outside of the SidebarMenuItem */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
