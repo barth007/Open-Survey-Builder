@@ -45,13 +45,12 @@ export function useMutateSurvey() {
     }
   });
 
-  // Update the type definition to include 'title' as a valid property
   const updateSurvey = useMutation({
     mutationFn: async ({ surveyId, updates }: { 
       surveyId: string; 
       updates: Partial<{ 
         name: string; 
-        title: string; // Add title property to the type
+        title: string; 
         description: string; 
         questions: any[]; 
         isPublished: boolean 
@@ -62,7 +61,9 @@ export function useMutateSurvey() {
         const dbUpdates: any = {};
         
         if (updates.name !== undefined) dbUpdates.name = updates.name;
-        if (updates.title !== undefined) dbUpdates.title = updates.title;
+        // Only include title if it's actually in the database schema
+        // Remove title from updates as it causes errors
+        // if (updates.title !== undefined) dbUpdates.title = updates.title;
         if (updates.description !== undefined) dbUpdates.description = updates.description;
         if (updates.questions !== undefined) dbUpdates.questions = updates.questions;
         if (updates.isPublished !== undefined) dbUpdates.is_published = updates.isPublished;

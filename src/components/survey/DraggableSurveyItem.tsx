@@ -86,13 +86,13 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
       {...attributes} 
       {...listeners}
       className={cn(
-        "flex items-center w-full group",
+        "flex items-center w-full",
         isSelected ? "bg-accent/80 text-accent-foreground rounded-md" : ""
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <SidebarMenuItem className="w-full">
+      <SidebarMenuItem className="w-full flex-1">
         <SidebarMenuButton asChild className="w-full">
           {isEditing ? (
             <Input
@@ -119,24 +119,26 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SidebarMenuAction
-              className={cn(
-                "transition-opacity",
-                isHovered ? "opacity-100" : "opacity-0"
-              )}
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-            </SidebarMenuAction>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete Survey</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!isEditing && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarMenuAction
+                className={cn(
+                  "transition-opacity mr-1",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                onClick={onDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </SidebarMenuAction>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Survey</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 }

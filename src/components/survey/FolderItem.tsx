@@ -44,19 +44,19 @@ export function FolderItem({
   return (
     <SidebarMenuItem>
       <div 
-        className="flex items-center w-full group"
+        className="flex items-center w-full"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <SidebarMenuButton 
           onClick={() => onToggle(id)}
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 flex-1"
         >
-          {isOpen ? <FolderOpen /> : <Folder />}
+          {isOpen ? <FolderOpen className="shrink-0" /> : <Folder className="shrink-0" />}
           <span>{name}</span>
         </SidebarMenuButton>
 
-        <div className="flex gap-1">
+        <div className="flex gap-1 mr-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -110,13 +110,15 @@ export function FolderItem({
             items={surveys}
             strategy={verticalListSortingStrategy}
           >
-            {surveys.map((survey) => (
-              <DraggableSurveyItem
-                key={survey.id}
-                survey={survey}
-                onDelete={(e) => onDeleteSurvey(survey.id, e)}
-              />
-            ))}
+            <div className="pl-4 space-y-1 mt-1">
+              {surveys.map((survey) => (
+                <DraggableSurveyItem
+                  key={survey.id}
+                  survey={survey}
+                  onDelete={(e) => onDeleteSurvey(survey.id, e)}
+                />
+              ))}
+            </div>
           </SortableContext>
         </DndContext>
       )}
