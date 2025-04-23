@@ -47,6 +47,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
+  const [showFigmaPreview, setShowFigmaPreview] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
@@ -191,6 +192,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       ...question,
       figmaPrototypeUrl: figmaUrl
     });
+    setShowFigmaPreview(true);
   };
 
   const duplicateQuestion = () => {
@@ -284,23 +286,35 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link size={16} className="text-abyss" />
-          <Input
-            value={figmaUrl}
-            onChange={(e) => setFigmaUrl(e.target.value)}
-            placeholder="Figma Prototype URL (optional)"
-            className="flex-1 text-sm border-ice"
-          />
-          <Button 
-            onClick={handleFigmaUrlSave} 
-            size="sm" 
-            variant="outline"
-            className="border-abyss text-abyss hover:bg-abyss hover:text-white"
-          >
-            <Check size={16} className="mr-1" />
-            Save
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Link size={16} className="text-abyss" />
+            <Input
+              value={figmaUrl}
+              onChange={(e) => setFigmaUrl(e.target.value)}
+              placeholder="Figma Prototype URL (optional)"
+              className="flex-1 text-sm border-ice"
+            />
+            <Button 
+              onClick={handleFigmaUrlSave} 
+              size="sm" 
+              variant="outline"
+              className="border-abyss text-abyss hover:bg-abyss hover:text-white"
+            >
+              <Check size={16} className="mr-1" />
+              Save
+            </Button>
+          </div>
+          
+          {showFigmaPreview && figmaUrl && (
+            <div className="mt-2 border rounded-md overflow-hidden bg-white h-[400px]">
+              <iframe
+                src={figmaUrl}
+                className="w-full h-full border-0"
+                allowFullScreen
+              />
+            </div>
+          )}
         </div>
 
         <div className="mt-4">
