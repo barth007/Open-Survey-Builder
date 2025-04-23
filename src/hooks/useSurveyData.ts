@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
@@ -46,32 +45,54 @@ export function useSurveyData() {
     }
   });
 
+  const createFolderMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const { data, error } = await supabase
+        .from('folders')
+        .insert([{ name }])
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('A folder with this name already exists');
+        }
+        throw new Error('Failed to create folder: ' + error.message);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+    }
+  });
+
   const createSurveyMutation = useMutation({
     mutationFn: async ({ name, folderId }: { name: string, folderId?: string }) => {
       try {
         const { data, error } = await supabase
           .from('surveys')
-          .insert([
-            {
-              name,
-              folder_id: folderId,
-              description: '',
-              questions: [],
-              is_published: false
-            }
-          ])
+          .insert([{
+            name,
+            folder_id: folderId,
+            description: '',
+            questions: [],
+            is_published: false
+          }])
           .select()
           .single();
 
         if (error) {
-          console.error("Supabase error:", error);
-          throw error;
+          console.error("Supabase error details:", error);
+          if (error.code === '23503') {
+            throw new Error('The selected folder does not exist');
+          }
+          throw new Error('Database error: ' + error.message);
         }
-        
+
         if (!data) {
-          throw new Error("No data returned from survey creation");
+          throw new Error('No data returned from survey creation');
         }
-        
+
         return data;
       } catch (err) {
         console.error("Error in createSurveyMutation:", err);
@@ -80,9 +101,6 @@ export function useSurveyData() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
-    },
-    onError: (error) => {
-      console.error("Mutation error:", error);
     }
   });
 
@@ -122,6 +140,7 @@ export function useSurveyData() {
   return {
     surveyData,
     isLoading,
+    createFolder: createFolderMutation.mutateAsync,
     createSurvey: createSurveyMutation.mutateAsync,
     deleteSurvey: deleteSurveyMutation.mutate,
     deleteFolder: deleteFolderMutation.mutate,

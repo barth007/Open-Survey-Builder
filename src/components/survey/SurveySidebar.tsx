@@ -1,7 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { CreateFolderDialog } from './CreateFolderDialog';
 import {
   Sidebar,
   SidebarContent,
@@ -25,9 +26,10 @@ import { DraggableSurveyItem } from './DraggableSurveyItem';
 
 export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
+  const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { surveyData, isLoading, createSurvey, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
+  const { surveyData, isLoading, createSurvey, createFolder, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -66,6 +68,22 @@ export function SurveySidebar() {
     }
   };
 
+  const handleCreateFolder = async (name: string) => {
+    try {
+      await createFolder(name);
+      toast({
+        title: "Success",
+        description: "Folder created successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create folder",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleCreateSurvey = async (folderId?: string) => {
     try {
       const newSurvey = await createSurvey({
@@ -78,17 +96,12 @@ export function SurveySidebar() {
           title: "Success",
           description: "Survey created successfully",
         });
-        
-        // Navigate to the new survey
         navigate(`/survey/${newSurvey.id}`);
-      } else {
-        throw new Error("Invalid survey data returned");
       }
     } catch (error) {
-      console.error("Failed to create survey:", error);
       toast({
         title: "Error",
-        description: "Failed to create survey",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
     }
@@ -112,7 +125,6 @@ export function SurveySidebar() {
         <h2 className="text-lg font-semibold">Survey Builder</h2>
       </SidebarHeader>
       <SidebarContent>
-        {/* Folders Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <span>Folders</span>
@@ -120,14 +132,14 @@ export function SurveySidebar() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => handleCreateSurvey()}
+                    onClick={() => setIsFolderDialogOpen(true)}
                     className="hover:bg-sidebar-accent rounded-md p-1"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create Survey</p>
+                  <p>Create Folder</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -144,7 +156,6 @@ export function SurveySidebar() {
                     <span>{folder.name}</span>
                   </SidebarMenuButton>
                   
-                  {/* Add button for folder */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -189,7 +200,6 @@ export function SurveySidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Unorganized Surveys Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <span>Other Surveys</span>
@@ -234,6 +244,12 @@ export function SurveySidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      <CreateFolderDialog
+        isOpen={isFolderDialogOpen}
+        onClose={() => setIsFolderDialogOpen(false)}
+        onCreateFolder={handleCreateFolder}
+      />
     </Sidebar>
   );
 }
