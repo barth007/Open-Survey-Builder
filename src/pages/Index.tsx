@@ -146,14 +146,24 @@ const Index = () => {
                   <div className="flex">
                     <Button 
                       onClick={togglePublish} 
-                      variant={survey.isPublished ? "destructive" : "outline"} 
-                      className={survey.isPublished ? "rounded-r-none border-r" : "rounded-r-none border-r border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
+                      variant={survey.isPublished ? "outline" : "destructive"} 
+                      className={`
+                        ${survey.isPublished 
+                          ? "border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white" 
+                          : ""}
+                        rounded-r-none border-r
+                      `}
                     >
                       {survey.isPublished ? "Unpublish" : "Publish"}
                     </Button>
                     <Button
-                      variant={survey.isPublished ? "destructive" : "outline"}
-                      className={survey.isPublished ? "rounded-l-none pl-2" : "rounded-l-none pl-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
+                      variant={survey.isPublished ? "default" : "secondary"}
+                      className={`
+                        ${survey.isPublished 
+                          ? "bg-gray-500 text-white hover:bg-gray-600" 
+                          : ""}
+                        rounded-l-none pl-2
+                      `}
                       disabled={!survey.isPublished}
                       onClick={handleCopyLink}
                     >
