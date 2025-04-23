@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { Eye, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EditTab from '@/components/survey/EditTab';
@@ -30,21 +28,15 @@ const Index = () => {
     error
   } = useSurveyState(surveyId);
 
-  // Update document title when survey title changes
   useEffect(() => {
     if (survey.title) {
       document.title = survey.title;
     }
   }, [survey.title]);
 
-  // Custom title change handler to update the UI immediately
   const handleSurveyTitleChange = (title: string) => {
-    // Update the survey title in the UI immediately
     handleTitleChange(title);
-    
-    // This ensures the sidebar also gets the update
     if (surveyId) {
-      // Optimistically update survey data in cache
       queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
         if (!oldData) return oldData;
         return { ...oldData, title, name: title };
@@ -52,7 +44,6 @@ const Index = () => {
     }
   };
 
-  // Handle loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
@@ -61,7 +52,6 @@ const Index = () => {
     );
   }
 
-  // Handle error state
   if (error) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
@@ -73,7 +63,6 @@ const Index = () => {
     );
   }
 
-  // Show empty state when no survey is selected
   if (!surveyId) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
@@ -91,23 +80,6 @@ const Index = () => {
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
           <div className="flex gap-2">
-            {activeTab !== "preview" && (
-              <Button 
-                variant="outline" 
-                onClick={() => setActiveTab("preview")} 
-                className="flex gap-2 border-abyss text-abyss hover:bg-abyss hover:text-white"
-              >
-                <Eye size={18} />
-                Preview
-              </Button>
-            )}
-            <Button 
-              onClick={handleSave} 
-              className="flex gap-2 bg-sunset hover:opacity-90"
-            >
-              <Save size={18} />
-              Save
-            </Button>
             <Button 
               onClick={togglePublish} 
               variant={survey.isPublished ? "destructive" : "outline"} 
