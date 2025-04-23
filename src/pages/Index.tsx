@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Save } from "lucide-react";
+import { Save, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
@@ -123,13 +124,33 @@ const Index = () => {
               <Save size={18} />
               Save
             </Button>
-            <Button 
-              onClick={togglePublish} 
-              variant={survey.isPublished ? "destructive" : "outline"} 
-              className={survey.isPublished ? "" : "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
-            >
-              {survey.isPublished ? "Unpublish" : "Publish"}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex">
+                    <Button 
+                      onClick={togglePublish} 
+                      variant={survey.isPublished ? "destructive" : "outline"} 
+                      className={survey.isPublished ? "rounded-r-none border-r" : "rounded-r-none border-r border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
+                    >
+                      {survey.isPublished ? "Unpublish" : "Publish"}
+                    </Button>
+                    <Button
+                      variant={survey.isPublished ? "destructive" : "outline"}
+                      className={survey.isPublished ? "rounded-l-none pl-2" : "rounded-l-none pl-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
+                      disabled={!survey.isPublished}
+                    >
+                      <Link2 size={18} />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!survey.isPublished && (
+                  <TooltipContent>
+                    <p>Publish to view the link</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </header>
 
