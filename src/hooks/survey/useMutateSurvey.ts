@@ -45,12 +45,13 @@ export function useMutateSurvey() {
     }
   });
 
-  // Fix the update mutation to accept a single parameter with both surveyId and updates
+  // Update the type definition to include 'title' as a valid property
   const updateSurvey = useMutation({
     mutationFn: async ({ surveyId, updates }: { 
       surveyId: string; 
       updates: Partial<{ 
         name: string; 
+        title: string; // Add title property to the type
         description: string; 
         questions: any[]; 
         isPublished: boolean 

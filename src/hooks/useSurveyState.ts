@@ -24,7 +24,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     if (surveyData) {
       setSurvey({
         id: surveyData.id,
-        title: surveyData.title || "Untitled Survey",
+        title: surveyData.title || surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
         questions: surveyData.questions || [],
         isPublished: surveyData.is_published || false
@@ -120,7 +120,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
           surveyId,
           updates: { 
             name: survey.title,  // Update the name in the sidebar
-            title: survey.title,
+            title: survey.title, // Now this is valid because we updated the type
             description: survey.description,
             questions: survey.questions,
             is_published: survey.isPublished
