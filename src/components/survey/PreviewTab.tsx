@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,33 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       ...prev,
       [questionId]: value
     }));
+  };
+
+  const handleCheckboxChange = (questionId: string, optionId: string) => {
+    const currentAnswers = answers[questionId] as string[] || [];
+    const maxSelections = survey.questions.find(q => q.id === questionId)?.maxSelections;
+    
+    if (currentAnswers.includes(optionId)) {
+      handleAnswerChange(
+        questionId, 
+        currentAnswers.filter(id => id !== optionId)
+      );
+      return;
+    }
+    
+    if (maxSelections === 1) {
+      handleAnswerChange(questionId, [optionId]);
+      return;
+    }
+    
+    if (maxSelections && currentAnswers.length >= maxSelections) {
+      return;
+    }
+    
+    handleAnswerChange(
+      questionId,
+      [...currentAnswers, optionId]
+    );
   };
 
   const renderQuestionInput = (question: Question) => {
@@ -90,6 +116,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
         );
       
       case 'checkboxes':
+        const currentSelections = (answers[question.id] as string[]) || [];
         return (
           <div className="space-y-2">
             {question.options.map((option) => (
@@ -97,6 +124,8 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                 <Checkbox
                   id={`preview-${option.id}`}
                   className="mr-2 mt-1"
+                  checked={currentSelections.includes(option.id)}
+                  onCheckedChange={() => handleCheckboxChange(question.id, option.id)}
                 />
                 <div>
                   <label htmlFor={`preview-${option.id}`}>
