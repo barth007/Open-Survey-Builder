@@ -61,6 +61,7 @@ const mockResponses = [
 interface ResponseData {
   answer: string;
   count: number;
+  percentage?: number;
 }
 
 const COLORS = ['#2563eb', '#0ea5e9', '#0284c7', '#0369a1', '#075985', '#0c4a6e'];
@@ -151,8 +152,11 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value, name, props) => {
-                        return [`${value} (${(props.percent * 100).toFixed(0)}%)`, props.name];
+                      formatter={(value, name, entry) => {
+                        // Access the percentage directly from our data
+                        const dataEntry = entry && entry.payload ? entry.payload : {};
+                        const percentage = dataEntry.percentage || 0;
+                        return [`${value} (${percentage}%)`, name];
                       }}
                     />
                   </PieChart>
