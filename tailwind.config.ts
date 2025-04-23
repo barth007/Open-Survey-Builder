@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,23 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom color palette
+				abyss: '#00506D',
+				magma: '#E51A1A',
+				carbon: '#182126',
+				flame: '#FD830B',
+				spark: '#F4C64C',
+				ice: '#CBDDE4',
+				pebble: '#F5F5F5',
+				snow: '#FFFFFF'
+			},
+			fontFamily: {
+				sans: ['Lato', 'sans-serif'],
+			},
+			backgroundImage: {
+				'sunset-gradient': 'linear-gradient(to right, #E51A1A, #FD830B)',
+				'dawn-gradient': 'linear-gradient(to right, #00506D, #FFFFFF)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
