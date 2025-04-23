@@ -114,6 +114,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const getMaxSelectionsOptions = () => {
+    const maxOptions = question.options.length;
+    return Array.from({ length: maxOptions }, (_, i) => i + 1).map(num => ({
+      value: num.toString(),
+      label: num.toString()
+    }));
+  };
+
   const addOption = () => {
     if (newOptionText.trim() === '') return;
     
@@ -253,10 +261,35 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             placeholder="Question"
             className="flex-1 border-ice focus-visible:ring-abyss"
           />
-          <QuestionTypeMenu
-            currentType={question.type}
-            onTypeChange={handleTypeChange}
-          />
+        </div>
+
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1">
+            <QuestionTypeMenu
+              currentType={question.type}
+              onTypeChange={handleTypeChange}
+            />
+          </div>
+          {question.type === 'checkboxes' && (
+            <div className="flex-1">
+              <Select
+                value={question.maxSelections?.toString() || "no-limit"}
+                onValueChange={handleMaxSelectionsChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Max answers allowed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no-limit">No limit</SelectItem>
+                  {getMaxSelectionsOptions().map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.value} {parseInt(option.value) === 1 ? 'answer' : 'answers'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         <div className="mt-2 mb-4">
