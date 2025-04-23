@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Save, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -157,7 +156,7 @@ const Index = () => {
                     <Button
                       className={`
                         ${survey.isPublished 
-                          ? "bg-transparent hover:bg-gray-100" 
+                          ? "bg-transparent text-gray-500 hover:bg-gray-100" 
                           : "bg-gray-500 bg-opacity-40 text-gray-500 text-opacity-50"}
                         rounded-l-none pl-2
                       `}
