@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash, GripVertical, Link as LinkIcon, Copy, Check, ExternalLink } from "lucide-react";
+import { Trash, GripVertical, Link as LinkIcon, Copy, Check, ExternalLink, ChevronUp, ChevronDown } from "lucide-react";
 import { 
   Question, 
   ConditionalLogic, 
@@ -27,6 +27,7 @@ import {
 import QuestionTypeMenu from './QuestionTypeMenu';
 import MediaUploadButton from './MediaUploadButton';
 import QuestionMediaUpload from './QuestionMediaUpload';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface QuestionCardProps {
   question: Question;
@@ -48,6 +49,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
   const [hasUrlChanged, setHasUrlChanged] = useState(false);
+  const [isLogicExpanded, setIsLogicExpanded] = useState(true);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
@@ -333,157 +335,178 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
 
         <div className="mt-4">
-          <div className="mb-4 p-3 bg-ice rounded-md">
-            <h4 className="text-sm font-medium mb-2">Conditional Logic</h4>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 w-full">
-                <Label className="w-24 shrink-0">Show when</Label>
-                <Select
-                  value={question.conditionalLogic?.dependsOn || 'none'}
-                  onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select question" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Always show</SelectItem>
-                    {availableQuestions.map((q) => (
-                      <SelectItem key={q.id} value={q.id}>
-                        {q.text.substring(0, 30)}...
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <Collapsible open={isLogicExpanded} onOpenChange={setIsLogicExpanded}>
+            <div className="mb-4 p-3 bg-ice rounded-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {question.conditionalLogic?.dependsOn && (
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  )}
+                  <h4 className="text-sm font-medium">Conditional Logic</h4>
+                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    {isLogicExpanded ? (
+                      <ChevronUp className="h-4 w-4" />  
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
               </div>
-
-              {question.conditionalLogic?.dependsOn && (
-                <>
+              
+              <CollapsibleContent>
+                <div className="space-y-3 mt-2">
                   <div className="flex items-center gap-2 w-full">
-                    <Label className="w-24 shrink-0">Operator</Label>
+                    <Label className="w-24 shrink-0">Show when</Label>
                     <Select
-                      value={question.conditionalLogic?.operator || 'equals'}
-                      onValueChange={(value) => handleConditionalLogicChange('operator', value)}
+                      value={question.conditionalLogic?.dependsOn || 'none'}
+                      onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
                     >
                       <SelectTrigger className="flex-1">
-                        <SelectValue />
+                        <SelectValue placeholder="Select question" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="equals">Equals</SelectItem>
-                        <SelectItem value="notEquals">Does not equal</SelectItem>
-                        <SelectItem value="isAnswered">Is answered</SelectItem>
-                        <SelectItem value="isNotAnswered">Is not answered</SelectItem>
+                        <SelectItem value="none">Always show</SelectItem>
+                        {availableQuestions.map((q) => (
+                          <SelectItem key={q.id} value={q.id}>
+                            {q.text.substring(0, 30)}...
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
-                    <div className="flex items-center gap-2 w-full">
-                      <Label className="w-24 shrink-0">Value</Label>
-                      <Select
-                        value={question.conditionalLogic?.value || ''}
-                        onValueChange={(value) => handleConditionalLogicChange('value', value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select option" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedDependentQuestion.options.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.text}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {question.conditionalLogic?.dependsOn && (
+                    <>
+                      <div className="flex items-center gap-2 w-full">
+                        <Label className="w-24 shrink-0">Operator</Label>
+                        <Select
+                          value={question.conditionalLogic?.operator || 'equals'}
+                          onValueChange={(value) => handleConditionalLogicChange('operator', value)}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="equals">Equals</SelectItem>
+                            <SelectItem value="notEquals">Does not equal</SelectItem>
+                            <SelectItem value="isAnswered">Is answered</SelectItem>
+                            <SelectItem value="isNotAnswered">Is not answered</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
+                        <div className="flex items-center gap-2 w-full">
+                          <Label className="w-24 shrink-0">Value</Label>
+                          <Select
+                            value={question.conditionalLogic?.value || ''}
+                            onValueChange={(value) => handleConditionalLogicChange('value', value)}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedDependentQuestion.options.map((option) => (
+                                <SelectItem key={option.id} value={option.id}>
+                                  {option.text}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        </div>
+
+        {question.type === 'text' && (
+          <Input disabled placeholder="Text answer will appear here" className="bg-muted/50" />
+        )}
+
+        {(question.type === 'multipleChoice' || question.type === 'checkboxes') && !isLikertType && (
+          <div className="space-y-2">
+            {question.options.map((option) => (
+              <div key={option.id} className="flex items-start gap-2">
+                {question.type === 'multipleChoice' ? (
+                  <RadioGroup className="flex mt-3">
+                    <RadioGroupItem value={option.id} id={option.id} disabled />
+                  </RadioGroup>
+                ) : (
+                  <Checkbox disabled id={option.id} className="mt-3" />
+                )}
+                <div className="flex-1">
+                  <Input 
+                    value={option.text}
+                    onChange={(e) => updateOptionText(option.id, e.target.value)}
+                    className="flex-1 border-ice"
+                  />
+                  
+                  {option.media && (
+                    <div className="mt-2 p-2 border rounded-md bg-ice">
+                      {option.media.type === 'image' ? (
+                        <img 
+                          src={option.media.url} 
+                          alt={option.text} 
+                          className="max-h-32 object-contain mx-auto"
+                        />
+                      ) : (
+                        <video 
+                          src={option.media.url} 
+                          controls 
+                          className="max-h-32 w-full"
+                        />
+                      )}
                     </div>
                   )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {question.type === 'text' && (
-            <Input disabled placeholder="Text answer will appear here" className="bg-muted/50" />
-          )}
-
-          {(question.type === 'multipleChoice' || question.type === 'checkboxes') && !isLikertType && (
-            <div className="space-y-2">
-              {question.options.map((option) => (
-                <div key={option.id} className="flex items-start gap-2">
-                  {question.type === 'multipleChoice' ? (
-                    <RadioGroup className="flex mt-3">
-                      <RadioGroupItem value={option.id} id={option.id} disabled />
-                    </RadioGroup>
-                  ) : (
-                    <Checkbox disabled id={option.id} className="mt-3" />
-                  )}
-                  <div className="flex-1">
-                    <Input 
-                      value={option.text}
-                      onChange={(e) => updateOptionText(option.id, e.target.value)}
-                      className="flex-1 border-ice"
-                    />
-                    
-                    {option.media && (
-                      <div className="mt-2 p-2 border rounded-md bg-ice">
-                        {option.media.type === 'image' ? (
-                          <img 
-                            src={option.media.url} 
-                            alt={option.text} 
-                            className="max-h-32 object-contain mx-auto"
-                          />
-                        ) : (
-                          <video 
-                            src={option.media.url} 
-                            controls 
-                            className="max-h-32 w-full"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-1">
-                    <MediaUploadButton 
-                      type="image" 
-                      onFileSelected={(file) => handleMediaUpload(option.id, file, 'image')} 
-                    />
-                    <MediaUploadButton 
-                      type="video" 
-                      onFileSelected={(file) => handleMediaUpload(option.id, file, 'video')} 
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteOption(option.id)}
-                      className="text-magma"
-                    >
-                      <Trash size={16} />
-                    </Button>
-                  </div>
                 </div>
-              ))}
-              <div className="flex items-center gap-2 mt-2">
-                <Input
-                  value={newOptionText}
-                  onChange={(e) => setNewOptionText(e.target.value)}
-                  placeholder="Add option"
-                  className="flex-1 border-ice"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      addOption();
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={addOption} 
-                  size="sm" 
-                  variant="outline"
-                  className="border-abyss text-abyss hover:bg-abyss hover:text-white"
-                >
-                  <Check size={16} className="mr-1" />
-                  Add
-                </Button>
+                
+                <div className="flex gap-1">
+                  <MediaUploadButton 
+                    type="image" 
+                    onFileSelected={(file) => handleMediaUpload(option.id, file, 'image')} 
+                  />
+                  <MediaUploadButton 
+                    type="video" 
+                    onFileSelected={(file) => handleMediaUpload(option.id, file, 'video')} 
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteOption(option.id)}
+                    className="text-magma"
+                  >
+                    <Trash size={16} />
+                  </Button>
+                </div>
               </div>
+            ))}
+            <div className="flex items-center gap-2 mt-2">
+              <Input
+                value={newOptionText}
+                onChange={(e) => setNewOptionText(e.target.value)}
+                placeholder="Add option"
+                className="flex-1 border-ice"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    addOption();
+                  }
+                }}
+              />
+              <Button 
+                onClick={addOption} 
+                size="sm" 
+                variant="outline"
+                className="border-abyss text-abyss hover:bg-abyss hover:text-white"
+              >
+                <Check size={16} className="mr-1" />
+                Add
+              </Button>
             </div>
           )}
 
