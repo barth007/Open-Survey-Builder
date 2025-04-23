@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -50,6 +49,24 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
+  
+  const selectedDependentQuestion = question.conditionalLogic?.dependsOn 
+    ? questions.find(q => q.id === question.conditionalLogic?.dependsOn)
+    : undefined;
+
+  useEffect(() => {
+    if (question.conditionalLogic?.dependsOn && 
+        ['equals', 'notEquals'].includes(question.conditionalLogic.operator) && 
+        selectedDependentQuestion) {
+      
+      const value = question.conditionalLogic.value;
+      const valueExists = selectedDependentQuestion.options.some(opt => opt.id === value);
+      
+      if (!valueExists && selectedDependentQuestion.options.length > 0) {
+        handleConditionalLogicChange('value', selectedDependentQuestion.options[0].id);
+      }
+    }
+  }, [selectedDependentQuestion, question.conditionalLogic]);
 
   const handleTextChange = (text: string) => {
     onQuestionChange({ ...question, text });
@@ -187,6 +204,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       ...(question.conditionalLogic || { operator: 'equals', dependsOn: '' }),
       [field]: value,
     };
+
+    if (field === 'dependsOn' && value !== '') {
+      const dependentQuestion = questions.find(q => q.id === value);
+      if (dependentQuestion && dependentQuestion.options.length > 0) {
+        updatedLogic.value = dependentQuestion.options[0].id;
+      } else {
+        updatedLogic.value = '';
+      }
+    } else if (field === 'operator' && ['equals', 'notEquals'].includes(value)) {
+      const dependentQuestion = questions.find(q => q.id === updatedLogic.dependsOn);
+      if (dependentQuestion && dependentQuestion.options.length > 0 && !updatedLogic.value) {
+        updatedLogic.value = dependentQuestion.options[0].id;
+      }
+    }
 
     onQuestionChange({
       ...question,
@@ -340,15 +371,24 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     </Select>
                   </div>
 
-                  {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && (
+                  {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
                     <div className="flex items-center gap-2">
                       <Label className="w-24">Value</Label>
-                      <Input
+                      <Select
                         value={question.conditionalLogic?.value || ''}
-                        onChange={(e) => handleConditionalLogicChange('value', e.target.value)}
-                        placeholder="Enter value"
-                        className="w-[200px]"
-                      />
+                        onValueChange={(value) => handleConditionalLogicChange('value', value)}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedDependentQuestion.options.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.text}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </>

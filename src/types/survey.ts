@@ -11,13 +11,13 @@ export interface QuestionOption {
   id: string;
   text: string;
   media?: Media;
-  value?: string; // Added for conditional logic matching
+  value?: string;
 }
 
 export interface ConditionalLogic {
   dependsOn: string; // Question ID this question depends on
   operator: 'equals' | 'notEquals' | 'isAnswered' | 'isNotAnswered';
-  value?: string | string[]; // The value(s) that trigger this question
+  value?: string; // The option ID to match against
 }
 
 export interface Question {
@@ -31,7 +31,7 @@ export interface Question {
   figmaPrototypeUrl?: string;
   media?: Media;
   conditionalLogic?: ConditionalLogic;
-  isVisible?: boolean; // Added to control visibility based on conditions
+  isVisible?: boolean;
 }
 
 export interface Survey {
@@ -54,10 +54,9 @@ export interface SurveyResponse {
 
 export interface Answer {
   questionId: string;
-  value: string | string[]; // Single value or array of values for checkbox questions
+  value: string | string[];
 }
 
-// Likert scale labels
 export const LIKERT_5_LABELS = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];
 export const LIKERT_7_LABELS = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neutral', 'Somewhat agree', 'Agree', 'Strongly agree'];
 export const LIKERT_10_LABELS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];

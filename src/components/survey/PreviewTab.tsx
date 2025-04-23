@@ -27,6 +27,9 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       answerType: Array.isArray(answer) ? 'array' : typeof answer
     });
 
+    const dependentQuestion = survey.questions.find(q => q.id === dependsOn);
+    if (!dependentQuestion) return true;
+
     switch (operator) {
       case 'equals':
         if (Array.isArray(answer)) {
