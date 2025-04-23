@@ -10,6 +10,7 @@ import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
@@ -17,6 +18,7 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [hasChanges, setHasChanges] = useState(false);
+  const { toast } = useToast();
   
   const {
     survey,
@@ -52,6 +54,20 @@ const Index = () => {
   const handleSaveWithReset = async () => {
     await handleSave();
     setHasChanges(false);
+  };
+
+  const handleCopyLink = () => {
+    if (!surveyId) return;
+    
+    const baseUrl = window.location.origin;
+    const surveyUrl = `${baseUrl}/survey-response/${surveyId}`;
+    
+    navigator.clipboard.writeText(surveyUrl);
+    
+    toast({
+      title: "Link Copied",
+      description: "Survey link has been copied to clipboard"
+    });
   };
 
   // Track changes for various operations
@@ -139,6 +155,7 @@ const Index = () => {
                       variant={survey.isPublished ? "destructive" : "outline"}
                       className={survey.isPublished ? "rounded-l-none pl-2" : "rounded-l-none pl-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
                       disabled={!survey.isPublished}
+                      onClick={handleCopyLink}
                     >
                       <Link2 size={18} />
                     </Button>

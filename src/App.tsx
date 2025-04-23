@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from "@/components/survey/SurveySidebar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import SurveyResponse from "./pages/SurveyResponse";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/survey/:id" element={<Index />} />
+                <Route path="/survey-response/:id" element={<SurveyResponse />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
