@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
 import {
   Sidebar,
@@ -11,15 +12,29 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
+import { DndContext, closestCenter, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 import { useToast } from "@/hooks/use-toast";
 import { useSurveyData } from '@/hooks/useSurveyData';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DraggableSurveyItem } from './DraggableSurveyItem';
 
 export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const { toast } = useToast();
-  const { surveyData, isLoading, createSurvey, deleteSurvey, deleteFolder } = useSurveyData();
+  const navigate = useNavigate();
+  const { surveyData, isLoading, createSurvey, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
+  
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const sensors = useSensors(mouseSensor);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders((current) => {
@@ -51,34 +66,20 @@ export function SurveySidebar() {
     }
   };
 
-  const handleDeleteFolder = async (folderId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      await deleteFolder(folderId);
-      toast({
-        title: "Success",
-        description: "Folder deleted successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete folder",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleCreateSurvey = async (folderId?: string) => {
     try {
-      await createSurvey({
+      const newSurvey = await createSurvey({
         name: "New Survey",
         folderId
       });
+      
       toast({
         title: "Success",
         description: "Survey created successfully",
       });
+      
+      // Navigate to the new survey
+      navigate(`/survey/${newSurvey.id}`);
     } catch (error) {
       toast({
         title: "Error",
@@ -88,16 +89,44 @@ export function SurveySidebar() {
     }
   };
 
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      updateSurveyOrder(active.id, over.id);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <Sidebar>
+      <SidebarHeader className="p-4">
+        <h2 className="text-lg font-semibold">Survey Builder</h2>
+      </SidebarHeader>
       <SidebarContent>
         {/* Folders Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Folders</SidebarGroupLabel>
+          <SidebarGroupLabel className="flex justify-between items-center">
+            <span>Folders</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleCreateSurvey()}
+                    className="hover:bg-sidebar-accent rounded-md p-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create new survey</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {surveyData?.folders.map((folder) => (
@@ -111,39 +140,44 @@ export function SurveySidebar() {
                   </SidebarMenuButton>
                   
                   {/* Add button for folder */}
-                  <SidebarMenuAction
-                    showOnHover
-                    onClick={() => handleCreateSurvey(folder.id)}
-                    className="right-8"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </SidebarMenuAction>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuAction
+                          showOnHover
+                          onClick={() => handleCreateSurvey(folder.id)}
+                          className="right-8"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </SidebarMenuAction>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add survey to folder</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-                  {/* Delete button for folder */}
-                  <SidebarMenuAction
-                    showOnHover
-                    onClick={(e) => handleDeleteFolder(folder.id, e)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </SidebarMenuAction>
-
-                  {openFolders.has(folder.id) && folder.surveys.map((survey) => (
-                    <SidebarMenuItem key={survey.id} className="pl-8">
-                      <SidebarMenuButton asChild>
-                        <Link to={`/survey/${survey.id}`} className="w-full justify-start">
-                          {survey.name}
-                        </Link>
-                      </SidebarMenuButton>
-                      
-                      {/* Delete button for survey within folder */}
-                      <SidebarMenuAction
-                        showOnHover
-                        onClick={(e) => handleDeleteSurvey(survey.id, e)}
+                  {openFolders.has(folder.id) && folder.surveys.length > 0 && (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                      modifiers={[restrictToVerticalAxis]}
+                    >
+                      <SortableContext
+                        items={folder.surveys}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </SidebarMenuAction>
-                    </SidebarMenuItem>
-                  ))}
+                        {folder.surveys.map((survey) => (
+                          <DraggableSurveyItem
+                            key={survey.id}
+                            survey={survey}
+                            onDelete={(e) => handleDeleteSurvey(survey.id, e)}
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -154,33 +188,44 @@ export function SurveySidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="flex justify-between items-center">
             <span>Other Surveys</span>
-            <button
-              onClick={() => handleCreateSurvey()}
-              className="hover:bg-sidebar-accent rounded-md p-1"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleCreateSurvey()}
+                    className="hover:bg-sidebar-accent rounded-md p-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create new survey</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {surveyData?.unorganizedSurveys.map((survey) => (
-                <SidebarMenuItem key={survey.id}>
-                  <SidebarMenuButton asChild>
-                    <Link to={`/survey/${survey.id}`} className="w-full justify-start">
-                      {survey.name}
-                    </Link>
-                  </SidebarMenuButton>
-                  
-                  {/* Delete button for unorganized survey */}
-                  <SidebarMenuAction
-                    showOnHover
-                    onClick={(e) => handleDeleteSurvey(survey.id, e)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </SidebarMenuAction>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <SortableContext
+                items={surveyData?.unorganizedSurveys || []}
+                strategy={verticalListSortingStrategy}
+              >
+                <SidebarMenu>
+                  {surveyData?.unorganizedSurveys.map((survey) => (
+                    <DraggableSurveyItem
+                      key={survey.id}
+                      survey={survey}
+                      onDelete={(e) => handleDeleteSurvey(survey.id, e)}
+                    />
+                  ))}
+                </SidebarMenu>
+              </SortableContext>
+            </DndContext>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

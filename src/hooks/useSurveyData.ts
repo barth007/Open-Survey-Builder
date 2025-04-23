@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
@@ -32,7 +31,6 @@ export function useSurveyData() {
         folderId: survey.folder_id
       }));
 
-      // Organize surveys into folders
       const organizedFolders = folders.map(folder => ({
         ...folder,
         surveys: surveys.filter(survey => survey.folderId === folder.id)
@@ -99,11 +97,17 @@ export function useSurveyData() {
     }
   });
 
+  const updateSurveyOrder = async (activeId: string, overId: string) => {
+    console.log(`Moving survey ${activeId} to position of ${overId}`);
+    queryClient.invalidateQueries({ queryKey: ['surveys'] });
+  };
+
   return {
     surveyData,
     isLoading,
-    createSurvey: createSurveyMutation.mutate,
+    createSurvey: createSurveyMutation.mutateAsync,
     deleteSurvey: deleteSurveyMutation.mutate,
-    deleteFolder: deleteFolderMutation.mutate
+    deleteFolder: deleteFolderMutation.mutate,
+    updateSurveyOrder
   };
 }
