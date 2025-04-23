@@ -1,12 +1,12 @@
 
 import React, { useState, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
@@ -22,6 +22,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
   const [name, setName] = useState(survey.name);
   const inputRef = useRef<HTMLInputElement>(null);
   const { updateSurvey } = useMutateSurvey();
+  const navigate = useNavigate();
 
   const {
     attributes,
@@ -71,57 +72,63 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isEditing) {
+      navigate(`/survey/${survey.id}`);
+    }
+  };
+
   return (
-    <SidebarMenuItem 
+    <div 
       ref={setNodeRef} 
       style={style} 
       {...attributes} 
       {...listeners}
       className={cn(
-        isSelected ? "bg-accent/80 text-accent-foreground" : ""
+        "flex items-center w-full",
+        isSelected ? "bg-accent/80 text-accent-foreground rounded-md" : ""
       )}
     >
-      <SidebarMenuButton asChild>
-        {isEditing ? (
-          <Input
-            ref={inputRef}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            className="h-8 w-full bg-background"
-            onClick={(e) => e.preventDefault()}
-          />
-        ) : (
-          <Link 
-            to={`/survey/${survey.id}`} 
-            className={cn(
-              "w-full justify-start",
-              isSelected && "font-bold"
-            )}
-            onDoubleClick={handleDoubleClick}
-          >
-            {name}
-          </Link>
-        )}
-      </SidebarMenuButton>
-      
-      {/* Move TooltipProvider outside of the SidebarMenuItem */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SidebarMenuAction
-              showOnHover
-              onClick={onDelete}
+      <SidebarMenuItem className="w-full">
+        <SidebarMenuButton asChild className="w-full">
+          {isEditing ? (
+            <Input
+              ref={inputRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              className="h-8 w-full bg-background"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <div 
+              className={cn(
+                "w-full cursor-pointer py-2 px-3",
+                isSelected ? "font-bold" : ""
+              )}
+              onClick={handleClick}
+              onDoubleClick={handleDoubleClick}
             >
-              <Trash2 className="h-4 w-4" />
-            </SidebarMenuAction>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete Survey</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </SidebarMenuItem>
+              {name}
+            </div>
+          )}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SidebarMenuAction
+            showOnHover
+            onClick={onDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </SidebarMenuAction>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Delete Survey</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
   );
 }

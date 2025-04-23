@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,10 +17,20 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   onTitleChange,
   onDescriptionChange,
 }) => {
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the title input when the component mounts if it's empty
+  useEffect(() => {
+    if (title === "Untitled Survey" && titleInputRef.current) {
+      titleInputRef.current.select();
+    }
+  }, [title]);
+
   return (
     <Card className="mb-6 border-t-4 border-t-indigo-500">
       <CardContent className="pt-6">
         <Input
+          ref={titleInputRef}
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Survey Title"

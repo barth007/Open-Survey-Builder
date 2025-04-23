@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,11 +7,12 @@ import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
+  const navigate = useNavigate();
   
   const {
     survey,
@@ -26,6 +27,13 @@ const Index = () => {
     isLoading,
     error
   } = useSurveyState(surveyId);
+
+  // Update document title when survey title changes
+  useEffect(() => {
+    if (survey.title) {
+      document.title = survey.title;
+    }
+  }, [survey.title]);
 
   // Handle loading state
   if (isLoading) {

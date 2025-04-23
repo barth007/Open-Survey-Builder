@@ -3,10 +3,14 @@ import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
+import { useMutateSurvey } from './survey/useMutateSurvey';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
+  const { updateSurvey } = useMutateSurvey();
   const [survey, setSurvey] = useState<Survey>({
     id: surveyId || "survey-1",
     title: "Untitled Survey",
@@ -108,12 +112,38 @@ export const useSurveyState = (surveyId: string | undefined) => {
     });
   };
 
-  const handleSave = () => {
-    console.log("Survey data:", survey);
-    toast({
-      title: "Survey saved",
-      description: "Your survey has been saved successfully",
-    });
+  const handleSave = async () => {
+    try {
+      // Update the survey in the database
+      if (surveyId) {
+        await updateSurvey({
+          surveyId,
+          updates: { 
+            name: survey.title,  // Update the name in the sidebar
+            title: survey.title,
+            description: survey.description,
+            questions: survey.questions,
+            is_published: survey.isPublished
+          }
+        });
+        
+        // Invalidate queries to refresh the data
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
+        toast({
+          title: "Survey saved",
+          description: "Your survey has been saved successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving survey:", error);
+      toast({
+        title: "Error saving survey",
+        description: "There was an error saving your survey. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return {
