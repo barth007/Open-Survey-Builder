@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
@@ -116,8 +117,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         await updateSurvey({
           surveyId,
           updates: { 
-            name: survey.title,
-            title: survey.title,
+            name: survey.title, // Use title for the name field
             description: survey.description,
             questions: survey.questions,
             isPublished: survey.isPublished
