@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
@@ -5,7 +6,7 @@ import { useQuerySurvey } from './survey/useQuerySurvey';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
-  const { data: surveyData } = useQuerySurvey(surveyId);
+  const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
   const [survey, setSurvey] = useState<Survey>({
     id: surveyId || "survey-1",
     title: "Untitled Survey",
@@ -123,6 +124,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
     deleteQuestion,
     duplicateQuestion,
     togglePublish,
-    handleSave
+    handleSave,
+    isLoading,
+    error
   };
 };

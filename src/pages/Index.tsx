@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Eye, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,10 @@ import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams } from 'react-router-dom';
-import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
-  const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
   
   const {
     survey,
@@ -23,7 +22,9 @@ const Index = () => {
     deleteQuestion,
     duplicateQuestion,
     togglePublish,
-    handleSave
+    handleSave,
+    isLoading,
+    error
   } = useSurveyState(surveyId);
 
   // Handle loading state
