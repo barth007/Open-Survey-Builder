@@ -58,9 +58,18 @@ export function useMutateSurvey() {
       }>
     }) => {
       try {
+        // Convert from camelCase to snake_case for the database
+        const dbUpdates: any = {};
+        
+        if (updates.name !== undefined) dbUpdates.name = updates.name;
+        if (updates.title !== undefined) dbUpdates.title = updates.title;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.questions !== undefined) dbUpdates.questions = updates.questions;
+        if (updates.isPublished !== undefined) dbUpdates.is_published = updates.isPublished;
+        
         const { data, error } = await supabase
           .from('surveys')
-          .update(updates)
+          .update(dbUpdates)
           .eq('id', surveyId)
           .select()
           .single();

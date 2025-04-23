@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
@@ -19,7 +18,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     isPublished: false
   });
 
-  // Update survey state when data is loaded from the API
   useEffect(() => {
     if (surveyData) {
       setSurvey({
@@ -27,7 +25,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         title: surveyData.title || surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
         questions: surveyData.questions || [],
-        isPublished: surveyData.is_published || false
+        isPublished: surveyData.isPublished || false
       });
     }
   }, [surveyData]);
@@ -114,20 +112,18 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   const handleSave = async () => {
     try {
-      // Update the survey in the database
       if (surveyId) {
         await updateSurvey({
           surveyId,
           updates: { 
-            name: survey.title,  // Update the name in the sidebar
-            title: survey.title, // Now this is valid because we updated the type
+            name: survey.title,
+            title: survey.title,
             description: survey.description,
             questions: survey.questions,
-            is_published: survey.isPublished
+            isPublished: survey.isPublished
           }
         });
         
-        // Invalidate queries to refresh the data
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
         
