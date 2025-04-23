@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
@@ -47,25 +48,41 @@ export function useSurveyData() {
 
   const createSurveyMutation = useMutation({
     mutationFn: async ({ name, folderId }: { name: string, folderId?: string }) => {
-      const { data, error } = await supabase
-        .from('surveys')
-        .insert([
-          {
-            name,
-            folder_id: folderId,
-            description: '',
-            questions: [],
-            is_published: false
-          }
-        ])
-        .select()
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('surveys')
+          .insert([
+            {
+              name,
+              folder_id: folderId,
+              description: '',
+              questions: [],
+              is_published: false
+            }
+          ])
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+        
+        if (!data) {
+          throw new Error("No data returned from survey creation");
+        }
+        
+        return data;
+      } catch (err) {
+        console.error("Error in createSurveyMutation:", err);
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+    },
+    onError: (error) => {
+      console.error("Mutation error:", error);
     }
   });
 

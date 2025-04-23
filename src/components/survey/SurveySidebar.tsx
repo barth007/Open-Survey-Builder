@@ -8,11 +8,11 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarMenu,
 } from "@/components/ui/sidebar";
 import { DndContext, closestCenter, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -73,14 +73,19 @@ export function SurveySidebar() {
         folderId
       });
       
-      toast({
-        title: "Success",
-        description: "Survey created successfully",
-      });
-      
-      // Navigate to the new survey
-      navigate(`/survey/${newSurvey.id}`);
+      if (newSurvey && newSurvey.id) {
+        toast({
+          title: "Success",
+          description: "Survey created successfully",
+        });
+        
+        // Navigate to the new survey
+        navigate(`/survey/${newSurvey.id}`);
+      } else {
+        throw new Error("Invalid survey data returned");
+      }
     } catch (error) {
+      console.error("Failed to create survey:", error);
       toast({
         title: "Error",
         description: "Failed to create survey",
@@ -122,7 +127,7 @@ export function SurveySidebar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create new survey</p>
+                  <p>Create Survey</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -152,7 +157,7 @@ export function SurveySidebar() {
                         </SidebarMenuAction>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Add survey to folder</p>
+                        <p>Create Survey</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -199,7 +204,7 @@ export function SurveySidebar() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create new survey</p>
+                  <p>Create Survey</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
