@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Question, Survey, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Save, Link } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Link as RouterLink } from "react-router-dom";
 
 const Index = () => {
   const { toast } = useToast();
@@ -67,7 +67,6 @@ const Index = () => {
     });
   };
 
-  // Helper function to render the appropriate input based on question type in preview
   const renderQuestionInput = (question: Question, index: number) => {
     switch(question.type) {
       case 'text':
