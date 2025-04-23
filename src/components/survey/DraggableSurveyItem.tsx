@@ -52,7 +52,11 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     setIsEditing(false);
     if (name !== survey.name) {
       try {
-        await updateSurvey(survey.id, { name });
+        // Update to match the new mutation function signature
+        await updateSurvey({
+          surveyId: survey.id,
+          updates: { name }
+        });
       } catch (error) {
         setName(survey.name); // Reset on error
       }

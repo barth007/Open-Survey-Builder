@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 
@@ -44,8 +45,17 @@ export function useMutateSurvey() {
     }
   });
 
+  // Fix the update mutation to accept a single parameter with both surveyId and updates
   const updateSurvey = useMutation({
-    mutationFn: async (surveyId: string, updates: Partial<{ name: string; description: string; questions: any[]; isPublished: boolean }>) => {
+    mutationFn: async ({ surveyId, updates }: { 
+      surveyId: string; 
+      updates: Partial<{ 
+        name: string; 
+        description: string; 
+        questions: any[]; 
+        isPublished: boolean 
+      }>
+    }) => {
       try {
         const { data, error } = await supabase
           .from('surveys')
