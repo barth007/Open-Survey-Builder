@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EditTab from '@/components/survey/EditTab';
@@ -80,6 +82,13 @@ const Index = () => {
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
           <div className="flex gap-2">
+            <Button 
+              onClick={handleSave} 
+              className="flex gap-2 bg-sunset hover:opacity-90"
+            >
+              <Save size={18} />
+              Save
+            </Button>
             <Button 
               onClick={togglePublish} 
               variant={survey.isPublished ? "destructive" : "outline"} 
