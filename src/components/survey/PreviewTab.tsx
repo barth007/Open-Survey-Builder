@@ -17,15 +17,36 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
     
     const { dependsOn, operator, value } = question.conditionalLogic;
     const answer = answers[dependsOn];
+    
+    console.log('Conditional logic check:', {
+      questionId: question.id,
+      dependsOn,
+      operator,
+      expectedValue: value,
+      actualAnswer: answer,
+      answerType: Array.isArray(answer) ? 'array' : typeof answer
+    });
 
     switch (operator) {
       case 'equals':
+        if (Array.isArray(answer)) {
+          return answer.includes(value as string);
+        }
         return answer === value;
       case 'notEquals':
+        if (Array.isArray(answer)) {
+          return !answer.includes(value as string);
+        }
         return answer !== value;
       case 'isAnswered':
+        if (Array.isArray(answer)) {
+          return answer.length > 0;
+        }
         return answer !== undefined && answer !== '';
       case 'isNotAnswered':
+        if (Array.isArray(answer)) {
+          return answer.length === 0;
+        }
         return answer === undefined || answer === '';
       default:
         return true;
@@ -37,6 +58,8 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       ...prev,
       [questionId]: value
     }));
+    
+    console.log('Answer updated:', { questionId, value, allAnswers: {...answers, [questionId]: value} });
   };
 
   const handleCheckboxChange = (questionId: string, optionId: string) => {
