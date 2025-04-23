@@ -51,7 +51,7 @@ export function SurveyFolders({
           </Tooltip>
         </TooltipProvider>
       </SidebarGroupLabel>
-      <SidebarGroupContent>
+      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
         {folders.map((folder) => (
           <FolderItem
             key={folder.id}

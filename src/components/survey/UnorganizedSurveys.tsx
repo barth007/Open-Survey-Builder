@@ -39,7 +39,7 @@ export function UnorganizedSurveys({
           </Tooltip>
         </TooltipProvider>
       </SidebarGroupLabel>
-      <SidebarGroupContent>
+      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
         <DraggableSurveyList
           surveys={surveys}
           onDeleteSurvey={onDeleteSurvey}
