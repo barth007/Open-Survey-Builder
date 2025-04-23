@@ -1,10 +1,11 @@
+
 import React, { useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
-import { SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
+import { SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -98,7 +99,7 @@ export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSur
       data-survey-id={survey.id}
       data-folder-id={folderId || "null"}
     >
-      <SidebarMenuItem className="w-full flex-1">
+      <div className="w-full flex-1">
         <SidebarMenuButton asChild className="w-full">
           {isEditing ? (
             <Input
@@ -123,7 +124,7 @@ export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSur
             </div>
           )}
         </SidebarMenuButton>
-      </SidebarMenuItem>
+      </div>
       
       <TooltipProvider>
         <Tooltip>
