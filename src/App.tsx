@@ -10,7 +10,14 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SurveyResponse from "./pages/SurveyResponse";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0, // Always fetch fresh data
+      refetchOnWindowFocus: true
+    }
+  }
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

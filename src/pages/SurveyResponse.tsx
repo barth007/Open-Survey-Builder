@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -31,10 +30,13 @@ const SurveyResponse = () => {
     }));
     
     try {
-      await submitResponse(surveyId, formattedAnswers, surveyData.isPublished);
+      // Check if survey is published - use is_published from database response
+      const isPublished = surveyData.is_published === true;
+      
+      await submitResponse(surveyId, formattedAnswers, isPublished);
       
       // Show different messages based on whether responses are being saved
-      if (surveyData.isPublished) {
+      if (isPublished) {
         toast({
           title: "Success",
           description: "Your response has been submitted. Thank you!",
@@ -46,7 +48,7 @@ const SurveyResponse = () => {
         });
       }
       
-      // Navigate or clear form
+      // Clear form
       setAnswers({});
       
     } catch (error) {
@@ -289,6 +291,8 @@ const SurveyResponse = () => {
     );
   }
 
+  const isPublished = surveyData.is_published === true;
+
   return (
     <div className="min-h-screen bg-pebble py-8">
       <div className="container max-w-3xl">
@@ -296,7 +300,7 @@ const SurveyResponse = () => {
           <h2 className="text-2xl font-bold mb-2 text-carbon">{surveyData.title || surveyData.name}</h2>
           <p className="text-gray-600 mb-6">{surveyData.description}</p>
 
-          {!surveyData.isPublished && (
+          {!isPublished && (
             <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
               <p className="text-sm font-medium">This survey is in preview mode</p>
               <p className="text-xs">Responses will not be saved until the survey is published</p>

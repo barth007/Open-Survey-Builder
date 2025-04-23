@@ -38,7 +38,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         title: surveyData.title || surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
         questions: surveyData.questions || [],
-        isPublished: surveyData.isPublished || false
+        isPublished: surveyData.isPublished || surveyData.is_published || false
       };
       setSurvey(newSurvey);
       setQuestions(newSurvey.questions);
@@ -49,18 +49,49 @@ export const useSurveyState = (surveyId: string | undefined) => {
     setSurvey((prev) => ({ ...prev, description }));
   };
 
-  const togglePublish = () => {
+  const togglePublish = async () => {
+    // Update local state first
+    const newPublishState = !survey.isPublished;
     setSurvey(prev => ({
       ...prev,
-      isPublished: !prev.isPublished
+      isPublished: newPublishState
     }));
-
-    toast({
-      title: survey.isPublished ? "Survey unpublished" : "Survey published",
-      description: survey.isPublished 
-        ? "The survey is now in draft mode" 
-        : "The survey is now live and can receive responses",
-    });
+    
+    try {
+      // Immediately save to database
+      if (surveyId) {
+        await updateSurvey({
+          surveyId,
+          updates: { 
+            isPublished: newPublishState
+          }
+        });
+        
+        // Invalidate queries to reflect the changes
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
+        toast({
+          title: newPublishState ? "Survey published" : "Survey unpublished",
+          description: newPublishState 
+            ? "The survey is now live and can receive responses" 
+            : "The survey is now in draft mode",
+        });
+      }
+    } catch (error) {
+      // Revert local state if the save failed
+      setSurvey(prev => ({
+        ...prev,
+        isPublished: !newPublishState
+      }));
+      
+      console.error("Error updating survey publish status:", error);
+      toast({
+        title: "Error updating survey",
+        description: "There was an error updating your survey. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSave = async () => {
