@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Folder, FolderOpen, Plus } from 'lucide-react';
+import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import {
   SidebarMenuButton,
@@ -21,6 +21,7 @@ interface FolderItemProps {
   onToggle: (id: string) => void;
   onCreateSurvey: (folderId: string) => void;
   onDeleteSurvey: (surveyId: string, e: React.MouseEvent) => void;
+  onDeleteFolder?: (folderId: string) => void;
   onDragEnd: (event: any) => void;
   sensors: any;
 }
@@ -33,35 +34,57 @@ export function FolderItem({
   onToggle,
   onCreateSurvey,
   onDeleteSurvey,
+  onDeleteFolder,
   onDragEnd,
   sensors,
 }: FolderItemProps) {
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton 
-        onClick={() => onToggle(id)}
-        className="w-full justify-start gap-2 group"
-      >
-        {isOpen ? <FolderOpen /> : <Folder />}
-        <span>{name}</span>
-      </SidebarMenuButton>
-      
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SidebarMenuAction
-              showOnHover
-              onClick={() => onCreateSurvey(id)}
-              className="right-8"
-            >
-              <Plus className="h-4 w-4" />
-            </SidebarMenuAction>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Create Survey</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className="flex items-center w-full group">
+        <SidebarMenuButton 
+          onClick={() => onToggle(id)}
+          className="w-full justify-start gap-2"
+        >
+          {isOpen ? <FolderOpen /> : <Folder />}
+          <span>{name}</span>
+        </SidebarMenuButton>
+
+        <div className="flex gap-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarMenuAction
+                  showOnHover
+                  onClick={() => onCreateSurvey(id)}
+                >
+                  <Plus className="h-4 w-4" />
+                </SidebarMenuAction>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Create Survey</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {onDeleteFolder && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarMenuAction
+                    showOnHover
+                    onClick={() => onDeleteFolder(id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </SidebarMenuAction>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete Folder</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      </div>
 
       {isOpen && surveys.length > 0 && (
         <DndContext

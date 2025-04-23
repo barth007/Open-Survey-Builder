@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
@@ -85,7 +84,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
       {...attributes} 
       {...listeners}
       className={cn(
-        "flex items-center w-full",
+        "flex items-center w-full group",
         isSelected ? "bg-accent/80 text-accent-foreground rounded-md" : ""
       )}
     >
@@ -116,19 +115,21 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SidebarMenuAction
-            showOnHover
-            onClick={onDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </SidebarMenuAction>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Delete Survey</p>
-        </TooltipContent>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarMenuAction
+              showOnHover
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </SidebarMenuAction>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete Survey</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
