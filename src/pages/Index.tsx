@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Question, Survey, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
@@ -166,10 +165,13 @@ const Index = () => {
           question.type === 'likert7' ? LIKERT_7_LABELS :
           LIKERT_10_LABELS;
         
+        const columns = likertLabels.length;
+        const gridClass = `grid grid-cols-5 md:grid-cols-${columns} gap-1`;
+        
         return (
           <div className="mt-4">
             <RadioGroup name={`likert-${question.id}`}>
-              <div className={`grid grid-cols-${likertLabels.length} gap-1`}>
+              <div className={gridClass}>
                 {likertLabels.map((label, i) => (
                   <div key={i} className="flex flex-col items-center">
                     <RadioGroupItem

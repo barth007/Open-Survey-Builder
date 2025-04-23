@@ -189,7 +189,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                   <SelectValue placeholder="No limit" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No limit</SelectItem>
+                  <SelectItem value="no-limit">No limit</SelectItem>
                   {[1, 2, 3, 4, 5].map(num => (
                     <SelectItem key={num} value={num.toString()}>
                       {num}
