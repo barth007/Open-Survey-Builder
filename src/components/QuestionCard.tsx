@@ -18,6 +18,7 @@ import { Check, Trash, GripVertical, Image, Video, Link } from "lucide-react";
 import QuestionTypeMenu from './QuestionTypeMenu';
 import { Question, QuestionOption, QuestionType, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import MediaUploadButton from './MediaUploadButton';
+import QuestionMediaUpload from './QuestionMediaUpload';
 
 interface QuestionCardProps {
   question: Question;
@@ -68,10 +69,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   };
 
   const handleMaxSelectionsChange = (value: string) => {
-    const maxSelections = parseInt(value);
+    const maxSelections = value === "no-limit" ? undefined : parseInt(value);
     onQuestionChange({
       ...question,
-      maxSelections: isNaN(maxSelections) ? undefined : maxSelections
+      maxSelections: isNaN(maxSelections as number) ? undefined : maxSelections
     });
   };
 
@@ -128,6 +129,32 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const handleQuestionMediaUpload = (file: File, type: 'image' | 'video') => {
+    // In a real app, you would upload this file to a server and get a URL
+    // For demo purposes, we'll create an object URL
+    const url = URL.createObjectURL(file);
+    
+    onQuestionChange({
+      ...question,
+      media: {
+        type,
+        url
+      }
+    });
+  };
+
+  const removeQuestionMedia = () => {
+    const { media, ...rest } = question;
+    onQuestionChange({
+      ...rest,
+      id: question.id,
+      type: question.type,
+      text: question.text,
+      isRequired: question.isRequired,
+      options: question.options,
+    });
+  };
+
   const handleFigmaUrlSave = () => {
     onQuestionChange({
       ...question,
@@ -154,8 +181,39 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           />
         </div>
 
+        {/* Question Media */}
+        <div className="mt-2 mb-4">
+          <QuestionMediaUpload onFileSelected={handleQuestionMediaUpload} />
+          
+          {question.media && (
+            <div className="mt-3 p-3 border rounded-md bg-ice relative">
+              {question.media.type === 'image' ? (
+                <img 
+                  src={question.media.url} 
+                  alt="Question media" 
+                  className="max-h-40 object-contain mx-auto" 
+                />
+              ) : (
+                <video 
+                  src={question.media.url} 
+                  controls 
+                  className="max-h-40 w-full" 
+                />
+              )}
+              <Button 
+                variant="destructive" 
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={removeQuestionMedia}
+              >
+                <Trash size={16} />
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Figma Prototype URL */}
-        <div className="mt-4 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link size={16} className="text-abyss" />
           <Input
             value={figmaUrl}
@@ -182,7 +240,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 Max selections allowed:
               </Label>
               <Select
-                value={question.maxSelections?.toString() || ''}
+                value={question.maxSelections?.toString() || "no-limit"}
                 onValueChange={handleMaxSelectionsChange}
               >
                 <SelectTrigger id={`max-selections-${question.id}`} className="w-32 border-ice">
@@ -211,11 +269,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               {question.options.map((option) => (
                 <div key={option.id} className="flex items-start gap-2">
                   {question.type === 'multipleChoice' ? (
-                    <RadioGroup>
+                    <RadioGroup className="flex mt-3">
                       <RadioGroupItem value={option.id} id={option.id} disabled />
                     </RadioGroup>
                   ) : (
-                    <Checkbox disabled id={option.id} />
+                    <Checkbox disabled id={option.id} className="mt-3" />
                   )}
                   <div className="flex-1">
                     <Input 

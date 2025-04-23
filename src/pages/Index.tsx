@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Question, Survey, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
@@ -5,14 +6,15 @@ import QuestionCard from '@/components/QuestionCard';
 import AddQuestionButton from '@/components/AddQuestionButton';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Save, Link } from "lucide-react";
+import { Eye, Save, Link, BarChart2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link as RouterLink } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import AnswersTab from '@/components/AnswersTab';
 
 const Index = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   
   const [survey, setSurvey] = useState<Survey>({
     title: "Untitled Survey",
@@ -84,12 +86,12 @@ const Index = () => {
           <div className="space-y-2">
             {question.options.map((option) => (
               <div key={option.id} className="flex items-start">
-                <input
-                  type="radio"
-                  id={`preview-${option.id}`}
-                  name={`question-${question.id}`}
-                  className="mr-2 mt-1"
-                />
+                <RadioGroup name={`question-${question.id}`} className="flex mt-1 mr-2">
+                  <RadioGroupItem
+                    value={`preview-${option.id}`}
+                    id={`preview-${option.id}`}
+                  />
+                </RadioGroup>
                 <div>
                   <label htmlFor={`preview-${option.id}`}>{option.text}</label>
                   {option.media && (
@@ -203,14 +205,16 @@ const Index = () => {
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-abyss">Survey Builder</h1>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setActiveTab("preview")} 
-              className="flex gap-2 border-abyss text-abyss hover:bg-abyss hover:text-white"
-            >
-              <Eye size={18} />
-              Preview
-            </Button>
+            {activeTab !== "preview" && (
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab("preview")} 
+                className="flex gap-2 border-abyss text-abyss hover:bg-abyss hover:text-white"
+              >
+                <Eye size={18} />
+                Preview
+              </Button>
+            )}
             <Button 
               onClick={handleSave} 
               className="flex gap-2 bg-sunset hover:opacity-90"
@@ -221,10 +225,16 @@ const Index = () => {
           </div>
         </header>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview")} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 bg-ice">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview" | "answers")} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3 bg-ice">
             <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
             <TabsTrigger value="preview" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Preview</TabsTrigger>
+            <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">
+              <span className="flex items-center gap-1">
+                <BarChart2 size={16} />
+                Answers
+              </span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="edit" className="space-y-4">
@@ -259,6 +269,24 @@ const Index = () => {
                     {question.isRequired && <span className="text-magma ml-1">*</span>}
                   </h3>
 
+                  {question.media && (
+                    <div className="mb-4 mt-2">
+                      {question.media.type === 'image' ? (
+                        <img 
+                          src={question.media.url} 
+                          alt="Question media" 
+                          className="max-h-48 object-contain rounded-md" 
+                        />
+                      ) : (
+                        <video 
+                          src={question.media.url} 
+                          controls 
+                          className="max-h-48 w-full rounded-md"
+                        />
+                      )}
+                    </div>
+                  )}
+
                   {question.figmaPrototypeUrl && (
                     <div className="mb-4">
                       <a 
@@ -286,6 +314,10 @@ const Index = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="answers" className="space-y-4">
+            <AnswersTab survey={survey} />
           </TabsContent>
         </Tabs>
       </div>

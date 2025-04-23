@@ -9,6 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuGroup,
   DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { QuestionType } from '@/types/survey';
@@ -24,14 +27,14 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
 }) => {
   const questionTypes = [
     { value: 'text', label: 'Text' },
-    { value: 'multipleChoice', label: 'Multiple Choice' },
+    { value: 'multipleChoice', label: 'Multiple Choice (Radio)' },
     { value: 'checkboxes', label: 'Checkboxes' },
   ] as const;
 
   const likertTypes = [
-    { value: 'likert5', label: '5-point Likert Scale' },
-    { value: 'likert7', label: '7-point Likert Scale' },
-    { value: 'likert10', label: '10-point Likert Scale' },
+    { value: 'likert5', label: '5-point Scale' },
+    { value: 'likert7', label: '7-point Scale' },
+    { value: 'likert10', label: '10-point Scale' },
   ] as const;
 
   const getTypeLabel = () => {
@@ -39,7 +42,7 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
     if (basicType) return basicType.label;
     
     const likertType = likertTypes.find(type => type.value === currentType);
-    if (likertType) return likertType.label;
+    if (likertType) return `Likert: ${likertType.label}`;
     
     return 'Select Type';
   };
@@ -68,18 +71,22 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuLabel>Likert Scales</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          {likertTypes.map((type) => (
-            <DropdownMenuItem
-              key={type.value}
-              onClick={() => onTypeChange(type.value as QuestionType)}
-              className={currentType === type.value ? "bg-muted" : ""}
-            >
-              {type.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className={currentType.startsWith('likert') ? "bg-muted" : ""}>
+            Likert Scale
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {likertTypes.map((type) => (
+              <DropdownMenuItem
+                key={type.value}
+                onClick={() => onTypeChange(type.value as QuestionType)}
+                className={currentType === type.value ? "bg-muted" : ""}
+              >
+                {type.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );

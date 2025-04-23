@@ -1,13 +1,17 @@
 
 export type QuestionType = 'text' | 'multipleChoice' | 'checkboxes' | 'likert5' | 'likert7' | 'likert10';
 
+export type MediaType = 'image' | 'video' | 'gif';
+
+export interface Media {
+  type: MediaType;
+  url: string;
+}
+
 export interface QuestionOption {
   id: string;
   text: string;
-  media?: {
-    type: 'image' | 'video' | 'gif';
-    url: string;
-  };
+  media?: Media;
 }
 
 export interface Question {
@@ -18,6 +22,7 @@ export interface Question {
   options: QuestionOption[];
   maxSelections?: number; // For checkboxes: how many options can be selected
   figmaPrototypeUrl?: string;
+  media?: Media; // Media for the question itself
 }
 
 export interface Survey {
