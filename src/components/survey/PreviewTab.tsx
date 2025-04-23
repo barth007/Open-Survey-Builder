@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
 
   const isQuestionVisible = (question: Question): boolean => {
-    if (!question.conditionalLogic) return true;
+    if (!question.conditionalLogic || !question.conditionalLogic.dependsOn) return true;
     
     const { dependsOn, operator, value } = question.conditionalLogic;
     const answer = answers[dependsOn];

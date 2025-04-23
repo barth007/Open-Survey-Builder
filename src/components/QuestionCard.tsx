@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -302,14 +303,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               <div className="flex items-center gap-2">
                 <Label className="w-24">Show when</Label>
                 <Select
-                  value={question.conditionalLogic?.dependsOn || ''}
-                  onValueChange={(value) => handleConditionalLogicChange('dependsOn', value)}
+                  value={question.conditionalLogic?.dependsOn || 'none'}
+                  onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
                 >
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Select question" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Always show</SelectItem>
+                    <SelectItem value="none">Always show</SelectItem>
                     {availableQuestions.map((q) => (
                       <SelectItem key={q.id} value={q.id}>
                         {q.text.substring(0, 30)}...
