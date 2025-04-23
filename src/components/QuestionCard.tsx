@@ -336,13 +336,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           <div className="mb-4 p-3 bg-ice rounded-md">
             <h4 className="text-sm font-medium mb-2">Conditional Logic</h4>
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Label className="w-24">Show when</Label>
+              <div className="flex items-center gap-2 w-full">
+                <Label className="w-24 shrink-0">Show when</Label>
                 <Select
                   value={question.conditionalLogic?.dependsOn || 'none'}
                   onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
                 >
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select question" />
                   </SelectTrigger>
                   <SelectContent>
@@ -358,13 +358,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
               {question.conditionalLogic?.dependsOn && (
                 <>
-                  <div className="flex items-center gap-2">
-                    <Label className="w-24">Operator</Label>
+                  <div className="flex items-center gap-2 w-full">
+                    <Label className="w-24 shrink-0">Operator</Label>
                     <Select
                       value={question.conditionalLogic?.operator || 'equals'}
                       onValueChange={(value) => handleConditionalLogicChange('operator', value)}
                     >
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="flex-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -377,13 +377,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                   </div>
 
                   {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
-                    <div className="flex items-center gap-2">
-                      <Label className="w-24">Value</Label>
+                    <div className="flex items-center gap-2 w-full">
+                      <Label className="w-24 shrink-0">Value</Label>
                       <Select
                         value={question.conditionalLogic?.value || ''}
                         onValueChange={(value) => handleConditionalLogicChange('value', value)}
                       >
-                        <SelectTrigger className="w-[200px]">
+                        <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Select option" />
                         </SelectTrigger>
                         <SelectContent>
