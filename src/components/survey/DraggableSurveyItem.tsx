@@ -73,7 +73,13 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
   };
 
   return (
-    <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <SidebarMenuItem 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      className={isSelected ? "bg-accent" : ""}
+    >
       <SidebarMenuButton asChild>
         {isEditing ? (
           <Input
@@ -90,7 +96,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
             to={`/survey/${survey.id}`} 
             className={cn(
               "w-full justify-start",
-              isSelected && "bg-accent text-accent-foreground font-medium"
+              isSelected && "font-semibold text-foreground"
             )}
             onDoubleClick={handleDoubleClick}
           >
