@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
 
@@ -45,6 +44,31 @@ export function useMutateSurvey() {
     }
   });
 
+  const updateSurvey = useMutation({
+    mutationFn: async (surveyId: string, updates: Partial<{ name: string; description: string; questions: any[]; isPublished: boolean }>) => {
+      try {
+        const { data, error } = await supabase
+          .from('surveys')
+          .update(updates)
+          .eq('id', surveyId)
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(`Database error: ${error.message}`);
+        }
+        
+        return data;
+      } catch (err) {
+        console.error("Error in updateSurveyMutation:", err);
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+    }
+  });
+
   const deleteSurvey = useMutation({
     mutationFn: async (surveyId: string) => {
       try {
@@ -71,6 +95,7 @@ export function useMutateSurvey() {
 
   return {
     createSurvey: createSurvey.mutateAsync,
+    updateSurvey: updateSurvey.mutateAsync,
     deleteSurvey: deleteSurvey.mutate
   };
 }

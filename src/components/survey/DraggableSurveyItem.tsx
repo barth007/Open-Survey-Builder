@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -7,7 +7,9 @@ import { Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
 
 interface DraggableSurveyItemProps {
   survey: Survey;
@@ -16,6 +18,11 @@ interface DraggableSurveyItemProps {
 
 export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemProps) {
   const { id: currentSurveyId } = useParams();
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(survey.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { updateSurvey } = useMutateSurvey();
+
   const {
     attributes,
     listeners,
@@ -34,18 +41,58 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
 
   const isSelected = currentSurveyId === survey.id;
 
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+    setTimeout(() => {
+      inputRef.current?.select();
+    }, 0);
+  };
+
+  const handleBlur = async () => {
+    setIsEditing(false);
+    if (name !== survey.name) {
+      try {
+        await updateSurvey(survey.id, { name });
+      } catch (error) {
+        setName(survey.name); // Reset on error
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    } else if (e.key === 'Escape') {
+      setName(survey.name);
+      setIsEditing(false);
+    }
+  };
+
   return (
     <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <SidebarMenuButton asChild>
-        <Link 
-          to={`/survey/${survey.id}`} 
-          className={cn(
-            "w-full justify-start",
-            isSelected && "bg-accent text-accent-foreground font-medium"
-          )}
-        >
-          {survey.name}
-        </Link>
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="h-8 w-full bg-background"
+            onClick={(e) => e.preventDefault()}
+          />
+        ) : (
+          <Link 
+            to={`/survey/${survey.id}`} 
+            className={cn(
+              "w-full justify-start",
+              isSelected && "bg-accent text-accent-foreground font-medium"
+            )}
+            onDoubleClick={handleDoubleClick}
+          >
+            {name}
+          </Link>
+        )}
       </SidebarMenuButton>
       
       <TooltipProvider>
