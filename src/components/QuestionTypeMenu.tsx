@@ -25,26 +25,23 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
   currentType,
   onTypeChange,
 }) => {
-  const questionTypes = [
-    { value: 'text', label: 'Text' },
-    { value: 'multipleChoice', label: 'Multiple Choice (Radio)' },
-    { value: 'checkboxes', label: 'Checkboxes' },
-  ] as const;
-
-  const likertTypes = [
-    { value: 'likert5', label: '5-point Scale' },
-    { value: 'likert7', label: '7-point Scale' },
-    { value: 'likert10', label: '10-point Scale' },
-  ] as const;
-
   const getTypeLabel = () => {
-    const basicType = questionTypes.find(type => type.value === currentType);
-    if (basicType) return basicType.label;
-    
-    const likertType = likertTypes.find(type => type.value === currentType);
-    if (likertType) return `Likert: ${likertType.label}`;
-    
-    return 'Select Type';
+    switch (currentType) {
+      case 'text':
+        return 'Text';
+      case 'multipleChoice':
+        return 'Multiple Choice (Radio)';
+      case 'checkboxes':
+        return 'Multiple Choice (Checkboxes)';
+      case 'likert5':
+        return 'Likert: 5-point Scale';
+      case 'likert7':
+        return 'Likert: 7-point Scale';
+      case 'likert10':
+        return 'Likert: 10-point Scale';
+      default:
+        return 'Select Type';
+    }
   };
 
   return (
@@ -55,36 +52,66 @@ const QuestionTypeMenu: React.FC<QuestionTypeMenuProps> = ({
           <ChevronDown size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Basic Types</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Question Types</DropdownMenuLabel>
         <DropdownMenuGroup>
-          {questionTypes.map((type) => (
-            <DropdownMenuItem
-              key={type.value}
-              onClick={() => onTypeChange(type.value)}
-              className={currentType === type.value ? "bg-muted" : ""}
-            >
-              {type.label}
-            </DropdownMenuItem>
-          ))}
+          <DropdownMenuItem 
+            onClick={() => onTypeChange('text')}
+            className={currentType === 'text' ? "bg-muted" : ""}
+          >
+            Text
+          </DropdownMenuItem>
         </DropdownMenuGroup>
-        
+
         <DropdownMenuSeparator />
         
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className={currentType.startsWith('likert') ? "bg-muted" : ""}>
+          <DropdownMenuSubTrigger 
+            className={['multipleChoice', 'checkboxes'].includes(currentType) ? "bg-muted" : ""}
+          >
+            Multiple Choice
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              onClick={() => onTypeChange('multipleChoice')}
+              className={currentType === 'multipleChoice' ? "bg-muted" : ""}
+            >
+              Radio Buttons
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onTypeChange('checkboxes')}
+              className={currentType === 'checkboxes' ? "bg-muted" : ""}
+            >
+              Checkboxes
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            className={currentType.startsWith('likert') ? "bg-muted" : ""}
+          >
             Likert Scale
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
-            {likertTypes.map((type) => (
-              <DropdownMenuItem
-                key={type.value}
-                onClick={() => onTypeChange(type.value as QuestionType)}
-                className={currentType === type.value ? "bg-muted" : ""}
-              >
-                {type.label}
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuItem
+              onClick={() => onTypeChange('likert5')}
+              className={currentType === 'likert5' ? "bg-muted" : ""}
+            >
+              5-point Scale
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onTypeChange('likert7')}
+              className={currentType === 'likert7' ? "bg-muted" : ""}
+            >
+              7-point Scale
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onTypeChange('likert10')}
+              className={currentType === 'likert10' ? "bg-muted" : ""}
+            >
+              10-point Scale
+            </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       </DropdownMenuContent>
