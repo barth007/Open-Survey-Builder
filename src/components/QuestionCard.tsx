@@ -49,7 +49,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
   const [hasUrlChanged, setHasUrlChanged] = useState(false);
-  const [isLogicExpanded, setIsLogicExpanded] = useState(true);
+  const [isLogicExpanded, setIsLogicExpanded] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
