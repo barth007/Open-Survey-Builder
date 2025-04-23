@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash, GripVertical, Link, Copy, Check } from "lucide-react";
+import { Trash, GripVertical, Link as LinkIcon, Copy, Check, ExternalLink } from "lucide-react";
 import { 
   Question, 
   ConditionalLogic, 
@@ -47,7 +47,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
-  const [showFigmaPreview, setShowFigmaPreview] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
@@ -192,7 +191,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       ...question,
       figmaPrototypeUrl: figmaUrl
     });
-    setShowFigmaPreview(true);
+  };
+
+  const openFigmaPrototype = () => {
+    if (figmaUrl) {
+      window.open(figmaUrl, '_blank');
+    }
   };
 
   const duplicateQuestion = () => {
@@ -288,7 +292,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Link size={16} className="text-abyss" />
+            <LinkIcon size={16} className="text-abyss" />
             <Input
               value={figmaUrl}
               onChange={(e) => setFigmaUrl(e.target.value)}
@@ -306,39 +310,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             </Button>
           </div>
           
-          {showFigmaPreview && figmaUrl && (
-            <div className="mt-2 border rounded-md overflow-hidden bg-white h-[400px]">
-              <iframe
-                src={figmaUrl}
-                className="w-full h-full border-0"
-                allowFullScreen
-              />
+          {figmaUrl && (
+            <div className="mt-2">
+              <Button 
+                onClick={openFigmaPrototype} 
+                size="sm" 
+                variant="outline"
+                className="border-sunset text-sunset hover:bg-sunset hover:text-white"
+              >
+                <ExternalLink size={16} className="mr-1" />
+                Open Figma Prototype
+              </Button>
             </div>
           )}
-        </div>
-
-        <div className="mt-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor={`max-selections-${question.id}`} className="text-sm text-carbon">
-              Max selections allowed:
-            </Label>
-            <Select
-              value={question.maxSelections?.toString() || "no-limit"}
-              onValueChange={handleMaxSelectionsChange}
-            >
-              <SelectTrigger id={`max-selections-${question.id}`} className="w-32 border-ice">
-                <SelectValue placeholder="No limit" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no-limit">No limit</SelectItem>
-                {[1, 2, 3, 4, 5].map(num => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <div className="mt-4">
@@ -434,7 +418,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                     
                     {option.media && (
                       <div className="mt-2 p-2 border rounded-md bg-ice">
-                        {option.media.type === 'image' || option.media.type === 'gif' ? (
+                        {option.media.type === 'image' ? (
                           <img 
                             src={option.media.url} 
                             alt={option.text} 
