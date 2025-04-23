@@ -7,9 +7,11 @@ import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
+import { useParams } from 'react-router-dom';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
+  const { id: surveyId } = useParams();
   const {
     survey,
     handleTitleChange,
@@ -21,6 +23,17 @@ const Index = () => {
     togglePublish,
     handleSave
   } = useSurveyState();
+
+  if (!surveyId) {
+    return (
+      <div className="min-h-screen bg-pebble flex items-center justify-center">
+        <div className="text-center p-8 max-w-md">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Survey Builder</h2>
+          <p className="text-gray-600">Select a survey or create a new one to get started.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-pebble py-8">

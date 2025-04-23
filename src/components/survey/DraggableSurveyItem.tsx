@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuAction } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface DraggableSurveyItemProps {
   survey: Survey;
@@ -14,6 +15,7 @@ interface DraggableSurveyItemProps {
 }
 
 export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemProps) {
+  const { id: currentSurveyId } = useParams();
   const {
     attributes,
     listeners,
@@ -30,10 +32,18 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     zIndex: isDragging ? 100 : 1,
   };
 
+  const isSelected = currentSurveyId === survey.id;
+
   return (
     <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <SidebarMenuButton asChild>
-        <Link to={`/survey/${survey.id}`} className="w-full justify-start">
+        <Link 
+          to={`/survey/${survey.id}`} 
+          className={cn(
+            "w-full justify-start",
+            isSelected && "bg-accent text-accent-foreground font-medium"
+          )}
+        >
           {survey.name}
         </Link>
       </SidebarMenuButton>
