@@ -18,17 +18,44 @@ export interface Question {
   id: string;
   type: QuestionType;
   text: string;
+  description?: string; // Added description field
   isRequired: boolean;
   options: QuestionOption[];
   maxSelections?: number; // For checkboxes: how many options can be selected
   figmaPrototypeUrl?: string;
   media?: Media; // Media for the question itself
+  conditionalLogic?: ConditionalLogic; // Added conditional logic
+}
+
+export interface ConditionalLogic {
+  dependsOn: string; // Question ID this question depends on
+  showWhen: {
+    optionId: string; // Option ID that triggers this question to show
+    operator: 'equals' | 'notEquals' | 'contains' | 'notContains';
+  }[];
 }
 
 export interface Survey {
+  id: string;
   title: string;
   description: string;
   questions: Question[];
+  isPublished: boolean;
+  sharableLink?: string;
+  responseLimit?: number;
+  responses?: SurveyResponse[];
+}
+
+export interface SurveyResponse {
+  id: string;
+  surveyId: string;
+  answers: Answer[];
+  submittedAt: string;
+}
+
+export interface Answer {
+  questionId: string;
+  value: string | string[]; // Single value or array of values for checkbox questions
 }
 
 // Likert scale labels

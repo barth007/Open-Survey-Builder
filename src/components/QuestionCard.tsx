@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Select, 
   SelectContent, 
@@ -14,7 +15,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Check, Trash, GripVertical, Image, Video, Link } from "lucide-react";
+import { Check, Trash, GripVertical, Image, Video, Link, Copy } from "lucide-react";
 import QuestionTypeMenu from './QuestionTypeMenu';
 import { Question, QuestionOption, QuestionType, LIKERT_5_LABELS, LIKERT_7_LABELS, LIKERT_10_LABELS } from '@/types/survey';
 import MediaUploadButton from './MediaUploadButton';
@@ -24,6 +25,7 @@ interface QuestionCardProps {
   question: Question;
   onQuestionChange: (updatedQuestion: Question) => void;
   onDeleteQuestion: (id: string) => void;
+  onDuplicateQuestion?: (question: Question) => void;
   isDragging?: boolean;
 }
 
@@ -31,6 +33,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   onQuestionChange,
   onDeleteQuestion,
+  onDuplicateQuestion,
   isDragging = false,
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
@@ -38,6 +41,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const handleTextChange = (text: string) => {
     onQuestionChange({ ...question, text });
+  };
+
+  const handleDescriptionChange = (description: string) => {
+    onQuestionChange({ ...question, description });
   };
 
   const handleTypeChange = (type: QuestionType) => {
@@ -162,6 +169,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const duplicateQuestion = () => {
+    if (onDuplicateQuestion) {
+      onDuplicateQuestion(question);
+    }
+  };
+
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';
 
   return (
@@ -178,6 +191,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           <QuestionTypeMenu
             currentType={question.type}
             onTypeChange={handleTypeChange}
+          />
+        </div>
+
+        {/* Question Description */}
+        <div className="mt-2 mb-4">
+          <Textarea
+            value={question.description || ''}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            placeholder="Question description (optional)"
+            className="w-full resize-none border-ice focus-visible:ring-abyss"
+            rows={2}
           />
         </div>
 
@@ -382,15 +406,28 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           <Label htmlFor={`required-${question.id}`} className="text-carbon">Required</Label>
         </div>
         
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => onDeleteQuestion(question.id)}
-          className="text-magma hover:text-magma hover:bg-red-50"
-        >
-          <Trash size={16} className="mr-1" />
-          Delete
-        </Button>
+        <div className="flex gap-2">
+          {onDuplicateQuestion && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={duplicateQuestion}
+              className="text-abyss border-abyss hover:bg-abyss hover:text-white"
+            >
+              <Copy size={16} className="mr-1" />
+              Duplicate
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onDeleteQuestion(question.id)}
+            className="text-magma hover:text-magma hover:bg-red-50"
+          >
+            <Trash size={16} className="mr-1" />
+            Delete
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

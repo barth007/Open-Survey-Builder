@@ -10,6 +10,7 @@ import { Eye, Save, Link, BarChart2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link as RouterLink } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import AnswersTab from '@/components/AnswersTab';
 
 const Index = () => {
@@ -17,9 +18,11 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   
   const [survey, setSurvey] = useState<Survey>({
+    id: "survey-1",
     title: "Untitled Survey",
     description: "Survey description",
-    questions: []
+    questions: [],
+    isPublished: false
   });
 
   const handleTitleChange = (title: string) => {
@@ -61,12 +64,53 @@ const Index = () => {
     }));
   };
 
+  const duplicateQuestion = (questionToDuplicate: Question) => {
+    const newQuestion: Question = {
+      ...questionToDuplicate,
+      id: Date.now().toString(),
+      options: questionToDuplicate.options.map(option => ({
+        ...option,
+        id: `${Date.now()}-${option.id}`
+      }))
+    };
+
+    setSurvey((prev) => {
+      const questionIndex = prev.questions.findIndex(q => q.id === questionToDuplicate.id);
+      const updatedQuestions = [...prev.questions];
+      updatedQuestions.splice(questionIndex + 1, 0, newQuestion);
+      
+      return {
+        ...prev,
+        questions: updatedQuestions
+      };
+    });
+
+    toast({
+      title: "Question duplicated",
+      description: "The question has been duplicated successfully.",
+    });
+  };
+
   const handleSave = () => {
     // In a real app, we would save the survey to a backend
     console.log("Survey data:", survey);
     toast({
       title: "Survey saved",
       description: "Your survey has been saved successfully",
+    });
+  };
+
+  const togglePublish = () => {
+    setSurvey(prev => ({
+      ...prev,
+      isPublished: !prev.isPublished
+    }));
+
+    toast({
+      title: survey.isPublished ? "Survey unpublished" : "Survey published",
+      description: survey.isPublished 
+        ? "The survey is now in draft mode" 
+        : "The survey is now live and can receive responses",
     });
   };
 
@@ -122,8 +166,7 @@ const Index = () => {
           <div className="space-y-2">
             {question.options.map((option) => (
               <div key={option.id} className="flex items-start">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id={`preview-${option.id}`}
                   className="mr-2 mt-1"
                 />
@@ -222,6 +265,13 @@ const Index = () => {
               <Save size={18} />
               Save
             </Button>
+            <Button 
+              onClick={togglePublish} 
+              variant={survey.isPublished ? "destructive" : "outline"} 
+              className={survey.isPublished ? "" : "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"}
+            >
+              {survey.isPublished ? "Unpublish" : "Publish"}
+            </Button>
           </div>
         </header>
 
@@ -251,6 +301,7 @@ const Index = () => {
                 question={question}
                 onQuestionChange={updateQuestion}
                 onDeleteQuestion={deleteQuestion}
+                onDuplicateQuestion={duplicateQuestion}
               />
             ))}
 
@@ -268,6 +319,11 @@ const Index = () => {
                     {index + 1}. {question.text} 
                     {question.isRequired && <span className="text-magma ml-1">*</span>}
                   </h3>
+                  
+                  {/* Display question description if available */}
+                  {question.description && (
+                    <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+                  )}
 
                   {question.media && (
                     <div className="mb-4 mt-2">

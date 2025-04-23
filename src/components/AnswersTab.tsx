@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
 import { 
   BarChart, 
@@ -16,8 +16,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BarChart2, PieChart as PieChartIcon } from "lucide-react";
+import { BarChart2, PieChart as PieChartIcon, Download } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface AnswersTabProps {
   survey: Survey;
@@ -68,6 +71,8 @@ const COLORS = ['#2563eb', '#0ea5e9', '#0284c7', '#0369a1', '#075985', '#0c4a6e'
 
 const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const [chartType, setChartType] = React.useState<Record<string, "bar" | "pie">>({});
+  const [filterText, setFilterText] = useState("");
+  const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
 
   const handleChartTypeChange = (questionId: string, type: "bar" | "pie") => {
     setChartType(prev => ({
@@ -85,16 +90,95 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
     }));
   };
 
+  // Handle sorting of responses
+  const sortResponses = (responses: ResponseData[]) => {
+    const processedResponses = calculatePercentages(responses);
+    
+    if (sortBy === "count") {
+      return [...processedResponses].sort((a, b) => b.count - a.count);
+    } else if (sortBy === "alpha") {
+      return [...processedResponses].sort((a, b) => a.answer.localeCompare(b.answer));
+    }
+    
+    return processedResponses;
+  };
+
+  // Filter responses by question text
+  const filteredResponses = mockResponses.filter(item => 
+    item.question.toLowerCase().includes(filterText.toLowerCase())
+  );
+
+  // Handle CSV export
+  const exportToCSV = () => {
+    // Create CSV headers
+    let csvContent = "Question,Answer,Count,Percentage\n";
+    
+    // Add data rows
+    mockResponses.forEach(item => {
+      const processedResponses = calculatePercentages(item.responses);
+      processedResponses.forEach(response => {
+        csvContent += `"${item.question}","${response.answer}",${response.count},${response.percentage}%\n`;
+      });
+    });
+    
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${survey.title}-responses.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
-        <h2 className="text-xl font-bold mb-4 text-carbon">Response Summary</h2>
-        <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">95</span></p>
-        <p className="text-gray-600">Last response: <span className="font-medium">Today, 2:30 PM</span></p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
+            <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">95</span></p>
+            <p className="text-gray-600">Last response: <span className="font-medium">Today, 2:30 PM</span></p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
+              <Download size={18} />
+              Export CSV
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {mockResponses.map((item) => {
-        const responses = calculatePercentages(item.responses);
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div className="w-full md:w-1/3">
+          <Input
+            placeholder="Filter questions..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        <div>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default order</SelectItem>
+              <SelectItem value="count">By count (highest first)</SelectItem>
+              <SelectItem value="alpha">Alphabetically</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {filteredResponses.map((item) => {
+        const responses = sortResponses(item.responses);
         const currentChartType = chartType[item.questionId] || "bar";
 
         return (
@@ -189,6 +273,12 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
           </Card>
         );
       })}
+
+      {filteredResponses.length === 0 && (
+        <div className="text-center py-16 bg-white rounded-lg border border-ice">
+          <p className="text-gray-500">No responses match your filter criteria.</p>
+        </div>
+      )}
     </div>
   );
 };
