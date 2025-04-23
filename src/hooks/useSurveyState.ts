@@ -1,18 +1,30 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 
-export const useSurveyState = () => {
+export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
+  const { data: surveyData } = useQuerySurvey(surveyId);
   const [survey, setSurvey] = useState<Survey>({
-    id: "survey-1",
+    id: surveyId || "survey-1",
     title: "Untitled Survey",
     description: "Survey description",
     questions: [],
     isPublished: false
   });
+
+  useEffect(() => {
+    if (surveyData) {
+      setSurvey({
+        id: surveyData.id,
+        title: surveyData.title || "Untitled Survey",
+        description: surveyData.description || "Survey description",
+        questions: surveyData.questions || [],
+        isPublished: surveyData.is_published || false
+      });
+    }
+  }, [surveyData]);
 
   const handleTitleChange = (title: string) => {
     setSurvey((prev) => ({ ...prev, title }));

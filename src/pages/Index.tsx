@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Eye, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ const Index = () => {
     duplicateQuestion,
     togglePublish,
     handleSave
-  } = useSurveyState();
+  } = useSurveyState(surveyId);
 
   // Handle loading state
   if (isLoading) {
@@ -64,7 +63,7 @@ const Index = () => {
     <div className="min-h-screen bg-pebble py-8">
       <div className="container max-w-3xl">
         <header className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-abyss">Survey Builder</h1>
+          <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
           <div className="flex gap-2">
             {activeTab !== "preview" && (
               <Button 
