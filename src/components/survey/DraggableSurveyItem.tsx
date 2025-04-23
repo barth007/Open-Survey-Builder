@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
@@ -96,8 +95,6 @@ export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSur
         "flex items-center w-full",
         isSelected ? "bg-accent/80 text-accent-foreground rounded-md" : ""
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       data-survey-id={survey.id}
       data-folder-id={folderId || "null"}
     >
@@ -128,23 +125,21 @@ export function DraggableSurveyItem({ survey, onDelete, folderId }: DraggableSur
         </SidebarMenuButton>
       </SidebarMenuItem>
       
-      {!isEditing && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <SidebarMenuAction
-                className="mr-1"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-4 w-4" />
-              </SidebarMenuAction>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete Survey</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarMenuAction
+              className="mr-1"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </SidebarMenuAction>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Delete Survey</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/components/ui/use-toast";
@@ -40,9 +41,22 @@ export const useSurveyState = (surveyId: string | undefined) => {
           updates: { name: title }
         });
         
+        // Trigger a refetch of all surveys to update sidebar
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        // Specifically refetch this survey
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
+        toast({
+          title: "Survey Title Updated",
+          description: `Survey title changed to "${title}"`,
+        });
       } catch (error) {
         console.error("Error updating survey title:", error);
+        toast({
+          title: "Error",
+          description: "Could not update survey title",
+          variant: "destructive"
+        });
       }
     }
   };
