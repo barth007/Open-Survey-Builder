@@ -52,7 +52,6 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     setIsEditing(false);
     if (name !== survey.name) {
       try {
-        // Update to match the new mutation function signature
         await updateSurvey({
           surveyId: survey.id,
           updates: { name }
@@ -72,13 +71,16 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
     }
   };
 
+  // Apply a more noticeable highlight style for the selected item
   return (
     <SidebarMenuItem 
       ref={setNodeRef} 
       style={style} 
       {...attributes} 
       {...listeners}
-      className={isSelected ? "bg-accent" : ""}
+      className={cn(
+        isSelected ? "bg-accent/80 text-accent-foreground" : ""
+      )}
     >
       <SidebarMenuButton asChild>
         {isEditing ? (
@@ -96,7 +98,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
             to={`/survey/${survey.id}`} 
             className={cn(
               "w-full justify-start",
-              isSelected && "font-semibold text-foreground"
+              isSelected && "font-bold"
             )}
             onDoubleClick={handleDoubleClick}
           >
