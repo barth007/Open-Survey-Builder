@@ -248,6 +248,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const isMultipleType = question.type === 'multipleChoice' || question.type === 'checkboxes';
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';
 
   return (
@@ -270,7 +271,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               onTypeChange={handleTypeChange}
             />
           </div>
-          {question.type === 'checkboxes' && (
+          {isMultipleType && (
             <div className="flex-1">
               <Select
                 value={question.maxSelections?.toString() || "no-limit"}
