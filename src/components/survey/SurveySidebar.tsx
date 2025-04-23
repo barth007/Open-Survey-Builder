@@ -8,13 +8,16 @@ import { useSurveyData } from '@/hooks/useSurveyData';
 import { CreateFolderDialog } from './CreateFolderDialog';
 import { FoldersSection } from './FoldersSection';
 import { UnorganizedSurveysSection } from './UnorganizedSurveysSection';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { surveyData, isLoading, createSurvey, createFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
+  const { surveyData, isLoading, error, createSurvey, createFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
   
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -22,6 +25,14 @@ export function SurveySidebar() {
     },
   });
   const sensors = useSensors(mouseSensor);
+
+  // Show error dialog if there's a query error
+  React.useEffect(() => {
+    if (error) {
+      setErrorMessage(error instanceof Error ? error.message : "An unexpected error occurred loading survey data.");
+      setErrorDialogOpen(true);
+    }
+  }, [error]);
 
   const toggleFolder = (folderId: string) => {
     setOpenFolders((current) => {
@@ -45,9 +56,10 @@ export function SurveySidebar() {
         description: "Survey deleted successfully",
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to delete survey";
       toast({
         title: "Error",
-        description: "Failed to delete survey",
+        description: errorMsg,
         variant: "destructive",
       });
     }
@@ -61,11 +73,19 @@ export function SurveySidebar() {
         description: "Folder created successfully",
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create folder",
-        variant: "destructive",
-      });
+      const errorMsg = error instanceof Error ? error.message : "Failed to create folder";
+      
+      // Show error dialog for database-related issues
+      if (errorMsg.includes("table") || errorMsg.includes("database")) {
+        setErrorMessage(errorMsg);
+        setErrorDialogOpen(true);
+      } else {
+        toast({
+          title: "Error",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -84,11 +104,19 @@ export function SurveySidebar() {
         navigate(`/survey/${newSurvey.id}`);
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      const errorMsg = error instanceof Error ? error.message : "An unexpected error occurred";
+      
+      // Show error dialog for database-related issues
+      if (errorMsg.includes("table") || errorMsg.includes("database")) {
+        setErrorMessage(errorMsg);
+        setErrorDialogOpen(true);
+      } else {
+        toast({
+          title: "Error",
+          description: errorMsg,
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -101,7 +129,9 @@ export function SurveySidebar() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-full">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
 
   return (
@@ -134,6 +164,26 @@ export function SurveySidebar() {
         onClose={() => setIsFolderDialogOpen(false)}
         onCreateFolder={handleCreateFolder}
       />
+
+      <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Database Error</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorMessage}
+              <div className="mt-4">
+                The required database tables do not exist in your Supabase project. Please make sure 
+                to set up the required tables before using this feature.
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   );
 }
