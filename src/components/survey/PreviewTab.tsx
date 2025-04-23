@@ -66,6 +66,10 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
     );
   };
 
+  const handleRadioChange = (questionId: string, optionId: string) => {
+    handleAnswerChange(questionId, optionId);
+  };
+
   const renderQuestionInput = (question: Question) => {
     if (!isQuestionVisible(question)) return null;
 
@@ -82,36 +86,41 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       case 'multipleChoice':
         return (
           <div className="space-y-2">
-            {question.options.map((option) => (
-              <div key={option.id} className="flex items-start">
-                <RadioGroup name={`question-${question.id}`} className="flex mt-1 mr-2">
+            <RadioGroup 
+              name={`question-${question.id}`} 
+              value={answers[question.id] as string}
+              onValueChange={(value) => handleRadioChange(question.id, value)}
+            >
+              {question.options.map((option) => (
+                <div key={option.id} className="flex items-start">
                   <RadioGroupItem
-                    value={`preview-${option.id}`}
+                    value={option.id}
                     id={`preview-${option.id}`}
+                    className="mt-1 mr-2"
                   />
-                </RadioGroup>
-                <div>
-                  <label htmlFor={`preview-${option.id}`}>{option.text}</label>
-                  {option.media && (
-                    <div className="mt-2">
-                      {option.media.type === 'image' || option.media.type === 'gif' ? (
-                        <img 
-                          src={option.media.url} 
-                          alt={option.text} 
-                          className="max-h-32 object-contain rounded-md" 
-                        />
-                      ) : (
-                        <video 
-                          src={option.media.url} 
-                          controls 
-                          className="max-h-32 w-full rounded-md"
-                        />
-                      )}
-                    </div>
-                  )}
+                  <div>
+                    <label htmlFor={`preview-${option.id}`}>{option.text}</label>
+                    {option.media && (
+                      <div className="mt-2">
+                        {option.media.type === 'image' || option.media.type === 'gif' ? (
+                          <img 
+                            src={option.media.url} 
+                            alt={option.text} 
+                            className="max-h-32 object-contain rounded-md" 
+                          />
+                        ) : (
+                          <video 
+                            src={option.media.url} 
+                            controls 
+                            className="max-h-32 w-full rounded-md"
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </RadioGroup>
           </div>
         );
       
@@ -128,31 +137,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                   onCheckedChange={() => handleCheckboxChange(question.id, option.id)}
                 />
                 <div>
-                  <label htmlFor={`preview-${option.id}`}>
-                    {option.text}
-                    {question.maxSelections && 
-                      <span className="text-xs text-gray-500 ml-1">
-                        (Max selections: {question.maxSelections})
-                      </span>
-                    }
-                  </label>
-                  {option.media && (
-                    <div className="mt-2">
-                      {option.media.type === 'image' || option.media.type === 'gif' ? (
-                        <img 
-                          src={option.media.url} 
-                          alt={option.text} 
-                          className="max-h-32 object-contain rounded-md" 
-                        />
-                      ) : (
-                        <video 
-                          src={option.media.url} 
-                          controls 
-                          className="max-h-32 w-full rounded-md"
-                        />
-                      )}
-                    </div>
-                  )}
+                  <label htmlFor={`preview-${option.id}`}>{option.text}</label>
                 </div>
               </div>
             ))}
@@ -210,6 +195,12 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
             
             {question.description && (
               <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+            )}
+
+            {question.maxSelections && (
+              <p className="text-xs text-gray-500 mb-3">
+                (Max selections: {question.maxSelections})
+              </p>
             )}
 
             {question.media && (
