@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import {
@@ -12,6 +12,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { DraggableSurveyItem } from './DraggableSurveyItem';
+import { cn } from '@/lib/utils';
 
 interface FolderItemProps {
   id: string;
@@ -38,9 +39,15 @@ export function FolderItem({
   onDragEnd,
   sensors,
 }: FolderItemProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   return (
     <SidebarMenuItem>
-      <div className="flex items-center w-full group">
+      <div 
+        className="flex items-center w-full group"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <SidebarMenuButton 
           onClick={() => onToggle(id)}
           className="w-full justify-start gap-2"
@@ -54,7 +61,10 @@ export function FolderItem({
             <Tooltip>
               <TooltipTrigger asChild>
                 <SidebarMenuAction
-                  showOnHover
+                  className={cn(
+                    "transition-opacity",
+                    isHovered ? "opacity-100" : "opacity-0"
+                  )}
                   onClick={() => onCreateSurvey(id)}
                 >
                   <Plus className="h-4 w-4" />
@@ -71,7 +81,10 @@ export function FolderItem({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarMenuAction
-                    showOnHover
+                    className={cn(
+                      "transition-opacity",
+                      isHovered ? "opacity-100" : "opacity-0"
+                    )}
                     onClick={() => onDeleteFolder(id)}
                   >
                     <Trash2 className="h-4 w-4" />

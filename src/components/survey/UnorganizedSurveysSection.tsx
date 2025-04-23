@@ -60,7 +60,7 @@ export function UnorganizedSurveysSection({
             items={surveys}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-1">
+            <SidebarMenu className="space-y-1">
               {surveys.map((survey) => (
                 <DraggableSurveyItem
                   key={survey.id}
@@ -68,7 +68,7 @@ export function UnorganizedSurveysSection({
                   onDelete={(e) => onDeleteSurvey(survey.id, e)}
                 />
               ))}
-            </div>
+            </SidebarMenu>
           </SortableContext>
         </DndContext>
       </SidebarGroupContent>

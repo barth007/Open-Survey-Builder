@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
@@ -19,6 +20,7 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
   const { id: currentSurveyId } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(survey.name);
+  const [isHovered, setIsHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { updateSurvey } = useMutateSurvey();
   const navigate = useNavigate();
@@ -87,6 +89,8 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
         "flex items-center w-full group",
         isSelected ? "bg-accent/80 text-accent-foreground rounded-md" : ""
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <SidebarMenuItem className="w-full">
         <SidebarMenuButton asChild className="w-full">
@@ -119,7 +123,10 @@ export function DraggableSurveyItem({ survey, onDelete }: DraggableSurveyItemPro
         <Tooltip>
           <TooltipTrigger asChild>
             <SidebarMenuAction
-              showOnHover
+              className={cn(
+                "transition-opacity",
+                isHovered ? "opacity-100" : "opacity-0"
+              )}
               onClick={onDelete}
             >
               <Trash2 className="h-4 w-4" />
