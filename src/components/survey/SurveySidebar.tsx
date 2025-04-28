@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sidebar, SidebarGroup, SidebarSection } from "@/components/ui/sidebar";
+import { Sidebar, SidebarGroup } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
 import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
 import { useSurveyData } from "@/hooks/useSurveyData";
@@ -116,8 +116,8 @@ export function SurveySidebar() {
       </Sidebar>
 
       <CreateFolderDialog 
-        open={openDialog === "createFolder"} 
-        onOpenChange={() => setOpenDialog(null)}
+        isOpen={openDialog === "createFolder"} 
+        onClose={() => setOpenDialog(null)}
         onCreateFolder={handleCreateFolder}
       />
     </>
