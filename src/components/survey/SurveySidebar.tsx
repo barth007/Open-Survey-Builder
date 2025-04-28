@@ -9,13 +9,14 @@ import { Plus } from "lucide-react";
 import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export function SurveySidebar() {
   const [openDialog, setOpenDialog] = React.useState<"createFolder" | "createSurvey" | null>(null);
   const { surveyData, isLoading, createFolder, createSurvey, error, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   const { user } = useAuth();
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   // If not authenticated, don't show the sidebar
   if (!user) {

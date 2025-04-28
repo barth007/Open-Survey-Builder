@@ -1,20 +1,33 @@
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get the path to redirect to after login
+  const from = location.state?.from || '/';
+  
+  // If already logged in, redirect
+  useEffect(() => {
+    if (user && !isLoading) {
+      console.log('Login - User already authenticated, redirecting to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [user, isLoading, navigate, from]);
 
   const handleGoogleLogin = async () => {
     try {
+      console.log('Attempting Google login...');
       await signInWithGoogle();
-      // Note: The actual navigation will happen after the OAuth redirect
+      // The actual navigation happens after OAuth redirect and re-render
     } catch (error) {
       toast({
         title: "Login Failed",
@@ -23,6 +36,15 @@ const Login = () => {
       });
     }
   };
+
+  // Don't render login form if user is already logged in and being redirected
+  if (user && !isLoading) {
+    return (
+      <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
