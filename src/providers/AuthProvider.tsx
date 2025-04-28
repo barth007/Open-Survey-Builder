@@ -36,8 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Initial auth state:', session?.user ? 'Logged in' : 'Not logged in');
       } catch (error) {
         console.error('Error checking session:', error);
-        toast({
-          title: "Authentication Error",
+        toast("Authentication Error", {
           description: "Failed to check your session status. Please try again."
         });
       } finally {
@@ -77,8 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Google sign-in error:', error);
-        toast({
-          title: "Authentication Failed",
+        toast("Authentication Failed", {
           description: error.message
         });
         return;
@@ -86,16 +84,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data && data.url) {
         console.log('OAuth redirect URL generated:', data.url);
-        toast({
-          title: "Redirecting",
+        toast("Redirecting", {
           description: "Taking you to Google for authentication"
         });
         // Let the redirect happen automatically
       }
     } catch (error: any) {
       console.error('Exception during Google sign-in:', error);
-      toast({
-        title: "Authentication Error",
+      toast("Authentication Error", {
         description: error?.message || "Failed to sign in with Google. Please try again."
       });
     }
@@ -109,22 +105,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Sign out error:', error);
-        toast({
-          title: "Sign Out Error",
+        toast("Sign Out Error", {
           description: error.message
         });
         return;
       }
       
       setUser(null);
-      toast({
-        title: "Signed Out",
+      toast("Signed Out", {
         description: "You have been successfully signed out"
       });
     } catch (error: any) {
       console.error('Exception during sign out:', error);
-      toast({
-        title: "Sign Out Error",
+      toast("Sign Out Error", {
         description: error?.message || "An error occurred while signing out"
       });
     }

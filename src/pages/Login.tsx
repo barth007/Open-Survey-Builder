@@ -27,16 +27,14 @@ const Login = () => {
     try {
       setIsAuthenticating(true);
       console.log('Initiating Google login...');
-      toast({
-        title: "Authentication",
+      toast("Authentication", {
         description: "Starting Google authentication flow"
       });
       await signInWithGoogle();
       // Redirect will happen automatically after successful auth
     } catch (error) {
       console.error('Login handler error:', error);
-      toast({
-        title: "Login Failed",
+      toast("Login Failed", {
         description: "There was a problem signing in with Google."
       });
     } finally {

@@ -15,8 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   useEffect(() => {
     if (!isLoading && !user) {
       console.log('ProtectedRoute - Authentication required for path:', location.pathname);
-      toast({
-        title: "Authentication Required",
+      toast("Authentication Required", {
         description: "Please sign in to access this page"
       });
     }
