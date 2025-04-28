@@ -29,17 +29,16 @@ const TeamDetails = () => {
       const alreadyInvited = members.some((m) => m.email.toLowerCase() === inviteEmail.trim().toLowerCase());
       if (alreadyInvited) throw new Error('This user is already a member.');
 
-      const { error } = await supabase
+      await supabase
         .from('team_invitations')
         .insert([
           {
             team_id: id!,
             email: inviteEmail.trim(),
             role: inviteRole,
-          },
+            accepted: false // oppure non specificarlo perché è default
+          }
         ]);
-
-      if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Invitation sent');

@@ -34,10 +34,16 @@ const ManageTeam = () => {
         if (alreadyMember) continue;
 
         const { data: user, error: userError } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', email)
-          .maybeSingle();
+        .from('team_invitations')
+        .insert([
+          { 
+            team_id: id!,
+            email: inviteEmail.trim(),
+            role: inviteRole,
+            accepted: false // oppure non specificarlo perché è default
+          }
+        ]);
+      
 
         if (userError) throw userError;
         if (!user) continue; // Skip users not found

@@ -71,7 +71,7 @@ export function SurveySidebar() {
               ) : (
                 <>
                   {surveyData?.folders && surveyData.folders.length > 0 && (
-                    <SurveyFolders 
+                    <SurveyFolders
                       folders={surveyData.folders}
                       openFolders={openFolders}
                       onToggleFolder={toggleFolder}
@@ -84,7 +84,7 @@ export function SurveySidebar() {
                   )}
 
                   {surveyData?.unorganizedSurveys && (
-                    <UnorganizedSurveys 
+                    <UnorganizedSurveys
                       surveys={surveyData.unorganizedSurveys}
                       onCreateSurvey={handleCreateSurvey}
                       onDeleteSurvey={deleteSurvey}
@@ -97,16 +97,17 @@ export function SurveySidebar() {
           </SidebarContent>
         </div>
 
-        <div 
+        <div
           onClick={() => navigate('/profile')}
-          className="cursor-pointer hover:bg-sidebar-accent transition-colors w-full flex items-center justify-start p-3 border-t border-border"
+          className="cursor-pointer group hover:bg-sidebar-accent transition-colors w-full h-full flex items-center justify-start"
         >
           <UserProfile />
         </div>
+
       </Sidebar>
 
-      <CreateFolderDialog 
-        isOpen={openDialog === "createFolder"} 
+      <CreateFolderDialog
+        isOpen={openDialog === "createFolder"}
         onClose={() => setOpenDialog(null)}
         onCreateFolder={handleCreateFolder}
       />
