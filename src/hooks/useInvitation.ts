@@ -1,4 +1,3 @@
-// src/hooks/useInvitations.ts
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +14,12 @@ export function useInvitations(teamId: string) {
         .order('invited_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Cast the role as the correct type
+      return (data || []).map(item => ({
+        ...item,
+        role: item.role as 'owner' | 'editor' | 'viewer'
+      }));
     },
     enabled: !!teamId,
   });

@@ -1,6 +1,9 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { TeamMember } from '@/types/team';
 
 type MemberData = {
   user_id: string;
@@ -14,8 +17,9 @@ type MemberData = {
 
 export function useTeam(teamId?: string) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['team', teamId],
     enabled: !!user && !!teamId,
     queryFn: async () => {
@@ -52,4 +56,28 @@ export function useTeam(teamId?: string) {
       };
     },
   });
+
+  const createTeam = useMutation({
+    mutationFn: async (name: string) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase
+        .from('teams')
+        .insert([{ name, created_by: user.id }])
+        .select();
+      
+      if (error) throw error;
+      return data[0];
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teams'] });
+    }
+  });
+
+  return {
+    ...query,
+    team: query.data,
+    members: query.data?.members || [],
+    createTeam
+  };
 }

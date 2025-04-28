@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Survey } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +6,7 @@ import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSurveyTitle } from './survey/useSurveyTitle';
 import { useQuestionManagement } from './survey/useQuestionManagement';
+import { Json } from '@/lib/database.types';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
@@ -35,13 +35,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
     if (surveyData) {
       const newSurvey = {
         id: surveyData.id,
-        title: surveyData.title || surveyData.name || "Untitled Survey",
+        title: surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
-        questions: surveyData.questions || [],
-        isPublished: surveyData.isPublished || surveyData.is_published || false
+        questions: Array.isArray(surveyData.questions) ? surveyData.questions : [],
+        isPublished: surveyData.is_published || false
       };
       setSurvey(newSurvey);
-      setQuestions(newSurvey.questions);
+      setQuestions(Array.isArray(surveyData.questions) ? surveyData.questions : []);
     }
   }, [surveyData, setQuestions]);
 
@@ -50,7 +50,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
   };
 
   const togglePublish = async () => {
-    // Update local state first
     const newPublishState = !survey.isPublished;
     setSurvey(prev => ({
       ...prev,
@@ -58,16 +57,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }));
     
     try {
-      // Immediately save to database
       if (surveyId) {
         await updateSurvey({
           surveyId,
           updates: { 
-            isPublished: newPublishState
+            is_published: newPublishState
           }
         });
         
-        // Invalidate queries to reflect the changes
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
         
@@ -79,7 +76,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
         });
       }
     } catch (error) {
-      // Revert local state if the save failed
       setSurvey(prev => ({
         ...prev,
         isPublished: !newPublishState
@@ -102,8 +98,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
           updates: { 
             name: survey.title,
             description: survey.description,
-            questions: questions, // Use questions from useQuestionManagement
-            isPublished: survey.isPublished
+            questions: questions,
+            is_published: survey.isPublished
           }
         });
         
@@ -125,7 +121,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   };
 
-  // Create a new survey object that includes the latest questions
   const currentSurvey: Survey = {
     ...survey,
     questions

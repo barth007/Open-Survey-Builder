@@ -1,5 +1,3 @@
-// src/pages/ManageTeam.tsx
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTeam } from '@/hooks/useTeam';
@@ -33,26 +31,18 @@ const ManageTeam = () => {
         const alreadyMember = members.some((m) => m.email.toLowerCase() === email);
         if (alreadyMember) continue;
 
-        const { data: user, error: userError } = await supabase
-        .from('team_invitations')
-        .insert([
-          { 
-            team_id: id!,
-            email: inviteEmail.trim(),
-            role: inviteRole,
-            accepted: false // oppure non specificarlo perché è default
-          }
-        ]);
-      
-
-        if (userError) throw userError;
-        if (!user) continue; // Skip users not found
-
-        const { error: memberError } = await supabase
-          .from('team_members')
-          .insert([{ team_id: id, user_id: user.id, role: inviteRole }]);
-
-        if (memberError) throw memberError;
+        const { error: inviteError } = await supabase
+          .from('team_invitations')
+          .insert([
+            { 
+              team_id: id!,
+              email: email,
+              role: inviteRole,
+              accepted: false
+            }
+          ]);
+          
+        if (inviteError) throw inviteError;
       }
     },
     onSuccess: () => {

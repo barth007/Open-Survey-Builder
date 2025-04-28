@@ -1,5 +1,3 @@
-// src/pages/TeamDetails.tsx
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTeam } from '@/hooks/useTeam';
@@ -36,7 +34,7 @@ const TeamDetails = () => {
             team_id: id!,
             email: inviteEmail.trim(),
             role: inviteRole,
-            accepted: false // oppure non specificarlo perché è default
+            accepted: false
           }
         ]);
     },

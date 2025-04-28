@@ -1,4 +1,3 @@
-// src/pages/Profile.tsx
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +10,7 @@ import { toast } from 'sonner';
 
 const Profile = () => {
   const [user, setUser] = useState<any>(null);
-  const { teams, isLoading, error } = useTeams();
+  const { teams, isLoading, error } = useTeams(); // Now correctly destructures teams
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { Answer } from '@/types/survey';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,11 +26,11 @@ export function useSubmitResponse() {
       try {
         const { data, error } = await supabase
           .from('survey_responses')
-          .insert([{
+          .insert({
             survey_id: surveyId,
-            answers: answers,
+            answers: answers as any, // Cast answers to any to match Json type expectation
             submitted_at: new Date().toISOString()
-          }]);
+          });
 
         if (error) {
           console.error("Error saving response:", error);

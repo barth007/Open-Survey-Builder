@@ -9,8 +9,8 @@ import { Plus, Users } from 'lucide-react';
 
 export function Teams() {
   const navigate = useNavigate();
-  const { createTeam } = useTeam();
-  const { data: teams, isLoading } = useTeams();
+  const { createTeam } = useTeam(); // Now correctly includes createTeam
+  const { teams, isLoading } = useTeams(); // Now correctly includes teams
   
   const handleCreateTeam = async () => {
     try {
