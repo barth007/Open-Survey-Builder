@@ -89,10 +89,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Current hostname:', hostname);
       console.log('Current pathname:', pathname);
       
-      // Generate redirect URL
+      // Generate redirect URL - Importante! Deve essere un URL completo e deve essere registrato
+      // sia in Google Cloud Console che nella configurazione di Supabase
       const redirectUrl = `${currentUrl}/login`;
       console.log('Redirect URL for auth:', redirectUrl);
       
+      // Aggiorna l'URL di callback esplicitamente a supabase.co
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -100,7 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
+          },
+          skipBrowserRedirect: false // Assicura che il browser venga reindirizzato
         },
       });
 
@@ -117,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast("Redirecting", {
           description: "Taking you to Google for authentication"
         });
-        // Let the redirect happen automatically
+        // Redirect manuale invece di lasciare che Supabase lo faccia automaticamente
         window.location.href = data.url;
       }
     } catch (error: any) {
