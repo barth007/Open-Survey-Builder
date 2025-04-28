@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -8,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Survey, Question, Json } from '@/types/survey';
+import { Survey, Question } from '@/types/survey';
 
 const SurveyResponse = () => {
   const { id: surveyId } = useParams();
@@ -22,8 +21,23 @@ const SurveyResponse = () => {
   // Helper function to ensure we're working with an array of questions
   const getQuestions = (): Question[] => {
     if (!surveyData || !surveyData.questions) return [];
-    // Make sure we're working with an array
-    return Array.isArray(surveyData.questions) ? surveyData.questions : [];
+    
+    // Make sure we're working with an array and convert to Question type
+    const questions = Array.isArray(surveyData.questions) ? surveyData.questions : [];
+    
+    return questions.map((q: any) => ({
+      id: q.id || "",
+      type: q.type || "text",
+      text: q.text || "",
+      description: q.description,
+      isRequired: q.isRequired || false,
+      options: Array.isArray(q.options) ? q.options : [],
+      maxSelections: q.maxSelections,
+      figmaPrototypeUrl: q.figmaPrototypeUrl,
+      media: q.media,
+      conditionalLogic: q.conditionalLogic,
+      isVisible: q.isVisible !== undefined ? q.isVisible : true
+    }));
   };
 
   // Helper to get survey title
@@ -82,7 +96,8 @@ const SurveyResponse = () => {
     const { dependsOn, operator, value } = question.conditionalLogic;
     const answer = answers[dependsOn];
     
-    const dependentQuestion = getQuestions().find(q => q.id === dependsOn);
+    const questions = getQuestions();
+    const dependentQuestion = questions.find(q => q.id === dependsOn);
     if (!dependentQuestion) return true;
 
     switch (operator) {
