@@ -39,8 +39,7 @@ const Login = () => {
     try {
       setIsAuthenticating(true);
       console.log('Attempting Google login...');
-      toast({
-        title: "Authentication",
+      toast("Authentication", {
         description: "Redirecting to Google for authentication"
       });
       await signInWithGoogle();

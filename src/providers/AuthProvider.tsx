@@ -34,10 +34,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user || null);
       } catch (error) {
         console.error('Error getting session:', error);
-        toast({
-          title: "Authentication Error",
-          description: "Failed to check your session status. Please try again.",
-          variant: "destructive"
+        toast("Authentication Error", {
+          description: "Failed to check your session status. Please try again."
         });
       } finally {
         setIsLoading(false);
@@ -64,8 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const currentDomain = window.location.origin;
       console.log('Current domain for redirect:', currentDomain);
       
-      toast({
-        title: "Redirecting...",
+      toast("Redirecting...", {
         description: "Connecting to Google authentication service"
       });
       
@@ -82,10 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Google sign-in error:', error.message);
-        toast({
-          title: "Authentication Failed",
-          description: error.message,
-          variant: "destructive"
+        toast("Authentication Failed", {
+          description: error.message
         });
         throw error;
       }
@@ -96,10 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      toast({
-        title: "Authentication Error",
-        description: "Failed to sign in with Google. Please try again.",
-        variant: "destructive"
+      toast("Authentication Error", {
+        description: "Failed to sign in with Google. Please try again."
       });
       throw error;
     }
@@ -109,16 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast({
-          title: "Sign Out Error",
-          description: error.message,
-          variant: "destructive"
+        toast("Sign Out Error", {
+          description: error.message
         });
         throw error;
       }
       setUser(null);
-      toast({
-        title: "Signed Out",
+      toast("Signed Out", {
         description: "You have been successfully signed out"
       });
     } catch (error) {

@@ -21,9 +21,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       });
       
       if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to access this page",
+        toast("Authentication Required", {
+          description: "Please sign in to access this page"
         });
       }
     }
