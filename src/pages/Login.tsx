@@ -4,7 +4,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from '@/components/ui/sonner';
-import { Loader2, LogIn } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const { signInWithGoogle, user, isLoading } = useAuth();

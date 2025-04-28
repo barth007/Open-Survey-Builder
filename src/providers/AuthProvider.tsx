@@ -1,12 +1,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 
 type AuthContextType = {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -24,16 +25,27 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Initialize the auth state when the provider is mounted
   useEffect(() => {
-    // Get the initial session
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log('Auth state changed:', event, currentSession?.user?.email);
+      setSession(currentSession);
+      setUser(currentSession?.user || null);
+      setIsLoading(false);
+    });
+
+    // THEN check for existing session
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
-        console.log('Initial auth state:', session?.user ? 'Logged in' : 'Not logged in');
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        setUser(initialSession?.user || null);
+        console.log('Initial auth state:', initialSession?.user ? 'Logged in' : 'Not logged in');
       } catch (error) {
         console.error('Error checking session:', error);
         toast("Authentication Error", {
@@ -45,13 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-
-    // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      setUser(session?.user || null);
-      setIsLoading(false);
-    });
 
     // Cleanup subscription on unmount
     return () => {
@@ -67,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/login',
+          redirectTo: `${window.location.origin}/login`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -89,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "Taking you to Google for authentication"
         });
         // Let the redirect happen automatically
+        window.location.href = data.url;
       }
     } catch (error: any) {
       console.error('Exception during Google sign-in:', error);
@@ -113,6 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       setUser(null);
+      setSession(null);
+      navigate('/login');
       toast("Signed Out", {
         description: "You have been successfully signed out"
       });
@@ -125,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
