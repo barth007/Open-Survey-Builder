@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -23,39 +22,58 @@ export const useAuth = () => {
   return context;
 };
 
+const isDevelopment = () => {
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || !hostname.endsWith('.lovableproject.com');
+};
+
+const mockSession = {
+  user: {
+    id: 'dev-user-id',
+    email: 'dev@example.com',
+    user_metadata: {
+      full_name: 'Development User',
+      avatar_url: 'https://api.dicebear.com/7.x/avatars/svg?seed=dev'
+    }
+  } as User,
+  access_token: 'mock-token',
+  refresh_token: 'mock-refresh-token'
+} as Session;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Add debug information about current URL
-  useEffect(() => {
-    console.log('Current location in AuthProvider:', window.location.href);
-  }, []);
-
   // Initialize the auth state when the provider is mounted
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      console.log('Auth state changed:', event, currentSession?.user?.email);
-      console.log('Current URL during auth change:', window.location.href);
-      setSession(currentSession);
-      setUser(currentSession?.user || null);
-      setIsLoading(false);
-    });
-
-    // THEN check for existing session
     const initializeAuth = async () => {
       try {
-        console.log('Checking session at URL:', window.location.href);
+        console.log('Initializing auth in environment:', isDevelopment() ? 'development' : 'production');
+        
+        if (isDevelopment()) {
+          console.log('Using mock session for development');
+          setSession(mockSession);
+          setUser(mockSession.user);
+          setIsLoading(false);
+          return;
+        }
+
+        // Set up auth state listener for production
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+          console.log('Auth state changed:', event, currentSession?.user?.email);
+          setSession(currentSession);
+          setUser(currentSession?.user || null);
+          setIsLoading(false);
+        });
+
+        // Check for existing session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         setSession(initialSession);
         setUser(initialSession?.user || null);
-        console.log('Initial auth state:', initialSession?.user ? 'Logged in' : 'Not logged in');
-        if (initialSession?.user) {
-          console.log('User authenticated:', initialSession.user.email);
-        }
+        
+        return () => subscription.unsubscribe();
       } catch (error) {
         console.error('Error checking session:', error);
         toast("Authentication Error", {
@@ -67,15 +85,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-
-    // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   // Google sign-in function
   const signInWithGoogle = async () => {
+    if (isDevelopment()) {
+      console.log('Development environment detected, using mock session');
+      setSession(mockSession);
+      setUser(mockSession.user);
+      navigate('/');
+      toast("Development Mode", {
+        description: "Using mock authentication for development"
+      });
+      return;
+    }
+
     try {
       console.log('Starting Google sign-in flow...');
       
@@ -135,6 +159,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sign out function
   const signOut = async () => {
+    if (isDevelopment()) {
+      console.log('Development environment detected, clearing mock session');
+      setSession(null);
+      setUser(null);
+      navigate('/login');
+      toast("Signed Out", {
+        description: "Development session cleared"
+      });
+      return;
+    }
+
     try {
       console.log('Signing out...');
       const { error } = await supabase.auth.signOut();
