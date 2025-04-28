@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamMember } from '@/types/team';
 import { toast } from 'sonner';
+import { useAuth } from '@/providers/AuthProvider';
 
 export function useTeam(teamId?: string) {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const { data: team, isLoading: isLoadingTeam } = useQuery({
     queryKey: ['team', teamId],
@@ -42,13 +44,30 @@ export function useTeam(teamId?: string) {
 
   const createTeam = useMutation({
     mutationFn: async (name: string) => {
+      if (!user) throw new Error('User must be logged in to create a team');
+      
       const { data, error } = await supabase
         .from('teams')
-        .insert([{ name }])
+        .insert([{ 
+          name, 
+          created_by: user.id 
+        }])
         .select()
         .single();
 
       if (error) throw error;
+      
+      // After creating the team, add the current user as an owner
+      const { error: memberError } = await supabase
+        .from('team_members')
+        .insert([{
+          team_id: data.id,
+          user_id: user.id,
+          role: 'owner'
+        }]);
+        
+      if (memberError) throw memberError;
+      
       return data;
     },
     onSuccess: () => {
