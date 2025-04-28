@@ -29,11 +29,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Add debug information about current URL
+  useEffect(() => {
+    console.log('Current location in AuthProvider:', window.location.href);
+  }, []);
+
   // Initialize the auth state when the provider is mounted
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.log('Auth state changed:', event, currentSession?.user?.email);
+      console.log('Current URL during auth change:', window.location.href);
       setSession(currentSession);
       setUser(currentSession?.user || null);
       setIsLoading(false);
@@ -42,10 +48,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // THEN check for existing session
     const initializeAuth = async () => {
       try {
+        console.log('Checking session at URL:', window.location.href);
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         setSession(initialSession);
         setUser(initialSession?.user || null);
         console.log('Initial auth state:', initialSession?.user ? 'Logged in' : 'Not logged in');
+        if (initialSession?.user) {
+          console.log('User authenticated:', initialSession.user.email);
+        }
       } catch (error) {
         console.error('Error checking session:', error);
         toast("Authentication Error", {
@@ -68,15 +78,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       console.log('Starting Google sign-in flow...');
+      console.log('Current full URL:', window.location.href);
       
-      // Use current URL for redirection to handle both development and production environments
+      // Get details about our environment
       const currentUrl = window.location.origin;
-      console.log('Current URL for redirect:', currentUrl);
+      const hostname = window.location.hostname;
+      const pathname = window.location.pathname;
+      
+      console.log('Current origin:', currentUrl);
+      console.log('Current hostname:', hostname);
+      console.log('Current pathname:', pathname);
+      
+      // Generate redirect URL
+      const redirectUrl = `${currentUrl}/login`;
+      console.log('Redirect URL for auth:', redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${currentUrl}/login`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

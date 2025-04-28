@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -11,6 +12,19 @@ const Login = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Debug current URL and search parameters
+  useEffect(() => {
+    console.log('Login page loaded at:', window.location.href);
+    console.log('URL search params:', window.location.search);
+    console.log('URL hash:', window.location.hash);
+    
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    for (const [key, value] of urlParams.entries()) {
+      console.log(`URL param: ${key} = ${value}`);
+    }
+  }, [location]);
   
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
