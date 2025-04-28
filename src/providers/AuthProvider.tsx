@@ -31,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session:', session); // Aggiungi questo log
         setUser(session?.user || null);
       } catch (error) {
         console.error('Error getting session:', error);
@@ -40,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } finally {
         setIsLoading(false);
       }
-    };
+   };   
 
     getSession();
 
@@ -108,6 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
+
+  console.log('User in AuthContext:', user);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signOut }}>
