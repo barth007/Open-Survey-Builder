@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -8,7 +7,7 @@ import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const { signInWithGoogle, user, isLoading, isDevelopment } = useAuth();
+  const { signInWithGoogle, user, isLoading } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,19 +28,13 @@ const Login = () => {
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
   
-  // If in development mode or already logged in, redirect
+  // If already logged in, redirect
   useEffect(() => {
-    if (isDevelopment()) {
-      console.log('Development environment detected, redirecting to main content');
-      navigate('/', { replace: true });
-      return;
-    }
-    
     if (user && !isLoading) {
       console.log('User already authenticated, redirecting to:', from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, navigate, from, isDevelopment]);
+  }, [user, isLoading, navigate, from]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -65,13 +58,13 @@ const Login = () => {
     }
   };
 
-  // Don't render login form if in development mode or user is already logged in and being redirected
-  if (isDevelopment() || (user && !isLoading)) {
+  // Only show loading state while checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
-          <p className="text-muted-foreground">Redirecting you...</p>
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     );

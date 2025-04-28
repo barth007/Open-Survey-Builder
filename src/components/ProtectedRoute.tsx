@@ -9,17 +9,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading, isDevelopment } = useAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
   
   useEffect(() => {
-    if (!isLoading && !user && !isDevelopment()) {
+    if (!isLoading && !user) {
       console.log('ProtectedRoute - Authentication required for path:', location.pathname);
       toast("Authentication Required", {
         description: "Please sign in to access this page"
       });
     }
-  }, [user, isLoading, location.pathname, isDevelopment]);
+  }, [user, isLoading, location.pathname]);
 
   if (isLoading) {
     return (
@@ -32,8 +32,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Always allow access in development mode, or if the user is authenticated
-  if (isDevelopment() || user) {
+  if (user) {
     return <>{children}</>;
   }
 
