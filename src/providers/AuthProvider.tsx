@@ -1,120 +1,72 @@
+import { supabase } from '@/lib/supabase-client'; // Ensure supabase is initialized
+import { useAuth } from '@/providers/AuthProvider';
+import { Database } from '@/types/database'; // Import the Database type
 
-// src/providers/AuthProvider.tsx
+const upsertUserProfile = async (userId: string, avatarUrl?: string, fullName?: string, bio?: string, website?: string) => {
+  const { data, error } = await supabase
+    .from<Database['public']['Tables']['profiles']['Insert']>('profiles') // Specify the correct table type
+    .upsert([
+      {
+        id: userId, // Use the user ID from auth
+        avatar_url: avatarUrl || null, // Profile photo URL
+        full_name: fullName || null, // Full name
+        bio: bio || null, // Bio
+        website: website || null, // Website
+      },
+    ]);
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase-client';
-import type { User } from '@supabase/supabase-js';
-import { toast } from '@/components/ui/sonner';
-
-type AuthContextType = {
-  user: User | null;
-  isLoading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (error) {
+    console.error('Error inserting/updating profile:', error);
+    throw new Error(error.message);
   }
-  return context;
+
+  return data;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const getSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Session:', session); // Aggiungi questo log
-        setUser(session?.user || null);
-      } catch (error) {
-        console.error('Error getting session:', error);
-        toast("Authentication Error", {
-          description: "Failed to check your session status. Please try again."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-   };   
-
-    getSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      setUser(session?.user || null);
-      setIsLoading(false);
+// Modify the signInWithGoogle function to handle profile upsert
+const signInWithGoogle = async () => {
+  try {
+    const redirectTo = 'https://your-redirect-url.com/';
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const signInWithGoogle = async () => {
-    try {
-      const redirectTo = 'https://93d9f5a0-8bb1-44d2-b2e2-0fc1b20d521f.lovableproject.com/';
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        },
-      });
-
-      if (error) {
-        console.error('Google sign-in error:', error.message);
-        toast("Authentication Failed", {
-          description: error.message
-        });
-        throw error;
-      }
-
-      if (data && data.url) {
-        console.log('Redirect URL:', data.url);
-      }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      toast("Authentication Error", {
-        description: "Failed to sign in with Google. Please try again."
+    if (error) {
+      console.error('Google sign-in error:', error.message);
+      toast('Authentication Failed', {
+        description: error.message,
       });
       throw error;
     }
-  };
 
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast("Sign Out Error", {
-          description: error.message
-        });
-        throw error;
-      }
-      setUser(null);
-      toast("Signed Out", {
-        description: "You have been successfully signed out."
-      });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
+    if (data && data.url) {
+      console.log('Redirect URL:', data.url);
     }
-  };
 
-  console.log('User in AuthContext:', user);
-
-  return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    // After sign-in, retrieve user data and upsert the profile
+    const user = supabase.auth.user();
+    if (user) {
+      const { user_metadata } = user;
+      await upsertUserProfile(
+        user.id, 
+        user_metadata?.avatar_url, 
+        user_metadata?.full_name,
+        user_metadata?.bio,
+        user_metadata?.website
+      );
+    }
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    toast('Authentication Error', {
+      description: 'Failed to sign in with Google. Please try again.',
+    });
+    throw error;
+  }
 };
