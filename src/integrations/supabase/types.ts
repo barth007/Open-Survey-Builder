@@ -27,6 +27,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       survey_responses: {
         Row: {
           answers: Json
