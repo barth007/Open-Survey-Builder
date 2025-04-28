@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import SurveyResponse from "./pages/SurveyResponse";
+import { Teams } from "@/components/teams/Teams";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +46,11 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="/survey-response/:id" element={<SurveyResponse />} />
+                  <Route path="/teams" element={
+                    <ProtectedRoute>
+                      <Teams />
+                    </ProtectedRoute>
+                  } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
