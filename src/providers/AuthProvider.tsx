@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import type { User } from '@supabase/supabase-js';
@@ -27,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check active session on load
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -44,7 +42,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getSession();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event);
       setUser(session?.user || null);
@@ -58,18 +55,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
-      // Get the current domain dynamically
-      const currentDomain = window.location.origin;
-      console.log('Current domain for redirect:', currentDomain);
-      
-      toast("Redirecting...", {
-        description: "Connecting to Google authentication service"
-      });
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: currentDomain,
+          redirectTo: undefined,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -85,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      // Log the redirect URL for debugging
       if (data && data.url) {
         console.log('Redirect URL:', data.url);
       }
