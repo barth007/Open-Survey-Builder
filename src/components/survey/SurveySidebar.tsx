@@ -98,12 +98,14 @@ export function SurveySidebar() {
         </div>
 
         <div
-          onClick={() => navigate('/profile')}
+          onClick={() => {
+            console.log('Navigating to Profile...');
+            navigate('/profile');
+          }}
           className="cursor-pointer group hover:bg-sidebar-accent transition-colors w-full h-full flex items-center justify-start"
         >
           <UserProfile />
         </div>
-
       </Sidebar>
 
       <CreateFolderDialog
