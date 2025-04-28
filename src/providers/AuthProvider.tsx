@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import type { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/sonner';
 
 type AuthContextType = {
   user: User | null;
@@ -32,6 +34,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user || null);
       } catch (error) {
         console.error('Error getting session:', error);
+        toast({
+          title: "Authentication Error",
+          description: "Failed to check your session status. Please try again.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -57,19 +64,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const currentDomain = window.location.origin;
       console.log('Current domain for redirect:', currentDomain);
       
-      const { error } = await supabase.auth.signInWithOAuth({
+      toast({
+        title: "Redirecting...",
+        description: "Connecting to Google authentication service"
+      });
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: currentDomain,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
 
       if (error) {
         console.error('Google sign-in error:', error.message);
+        toast({
+          title: "Authentication Failed",
+          description: error.message,
+          variant: "destructive"
+        });
         throw error;
+      }
+      
+      // Log the redirect URL for debugging
+      if (data && data.url) {
+        console.log('Redirect URL:', data.url);
       }
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      toast({
+        title: "Authentication Error",
+        description: "Failed to sign in with Google. Please try again.",
+        variant: "destructive"
+      });
       throw error;
     }
   };
@@ -78,9 +109,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
+        toast({
+          title: "Sign Out Error",
+          description: error.message,
+          variant: "destructive"
+        });
         throw error;
       }
       setUser(null);
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out"
+      });
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;

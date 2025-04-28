@@ -1,6 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { toast } from '@/components/ui/sonner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,8 +16,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     if (!isLoading) {
       console.log('ProtectedRoute - Auth state:', { 
         isAuthenticated: !!user,
+        userEmail: user?.email,
         currentPath: location.pathname + location.search,
       });
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to access this page",
+        });
+      }
     }
   }, [user, isLoading, location.pathname, location.search]);
 
@@ -28,6 +38,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
+    console.log('ProtectedRoute - Redirecting to login from:', location.pathname);
     return (
       <Navigate
         to="/login"
