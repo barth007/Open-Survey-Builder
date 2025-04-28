@@ -69,10 +69,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Starting Google sign-in flow...');
       
+      // Use current URL for redirection to handle both development and production environments
+      const currentUrl = window.location.origin;
+      console.log('Current URL for redirect:', currentUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/login`,
+          redirectTo: `${currentUrl}/login`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
