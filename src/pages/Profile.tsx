@@ -1,86 +1,84 @@
-
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { useAuth } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useTeams } from '@/hooks/useTeams';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const Profile = () => {
-  const [user, setUser] = useState<any>(null);
-  const { teams, isLoading, error } = useTeams(); // Now correctly destructures teams
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { data: teams, isLoading: loadingTeams, error: teamsError } = useTeams();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        toast.error('Failed to load user');
-        return;
-      }
-      setUser(data.user);
-    };
-
-    fetchUser();
-  }, []);
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error('Failed to sign out');
-    } else {
+    try {
+      await signOut();
       navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
-  if (!user) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center gap-4">
+    <div className="p-8 max-w-4xl mx-auto space-y-10">
+      {/* User Profile Section */}
+      <div className="flex items-center gap-6">
         <Avatar className="h-16 w-16">
           <AvatarImage src={user.user_metadata?.avatar_url} />
-          <AvatarFallback>{user.email[0]?.toUpperCase() || 'U'}</AvatarFallback>
+          <AvatarFallback>{user.user_metadata?.full_name?.[0] || 'U'}</AvatarFallback>
         </Avatar>
         <div>
           <p className="text-xl font-semibold">{user.user_metadata?.full_name || user.email}</p>
           <p className="text-muted-foreground text-sm">{user.email}</p>
         </div>
+        <Button variant="destructive" onClick={handleSignOut}>
+          Sign Out
+        </Button>
       </div>
 
-      <Button variant="destructive" onClick={handleSignOut}>
-        Sign Out
-      </Button>
+      {/* Teams Section */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Your Teams</h2>
+          <Button size="sm" onClick={() => navigate('/teams/create')}>
+            <Plus className="h-4 w-4 mr-1" />
+            Create Team
+          </Button>
+        </div>
 
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Your Teams</h2>
-
-        {isLoading ? (
+        {loadingTeams ? (
           <p>Loading teams...</p>
-        ) : error ? (
+        ) : teamsError ? (
           <p className="text-destructive">Error loading teams</p>
-        ) : teams.length === 0 ? (
-          <p className="text-muted-foreground">You are not part of any teams yet.</p>
+        ) : (teams?.length ?? 0) === 0 ? (
+          <p className="text-muted-foreground">You are not a member of any teams yet.</p>
         ) : (
-          <div className="grid gap-4">
+          <div className="space-y-4">
             {teams.map((team) => (
-              <Card key={team.id} className="p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-semibold">{team.name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{team.role}</p>
+              <div
+                key={team.id}
+                onClick={() => navigate(`/teams/${team.id}`)}
+                className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">{team.name}</p>
+                    <p className="text-sm text-muted-foreground">Role: {team.role}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/teams/${team.id}`)}>
+                    Manage
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(`/teams/${team.id}`)}
-                >
-                  Manage
-                </Button>
-              </Card>
+              </div>
             ))}
           </div>
         )}

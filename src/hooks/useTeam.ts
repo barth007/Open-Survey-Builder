@@ -1,9 +1,7 @@
-
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { TeamMember } from '@/types/team';
+import { TeamMember, TeamInvitation } from '@/types/team';
 
 type MemberData = {
   user_id: string;
@@ -25,6 +23,7 @@ export function useTeam(teamId?: string) {
     queryFn: async () => {
       if (!user || !teamId) return null;
 
+      // Carica team info
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .select('id, name')
@@ -33,6 +32,7 @@ export function useTeam(teamId?: string) {
 
       if (teamError) throw teamError;
 
+      // Carica membri
       const { data: membersData, error: membersError } = await supabase
         .from('team_members')
         .select('user_id, role, users ( email, full_name, avatar_url )')
@@ -41,18 +41,33 @@ export function useTeam(teamId?: string) {
 
       if (membersError) throw membersError;
 
-      const members = (membersData || []).map((member) => ({
+      const members: TeamMember[] = (membersData || []).map((member) => ({
         id: member.user_id,
-        email: member.users ? member.users.email : '',
-        full_name: member.users ? member.users.full_name : '',
-        avatar_url: member.users ? member.users.avatar_url : '',
+        team_id: teamId,
+        user_id: member.user_id,
         role: member.role,
+        joined_at: '', // Non disponibile direttamente, puoi aggiungerlo se lo vuoi
+        email: member.users?.email || '',
+        full_name: member.users?.full_name || '',
+        avatar_url: member.users?.avatar_url || '',
       }));
+
+      // Carica inviti
+      const { data: invitationsData, error: invitationsError } = await supabase
+        .from('team_invitations')
+        .select('id, team_id, email, role, invited_at, accepted')
+        .eq('team_id', teamId)
+        .returns<TeamInvitation[]>();
+
+      if (invitationsError) throw invitationsError;
+
+      const invitations = invitationsData || [];
 
       return {
         id: teamData.id,
         name: teamData.name,
         members,
+        invitations,
       };
     },
   });
@@ -78,6 +93,7 @@ export function useTeam(teamId?: string) {
     ...query,
     team: query.data,
     members: query.data?.members || [],
+    invitations: query.data?.invitations || [],
     createTeam
   };
 }
