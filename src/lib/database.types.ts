@@ -15,16 +15,19 @@ export interface Database {
           id: string
           name: string
           created_at: string
+          user_id: string
         }
         Insert: {
           id?: string
           name: string
           created_at?: string
+          user_id: string
         }
         Update: {
           id?: string
           name?: string
           created_at?: string
+          user_id?: string
         }
       }
       surveys: {
@@ -36,6 +39,7 @@ export interface Database {
           description: string
           questions: Json
           is_published: boolean
+          user_id: string
         }
         Insert: {
           id?: string
@@ -45,6 +49,7 @@ export interface Database {
           description?: string
           questions?: Json
           is_published?: boolean
+          user_id: string
         }
         Update: {
           id?: string
@@ -54,6 +59,7 @@ export interface Database {
           description?: string
           questions?: Json
           is_published?: boolean
+          user_id?: string
         }
       }
       survey_responses: {
@@ -74,6 +80,66 @@ export interface Database {
           survey_id?: string
           answers?: Json
           submitted_at?: string
+        }
+      }
+      team_members: {
+        Row: {
+          id: string
+          team_id: string
+          user_id: string
+          role: 'owner' | 'editor' | 'viewer'
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          user_id: string
+          role?: 'owner' | 'editor' | 'viewer'
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          user_id?: string
+          role?: 'owner' | 'editor' | 'viewer'
+          joined_at?: string
+        }
+      }
+      teams: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+          created_by: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+          created_by: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+          created_by?: string
+        }
+      }
+      team_surveys: {
+        Row: {
+          id: string
+          team_id: string
+          survey_id: string
+        }
+        Insert: {
+          id?: string
+          team_id: string
+          survey_id: string
+        }
+        Update: {
+          id?: string
+          team_id?: string
+          survey_id?: string
         }
       }
     }

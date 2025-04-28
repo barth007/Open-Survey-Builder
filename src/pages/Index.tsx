@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,8 @@ import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import UserProfile from '@/components/UserProfile';
+import { useActiveUsers } from '@/hooks/useActiveUsers';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
@@ -19,6 +19,8 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
+  const { activeUsers } = useActiveUsers(surveyId);
   
   const {
     survey,
@@ -34,14 +36,7 @@ const Index = () => {
     error
   } = useSurveyState(surveyId);
 
-  // Autosave timer
   const [pendingChanges, setPendingChanges] = useState(false);
-  
-  // Demo team members (in a real app, this would come from a backend)
-  const activeTeamMembers = [
-    { id: '1', name: 'Anna Smith', initials: 'AS' },
-    { id: '2', name: 'John Doe', initials: 'JD' }
-  ];
 
   useEffect(() => {
     if (survey.title) {
@@ -49,7 +44,6 @@ const Index = () => {
     }
   }, [survey.title]);
 
-  // Autosave effect
   useEffect(() => {
     let saveTimer: ReturnType<typeof setTimeout>;
     
@@ -159,14 +153,9 @@ const Index = () => {
               <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
             )}
             
-            {/* Team members avatars */}
             <div className="flex -space-x-2 mr-2">
-              {activeTeamMembers.map(member => (
-                <Avatar key={member.id} className="border-2 border-background h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {member.initials}
-                  </AvatarFallback>
-                </Avatar>
+              {activeUsers.map(user => (
+                <UserProfile key={user.id} compact />
               ))}
             </div>
             
@@ -186,12 +175,7 @@ const Index = () => {
                       {survey.isPublished ? "Unpublish" : "Publish"}
                     </Button>
                     <Button
-                      className={`
-                        ${survey.isPublished 
-                          ? "bg-transparent text-gray-500 hover:bg-gray-100" 
-                          : "bg-transparent text-gray-500 hover:bg-gray-100"}
-                        rounded-l-none pl-2
-                      `}
+                      className="bg-transparent text-gray-500 hover:bg-gray-100 rounded-l-none pl-2"
                       onClick={handleCopyLink}
                     >
                       <Link2 size={18} />

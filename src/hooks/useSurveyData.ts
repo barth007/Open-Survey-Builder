@@ -3,9 +3,11 @@ import { useQuerySurveys } from './survey/useQuerySurveys';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useMutateFolder } from './survey/useMutateFolder';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/providers/AuthProvider';
 
 export function useSurveyData() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { data: surveyData, isLoading, error: queryError } = useQuerySurveys();
   const { createSurvey, deleteSurvey, updateSurvey } = useMutateSurvey();
   const { createFolder, deleteFolder } = useMutateFolder();
@@ -68,6 +70,7 @@ export function useSurveyData() {
     createSurvey,
     deleteSurvey,
     deleteFolder,
-    updateSurveyOrder
+    updateSurveyOrder,
+    userId: user?.id
   };
 }
