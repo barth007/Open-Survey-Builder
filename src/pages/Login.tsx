@@ -1,19 +1,16 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from '@/hooks/use-toast';
 import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogIn } from 'lucide-react';
 
 const Login = () => {
   const { signInWithGoogle, user, isLoading } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast: hookToast } = useToast();
   
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
@@ -21,38 +18,32 @@ const Login = () => {
   // If already logged in, redirect
   useEffect(() => {
     if (user && !isLoading) {
-      console.log('Login - User already authenticated, redirecting to:', from);
+      console.log('User already authenticated, redirecting to:', from);
       navigate(from, { replace: true });
     }
   }, [user, isLoading, navigate, from]);
 
-  // Display current environment info for debugging
-  useEffect(() => {
-    console.log('Login environment:', {
-      origin: window.location.origin,
-      href: window.location.href,
-      from: from
-    });
-  }, [from]);
-
   const handleGoogleLogin = async () => {
     try {
       setIsAuthenticating(true);
-      console.log('Attempting Google login...');
-      toast("Authentication", {
-        description: "Redirecting to Google for authentication"
+      console.log('Initiating Google login...');
+      toast({
+        title: "Authentication",
+        description: "Starting Google authentication flow"
       });
       await signInWithGoogle();
-      // The actual navigation happens after OAuth redirect and re-render
+      // Redirect will happen automatically after successful auth
     } catch (error) {
-      console.error('Login error:', error);
-      hookToast({
+      console.error('Login handler error:', error);
+      toast({
         title: "Login Failed",
-        description: "There was a problem signing in with Google.",
-        variant: "destructive"
+        description: "There was a problem signing in with Google."
       });
     } finally {
-      setIsAuthenticating(false);
+      // Keep button disabled until redirect happens
+      setTimeout(() => {
+        setIsAuthenticating(false);
+      }, 3000);
     }
   };
 
@@ -60,28 +51,31 @@ const Login = () => {
   if (user && !isLoading) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+          <p className="text-muted-foreground">Redirecting you...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Sign In</CardTitle>
+          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
           <CardDescription className="text-center">
             Sign in to create and manage your surveys
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Button
             className="w-full flex items-center justify-center gap-2"
             onClick={handleGoogleLogin}
             disabled={isAuthenticating}
           >
             {isAuthenticating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <svg width="20" height="20" viewBox="0 0 24 24">
                 <path
@@ -104,6 +98,15 @@ const Login = () => {
             )}
             {isAuthenticating ? "Signing in..." : "Sign in with Google"}
           </Button>
+          
+          <div className="relative flex items-center justify-center mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-muted"></div>
+            </div>
+            <div className="relative bg-background px-4 text-xs uppercase text-muted-foreground">
+              Secure Authentication
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="text-center text-sm text-gray-500 justify-center">
           By signing in, you agree to our Terms of Service and Privacy Policy

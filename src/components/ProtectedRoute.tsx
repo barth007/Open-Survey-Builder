@@ -13,25 +13,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const location = useLocation();
   
   useEffect(() => {
-    if (!isLoading) {
-      console.log('ProtectedRoute - Auth state:', { 
-        isAuthenticated: !!user,
-        userEmail: user?.email,
-        currentPath: location.pathname + location.search,
+    if (!isLoading && !user) {
+      console.log('ProtectedRoute - Authentication required for path:', location.pathname);
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access this page"
       });
-      
-      if (!user) {
-        toast("Authentication Required", {
-          description: "Please sign in to access this page"
-        });
-      }
     }
-  }, [user, isLoading, location.pathname, location.search]);
+  }, [user, isLoading, location.pathname]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+          <p className="text-sm text-muted-foreground">Verifying your session...</p>
+        </div>
       </div>
     );
   }

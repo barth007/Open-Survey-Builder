@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import type { User } from '@supabase/supabase-js';
@@ -25,14 +26,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize the auth state when the provider is mounted
   useEffect(() => {
-    const getSession = async () => {
+    // Get the initial session
+    const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user || null);
+        console.log('Initial auth state:', session?.user ? 'Logged in' : 'Not logged in');
       } catch (error) {
-        console.error('Error getting session:', error);
-        toast("Authentication Error", {
+        console.error('Error checking session:', error);
+        toast({
+          title: "Authentication Error",
           description: "Failed to check your session status. Please try again."
         });
       } finally {
@@ -40,70 +45,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    getSession();
+    initializeAuth();
 
+    // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, session?.user?.email);
       setUser(session?.user || null);
       setIsLoading(false);
     });
 
+    // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
+  // Google sign-in function
   const signInWithGoogle = async () => {
-  try {
-    const redirectTo = 'https://93d9f5a0-8bb1-44d2-b2e2-0fc1b20d521f.lovableproject.com/';
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
-      },
-    });
-
-    if (error) {
-      console.error('Google sign-in error:', error.message);
-      toast("Authentication Failed", {
-        description: error.message
-      });
-      throw error;
-    }
-
-    if (data && data.url) {
-      console.log('Redirect URL:', data.url);
-    }
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
-    toast("Authentication Error", {
-      description: "Failed to sign in with Google. Please try again."
-    });
-    throw error;
-  }
-};
-
-  const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      console.log('Starting Google sign-in flow...');
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
+        },
+      });
+
       if (error) {
-        toast("Sign Out Error", {
+        console.error('Google sign-in error:', error);
+        toast({
+          title: "Authentication Failed",
           description: error.message
         });
-        throw error;
+        return;
       }
+
+      if (data && data.url) {
+        console.log('OAuth redirect URL generated:', data.url);
+        toast({
+          title: "Redirecting",
+          description: "Taking you to Google for authentication"
+        });
+        // Let the redirect happen automatically
+      }
+    } catch (error: any) {
+      console.error('Exception during Google sign-in:', error);
+      toast({
+        title: "Authentication Error",
+        description: error?.message || "Failed to sign in with Google. Please try again."
+      });
+    }
+  };
+
+  // Sign out function
+  const signOut = async () => {
+    try {
+      console.log('Signing out...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        toast({
+          title: "Sign Out Error",
+          description: error.message
+        });
+        return;
+      }
+      
       setUser(null);
-      toast("Signed Out", {
+      toast({
+        title: "Signed Out",
         description: "You have been successfully signed out"
       });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Exception during sign out:', error);
+      toast({
+        title: "Sign Out Error",
+        description: error?.message || "An error occurred while signing out"
+      });
     }
   };
 
