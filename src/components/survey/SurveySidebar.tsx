@@ -4,8 +4,6 @@ import { Sidebar, SidebarGroup } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
 import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
 import { useSurveyData } from "@/hooks/useSurveyData";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
@@ -18,14 +16,12 @@ export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
-  // If not authenticated, don't show the sidebar
   if (!user) {
     return null;
   }
 
   const handleCreateSurvey = async () => {
     try {
-      // Passing a default name for the survey
       await createSurvey({ name: "Untitled Survey" });
     } catch (error) {
       console.error("Error creating survey:", error);
@@ -57,25 +53,8 @@ export function SurveySidebar() {
     <>
       <Sidebar className="border-r border-border">
         <SidebarGroup>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold tracking-tight">Surveys</h2>
-            <div className="flex gap-1">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setOpenDialog("createFolder")}
-                title="Create Folder"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                onClick={handleCreateSurvey}
-                title="Create Survey"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
           </div>
           
           {isLoading ? (
@@ -113,8 +92,12 @@ export function SurveySidebar() {
           )}
         </SidebarGroup>
         
-        {/* User profile section */}
-        <UserProfile />
+        <div 
+          onClick={() => navigate('/profile')} 
+          className="cursor-pointer group hover:bg-sidebar-accent transition-colors"
+        >
+          <UserProfile />
+        </div>
       </Sidebar>
 
       <CreateFolderDialog 

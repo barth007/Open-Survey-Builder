@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfileProps {
@@ -16,7 +16,6 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   if (!user) return null;
 
-  // Function to get initials from name or email
   const getInitials = () => {
     if (user.user_metadata?.full_name) {
       return user.user_metadata.full_name
@@ -29,7 +28,8 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     return user.email?.substring(0, 2).toUpperCase() || 'U';
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking sign out
     try {
       await signOut();
       toast({
@@ -57,7 +57,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   }
 
   return (
-    <div className="p-4 mt-auto border-t">
+    <div className="p-4 mt-auto border-t group-hover:bg-sidebar-accent transition-colors">
       <div className="flex items-center gap-3">
         <Avatar>
           <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -73,6 +73,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
             {user.email}
           </p>
         </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         <Button variant="ghost" size="icon" onClick={handleSignOut}>
           <LogOut className="h-4 w-4" />
         </Button>

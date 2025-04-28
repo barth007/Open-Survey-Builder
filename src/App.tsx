@@ -51,6 +51,14 @@ const App = () => (
                       <Teams />
                     </ProtectedRoute>
                   } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <div className="p-8">
+                        <h1 className="text-2xl font-bold mb-4">Profile Settings</h1>
+                        <p className="text-muted-foreground">Profile settings coming soon...</p>
+                      </div>
+                    </ProtectedRoute>
+                  } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
