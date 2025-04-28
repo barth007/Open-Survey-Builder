@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Save, Link2 } from "lucide-react";
+import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -10,13 +11,13 @@ import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [hasChanges, setHasChanges] = useState(false);
   const { toast } = useToast();
   
   const {
@@ -33,26 +34,46 @@ const Index = () => {
     error
   } = useSurveyState(surveyId);
 
+  // Autosave timer
+  const [pendingChanges, setPendingChanges] = useState(false);
+  
+  // Demo team members (in a real app, this would come from a backend)
+  const activeTeamMembers = [
+    { id: '1', name: 'Anna Smith', initials: 'AS' },
+    { id: '2', name: 'John Doe', initials: 'JD' }
+  ];
+
   useEffect(() => {
     if (survey.title) {
       document.title = survey.title;
     }
   }, [survey.title]);
 
+  // Autosave effect
+  useEffect(() => {
+    let saveTimer: ReturnType<typeof setTimeout>;
+    
+    if (pendingChanges) {
+      saveTimer = setTimeout(() => {
+        handleSave();
+        setPendingChanges(false);
+      }, 2000); // Save after 2 seconds of inactivity
+    }
+    
+    return () => {
+      if (saveTimer) clearTimeout(saveTimer);
+    };
+  }, [pendingChanges, handleSave]);
+
   const handleSurveyTitleChange = (title: string) => {
     handleTitleChange(title);
-    setHasChanges(true);
+    setPendingChanges(true);
     if (surveyId) {
       queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
         if (!oldData) return oldData;
         return { ...oldData, title, name: title };
       });
     }
-  };
-
-  const handleSaveWithReset = async () => {
-    await handleSave();
-    setHasChanges(false);
   };
 
   const handleCopyLink = () => {
@@ -64,34 +85,38 @@ const Index = () => {
     navigator.clipboard.writeText(surveyUrl);
     
     toast({
-      title: "Link Copied",
-      description: "Survey link has been copied to clipboard"
+      title: survey.isPublished 
+        ? "Survey Link Copied" 
+        : "Preview Link Copied",
+      description: survey.isPublished
+        ? "You have copied the Survey link"
+        : "You have copied the Preview link"
     });
   };
 
   const handleQuestionChange = (updatedQuestion: any) => {
     updateQuestion(updatedQuestion);
-    setHasChanges(true);
+    setPendingChanges(true);
   };
 
   const handleDescriptionChangeWithTracking = (description: string) => {
     handleDescriptionChange(description);
-    setHasChanges(true);
+    setPendingChanges(true);
   };
 
   const handleAddQuestion = () => {
     addQuestion();
-    setHasChanges(true);
+    setPendingChanges(true);
   };
 
   const handleDeleteQuestion = (questionId: string) => {
     deleteQuestion(questionId);
-    setHasChanges(true);
+    setPendingChanges(true);
   };
 
   const handleDuplicateQuestion = (question: any) => {
     duplicateQuestion(question);
-    setHasChanges(true);
+    setPendingChanges(true);
   };
 
   if (isLoading) {
@@ -129,15 +154,22 @@ const Index = () => {
       <div className="container max-w-3xl">
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleSaveWithReset} 
-              className="flex gap-2 bg-sunset hover:opacity-90"
-              disabled={!hasChanges}
-            >
-              <Save size={18} />
-              Save
-            </Button>
+          <div className="flex items-center gap-2">
+            {pendingChanges && (
+              <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
+            )}
+            
+            {/* Team members avatars */}
+            <div className="flex -space-x-2 mr-2">
+              {activeTeamMembers.map(member => (
+                <Avatar key={member.id} className="border-2 border-background h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                    {member.initials}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+            
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -157,10 +189,9 @@ const Index = () => {
                       className={`
                         ${survey.isPublished 
                           ? "bg-transparent text-gray-500 hover:bg-gray-100" 
-                          : "bg-gray-500 bg-opacity-40 text-gray-500 text-opacity-50"}
+                          : "bg-transparent text-gray-500 hover:bg-gray-100"}
                         rounded-l-none pl-2
                       `}
-                      disabled={!survey.isPublished}
                       onClick={handleCopyLink}
                     >
                       <Link2 size={18} />
@@ -169,7 +200,7 @@ const Index = () => {
                 </TooltipTrigger>
                 {!survey.isPublished && (
                   <TooltipContent>
-                    <p>Publish to view the link</p>
+                    <p>Preview the survey</p>
                   </TooltipContent>
                 )}
               </Tooltip>
