@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserProfile } from '@/components/UserProfile';
+import UserProfile from '@/components/UserProfile';
 
 const Profile = () => {
   const { user, signOut } = useAuth();
