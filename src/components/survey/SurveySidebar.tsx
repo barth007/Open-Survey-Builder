@@ -24,7 +24,8 @@ export function SurveySidebar() {
 
   const handleCreateSurvey = async () => {
     try {
-      await createSurvey();
+      // Adding empty object parameter to meet the expected argument requirement
+      await createSurvey({});
     } catch (error) {
       console.error("Error creating survey:", error);
     }
