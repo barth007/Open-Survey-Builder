@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -11,15 +10,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
   
-  // For debugging authentication issues
   useEffect(() => {
     if (!isLoading) {
       console.log('ProtectedRoute - Auth state:', { 
         isAuthenticated: !!user,
-        currentPath: location.pathname,
+        currentPath: location.pathname + location.search,
       });
     }
-  }, [user, isLoading, location.pathname]);
+  }, [user, isLoading, location.pathname, location.search]);
 
   if (isLoading) {
     return (
@@ -30,8 +28,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    // Add the current location to use as a return URL after login
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location.pathname + location.search }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;
