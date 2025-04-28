@@ -53,28 +53,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    try {
-      // Get the current URL origin for the redirect
-      const redirectUrl = `${window.location.origin}/`;
-      
-      console.log('Signing in with Google, redirect to:', redirectUrl);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-        },
-      });
-      
-      if (error) {
-        console.error('Google sign-in error:', error.message);
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
+  try {
+    let redirectTo = 'https://preview--form-tapestry-weaver.lovable.app/'; // Ambiente di produzione
+
+    if (window.location.hostname === 'localhost') {
+      redirectTo = 'http://localhost:3000/';
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) {
+      console.error('Google sign-in error:', error.message);
       throw error;
     }
-  };
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    throw error;
+  }
+};
 
   const signOut = async () => {
     try {
