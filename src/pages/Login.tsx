@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const { signInWithGoogle, user, isLoading } = useAuth();
+  const { signInWithGoogle, user, isLoading, isDevelopment } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,13 +29,19 @@ const Login = () => {
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
   
-  // If already logged in, redirect
+  // If in development mode or already logged in, redirect
   useEffect(() => {
+    if (isDevelopment()) {
+      console.log('Development environment detected, redirecting to main content');
+      navigate('/', { replace: true });
+      return;
+    }
+    
     if (user && !isLoading) {
       console.log('User already authenticated, redirecting to:', from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, navigate, from]);
+  }, [user, isLoading, navigate, from, isDevelopment]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -59,8 +65,8 @@ const Login = () => {
     }
   };
 
-  // Don't render login form if user is already logged in and being redirected
-  if (user && !isLoading) {
+  // Don't render login form if in development mode or user is already logged in and being redirected
+  if (isDevelopment() || (user && !isLoading)) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
