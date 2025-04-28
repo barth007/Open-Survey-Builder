@@ -1,20 +1,21 @@
 
 import React from 'react';
-import { Sidebar, SidebarSection } from "@/components/ui/sidebar";
-import SurveyFolders from "@/components/survey/SurveyFolders";
-import UnorganizedSurveys from "@/components/survey/UnorganizedSurveys";
+import { Sidebar, SidebarGroup, SidebarSection } from "@/components/ui/sidebar";
+import { SurveyFolders } from "@/components/survey/SurveyFolders";
+import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
 import { useSurveyData } from "@/hooks/useSurveyData";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import CreateFolderDialog from "@/components/survey/CreateFolderDialog";
+import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate } from 'react-router-dom';
 
 export function SurveySidebar() {
   const [openDialog, setOpenDialog] = React.useState<"createFolder" | "createSurvey" | null>(null);
-  const { surveyData, isLoading, createFolder, createSurvey, error } = useSurveyData();
+  const { surveyData, isLoading, createFolder, createSurvey, error, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   const { user } = useAuth();
+  const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
 
   // If not authenticated, don't show the sidebar
   if (!user) {
@@ -38,10 +39,22 @@ export function SurveySidebar() {
     }
   };
 
+  const toggleFolder = (id: string) => {
+    setOpenFolders(prev => {
+      const newOpenFolders = new Set(prev);
+      if (newOpenFolders.has(id)) {
+        newOpenFolders.delete(id);
+      } else {
+        newOpenFolders.add(id);
+      }
+      return newOpenFolders;
+    });
+  };
+
   return (
     <>
       <Sidebar className="border-r border-border">
-        <SidebarSection>
+        <SidebarGroup>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold tracking-tight">Surveys</h2>
             <div className="flex gap-1">
@@ -74,15 +87,29 @@ export function SurveySidebar() {
           ) : (
             <>
               {surveyData?.folders && surveyData.folders.length > 0 && (
-                <SurveyFolders folders={surveyData.folders} />
+                <SurveyFolders 
+                  folders={surveyData.folders}
+                  openFolders={openFolders}
+                  onToggleFolder={toggleFolder}
+                  onCreateFolder={handleCreateFolder}
+                  onCreateSurvey={createSurvey}
+                  onDeleteSurvey={deleteSurvey}
+                  onDeleteFolder={deleteFolder}
+                  onUpdateOrder={updateSurveyOrder}
+                />
               )}
               
               {surveyData?.unorganizedSurveys && (
-                <UnorganizedSurveys surveys={surveyData.unorganizedSurveys} />
+                <UnorganizedSurveys 
+                  surveys={surveyData.unorganizedSurveys}
+                  onCreateSurvey={handleCreateSurvey}
+                  onDeleteSurvey={deleteSurvey}
+                  onUpdateOrder={updateSurveyOrder}
+                />
               )}
             </>
           )}
-        </SidebarSection>
+        </SidebarGroup>
         
         {/* User profile section */}
         <UserProfile />
