@@ -1,6 +1,7 @@
+// src/components/survey/SurveySidebar.tsx
 
 import React from 'react';
-import { Sidebar, SidebarGroup } from "@/components/ui/sidebar";
+import { Sidebar, SidebarGroup, SidebarContent } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
 import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
 import { useSurveyData } from "@/hooks/useSurveyData";
@@ -51,50 +52,54 @@ export function SurveySidebar() {
 
   return (
     <>
-      <Sidebar className="border-r border-border">
-        <SidebarGroup>
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
-          </div>
-          
-          {isLoading ? (
-            <div className="flex items-center justify-center h-[100px]">
-              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          ) : error ? (
-            <div className="text-destructive text-center p-2 text-sm">
-              Error loading surveys
-            </div>
-          ) : (
-            <>
-              {surveyData?.folders && surveyData.folders.length > 0 && (
-                <SurveyFolders 
-                  folders={surveyData.folders}
-                  openFolders={openFolders}
-                  onToggleFolder={toggleFolder}
-                  onCreateFolder={handleCreateFolder}
-                  onCreateSurvey={createSurvey}
-                  onDeleteSurvey={deleteSurvey}
-                  onDeleteFolder={deleteFolder}
-                  onUpdateOrder={updateSurveyOrder}
-                />
+      <Sidebar className="border-r border-border flex flex-col h-screen">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <SidebarContent className="flex-1 overflow-auto">
+            <SidebarGroup>
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
+              </div>
+
+              {isLoading ? (
+                <div className="flex items-center justify-center h-[100px]">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+                </div>
+              ) : error ? (
+                <div className="text-destructive text-center p-2 text-sm">
+                  Error loading surveys
+                </div>
+              ) : (
+                <>
+                  {surveyData?.folders && surveyData.folders.length > 0 && (
+                    <SurveyFolders 
+                      folders={surveyData.folders}
+                      openFolders={openFolders}
+                      onToggleFolder={toggleFolder}
+                      onCreateFolder={handleCreateFolder}
+                      onCreateSurvey={createSurvey}
+                      onDeleteSurvey={deleteSurvey}
+                      onDeleteFolder={deleteFolder}
+                      onUpdateOrder={updateSurveyOrder}
+                    />
+                  )}
+
+                  {surveyData?.unorganizedSurveys && (
+                    <UnorganizedSurveys 
+                      surveys={surveyData.unorganizedSurveys}
+                      onCreateSurvey={handleCreateSurvey}
+                      onDeleteSurvey={deleteSurvey}
+                      onUpdateOrder={updateSurveyOrder}
+                    />
+                  )}
+                </>
               )}
-              
-              {surveyData?.unorganizedSurveys && (
-                <UnorganizedSurveys 
-                  surveys={surveyData.unorganizedSurveys}
-                  onCreateSurvey={handleCreateSurvey}
-                  onDeleteSurvey={deleteSurvey}
-                  onUpdateOrder={updateSurveyOrder}
-                />
-              )}
-            </>
-          )}
-        </SidebarGroup>
-        
+            </SidebarGroup>
+          </SidebarContent>
+        </div>
+
         <div 
-          onClick={() => navigate('/profile')} 
-          className="cursor-pointer group hover:bg-sidebar-accent transition-colors"
+          onClick={() => navigate('/profile')}
+          className="cursor-pointer hover:bg-sidebar-accent transition-colors w-full flex items-center justify-start p-3 border-t border-border"
         >
           <UserProfile />
         </div>

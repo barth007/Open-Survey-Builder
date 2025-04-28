@@ -1,112 +1,55 @@
-
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Team, TeamMember } from '@/types/team';
-import { toast } from 'sonner';
 import { useAuth } from '@/providers/AuthProvider';
 
+type MemberData = {
+  user_id: string;
+  role: 'owner' | 'editor' | 'viewer';
+  users: {
+    email: string;
+    full_name: string;
+    avatar_url: string;
+  } | null;
+};
+
 export function useTeam(teamId?: string) {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const { data: team, isLoading: isLoadingTeam } = useQuery({
+  return useQuery({
     queryKey: ['team', teamId],
+    enabled: !!user && !!teamId,
     queryFn: async () => {
-      if (!teamId) return null;
-      const { data, error } = await supabase
+      if (!user || !teamId) return null;
+
+      const { data: teamData, error: teamError } = await supabase
         .from('teams')
-        .select('*')
+        .select('id, name')
         .eq('id', teamId)
         .single();
 
-      if (error) throw error;
-      return data as Team;
-    },
-    enabled: !!teamId,
-  });
+      if (teamError) throw teamError;
 
-  const { data: members, isLoading: isLoadingMembers } = useQuery({
-    queryKey: ['team-members', teamId],
-    queryFn: async () => {
-      if (!teamId) return [];
-      const { data, error } = await supabase
+      const { data: membersData, error: membersError } = await supabase
         .from('team_members')
-        .select('*')
-        .eq('team_id', teamId);
+        .select('user_id, role, users ( email, full_name, avatar_url )')
+        .eq('team_id', teamId)
+        .returns<MemberData[]>();
 
-      if (error) throw error;
-      return data as TeamMember[];
-    },
-    enabled: !!teamId,
-  });
+      if (membersError) throw membersError;
 
-  const createTeam = useMutation({
-    mutationFn: async (name: string) => {
-      if (!user) throw new Error('User must be logged in to create a team');
-      
-      const { data, error } = await supabase
-        .from('teams')
-        .insert([{ 
-          name, 
-          created_by: user.id 
-        }])
-        .select()
-        .single();
+      const members = (membersData || []).map((member) => ({
+        id: member.user_id,
+        email: member.users ? member.users.email : '',
+        full_name: member.users ? member.users.full_name : '',
+        avatar_url: member.users ? member.users.avatar_url : '',
+        role: member.role,
+      }));
 
-      if (error) throw error;
-      
-      // After creating the team, add the current user as an owner
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert([{
-          team_id: data.id,
-          user_id: user.id,
-          role: 'owner'
-        }]);
-        
-      if (memberError) throw memberError;
-      
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teams'] });
-      toast.success('Team created successfully');
-    },
-    onError: (error) => {
-      setError(error.message);
-      toast.error('Failed to create team');
+      return {
+        id: teamData.id,
+        name: teamData.name,
+        members,
+      };
     },
   });
-
-  const addMember = useMutation({
-    mutationFn: async ({ teamId, userId, role }: { teamId: string; userId: string; role: TeamMember['role'] }) => {
-      const { data, error } = await supabase
-        .from('team_members')
-        .insert([{ team_id: teamId, user_id: userId, role }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-members'] });
-      toast.success('Team member added successfully');
-    },
-    onError: (error) => {
-      setError(error.message);
-      toast.error('Failed to add team member');
-    },
-  });
-
-  return {
-    team,
-    members,
-    isLoading: isLoadingTeam || isLoadingMembers,
-    error,
-    createTeam,
-    addMember,
-  };
 }

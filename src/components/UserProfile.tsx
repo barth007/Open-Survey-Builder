@@ -1,9 +1,10 @@
+// src/components/UserProfile.tsx
 
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, User as UserIcon, ChevronRight } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfileProps {
@@ -29,7 +30,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   };
 
   const handleSignOut = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking sign out
+    e.stopPropagation();
     try {
       await signOut();
       toast({
@@ -47,7 +48,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   if (compact) {
     return (
-      <Avatar className="border-2 border-background h-8 w-8">
+      <Avatar className="h-8 w-8 border-2 border-background">
         <AvatarImage src={user.user_metadata?.avatar_url} />
         <AvatarFallback className="bg-primary text-primary-foreground text-xs">
           {getInitials()}
@@ -57,27 +58,20 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   }
 
   return (
-    <div className="p-4 mt-auto border-t group-hover:bg-sidebar-accent transition-colors">
-      <div className="flex items-center gap-3">
-        <Avatar>
-          <AvatarImage src={user.user_metadata?.avatar_url} />
-          <AvatarFallback className="bg-primary text-primary-foreground">
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 overflow-hidden">
-          <p className="text-sm font-medium truncate">
-            {user.user_metadata?.full_name || user.email}
-          </p>
-          <p className="text-xs text-muted-foreground truncate">
-            {user.email}
-          </p>
-        </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <Button variant="ghost" size="icon" onClick={handleSignOut}>
-          <LogOut className="h-4 w-4" />
-        </Button>
+    <div className="w-full flex items-center gap-3 p-3">
+      <Avatar className="h-10 w-10">
+        <AvatarImage src={user.user_metadata?.avatar_url} />
+        <AvatarFallback className="bg-primary text-primary-foreground">
+          {getInitials()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 overflow-hidden">
+        <p className="text-sm font-medium truncate">{user.user_metadata?.full_name || user.email}</p>
+        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
       </div>
+      <Button variant="ghost" size="icon" onClick={handleSignOut}>
+        <LogOut className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

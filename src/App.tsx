@@ -12,6 +12,9 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import SurveyResponse from "./pages/SurveyResponse";
 import { Teams } from "@/components/teams/Teams";
+import TeamsCreate from './pages/TeamsCreate';
+import TeamDetails from './pages/TeamDetails';
+import Profile from './pages/Profile'; // Aggiunto import corretto!
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,12 +54,19 @@ const App = () => (
                       <Teams />
                     </ProtectedRoute>
                   } />
+                  <Route path="/teams/create" element={
+                    <ProtectedRoute>
+                      <TeamsCreate />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/teams/:id" element={
+                    <ProtectedRoute>
+                      <TeamDetails />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/profile" element={
                     <ProtectedRoute>
-                      <div className="p-8">
-                        <h1 className="text-2xl font-bold mb-4">Profile Settings</h1>
-                        <p className="text-muted-foreground">Profile settings coming soon...</p>
-                      </div>
+                      <Profile />
                     </ProtectedRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

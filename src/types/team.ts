@@ -21,3 +21,13 @@ export interface TeamSurvey {
   team_id: string;
   survey_id: string;
 }
+
+export type TeamInvitation = {
+  id: string;
+  team_id: string;
+  email: string;
+  role: 'owner' | 'editor' | 'viewer';
+  invited_at: string;
+  accepted: boolean;
+};
+
