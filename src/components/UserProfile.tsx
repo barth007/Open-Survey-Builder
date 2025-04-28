@@ -1,11 +1,10 @@
-// src/components/UserProfile.tsx
-
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface UserProfileProps {
   compact?: boolean;
@@ -14,10 +13,10 @@ interface UserProfileProps {
 const UserProfile = ({ compact = false }: UserProfileProps) => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
-  // Funzione per ottenere le iniziali dell'utente
   const getInitials = () => {
     if (user.user_metadata?.full_name) {
       return user.user_metadata.full_name
@@ -30,7 +29,6 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     return user.email?.substring(0, 2).toUpperCase() || 'U';
   };
 
-  // Funzione per il logout
   const handleSignOut = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
@@ -48,7 +46,10 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     }
   };
 
-  // Rendering del profilo utente
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
+
   if (compact) {
     return (
       <Avatar className="h-8 w-8 border-2 border-background">
@@ -61,7 +62,10 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   }
 
   return (
-    <div className="w-full flex items-center gap-3 p-3">
+    <div 
+      className="w-full flex items-center gap-3 p-3 cursor-pointer hover:bg-sidebar-accent transition-colors"
+      onClick={handleProfileClick}
+    >
       <Avatar className="h-10 w-10">
         <AvatarImage src={user.user_metadata?.avatar_url} />
         <AvatarFallback className="bg-primary text-primary-foreground">
