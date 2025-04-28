@@ -27,18 +27,28 @@ const isDevelopment = () => {
   return hostname === 'localhost' || !hostname.endsWith('.lovableproject.com');
 };
 
-const mockSession = {
-  user: {
-    id: 'dev-user-id',
-    email: 'dev@example.com',
-    user_metadata: {
-      full_name: 'Development User',
-      avatar_url: 'https://api.dicebear.com/7.x/avatars/svg?seed=dev'
-    }
-  } as User,
+const mockUser: User = {
+  id: 'dev-user-id',
+  email: 'dev@example.com',
+  app_metadata: {},
+  user_metadata: {
+    full_name: 'Development User',
+    avatar_url: 'https://api.dicebear.com/7.x/avatars/svg?seed=dev'
+  },
+  aud: 'authenticated',
+  created_at: new Date().toISOString(),
+  role: '',
+  email_confirmed_at: new Date().toISOString()
+};
+
+const mockSession: Session = {
+  user: mockUser,
   access_token: 'mock-token',
-  refresh_token: 'mock-refresh-token'
-} as Session;
+  refresh_token: 'mock-refresh-token',
+  expires_in: 3600,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  token_type: 'bearer'
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -46,7 +56,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Initialize the auth state when the provider is mounted
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -55,12 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (isDevelopment()) {
           console.log('Using mock session for development');
           setSession(mockSession);
-          setUser(mockSession.user);
+          setUser(mockUser);
           setIsLoading(false);
           return;
         }
 
-        // Set up auth state listener for production
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
           console.log('Auth state changed:', event, currentSession?.user?.email);
           setSession(currentSession);
@@ -68,7 +76,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsLoading(false);
         });
 
-        // Check for existing session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         setSession(initialSession);
         setUser(initialSession?.user || null);
@@ -87,12 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
   }, []);
 
-  // Google sign-in function
   const signInWithGoogle = async () => {
     if (isDevelopment()) {
       console.log('Development environment detected, using mock session');
       setSession(mockSession);
-      setUser(mockSession.user);
+      setUser(mockUser);
       navigate('/');
       toast("Development Mode", {
         description: "Using mock authentication for development"
@@ -103,10 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Starting Google sign-in flow...');
       
-      // Get the hostname from the current URL
       const hostname = window.location.hostname;
       
-      // Check if we're in the preview panel (ends with .lovableproject.com)
       if (!hostname.endsWith('.lovableproject.com')) {
         console.error('Not in preview panel - authentication must be performed in the preview panel');
         toast("Authentication Error", {
@@ -115,7 +119,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      // Construct the preview panel URL
       const previewOrigin = `https://${hostname}`;
       const redirectUrl = `${previewOrigin}/login`;
       
@@ -157,7 +160,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out function
   const signOut = async () => {
     if (isDevelopment()) {
       console.log('Development environment detected, clearing mock session');
