@@ -1,26 +1,25 @@
 
 export type TeamRole = 'owner' | 'editor' | 'viewer';
 
-export interface Team {
+// src/types/team.ts
+
+export type Team = {
   id: string;
   name: string;
   created_at: string;
   created_by: string;
-}
+};
 
-export interface TeamMember {
+export type TeamMember = {
   id: string;
   team_id: string;
   user_id: string;
-  role: TeamRole;
+  role: 'owner' | 'editor' | 'viewer';
   joined_at: string;
-}
-
-export interface TeamSurvey {
-  id: string;
-  team_id: string;
-  survey_id: string;
-}
+  email: string;
+  full_name: string;
+  avatar_url: string;
+};
 
 export type TeamInvitation = {
   id: string;
@@ -30,4 +29,10 @@ export type TeamInvitation = {
   invited_at: string;
   accepted: boolean;
 };
+
+export interface TeamSurvey {
+  id: string;
+  team_id: string;
+  survey_id: string;
+}
 
