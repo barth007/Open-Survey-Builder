@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,9 +14,9 @@ import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
 import { Teams } from "@/components/teams/Teams";
-import TeamsCreate from "@/pages/TeamsCreate";
-import TeamDetails from "@/pages/TeamDetails";
-import Profile from "@/pages/Profile"; // <-- IMPORTA QUI il vero Profile
+import TeamsCreate from './pages/TeamsCreate';
+import TeamDetails from './pages/TeamDetails';
+import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({
   defaultOptions: {

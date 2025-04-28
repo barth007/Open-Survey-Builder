@@ -94,27 +94,65 @@ export type Database = {
           },
         ]
       }
-      team_members: {
+      team_invitations: {
         Row: {
+          accepted: boolean | null
+          email: string
           id: string
-          joined_at: string
+          invited_at: string
           role: string
           team_id: string
-          user_id: string
         }
         Insert: {
+          accepted?: boolean | null
+          email: string
           id?: string
-          joined_at?: string
+          invited_at?: string
           role: string
           team_id: string
-          user_id: string
         }
         Update: {
+          accepted?: boolean | null
+          email?: string
           id?: string
-          joined_at?: string
+          invited_at?: string
           role?: string
           team_id?: string
-          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          email: string | null
+          id: string
+          joined_at: string | null
+          role: string
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          email?: string | null
+          id?: string
+          joined_at?: string | null
+          role?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          email?: string | null
+          id?: string
+          joined_at?: string | null
+          role?: string
+          team_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
