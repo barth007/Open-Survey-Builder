@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase-client';
 import type { User } from '@supabase/supabase-js';
@@ -53,29 +52,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-  try {
-    let redirectTo = 'https://preview--form-tapestry-weaver.lovable.app/'; // Ambiente di produzione
+    try {
+      // Get the current domain dynamically
+      const currentDomain = window.location.origin;
+      console.log('Current domain for redirect:', currentDomain);
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: currentDomain,
+        },
+      });
 
-    if (window.location.hostname === 'localhost') {
-      redirectTo = 'http://localhost:3000/';
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-      },
-    });
-
-    if (error) {
-      console.error('Google sign-in error:', error.message);
+      if (error) {
+        console.error('Google sign-in error:', error.message);
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
       throw error;
     }
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
-    throw error;
-  }
-};
+  };
 
   const signOut = async () => {
     try {
