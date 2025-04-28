@@ -17,6 +17,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   if (!user) return null;
 
+  // Funzione per ottenere le iniziali dell'utente
   const getInitials = () => {
     if (user.user_metadata?.full_name) {
       return user.user_metadata.full_name
@@ -29,6 +30,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     return user.email?.substring(0, 2).toUpperCase() || 'U';
   };
 
+  // Funzione per il logout
   const handleSignOut = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
@@ -46,6 +48,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     }
   };
 
+  // Rendering del profilo utente
   if (compact) {
     return (
       <Avatar className="h-8 w-8 border-2 border-background">
