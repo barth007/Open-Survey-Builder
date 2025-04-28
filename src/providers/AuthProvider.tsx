@@ -54,37 +54,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: undefined,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        },
-      });
+  try {
+    const redirectTo = 'https://93d9f5a0-8bb1-44d2-b2e2-0fc1b20d521f.lovableproject.com/';
 
-      if (error) {
-        console.error('Google sign-in error:', error.message);
-        toast("Authentication Failed", {
-          description: error.message
-        });
-        throw error;
-      }
-      
-      if (data && data.url) {
-        console.log('Redirect URL:', data.url);
-      }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      toast("Authentication Error", {
-        description: "Failed to sign in with Google. Please try again."
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
+      },
+    });
+
+    if (error) {
+      console.error('Google sign-in error:', error.message);
+      toast("Authentication Failed", {
+        description: error.message
       });
       throw error;
     }
-  };
+
+    if (data && data.url) {
+      console.log('Redirect URL:', data.url);
+    }
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    toast("Authentication Error", {
+      description: "Failed to sign in with Google. Please try again."
+    });
+    throw error;
+  }
+};
 
   const signOut = async () => {
     try {
