@@ -78,23 +78,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       console.log('Starting Google sign-in flow...');
-      console.log('Current full URL:', window.location.href);
       
-      // Get details about our environment
-      const currentUrl = window.location.origin;
+      // Get the hostname from the current URL
       const hostname = window.location.hostname;
-      const pathname = window.location.pathname;
       
-      console.log('Current origin:', currentUrl);
-      console.log('Current hostname:', hostname);
-      console.log('Current pathname:', pathname);
+      // Check if we're in the preview panel (ends with .lovableproject.com)
+      if (!hostname.endsWith('.lovableproject.com')) {
+        console.error('Not in preview panel - authentication must be performed in the preview panel');
+        toast("Authentication Error", {
+          description: "Please use the preview panel for authentication"
+        });
+        return;
+      }
       
-      // Generate redirect URL - Importante! Deve essere un URL completo e deve essere registrato
-      // sia in Google Cloud Console che nella configurazione di Supabase
-      const redirectUrl = `${currentUrl}/login`;
+      // Construct the preview panel URL
+      const previewOrigin = `https://${hostname}`;
+      const redirectUrl = `${previewOrigin}/login`;
+      
+      console.log('Using preview panel URL:', previewOrigin);
       console.log('Redirect URL for auth:', redirectUrl);
       
-      // Aggiorna l'URL di callback esplicitamente a supabase.co
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -103,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             access_type: 'offline',
             prompt: 'consent',
           },
-          skipBrowserRedirect: false // Assicura che il browser venga reindirizzato
+          skipBrowserRedirect: false
         },
       });
 
@@ -120,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast("Redirecting", {
           description: "Taking you to Google for authentication"
         });
-        // Redirect manuale invece di lasciare che Supabase lo faccia automaticamente
         window.location.href = data.url;
       }
     } catch (error: any) {
