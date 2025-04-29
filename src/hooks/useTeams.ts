@@ -31,8 +31,8 @@ export function useTeams() {
     queryFn: async (): Promise<TeamWithRole[]> => {
       if (!user) return [];
 
-      // Use explicit any typing for the query to avoid TypeScript recursion
-      const membershipsResult = await supabase
+      // Cast the entire query response to any to bypass TypeScript's type inference
+      const membershipsResult: any = await supabase
         .from('team_members')
         .select('team_id, role')
         .eq('user_id', user.id);
@@ -52,8 +52,8 @@ export function useTeams() {
         memberships.map(item => [item.team_id, item.role])
       );
       
-      // Use explicit any typing for teams query as well
-      const teamsResult = await supabase
+      // Cast the entire query response to any to bypass TypeScript's type inference
+      const teamsResult: any = await supabase
         .from('teams')
         .select('id, name, created_at')
         .in('id', teamIds);
