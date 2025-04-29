@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 
+// Definisco tipi semplici per evitare problemi di inferenza di tipo eccessivamente profondi
 export type TeamWithRole = {
   id: string;
   name: string;
@@ -10,13 +11,13 @@ export type TeamWithRole = {
   created_at: string;
 };
 
-// Define specific types for database returns to avoid type inference issues
-type TeamMembership = {
+// Tipi ausiliari per il processamento dei dati
+type TeamMembershipRaw = {
   team_id: string;
   role: string;
 };
 
-type TeamData = {
+type TeamDataRaw = {
   id: string;
   name: string;
   created_at: string;
@@ -31,43 +32,43 @@ export function useTeams() {
     queryFn: async (): Promise<TeamWithRole[]> => {
       if (!user) return [];
 
-      // Use explicit typing and avoid deep type inference
-      const { data: membershipsData, error: membershipsError } = await supabase
+      // Evito inferenza di tipo utilizzando una struttura semplificata
+      const membershipsResponse = await supabase
         .from('team_members')
         .select('team_id, role')
         .eq('user_id', user.id);
         
-      if (membershipsError) {
-        console.error('Error fetching team memberships:', membershipsError);
+      if (membershipsResponse.error) {
+        console.error('Error fetching team memberships:', membershipsResponse.error);
         return [];
       }
       
-      // Use explicit casting to our defined type
-      const memberships = (membershipsData || []) as TeamMembership[];
+      // Utilizzo una conversione di tipo diretta per evitare problemi di inferenza
+      const memberships = membershipsResponse.data as unknown as TeamMembershipRaw[];
       
-      if (memberships.length === 0) return [];
+      if (!memberships || memberships.length === 0) return [];
       
-      // Get the team IDs to fetch team details
+      // Ottengo gli ID dei team e una mappa per i ruoli
       const teamIds = memberships.map(item => item.team_id);
       const roleMap = new Map(
         memberships.map(item => [item.team_id, item.role])
       );
       
-      // Use explicit typing for team query as well
-      const { data: teamsData, error: teamsError } = await supabase
+      // Recupero i dettagli dei team con lo stesso approccio semplificato
+      const teamsResponse = await supabase
         .from('teams')
         .select('id, name, created_at')
         .in('id', teamIds);
         
-      if (teamsError) {
-        console.error('Error fetching team details:', teamsError);
+      if (teamsResponse.error) {
+        console.error('Error fetching team details:', teamsResponse.error);
         return [];
       }
       
-      // Cast to our defined type
-      const teams = (teamsData || []) as TeamData[];
+      // Conversione diretta a un tipo semplificato
+      const teams = teamsResponse.data as unknown as TeamDataRaw[];
       
-      // Combine the data with manual type assertion
+      // Combino i dati con conversione di tipo sicura
       return teams.map(team => {
         const role = roleMap.get(team.id) || 'viewer';
         return {
