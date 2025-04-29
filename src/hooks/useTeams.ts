@@ -19,27 +19,24 @@ export function useTeams() {
     queryFn: async (): Promise<TeamWithRole[]> => {
       if (!user) return [];
 
-      // Use a completely different approach to avoid the deep type instantiation error
-      const { data, error } = await supabase.rpc('get_user_teams', {
-        user_id: user.id
-      }).catch(() => {
-        // Fallback to direct query if the RPC function doesn't exist
-        return supabase
-          .from('team_members')
-          .select('role, team_id')
-          .eq('user_id', user.id);
-      });
+      // Get team memberships first
+      const { data: memberships, error: membershipError } = await supabase
+        .from('team_members')
+        .select('team_id, role')
+        .eq('user_id', user.id);
 
-      if (error) {
-        console.error('Error fetching teams:', error);
+      if (membershipError) {
+        console.error('Error fetching team memberships:', membershipError);
         return [];
       }
 
-      if (!data || data.length === 0) return [];
+      if (!memberships || memberships.length === 0) return [];
       
       // Get the team IDs to fetch team details
-      const teamIds = data.map(item => item.team_id);
-      const roleMap = new Map(data.map(item => [item.team_id, item.role as 'owner' | 'editor' | 'viewer']));
+      const teamIds = memberships.map(item => item.team_id);
+      const roleMap = new Map(
+        memberships.map(item => [item.team_id, item.role as 'owner' | 'editor' | 'viewer'])
+      );
       
       // Fetch teams data separately
       const { data: teamsData, error: teamsError } = await supabase
@@ -56,7 +53,7 @@ export function useTeams() {
       return (teamsData || []).map(team => ({
         id: team.id,
         name: team.name,
-        role: roleMap.get(team.id) || 'viewer',
+        role: (roleMap.get(team.id) || 'viewer') as 'owner' | 'editor' | 'viewer',
         created_at: team.created_at
       }));
     },
