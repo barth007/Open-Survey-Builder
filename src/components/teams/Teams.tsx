@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTeam } from '@/hooks/useTeam';
-import { useTeams } from '@/hooks/useTeams';
+import { useSimpleTeams } from '@/hooks/useSimpleTeams';
 import { Plus, Users } from 'lucide-react';
 
 export function Teams() {
   const navigate = useNavigate();
-  const { createTeam } = useTeam(); // Now correctly includes createTeam
-  const { teams, isLoading } = useTeams(); // Now correctly includes teams
+  const { createTeam } = useTeam();
+  const { teams, isLoading } = useSimpleTeams();
   
   const handleCreateTeam = async () => {
     try {
