@@ -13,9 +13,6 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
-import { Teams } from "@/components/teams/Teams";
-import TeamsCreate from './pages/TeamsCreate';
-import TeamDetails from './pages/TeamDetails';
 import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({
@@ -57,30 +54,6 @@ const App = () => (
                     }
                   />
                   <Route path="/survey-response/:id" element={<SurveyResponse />} />
-                  <Route
-                    path="/teams"
-                    element={
-                      <ProtectedRoute>
-                        <Teams />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/teams/create"
-                    element={
-                      <ProtectedRoute>
-                        <TeamsCreate />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/teams/:id"
-                    element={
-                      <ProtectedRoute>
-                        <TeamDetails />
-                      </ProtectedRoute>
-                    }
-                  />
                   <Route
                     path="/profile"
                     element={
