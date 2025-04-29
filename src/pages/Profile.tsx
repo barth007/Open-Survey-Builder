@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider'; // Access authentication state
 import { supabase } from '@/integrations/supabase/client'; // Supabase client
@@ -24,7 +25,7 @@ const Profile = () => {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('user_id', user.id)
           .single(); // Fetch the profile for the current user
 
         if (error) {
@@ -54,11 +55,12 @@ const Profile = () => {
       const { error } = await supabase
         .from('profiles')
         .upsert({
-          id: user.id,
+          user_id: user.id,
           full_name: fullName,
           bio,
           website,
           avatar_url: avatarUrl,
+          updated_at: new Date().toISOString()
         });
 
       if (error) {
@@ -80,7 +82,15 @@ const Profile = () => {
     setAvatarUrl(e.target.value); // Update avatar URL
   };
 
-  if (!user || !profile) {
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Please log in to view your profile.</p>
+      </div>
+    );
+  }
+
+  if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
@@ -98,7 +108,7 @@ const Profile = () => {
         </Avatar>
         <div>
           <h2 className="text-2xl font-semibold">{profile.full_name}</h2>
-          <p className="text-sm text-muted">{profile.email}</p>
+          <p className="text-sm text-muted">{user.email}</p>
         </div>
       </div>
 

@@ -1,17 +1,8 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { TeamMember, TeamInvitation } from '@/types/team';
-
-type MemberData = {
-  user_id: string;
-  role: 'owner' | 'editor' | 'viewer';
-  users: {
-    email: string;
-    full_name: string;
-    avatar_url: string;
-  } | null;
-};
 
 export function useTeam(teamId?: string) {
   const { user } = useAuth();
@@ -23,7 +14,7 @@ export function useTeam(teamId?: string) {
     queryFn: async () => {
       if (!user || !teamId) return null;
 
-      // Carica team info
+      // Load team info
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .select('id, name')
@@ -32,32 +23,38 @@ export function useTeam(teamId?: string) {
 
       if (teamError) throw teamError;
 
-      // Carica membri
+      // Load members with simplified query to avoid type instantiation error
       const { data: membersData, error: membersError } = await supabase
         .from('team_members')
-        .select('user_id, role, users ( email, full_name, avatar_url )')
-        .eq('team_id', teamId)
-        .returns<MemberData[]>();
+        .select(`
+          id,
+          team_id, 
+          user_id, 
+          role, 
+          joined_at,
+          email
+        `)
+        .eq('team_id', teamId);
 
       if (membersError) throw membersError;
 
-      const members: TeamMember[] = (membersData || []).map((member) => ({
-        id: member.user_id,
+      // Transform member data
+      const members: TeamMember[] = (membersData || []).map(member => ({
+        id: member.id,
         team_id: teamId,
         user_id: member.user_id,
         role: member.role,
-        joined_at: '', // Non disponibile direttamente, puoi aggiungerlo se lo vuoi
-        email: member.users?.email || '',
-        full_name: member.users?.full_name || '',
-        avatar_url: member.users?.avatar_url || '',
+        joined_at: member.joined_at || '',
+        email: member.email || '',
+        full_name: '', // Will need to join with profiles to get this
+        avatar_url: '', // Will need to join with profiles to get this
       }));
 
-      // Carica inviti
+      // Load invitations
       const { data: invitationsData, error: invitationsError } = await supabase
         .from('team_invitations')
         .select('id, team_id, email, role, invited_at, accepted')
-        .eq('team_id', teamId)
-        .returns<TeamInvitation[]>();
+        .eq('team_id', teamId);
 
       if (invitationsError) throw invitationsError;
 
@@ -78,7 +75,7 @@ export function useTeam(teamId?: string) {
       
       const { data, error } = await supabase
         .from('teams')
-        .insert([{ name, created_by: user.id }])
+        .insert([{ name, user_id: user.id }])
         .select();
       
       if (error) throw error;

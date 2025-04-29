@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -46,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const { data: existingProfile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', currentSession.user!.id)
+                .eq('user_id', currentSession.user!.id)
                 .single();
                 
               if (profileError) {
@@ -56,10 +57,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (!existingProfile) {
                 // If the profile doesn't exist, create it
                 console.log('Creating new profile for user:', currentSession.user.id);
-                const { error: insertError, data: insertedProfile } = await supabase
+                const { error: insertError } = await supabase
                   .from('profiles')
                   .upsert({
-                    id: currentSession.user!.id,
+                    user_id: currentSession.user!.id,
                     avatar_url: currentSession.user?.user_metadata?.avatar_url || null,
                     full_name: currentSession.user?.user_metadata?.full_name || null,
                     updated_at: new Date().toISOString()
@@ -71,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     description: 'There was an issue setting up your profile.',
                   });
                 } else {
-                  console.log('Profile created successfully:', insertedProfile);
+                  console.log('Profile created successfully');
                 }
               } else {
                 console.log('Profile already exists for user:', currentSession.user.id);
