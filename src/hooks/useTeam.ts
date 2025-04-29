@@ -29,10 +29,9 @@ export function useTeam(teamId?: string) {
         .select(`
           id,
           team_id, 
-          user_id, 
+          email, 
           role, 
-          joined_at,
-          email
+          joined_at
         `)
         .eq('team_id', teamId);
 
@@ -42,8 +41,8 @@ export function useTeam(teamId?: string) {
       const members: TeamMember[] = (membersData || []).map(member => ({
         id: member.id,
         team_id: teamId,
-        user_id: member.user_id,
-        role: member.role,
+        user_id: member.user_id || '', // Provide a default empty string
+        role: member.role as 'owner' | 'editor' | 'viewer',
         joined_at: member.joined_at || '',
         email: member.email || '',
         full_name: '', // Will need to join with profiles to get this
@@ -75,7 +74,7 @@ export function useTeam(teamId?: string) {
       
       const { data, error } = await supabase
         .from('teams')
-        .insert([{ name, user_id: user.id }])
+        .insert([{ name, created_by: user.id }])
         .select();
       
       if (error) throw error;
