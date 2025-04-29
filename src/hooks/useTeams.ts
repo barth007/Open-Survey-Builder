@@ -31,20 +31,21 @@ export function useTeams() {
     queryFn: async (): Promise<TeamWithRole[]> => {
       if (!user) return [];
 
-      // Cast the entire query response to any to bypass TypeScript's type inference
-      const membershipsResult: any = await supabase
+      // Use explicit typing and avoid deep type inference
+      const { data: membershipsData, error: membershipsError } = await supabase
         .from('team_members')
         .select('team_id, role')
         .eq('user_id', user.id);
         
-      if (membershipsResult.error) {
-        console.error('Error fetching team memberships:', membershipsResult.error);
+      if (membershipsError) {
+        console.error('Error fetching team memberships:', membershipsError);
         return [];
       }
       
-      const memberships = membershipsResult.data as TeamMembership[];
+      // Use explicit casting to our defined type
+      const memberships = (membershipsData || []) as TeamMembership[];
       
-      if (!memberships || memberships.length === 0) return [];
+      if (memberships.length === 0) return [];
       
       // Get the team IDs to fetch team details
       const teamIds = memberships.map(item => item.team_id);
@@ -52,21 +53,22 @@ export function useTeams() {
         memberships.map(item => [item.team_id, item.role])
       );
       
-      // Cast the entire query response to any to bypass TypeScript's type inference
-      const teamsResult: any = await supabase
+      // Use explicit typing for team query as well
+      const { data: teamsData, error: teamsError } = await supabase
         .from('teams')
         .select('id, name, created_at')
         .in('id', teamIds);
         
-      if (teamsResult.error) {
-        console.error('Error fetching team details:', teamsResult.error);
+      if (teamsError) {
+        console.error('Error fetching team details:', teamsError);
         return [];
       }
       
-      const teamsData = teamsResult.data as TeamData[];
+      // Cast to our defined type
+      const teams = (teamsData || []) as TeamData[];
       
       // Combine the data with manual type assertion
-      return teamsData.map(team => {
+      return teams.map(team => {
         const role = roleMap.get(team.id) || 'viewer';
         return {
           id: team.id,
