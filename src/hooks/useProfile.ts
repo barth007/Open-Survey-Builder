@@ -31,19 +31,20 @@ export function useProfile() {
 
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        if (error) {
-          throw error;
+        if (fetchError) {
+          console.error('Error fetching profile:', fetchError);
+          throw fetchError;
         }
 
-        setProfile(data);
+        setProfile(data as Profile);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error in profile fetch:', error);
         setError(error as Error);
       } finally {
         setLoading(false);
@@ -55,20 +56,26 @@ export function useProfile() {
 
   // Function to update profile
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return;
+    if (!user) return false;
     
     try {
-      const { error } = await supabase
+      // Update timestamp
+      const updatedData = {
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+      
+      const { error: updateError } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(updatedData)
         .eq('id', user.id);
 
-      if (error) {
-        throw error;
+      if (updateError) {
+        throw updateError;
       }
 
       // Update local state with new values
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      setProfile(prev => prev ? { ...prev, ...updatedData } : null);
       
       toast({
         title: "Profile updated",

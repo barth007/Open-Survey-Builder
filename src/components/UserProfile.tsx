@@ -1,13 +1,12 @@
+
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useProfile } from '@/hooks/useProfile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-
 
 interface UserProfileProps {
   compact?: boolean;
@@ -42,6 +41,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
         title: "Signed out successfully",
         description: "You have been signed out of your account",
       });
+      navigate('/login');
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -63,10 +63,13 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     );
   }
 
+  // Use avatar from profile or from user metadata as fallback
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
+
   if (compact) {
     return (
       <Avatar className="h-8 w-8 border-2 border-background">
-        <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} />
+        <AvatarImage src={avatarUrl} />
         <AvatarFallback className="bg-primary text-primary-foreground text-xs">
           {getInitials()}
         </AvatarFallback>
@@ -80,7 +83,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
       onClick={handleProfileClick}
     >
       <Avatar className="h-10 w-10">
-        <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} />
+        <AvatarImage src={avatarUrl} />
         <AvatarFallback className="bg-primary text-primary-foreground">
           {getInitials()}
         </AvatarFallback>
