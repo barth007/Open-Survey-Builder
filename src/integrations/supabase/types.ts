@@ -14,16 +14,19 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           name: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           name?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -32,24 +35,24 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           full_name: string | null
-          id: string
           updated_at: string | null
+          user_id: string
           website: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           full_name?: string | null
-          id: string
           updated_at?: string | null
+          user_id: string
           website?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           full_name?: string | null
-          id?: string
           updated_at?: string | null
+          user_id?: string
           website?: string | null
         }
         Relationships: []
@@ -92,6 +95,7 @@ export type Database = {
           is_published: boolean | null
           name: string
           questions: Json | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -101,6 +105,7 @@ export type Database = {
           is_published?: boolean | null
           name: string
           questions?: Json | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -110,6 +115,7 @@ export type Database = {
           is_published?: boolean | null
           name?: string
           questions?: Json | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -163,7 +169,6 @@ export type Database = {
           joined_at: string | null
           role: string
           team_id: string | null
-          user_id: string | null
         }
         Insert: {
           email?: string | null
@@ -171,7 +176,6 @@ export type Database = {
           joined_at?: string | null
           role?: string
           team_id?: string | null
-          user_id?: string | null
         }
         Update: {
           email?: string | null
@@ -179,7 +183,6 @@ export type Database = {
           joined_at?: string | null
           role?: string
           team_id?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
@@ -227,21 +230,24 @@ export type Database = {
       teams: {
         Row: {
           created_at: string
-          created_by: string
           id: string
           name: string
+          profile_id: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
-          created_by: string
           id?: string
           name: string
+          profile_id?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
-          created_by?: string
           id?: string
           name?: string
+          profile_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -250,7 +256,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_user_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

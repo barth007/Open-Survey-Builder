@@ -1,3 +1,4 @@
+
 // src/pages/TeamsCreate.tsx
 
 import React, { useState } from 'react';
@@ -5,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 
 const TeamsCreate = () => {
   const [name, setName] = useState('');

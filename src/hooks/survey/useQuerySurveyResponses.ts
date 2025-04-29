@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { SurveyResponse } from '@/types/survey';
 
 export function useQuerySurveyResponses(surveyId: string | undefined) {
