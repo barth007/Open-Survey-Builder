@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useTeams } from '@/hooks/useTeams';
@@ -13,12 +13,13 @@ import { Plus, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/sonner';
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { profile, loading: loadingProfile, updateProfile } = useProfile();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: toastUI } = useToast(); // renamed to avoid conflict with sonner toast
   const { data: teams, isLoading: loadingTeams, error: teamsError } = useTeams();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -27,9 +28,21 @@ const Profile = () => {
   const [website, setWebsite] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!user && !loadingProfile) {
+      console.log("No user found, redirecting to login");
+      toast('Authentication Required', {
+        description: 'Please log in to view your profile'
+      });
+      navigate('/login');
+    }
+  }, [user, loadingProfile, navigate]);
+
   // Initialize form values when profile loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (profile) {
+      console.log('Setting profile form data:', profile);
       setFullName(profile.full_name || '');
       setBio(profile.bio || '');
       setWebsite(profile.website || '');
@@ -49,12 +62,15 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      await updateProfile({
+      const result = await updateProfile({
         full_name: fullName,
         bio,
         website
       });
-      setIsEditing(false);
+      
+      if (result) {
+        setIsEditing(false);
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
     } finally {
@@ -68,14 +84,14 @@ const Profile = () => {
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
-      toast({
+      toastUI({
         title: "Sign Out Error",
         description: "Failed to sign out. Please try again."
       });
     }
   };
 
-  if (!user || loadingProfile) {
+  if (loadingProfile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-3">
@@ -84,6 +100,10 @@ const Profile = () => {
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null; // Will redirect in useEffect
   }
 
   const getInitials = () => {

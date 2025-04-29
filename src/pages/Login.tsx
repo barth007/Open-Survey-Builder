@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -61,9 +62,9 @@ const Login = () => {
   // Only show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
@@ -71,7 +72,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-pebble flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
