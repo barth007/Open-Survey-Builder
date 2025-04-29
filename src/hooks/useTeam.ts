@@ -41,7 +41,7 @@ export function useTeam(teamId?: string) {
       const members: TeamMember[] = (membersData || []).map(member => ({
         id: member.id,
         team_id: teamId,
-        user_id: member.user_id || '', // Provide a default empty string
+        user_id: '', // Provide a default empty string since user_id doesn't exist in query result
         role: member.role as 'owner' | 'editor' | 'viewer',
         joined_at: member.joined_at || '',
         email: member.email || '',
