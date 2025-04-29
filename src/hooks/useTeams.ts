@@ -10,6 +10,18 @@ export type TeamWithRole = {
   created_at: string;
 };
 
+// Define specific types for database returns to avoid type inference issues
+type TeamMembership = {
+  team_id: string;
+  role: string;
+};
+
+type TeamData = {
+  id: string;
+  name: string;
+  created_at: string;
+};
+
 export function useTeams() {
   const { user } = useAuth();
 
@@ -19,18 +31,19 @@ export function useTeams() {
     queryFn: async (): Promise<TeamWithRole[]> => {
       if (!user) return [];
 
-      // We'll fetch team memberships as plain objects to avoid the type instantiation issue
-      const { data: memberships, error: membershipError } = await supabase
+      // Use explicit any typing for the query to avoid TypeScript recursion
+      const membershipsResult = await supabase
         .from('team_members')
         .select('team_id, role')
-        .eq('user_id', user.id)
-        .returns<{ team_id: string; role: string }[]>();
-
-      if (membershipError) {
-        console.error('Error fetching team memberships:', membershipError);
+        .eq('user_id', user.id);
+        
+      if (membershipsResult.error) {
+        console.error('Error fetching team memberships:', membershipsResult.error);
         return [];
       }
-
+      
+      const memberships = membershipsResult.data as TeamMembership[];
+      
       if (!memberships || memberships.length === 0) return [];
       
       // Get the team IDs to fetch team details
@@ -39,20 +52,21 @@ export function useTeams() {
         memberships.map(item => [item.team_id, item.role])
       );
       
-      // Fetch teams data separately with explicit return type
-      const { data: teamsData, error: teamsError } = await supabase
+      // Use explicit any typing for teams query as well
+      const teamsResult = await supabase
         .from('teams')
         .select('id, name, created_at')
-        .in('id', teamIds)
-        .returns<{ id: string; name: string; created_at: string }[]>();
+        .in('id', teamIds);
         
-      if (teamsError) {
-        console.error('Error fetching team details:', teamsError);
+      if (teamsResult.error) {
+        console.error('Error fetching team details:', teamsResult.error);
         return [];
       }
       
-      // Combine the data with explicit type casting
-      return (teamsData || []).map(team => {
+      const teamsData = teamsResult.data as TeamData[];
+      
+      // Combine the data with manual type assertion
+      return teamsData.map(team => {
         const role = roleMap.get(team.id) || 'viewer';
         return {
           id: team.id,
