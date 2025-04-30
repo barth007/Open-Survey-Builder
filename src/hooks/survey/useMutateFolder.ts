@@ -15,13 +15,17 @@ export function useMutateFolder() {
       }
 
       try {
+        console.log('Creating folder with name:', name, 'for user:', user.id);
+        
+        // The user_id will be set automatically by the database trigger
         const { data, error } = await supabase
           .from('folders')
-          .insert([{ name, user_id: user.id }])
+          .insert([{ name }])
           .select()
           .single();
 
         if (error) {
+          console.error('Folder creation error:', error);
           if (error.code === '23505') {
             throw new Error('A folder with this name already exists');
           } else if (error.message?.includes("relation \"public.folders\" does not exist")) {
@@ -34,6 +38,7 @@ export function useMutateFolder() {
           throw new Error('No data returned from folder creation');
         }
         
+        console.log('Folder created successfully:', data);
         return data;
       } catch (err) {
         console.error("Error in createFolderMutation:", err);

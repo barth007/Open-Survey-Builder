@@ -13,7 +13,7 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
-import PublicSurvey from "@/pages/PublicSurvey"; // New public survey page
+import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({
@@ -59,12 +59,14 @@ const App = () => (
                     path="/profile"
                     element={
                       <ProtectedRoute>
-                        <Profile /> 
+                        <Profile />
                       </ProtectedRoute>
                     }
                   />
-                  {/* New route for public survey access */}
+                  {/* Public survey access */}
                   <Route path="/p/:publicCode" element={<PublicSurvey />} />
+                  {/* New preview route for unpublished surveys */}
+                  <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

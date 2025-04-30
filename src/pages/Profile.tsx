@@ -11,6 +11,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<"personal" | "team" | "settings">("personal");
   const { profile, loading, error, updateProfile } = useProfile();
 
+  console.log("Profile data:", { profile, loading, error, activeTab });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

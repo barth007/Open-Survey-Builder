@@ -8,6 +8,8 @@ import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Folder, Loader } from 'lucide-react';
 
 export function SurveySidebar() {
   const [openDialog, setOpenDialog] = React.useState<"createFolder" | "createSurvey" | null>(null);
@@ -30,6 +32,7 @@ export function SurveySidebar() {
 
   const handleCreateFolder = async (name: string) => {
     try {
+      console.log("Creating folder:", name);
       await createFolder(name);
       setOpenDialog(null);
     } catch (error) {
@@ -61,15 +64,27 @@ export function SurveySidebar() {
 
               {isLoading ? (
                 <div className="flex items-center justify-center h-[100px]">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+                  <Loader className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : error ? (
                 <div className="text-destructive text-center p-2 text-sm">
-                  Error loading surveys
+                  Error loading surveys: {error.message}
                 </div>
               ) : (
                 <>
-                  {/* Always show the SurveyFolders component */}
+                  {/* Always show the folder section regardless of whether there are folders or not */}
+                  <div className="mb-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full flex justify-center items-center gap-2"
+                      onClick={() => setOpenDialog("createFolder")}
+                    >
+                      <Folder className="h-4 w-4" />
+                      Create Folder
+                    </Button>
+                  </div>
+                  
                   <SurveyFolders
                     folders={surveyData?.folders || []}
                     openFolders={openFolders}
@@ -95,7 +110,7 @@ export function SurveySidebar() {
           </SidebarContent>
         </div>
 
-        <div className="w-full h-full">
+        <div className="w-full">
           <UserProfile />
         </div>
       </Sidebar>

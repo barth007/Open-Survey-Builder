@@ -15,6 +15,9 @@ export function useQuerySurveys() {
           return { folders: [], unorganizedSurveys: [] };
         }
 
+        // Log that we're fetching data to help with debugging
+        console.log('Fetching folders and surveys for user:', user.id);
+
         const [foldersResult, surveysResult] = await Promise.all([
           supabase
             .from('folders')
@@ -29,16 +32,25 @@ export function useQuerySurveys() {
             .order('created_at', { ascending: true })
         ]);
         
-        if (foldersResult.error && foldersResult.error.message?.includes("relation \"public.folders\" does not exist")) {
-          throw new Error("The folders table doesn't exist in the Supabase database. Please create the required tables first.");
+        // Better error handling with specific logging
+        if (foldersResult.error) {
+          console.error("Error fetching folders:", foldersResult.error);
+          if (foldersResult.error.message?.includes("relation \"public.folders\" does not exist")) {
+            throw new Error("The folders table doesn't exist in the Supabase database. Please create the required tables first.");
+          }
+          throw foldersResult.error;
         }
         
-        if (surveysResult.error && surveysResult.error.message?.includes("relation \"public.surveys\" does not exist")) {
-          throw new Error("The surveys table doesn't exist in the Supabase database. Please create the required tables first.");
+        if (surveysResult.error) {
+          console.error("Error fetching surveys:", surveysResult.error);
+          if (surveysResult.error.message?.includes("relation \"public.surveys\" does not exist")) {
+            throw new Error("The surveys table doesn't exist in the Supabase database. Please create the required tables first.");
+          }
+          throw surveysResult.error;
         }
         
-        if (foldersResult.error) throw foldersResult.error;
-        if (surveysResult.error) throw surveysResult.error;
+        console.log('Folders data:', foldersResult.data);
+        console.log('Surveys data:', surveysResult.data);
         
         const folders: SurveyFolder[] = foldersResult.data.map(folder => ({
           id: folder.id,
