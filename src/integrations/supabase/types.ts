@@ -155,10 +155,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_user_profile: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       generate_random_string: {
         Args: { length: number }
         Returns: string
