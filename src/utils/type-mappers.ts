@@ -1,7 +1,6 @@
 
-import { DbSurvey, DbSurveyResponse } from '@/types/database-types';
+import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
-import { Json } from '@/types/database';
 
 /**
  * Convert a database survey to a frontend survey

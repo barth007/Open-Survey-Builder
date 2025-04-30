@@ -1,4 +1,6 @@
 
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
 export type Database = {
   public: {
     Tables: {
@@ -121,8 +123,6 @@ export type Database = {
   };
 };
 
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
-
 type DefaultSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
@@ -233,3 +233,27 @@ export const Constants = {
     Enums: {},
   },
 } as const;
+
+/**
+ * Database Survey type - matches the structure in Supabase
+ */
+export interface DbSurvey {
+  id: string;
+  name: string;
+  description: string | null;
+  is_published: boolean | null;
+  questions: Json | null;
+  folder_id: string | null;
+  created_at: string | null;
+  user_id: string | null;
+}
+
+/**
+ * Database Survey Response type - matches the structure in Supabase
+ */
+export interface DbSurveyResponse {
+  id: string;
+  survey_id: string | null;
+  answers: Json;
+  submitted_at: string | null;
+}

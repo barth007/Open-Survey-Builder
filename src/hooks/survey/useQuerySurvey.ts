@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { dbSurveyToSurvey } from '@/utils/type-mappers';
-import { DbSurvey } from '@/types/database-types';
+import { DbSurvey } from '@/types/database';
 import { Survey } from '@/types/survey';
 
 export function useQuerySurvey(surveyId: string | undefined) {
