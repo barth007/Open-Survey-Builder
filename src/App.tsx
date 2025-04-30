@@ -63,7 +63,6 @@ const App = () => (
                   <Route path="/preview/:publicCode" element={<PublicSurveyPreview />} />
                   <Route path="/survey-response/:id" element={<RedirectSurveyResponse />} />
 
-
                   <Route path="*" element={<NotFound />} />
 
                 </Routes>
