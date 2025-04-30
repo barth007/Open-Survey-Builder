@@ -41,7 +41,7 @@ export function useProfile() {
           .from('profiles')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (fetchError) {
           console.error('Error fetching profile:', fetchError);

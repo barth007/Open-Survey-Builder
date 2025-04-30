@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // If the user just signed in, create or update their profile
+        // If the user just signed in, ensure they have a profile
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
@@ -48,9 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 .from('profiles')
                 .select('*')
                 .eq('user_id', currentSession.user!.id)
-                .single();
+                .maybeSingle();
                 
-              if (profileError) {
+              if (profileError && !profileError.message.includes('No rows found')) {
                 console.error('Error fetching profile:', profileError);
               }
 
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log('Creating new profile for user:', currentSession.user.id);
                 const { error: insertError } = await supabase
                   .from('profiles')
-                  .upsert({
+                  .insert({
                     user_id: currentSession.user!.id,
                     avatar_url: currentSession.user?.user_metadata?.avatar_url || null,
                     full_name: currentSession.user?.user_metadata?.full_name || null,

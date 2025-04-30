@@ -11,20 +11,22 @@ export function useQuerySurveyByPublicCode(publicCode: string | undefined) {
     queryFn: async () => {
       if (!publicCode) return null;
 
+      console.log('Fetching survey with public code:', publicCode);
+      
       const { data, error } = await supabase
         .from('surveys')
         .select('*')
         .eq('public_code', publicCode)
         .eq('is_published', true) // Only fetch published surveys
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.message?.includes("No rows found")) {
-          return null; // Survey not found or not published
-        }
+        console.error('Error fetching public survey:', error);
         throw error;
       }
 
+      console.log('Survey fetch result:', data ? 'Found' : 'Not found');
+      
       // Convert the database survey to our frontend survey format
       return data ? dbSurveyToSurvey(data as DbSurvey) : null;
     },
