@@ -18,7 +18,9 @@ const AccountSettingsTab = () => {
       console.error('Error signing out:', error);
       toast("Error", {
         description: "There was a problem signing out. Please try again.",
-        variant: "destructive"
+        // The sonner toast doesn't have a variant property in its type
+        // Using the correct property for error styling
+        style: { backgroundColor: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))' }
       });
     }
   };
