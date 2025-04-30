@@ -1,6 +1,7 @@
 
 import { DbSurvey, DbSurveyResponse } from '@/types/database-types';
-import { Survey, SurveyResponse, Question } from '@/types/survey';
+import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
+import { Json } from '@/types/database';
 
 /**
  * Convert a database survey to a frontend survey
@@ -42,7 +43,8 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     name: survey.title,
     description: survey.description,
     is_published: survey.isPublished,
-    questions: survey.questions,
+    // Cast questions to Json as it's stored as JSONB in the database
+    questions: survey.questions as unknown as Json,
     folder_id: survey.folderId
   };
 }
@@ -69,7 +71,8 @@ export function surveyResponseToDbSurveyResponse(response: SurveyResponse): Part
   return {
     id: response.id,
     survey_id: response.surveyId,
-    answers: response.answers,
+    // Cast answers to Json as it's stored as JSONB in the database
+    answers: response.answers as unknown as Json,
     submitted_at: response.submittedAt
   };
 }

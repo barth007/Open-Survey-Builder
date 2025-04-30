@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -43,7 +44,7 @@ const SurveyResponse = () => {
   // Helper to get survey title
   const getSurveyTitle = (): string => {
     if (!surveyData) return "Untitled Survey";
-    return surveyData.name || "Untitled Survey";
+    return surveyData.title || "Untitled Survey";
   };
 
   const handleSubmit = async () => {
@@ -58,8 +59,8 @@ const SurveyResponse = () => {
     }));
     
     try {
-      // Check if survey is published - use is_published from database response
-      const isPublished = surveyData.is_published === true;
+      // Check if survey is published - use isPublished from the Survey type
+      const isPublished = surveyData.isPublished === true;
       
       await submitResponse(surveyId, formattedAnswers, isPublished);
       
@@ -323,7 +324,7 @@ const SurveyResponse = () => {
     );
   }
 
-  const isPublished = surveyData.is_published === true;
+  const isPublished = surveyData.isPublished === true;
   const questions = getQuestions();
 
   return (
