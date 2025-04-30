@@ -1,8 +1,9 @@
+
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { useMutateSurvey } from './useMutateSurvey';
 import { Survey } from '@/types/survey';
-import { DbSurvey } from '@/types/database-types';
+import { DbSurvey } from '@/types/database';
 import { dbSurveyToSurvey } from '@/utils/type-mappers';
 
 export const useSurveyTitle = (surveyId: string | undefined) => {
