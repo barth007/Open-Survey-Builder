@@ -84,7 +84,8 @@ const Index = () => {
 
   const handleCopyLink = async () => {
     if (!surveyId) {
-      toast("Missing Survey ID", {
+      toast({
+        title: "Missing Survey ID",
         description: "Cannot generate a link without a survey ID",
       });
       return;
@@ -96,7 +97,8 @@ const Index = () => {
       const latestSurvey = queryClient.getQueryData(['survey', surveyId]) as any;
       
       if (!latestSurvey) {
-        toast("Error copying link", {
+        toast({
+          title: "Error copying link",
           description: "Could not retrieve the latest survey data"
         });
         return;
@@ -114,14 +116,16 @@ const Index = () => {
 
       navigator.clipboard.writeText(surveyUrl);
 
-      toast(isPublished ? "Survey Link Copied" : "Preview Link Copied", {
+      toast({
+        title: isPublished ? "Survey Link Copied" : "Preview Link Copied",
         description: isPublished
           ? "You have copied the Survey link"
           : "You have copied the Preview link",
       });
     } catch (error) {
       console.error("Error copying link:", error);
-      toast("Error copying link", {
+      toast({
+        title: "Error copying link",
         description: "Failed to copy the link to clipboard."
       });
     }
