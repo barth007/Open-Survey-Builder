@@ -15,15 +15,11 @@ const AccountSettingsTab = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        description: "You have been signed out successfully."
-      });
+      toast("You have been signed out successfully.");
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
-      toast({
-        description: "There was a problem signing out. Please try again."
-      });
+      toast("There was a problem signing out. Please try again.");
     }
   };
 

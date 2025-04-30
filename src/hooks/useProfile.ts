@@ -55,9 +55,7 @@ export function useProfile() {
         console.error('Error in profile fetch:', error);
         if (isMounted) {
           setError(error as Error);
-          toast({
-            description: "Couldn't load your profile information"
-          });
+          toast("Couldn't load your profile information");
         }
       } finally {
         if (isMounted) {
@@ -98,16 +96,12 @@ export function useProfile() {
       // Update local state with new values
       setProfile(prev => prev ? { ...prev, ...updatedData } : null);
       
-      toast({
-        description: "Your profile has been updated successfully"
-      });
+      toast("Your profile has been updated successfully");
       
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast({
-        description: "There was a problem updating your profile"
-      });
+      toast("There was a problem updating your profile");
       return false;
     }
   };
