@@ -5,6 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import PersonalInfoTab from '@/components/profile/PersonalInfoTab';
 import TeamTab from '@/components/profile/TeamTab';
 import AccountSettingsTab from '@/components/profile/AccountSettingsTab';
+import { Loader } from 'lucide-react';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState<"personal" | "team" | "settings">("personal");
@@ -13,7 +14,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>Loading profile...</p>
+        <Loader className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -21,7 +22,10 @@ const Profile = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>Error loading profile: {error.message}</p>
+        <div className="p-6 max-w-md mx-auto rounded-md shadow-md bg-destructive/10">
+          <h2 className="text-xl font-bold mb-2 text-destructive">Error Loading Profile</h2>
+          <p className="text-destructive-foreground">{error.message}</p>
+        </div>
       </div>
     );
   }

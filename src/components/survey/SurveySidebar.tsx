@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sidebar, SidebarGroup, SidebarContent } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
@@ -68,18 +69,17 @@ export function SurveySidebar() {
                 </div>
               ) : (
                 <>
-                  {surveyData?.folders && surveyData.folders.length > 0 && (
-                    <SurveyFolders
-                      folders={surveyData.folders}
-                      openFolders={openFolders}
-                      onToggleFolder={toggleFolder}
-                      onCreateFolder={handleCreateFolder}
-                      onCreateSurvey={createSurvey}
-                      onDeleteSurvey={deleteSurvey}
-                      onDeleteFolder={deleteFolder}
-                      onUpdateOrder={updateSurveyOrder}
-                    />
-                  )}
+                  {/* Always show the SurveyFolders component */}
+                  <SurveyFolders
+                    folders={surveyData?.folders || []}
+                    openFolders={openFolders}
+                    onToggleFolder={toggleFolder}
+                    onCreateFolder={handleCreateFolder}
+                    onCreateSurvey={createSurvey}
+                    onDeleteSurvey={deleteSurvey}
+                    onDeleteFolder={deleteFolder}
+                    onUpdateOrder={updateSurveyOrder}
+                  />
 
                   {surveyData?.unorganizedSurveys && (
                     <UnorganizedSurveys

@@ -46,8 +46,6 @@ const PublicSurvey = () => {
   const isPublished = surveyData.isPublished === true;
   const questions = getQuestions();
 
-  // Removed the conditional block that prevented unpublished surveys from being viewed
-
   return (
     <div className="min-h-screen bg-pebble py-8">
       <div className="container max-w-3xl">
@@ -56,9 +54,9 @@ const PublicSurvey = () => {
           <p className="text-gray-600 mb-6">{surveyData.description}</p>
 
           {!isPublished && (
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
-              <p className="text-amber-700 font-medium">Preview Mode</p>
-              <p className="text-amber-600 text-sm">This survey is in preview mode. Responses will not be saved.</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6 shadow-sm">
+              <p className="text-amber-800 font-medium text-base">Preview Mode</p>
+              <p className="text-amber-700 text-sm">This survey is currently unpublished. Responses will not be saved.</p>
             </div>
           )}
 
@@ -76,11 +74,11 @@ const PublicSurvey = () => {
 
           {questions.length > 0 && (
             <Button 
-              className="mt-4 bg-sunset hover:opacity-90"
+              className={`mt-4 ${isPublished ? 'bg-sunset' : 'bg-amber-500'} hover:opacity-90`}
               onClick={() => handleSubmit(isPublished)}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+              {isSubmitting ? 'Submitting...' : isPublished ? 'Submit' : 'Submit Preview'}
             </Button>
           )}
 

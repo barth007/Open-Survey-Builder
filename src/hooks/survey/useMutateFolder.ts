@@ -1,16 +1,23 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/providers/AuthProvider';
+import { toast } from '@/components/ui/sonner';
 
 export function useMutateFolder() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const createFolder = useMutation({
     mutationFn: async (name: string) => {
+      if (!user) {
+        throw new Error('You must be logged in to create folders');
+      }
+
       try {
         const { data, error } = await supabase
           .from('folders')
-          .insert([{ name }])
+          .insert([{ name, user_id: user.id }])
           .select()
           .single();
 
@@ -30,21 +37,28 @@ export function useMutateFolder() {
         return data;
       } catch (err) {
         console.error("Error in createFolderMutation:", err);
+        toast("Failed to create folder", { description: err instanceof Error ? err.message : "Unknown error" });
         throw err;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      toast("Folder created", { description: "Your folder has been created successfully" });
     }
   });
 
   const deleteFolder = useMutation({
     mutationFn: async (folderId: string) => {
+      if (!user) {
+        throw new Error('You must be logged in to delete folders');
+      }
+
       try {
         const { error } = await supabase
           .from('folders')
           .delete()
-          .eq('id', folderId);
+          .eq('id', folderId)
+          .eq('user_id', user.id);
 
         if (error) {
           if (error.message?.includes("relation \"public.folders\" does not exist")) {
@@ -54,11 +68,13 @@ export function useMutateFolder() {
         }
       } catch (err) {
         console.error("Error in deleteFolderMutation:", err);
+        toast("Failed to delete folder", { description: err instanceof Error ? err.message : "Unknown error" });
         throw err;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      toast("Folder deleted", { description: "Your folder has been deleted" });
     }
   });
 

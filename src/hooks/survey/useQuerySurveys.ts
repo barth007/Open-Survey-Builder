@@ -2,15 +2,31 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { SurveyFolder } from '@/types/survey-organization';
+import { useAuth } from '@/providers/AuthProvider';
 
 export function useQuerySurveys() {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ['surveys'],
+    queryKey: ['surveys', user?.id],
     queryFn: async () => {
       try {
+        if (!user) {
+          return { folders: [], unorganizedSurveys: [] };
+        }
+
         const [foldersResult, surveysResult] = await Promise.all([
-          supabase.from('folders').select('*').order('created_at', { ascending: true }),
-          supabase.from('surveys').select('*').order('created_at', { ascending: true })
+          supabase
+            .from('folders')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true }),
+          
+          supabase
+            .from('surveys')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true })
         ]);
         
         if (foldersResult.error && foldersResult.error.message?.includes("relation \"public.folders\" does not exist")) {
@@ -53,6 +69,7 @@ export function useQuerySurveys() {
         console.error("Error fetching survey data:", err);
         throw err;
       }
-    }
+    },
+    enabled: !!user
   });
 }
