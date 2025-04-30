@@ -56,7 +56,6 @@ export function useProfile() {
         if (isMounted) {
           setError(error as Error);
           toast({
-            title: "Profile Error",
             description: "Couldn't load your profile information"
           });
         }
@@ -100,7 +99,6 @@ export function useProfile() {
       setProfile(prev => prev ? { ...prev, ...updatedData } : null);
       
       toast({
-        title: "Profile updated",
         description: "Your profile has been updated successfully"
       });
       
@@ -108,7 +106,6 @@ export function useProfile() {
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
-        title: "Update failed",
         description: "There was a problem updating your profile"
       });
       return false;
