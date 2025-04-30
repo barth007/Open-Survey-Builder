@@ -7,7 +7,7 @@ import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import UserProfile from '@/components/UserProfile';
@@ -16,7 +16,6 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
   const { id: surveyId } = useParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -46,16 +45,13 @@ const Index = () => {
 
   useEffect(() => {
     let saveTimer: ReturnType<typeof setTimeout>;
-
     if (pendingChanges) {
       saveTimer = setTimeout(() => {
         handleSave();
         setPendingChanges(false);
-      }, 2000); // Save after 2 seconds of inactivity
+      }, 2000);
     }
-
     return () => {
-      
       if (saveTimer) clearTimeout(saveTimer);
     };
   }, [pendingChanges, handleSave]);
@@ -73,77 +69,47 @@ const Index = () => {
 
   const handleCopyLink = () => {
     if (!survey) return;
-
     const baseUrl = window.location.origin;
     const surveyUrl = survey.isPublished
       ? `${baseUrl}/survey/${survey.id}`
       : `${baseUrl}/preview/${survey.publicCode}`;
-
     navigator.clipboard.writeText(surveyUrl);
-
     toast({
-      title: survey.isPublished
-        ? "Survey Link Copied"
-        : "Preview Link Copied",
+      title: survey.isPublished ? "Survey Link Copied" : "Preview Link Copied",
       description: survey.isPublished
         ? "You have copied the Survey link"
         : "You have copied the Preview link"
     });
   };
 
-  const handleQuestionChange = (updatedQuestion: any) => {
-    updateQuestion(updatedQuestion);
-    setPendingChanges(true);
-  };
-
-  const handleDescriptionChangeWithTracking = (description: string) => {
-    handleDescriptionChange(description);
-    setPendingChanges(true);
-  };
-
-  const handleAddQuestion = () => {
-    addQuestion();
-    setPendingChanges(true);
-  };
-
-  const handleDeleteQuestion = (questionId: string) => {
-    deleteQuestion(questionId);
-    setPendingChanges(true);
-  };
-
-  const handleDuplicateQuestion = (question: any) => {
-    duplicateQuestion(question);
-    setPendingChanges(true);
-  };
+  const handleQuestionChange = (q: any) => { updateQuestion(q); setPendingChanges(true); };
+  const handleDescriptionChangeWithTracking = (desc: string) => { handleDescriptionChange(desc); setPendingChanges(true); };
+  const handleAddQuestion = () => { addQuestion(); setPendingChanges(true); };
+  const handleDeleteQuestion = (id: string) => { deleteQuestion(id); setPendingChanges(true); };
+  const handleDuplicateQuestion = (q: any) => { duplicateQuestion(q); setPendingChanges(true); };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-pebble">
+      <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-abyss rounded-full"></div>
+    </div>;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="text-center p-8 max-w-md text-magma">
-          <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
-          <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
-        </div>
+    return <div className="min-h-screen flex items-center justify-center bg-pebble">
+      <div className="text-center p-8 max-w-md text-magma">
+        <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
+        <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
       </div>
-    );
+    </div>;
   }
 
   if (!surveyId) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="text-center p-8 max-w-md">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Survey Builder</h2>
-          <p className="text-gray-600">Select a survey or create a new one to get started.</p>
-        </div>
+    return <div className="min-h-screen flex items-center justify-center bg-pebble">
+      <div className="text-center p-8 max-w-md">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Survey Builder</h2>
+        <p className="text-gray-600">Select a survey or create a new one to get started.</p>
       </div>
-    );
+    </div>;
   }
 
   return (
@@ -152,29 +118,19 @@ const Index = () => {
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
           <div className="flex items-center gap-2">
-            {pendingChanges && (
-              <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
-            )}
-
+            {pendingChanges && <span className="text-sm text-gray-500 italic mr-2">Saving...</span>}
             <div className="flex -space-x-2 mr-2">
-              {activeUsers.map(user => (
-                <UserProfile key={user.id} compact />
-              ))}
+              {activeUsers.map(user => <UserProfile key={user.id} compact />)}
             </div>
-
-
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex">
                     <Button
                       onClick={togglePublish}
-                      className={`
-                        ${survey.isPublished
-                          ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20"
-                          : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20"}
-                        rounded-r-none border-r
-                      `}
+                      className={survey.isPublished
+                        ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20 rounded-r-none border-r"
+                        : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20 rounded-r-none border-r"}
                     >
                       {survey.isPublished ? "Unpublish" : "Publish"}
                     </Button>
@@ -194,33 +150,32 @@ const Index = () => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div style={{ backgroundColor: 'yellow', padding: '10px' }}>
-            Debug Button Area
-            <button
-              style={{ padding: '6px 10px', backgroundColor: 'black', color: 'white' }}
-              onClick={() => {
-                const baseUrl = window.location.origin;
-                const url = survey.isPublished
-                  ? `${baseUrl}/survey/${survey.id}`
-                  : `${baseUrl}/preview/${survey.publicCode}`;
-                console.log("🔗 DEBUG COPY:", url);
-                navigator.clipboard.writeText(url);
-              }}
-            >
-              Copy Test
-            </button>
-          </div>
         </header>
+
+        {/* Debug button block for verifying link generation */}
+        <div className="bg-yellow-200 px-4 py-3 mb-6 text-center rounded">
+          <span className="font-semibold text-sm text-gray-800 mr-3">Debug:</span>
+          <button
+            className="bg-black text-white px-3 py-1 rounded text-sm"
+            onClick={() => {
+              const baseUrl = window.location.origin;
+              const url = survey.isPublished
+                ? `${baseUrl}/survey/${survey.id}`
+                : `${baseUrl}/preview/${survey.publicCode}`;
+              console.log("🔗 DEBUG COPY:", url);
+              navigator.clipboard.writeText(url);
+            }}
+          >
+            Copy Test Link
+          </button>
+        </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview" | "answers")} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3 bg-ice">
             <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
             <TabsTrigger value="preview" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Preview</TabsTrigger>
-            <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">
-              Answers
-            </TabsTrigger>
+            <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Answers</TabsTrigger>
           </TabsList>
-
           <TabsContent value="edit" className="space-y-4">
             <EditTab
               survey={survey}
@@ -232,11 +187,9 @@ const Index = () => {
               onAddQuestion={handleAddQuestion}
             />
           </TabsContent>
-
           <TabsContent value="preview" className="space-y-4">
             <PreviewTab survey={survey} />
           </TabsContent>
-
           <TabsContent value="answers" className="space-y-4">
             <AnswersTab survey={survey} />
           </TabsContent>
