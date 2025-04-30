@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import UserProfile from '@/components/UserProfile';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
+import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
@@ -36,6 +38,7 @@ const Index = () => {
   } = useSurveyState(surveyId);
 
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     if (survey.title) {
@@ -67,43 +70,62 @@ const Index = () => {
     }
   };
 
-  const handleCopyLink = () => {
-    const baseUrl = window.location.origin;
+  const handleTogglePublish = async () => {
+    setIsPublishing(true);
+    try {
+      await togglePublish();
+      // The togglePublish function already invalidates the query
+    } catch (error) {
+      console.error("Error toggling publish state:", error);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
-    const isPublished = survey.isPublished;
-    const hasPublicCode = !!survey.publicCode;
-
-    console.log("🔁 Current state →", {
-      isPublished,
-      id: survey.id,
-      publicCode: survey.publicCode,
-    });
-
-    if (!survey.id) {
-      toast({
-        title: "Missing Survey ID",
+  const handleCopyLink = async () => {
+    if (!surveyId) {
+      toast("Missing Survey ID", {
         description: "Cannot generate a link without a survey ID",
-        variant: "destructive",
       });
       return;
     }
 
-    const surveyUrl = isPublished
-      ? `${baseUrl}/survey/${survey.id}`
-      : hasPublicCode
-        ? `${baseUrl}/preview/${survey.publicCode}`
-        : `${baseUrl}/survey/${survey.id}`; // fallback
+    try {
+      // Ensure we have the most up-to-date survey data
+      await queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+      const latestSurvey = queryClient.getQueryData(['survey', surveyId]) as any;
+      
+      if (!latestSurvey) {
+        toast("Error copying link", {
+          description: "Could not retrieve the latest survey data"
+        });
+        return;
+      }
 
-    navigator.clipboard.writeText(surveyUrl);
+      const baseUrl = window.location.origin;
+      const isPublished = latestSurvey.isPublished;
+      const hasPublicCode = !!latestSurvey.publicCode;
+      
+      const surveyUrl = isPublished
+        ? `${baseUrl}/survey/${latestSurvey.id}`
+        : hasPublicCode
+          ? `${baseUrl}/preview/${latestSurvey.publicCode}`
+          : `${baseUrl}/survey/${latestSurvey.id}`; // fallback
 
-    toast({
-      title: isPublished ? "Survey Link Copied" : "Preview Link Copied",
-      description: isPublished
-        ? "You have copied the Survey link"
-        : "You have copied the Preview link",
-    });
+      navigator.clipboard.writeText(surveyUrl);
+
+      toast(isPublished ? "Survey Link Copied" : "Preview Link Copied", {
+        description: isPublished
+          ? "You have copied the Survey link"
+          : "You have copied the Preview link",
+      });
+    } catch (error) {
+      console.error("Error copying link:", error);
+      toast("Error copying link", {
+        description: "Failed to copy the link to clipboard."
+      });
+    }
   };
-
 
   const handleQuestionChange = (q: any) => { updateQuestion(q); setPendingChanges(true); };
   const handleDescriptionChangeWithTracking = (desc: string) => { handleDescriptionChange(desc); setPendingChanges(true); };
@@ -150,16 +172,18 @@ const Index = () => {
                 <TooltipTrigger asChild>
                   <div className="flex">
                     <Button
-                      onClick={togglePublish}
+                      onClick={handleTogglePublish}
+                      disabled={isPublishing}
                       className={survey.isPublished
                         ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20 rounded-r-none border-r"
                         : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20 rounded-r-none border-r"}
                     >
-                      {survey.isPublished ? "Unpublish" : "Publish"}
+                      {isPublishing ? "Updating..." : survey.isPublished ? "Unpublish" : "Publish"}
                     </Button>
                     <Button
                       className="bg-transparent text-gray-500 hover:bg-gray-100 rounded-l-none pl-2"
                       onClick={handleCopyLink}
+                      disabled={isPublishing}
                     >
                       <Link2 size={18} />
                     </Button>
@@ -172,26 +196,13 @@ const Index = () => {
                 )}
               </Tooltip>
             </TooltipProvider>
+            
+            {/* Adding the ShareSurveyButton component */}
+            <ShareSurveyButton survey={survey} />
           </div>
         </header>
 
-        {/* Debug button block for verifying link generation */}
-        <div className="bg-yellow-200 px-4 py-3 mb-6 text-center rounded">
-          <span className="font-semibold text-sm text-gray-800 mr-3">Debug:</span>
-          <button
-            className="bg-black text-white px-3 py-1 rounded text-sm"
-            onClick={() => {
-              const baseUrl = window.location.origin;
-              const url = survey.isPublished
-                ? `${baseUrl}/survey/${survey.id}`
-                : `${baseUrl}/preview/${survey.publicCode}`;
-              console.log("🔗 DEBUG COPY:", url);
-              navigator.clipboard.writeText(url);
-            }}
-          >
-            Copy Test Link
-          </button>
-        </div>
+        {/* Debug button removed as it's no longer needed with the improved functionality */}
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview" | "answers")} className="space-y-4">
           <TabsList className="grid w-full grid-cols-3 bg-ice">
