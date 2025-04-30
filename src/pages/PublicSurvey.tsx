@@ -46,16 +46,7 @@ const PublicSurvey = () => {
   const isPublished = surveyData.isPublished === true;
   const questions = getQuestions();
 
-  if (!isPublished) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="text-center p-8 max-w-md text-magma">
-          <h2 className="text-2xl font-semibold mb-4">Survey Not Available</h2>
-          <p>This survey is not currently published and cannot be accessed.</p>
-        </div>
-      </div>
-    );
-  }
+  // Removed the conditional block that prevented unpublished surveys from being viewed
 
   return (
     <div className="min-h-screen bg-pebble py-8">
@@ -63,6 +54,13 @@ const PublicSurvey = () => {
         <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
           <h2 className="text-2xl font-bold mb-2 text-carbon">{surveyData.title}</h2>
           <p className="text-gray-600 mb-6">{surveyData.description}</p>
+
+          {!isPublished && (
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
+              <p className="text-amber-700 font-medium">Preview Mode</p>
+              <p className="text-amber-600 text-sm">This survey is in preview mode. Responses will not be saved.</p>
+            </div>
+          )}
 
           {questions.map((question, index) => (
             isQuestionVisible(question) && (

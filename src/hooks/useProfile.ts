@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 export type Profile = {
-  user_id: string;
+  id: string;  // Changed from user_id to id
   avatar_url: string | null;
   full_name: string | null;
   bio: string | null;
@@ -40,7 +40,7 @@ export function useProfile() {
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('id', user.id)  // Changed from user_id to id
           .maybeSingle();
 
         if (fetchError) {
@@ -93,7 +93,7 @@ export function useProfile() {
       const { error: updateError } = await supabase
         .from('profiles')
         .update(updatedData)
-        .eq('user_id', user.id);
+        .eq('id', user.id);  // Changed from user_id to id
 
       if (updateError) {
         throw updateError;

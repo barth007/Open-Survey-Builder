@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const { data: existingProfile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('user_id', currentSession.user!.id)
+                .eq('id', currentSession.user!.id)  // Changed from user_id to id
                 .maybeSingle();
                 
               if (profileError && !profileError.message.includes('No rows found')) {
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { error: insertError } = await supabase
                   .from('profiles')
                   .insert({
-                    user_id: currentSession.user!.id,
+                    id: currentSession.user!.id,  // Changed from user_id to id
                     avatar_url: currentSession.user?.user_metadata?.avatar_url || null,
                     full_name: currentSession.user?.user_metadata?.full_name || null,
                     updated_at: new Date().toISOString()

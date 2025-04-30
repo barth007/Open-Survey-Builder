@@ -17,7 +17,7 @@ export function useQuerySurveyByPublicCode(publicCode: string | undefined) {
         .from('surveys')
         .select('*')
         .eq('public_code', publicCode)
-        .eq('is_published', true) // Only fetch published surveys
+        // Removed the is_published filter to allow fetching unpublished surveys for preview
         .maybeSingle();
 
       if (error) {
