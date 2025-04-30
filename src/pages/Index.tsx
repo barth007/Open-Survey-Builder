@@ -19,9 +19,9 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   const { activeUsers } = useActiveUsers(surveyId);
-  
+
   const {
     survey,
     handleTitleChange,
@@ -46,14 +46,14 @@ const Index = () => {
 
   useEffect(() => {
     let saveTimer: ReturnType<typeof setTimeout>;
-    
+
     if (pendingChanges) {
       saveTimer = setTimeout(() => {
         handleSave();
         setPendingChanges(false);
       }, 2000); // Save after 2 seconds of inactivity
     }
-    
+
     return () => {
       if (saveTimer) clearTimeout(saveTimer);
     };
@@ -72,23 +72,23 @@ const Index = () => {
 
   const handleCopyLink = () => {
     if (!survey) return;
-  
+
     const baseUrl = window.location.origin;
     const surveyUrl = survey.isPublished
       ? `${baseUrl}/survey/${survey.id}`
       : `${baseUrl}/preview/${survey.publicCode}`;
-  
+
     navigator.clipboard.writeText(surveyUrl);
-  
+
     toast({
-      title: survey.isPublished 
-        ? "Survey Link Copied" 
+      title: survey.isPublished
+        ? "Survey Link Copied"
         : "Preview Link Copied",
       description: survey.isPublished
         ? "You have copied the Survey link"
         : "You have copied the Preview link"
     });
-  };  
+  };
 
   const handleQuestionChange = (updatedQuestion: any) => {
     updateQuestion(updatedQuestion);
@@ -154,22 +154,41 @@ const Index = () => {
             {pendingChanges && (
               <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
             )}
-            
+
             <div className="flex -space-x-2 mr-2">
               {activeUsers.map(user => (
                 <UserProfile key={user.id} compact />
               ))}
             </div>
-            
+
+            <button
+              onClick={() => {
+                const baseUrl = window.location.origin;
+                const fakeSurvey = {
+                  id: "123",
+                  publicCode: "abc",
+                  isPublished: false
+                };
+                const link = fakeSurvey.isPublished
+                  ? `${baseUrl}/survey/${fakeSurvey.id}`
+                  : `${baseUrl}/preview/${fakeSurvey.publicCode}`;
+                console.log("Testing link copy:", link);
+                navigator.clipboard.writeText(link);
+              }}
+              className="ml-2 px-3 py-1 bg-sky-200 rounded text-sm text-sky-800"
+            >
+              Test Copy
+            </button>
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex">
-                    <Button 
-                      onClick={togglePublish} 
+                    <Button
+                      onClick={togglePublish}
                       className={`
-                        ${survey.isPublished 
-                          ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20" 
+                        ${survey.isPublished
+                          ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20"
                           : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20"}
                         rounded-r-none border-r
                       `}
