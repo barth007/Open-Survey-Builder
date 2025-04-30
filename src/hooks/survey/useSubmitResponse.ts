@@ -12,29 +12,18 @@ export function useSubmitResponse() {
     mutationFn: async ({ 
       surveyId, 
       answers, 
-      saveToDatabase,
-      participantId,
       metadata 
     }: { 
       surveyId: string; 
       answers: Answer[]; 
-      saveToDatabase: boolean;
-      participantId?: string;
       metadata?: Record<string, any>;
     }) => {
-      // If the survey isn't published, don't save to database
-      if (!saveToDatabase) {
-        console.log('Survey is not published, responses will not be saved');
-        return { success: true, preview: true };
-      }
-
       try {
         const surveyResponse = {
           id: crypto.randomUUID(),
           surveyId,
           answers,
           submittedAt: new Date().toISOString(),
-          participantId,
           metadata
         };
 
@@ -47,7 +36,6 @@ export function useSubmitResponse() {
             survey_id: dbResponse.survey_id,
             answers: dbResponse.answers,
             submitted_at: dbResponse.submitted_at,
-            participant_id: participantId,
             metadata: metadata || {}
           });
 
@@ -64,34 +52,8 @@ export function useSubmitResponse() {
     }
   });
 
-  const submitResponse = async (
-    surveyId: string, 
-    answers: Answer[], 
-    isPublished: boolean,
-    participantId?: string,
-    metadata?: Record<string, any>
-  ) => {
-    try {
-      return await mutation.mutateAsync({ 
-        surveyId, 
-        answers, 
-        saveToDatabase: isPublished,
-        participantId,
-        metadata
-      });
-    } catch (error) {
-      console.error("Failed to submit response:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem submitting your response",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
   return {
-    submitResponse,
+    submitResponse: mutation.mutateAsync,
     isSubmitting: mutation.isPending
   };
 }

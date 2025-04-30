@@ -88,7 +88,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{survey.name}</h1>
+        <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
         {survey.description && (
           <p className="text-muted-foreground">{survey.description}</p>
         )}

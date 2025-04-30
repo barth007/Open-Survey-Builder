@@ -9,7 +9,6 @@ import { Survey } from '@/types/survey';
 const mapToSurvey = (data: any): Survey => {
   return {
     id: data.id,
-    name: data.title || data.name,
     title: data.title || data.name,
     description: data.description,
     questions: data.questions || [],
@@ -17,7 +16,7 @@ const mapToSurvey = (data: any): Survey => {
     createdAt: new Date(data.created_at),
     updatedAt: data.updated_at ? new Date(data.updated_at) : undefined,
     folderId: data.folder_id,
-    public_code: data.public_code,
+    publicCode: data.public_code,
   };
 };
 
