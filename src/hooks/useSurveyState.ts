@@ -31,11 +31,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
   } = useQuestionManagement(survey.questions);
 
   useEffect(() => {
+    setSurvey(surveyData || survey); // always sync when surveyData updates
     if (surveyData) {
-      setSurvey(surveyData);
       setQuestions(surveyData.questions);
     }
-  }, [surveyData, setQuestions]);
+  }, [surveyData, setQuestions]);  
 
   const handleDescriptionChange = (description: string) => {
     setSurvey((prev) => ({ ...prev, description }));
