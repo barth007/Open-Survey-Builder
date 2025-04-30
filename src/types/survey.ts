@@ -1,3 +1,4 @@
+
 export type QuestionType = 'text' | 'multipleChoice' | 'checkboxes' | 'likert5' | 'likert7' | 'likert10';
 
 export type MediaType = 'image' | 'video' | 'gif';
@@ -34,27 +35,37 @@ export interface Question {
   isVisible?: boolean;
 }
 
+/**
+ * Front-end Survey interface - used throughout the application UI
+ */
 export interface Survey {
   id: string;
   title: string;
   description: string;
   questions: Question[];
   isPublished: boolean;
+  folderId?: string;
   sharableLink?: string;
   responseLimit?: number;
   responses?: SurveyResponse[];
 }
 
+/**
+ * Front-end Answer interface - represents a user's answer to a question
+ */
+export interface Answer {
+  questionId: string;
+  value: string | string[];
+}
+
+/**
+ * Front-end SurveyResponse interface - represents a completed survey submission
+ */
 export interface SurveyResponse {
   id: string;
   surveyId: string;
   answers: Answer[];
   submittedAt: string;
-}
-
-export interface Answer {
-  questionId: string;
-  value: string | string[];
 }
 
 export const LIKERT_5_LABELS = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];

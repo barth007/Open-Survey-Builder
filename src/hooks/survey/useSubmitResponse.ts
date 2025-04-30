@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Answer } from '@/types/survey';
 import { useToast } from '@/hooks/use-toast';
+import { surveyResponseToDbSurveyResponse } from '@/utils/type-mappers';
 
 export function useSubmitResponse() {
   const { toast } = useToast();
@@ -24,17 +25,22 @@ export function useSubmitResponse() {
       }
 
       try {
-        const formattedAnswers = answers.map(answer => ({
-          questionId: answer.questionId,
-          value: answer.value
-        }));
+        const surveyResponse = {
+          id: crypto.randomUUID(),
+          surveyId,
+          answers,
+          submittedAt: new Date().toISOString()
+        };
+
+        // Convert to database format
+        const dbResponse = surveyResponseToDbSurveyResponse(surveyResponse);
 
         const { data, error } = await supabase
           .from('survey_responses')
           .insert({
-            survey_id: surveyId,
-            answers: formattedAnswers,
-            submitted_at: new Date().toISOString()
+            survey_id: dbResponse.survey_id,
+            answers: dbResponse.answers,
+            submitted_at: dbResponse.submitted_at
           });
 
         if (error) {

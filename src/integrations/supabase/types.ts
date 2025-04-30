@@ -78,6 +78,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_survey_responses_survey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "survey_responses_survey_id_fkey"
             columns: ["survey_id"]
             isOneToOne: false
@@ -119,6 +126,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_surveys_folder"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "surveys_folder_id_fkey"
             columns: ["folder_id"]
             isOneToOne: false
@@ -126,130 +140,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      team_invitations: {
-        Row: {
-          accepted: boolean | null
-          email: string
-          id: string
-          invited_at: string
-          role: string
-          team_id: string
-        }
-        Insert: {
-          accepted?: boolean | null
-          email: string
-          id?: string
-          invited_at?: string
-          role: string
-          team_id: string
-        }
-        Update: {
-          accepted?: boolean | null
-          email?: string
-          id?: string
-          invited_at?: string
-          role?: string
-          team_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "team_invitations_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      team_members: {
-        Row: {
-          email: string | null
-          id: string
-          joined_at: string | null
-          role: string
-          team_id: string | null
-        }
-        Insert: {
-          email?: string | null
-          id?: string
-          joined_at?: string | null
-          role?: string
-          team_id?: string | null
-        }
-        Update: {
-          email?: string | null
-          id?: string
-          joined_at?: string | null
-          role?: string
-          team_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "team_members_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      team_surveys: {
-        Row: {
-          id: string
-          survey_id: string
-          team_id: string
-        }
-        Insert: {
-          id?: string
-          survey_id: string
-          team_id: string
-        }
-        Update: {
-          id?: string
-          survey_id?: string
-          team_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "team_surveys_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "team_surveys_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      teams: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          profile_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          profile_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          profile_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {

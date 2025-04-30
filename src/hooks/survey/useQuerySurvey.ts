@@ -1,6 +1,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { dbSurveyToSurvey } from '@/utils/type-mappers';
+import { DbSurvey } from '@/types/database-types';
+import { Survey } from '@/types/survey';
 
 export function useQuerySurvey(surveyId: string | undefined) {
   return useQuery({
@@ -21,7 +24,8 @@ export function useQuerySurvey(surveyId: string | undefined) {
         throw error;
       }
 
-      return data;
+      // Convert the database survey to our frontend survey format
+      return data ? dbSurveyToSurvey(data as DbSurvey) : null;
     },
     enabled: !!surveyId
   });
