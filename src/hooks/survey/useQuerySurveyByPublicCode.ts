@@ -1,5 +1,25 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Survey } from '@/types/survey';
+
+/**
+ * Maps the database survey record to the Survey type
+ */
+const mapToSurvey = (data: any): Survey => {
+  return {
+    id: data.id,
+    name: data.title || data.name,
+    title: data.title || data.name,
+    description: data.description,
+    questions: data.questions || [],
+    isPublished: data.is_published,
+    createdAt: new Date(data.created_at),
+    updatedAt: data.updated_at ? new Date(data.updated_at) : undefined,
+    folderId: data.folder_id,
+    public_code: data.public_code,
+  };
+};
 
 /**
  * Custom hook to fetch a survey by its public code

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
-import QuestionRenderer from '@/components/survey/response/QuestionRenderer';
+import { QuestionRenderer } from '@/components/survey/response/QuestionRenderer';
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { useSubmitResponse } from '@/hooks/survey/useSubmitResponse';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,9 @@ interface PublicSurveyProps {
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   const { publicCode } = useParams<{ publicCode: string }>();
-  const { survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
-  const { answers, updateAnswer, validateAnswers } = useSurveyResponseLogic(survey);
-  const { submitResponse, isSubmitting } = useSubmitResponse();
+  const { data: survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
+  const { answers, handleAnswerChange, isSubmitting } = useSurveyResponseLogic(survey?.id);
+  const { submitResponse } = useSubmitResponse();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,17 +26,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     try {
       if (!survey) return;
       
-      const validation = validateAnswers(survey.questions || []);
-      
-      if (!validation.valid) {
-        toast("Please complete all required fields", {
-          description: "Some required questions haven't been answered",
-        });
-        return;
-      }
-
+      // In preview mode, don't actually submit the response
       if (isPreviewMode) {
-        // In preview mode, don't actually submit the response
         toast("Preview Submission", {
           description: "This is a preview. Your response has not been recorded.",
         });
@@ -59,7 +50,6 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       console.error("Error submitting response:", error);
       toast("Submission failed", {
         description: "There was an error submitting your response",
-        variant: "destructive",
       });
     }
   };
@@ -89,7 +79,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     <div className="container max-w-3xl py-10 px-4">
       {/* Preview Mode Banner */}
       {isPreviewMode && (
-        <Alert variant="warning" className="mb-6 border-amber-500 bg-amber-50">
+        <Alert className="mb-6 border-amber-500 bg-amber-50">
           <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
           <AlertDescription className="text-amber-700">
             This is a preview of your survey. Responses submitted here will not be recorded.
@@ -109,8 +99,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           <QuestionRenderer
             key={question.id || index}
             question={question}
-            onChange={(value) => updateAnswer(question.id || `q-${index}`, value)}
-            value={answers[question.id || `q-${index}`]}
+            answers={answers}
+            onAnswerChange={handleAnswerChange}
           />
         ))}
 
