@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,14 @@ import SurveyResponse from "@/pages/SurveyResponse";
 import PublicSurvey from "@/pages/PublicSurvey";
 import PublicSurveyPreview from '@/pages/preview/PublicSurveyPreview';
 import Profile from './pages/Profile';
+import { useLocation } from "react-router-dom";
+
+const RedirectSurveyResponse = () => {
+  const location = useLocation();
+  const id = location.pathname.split("/").pop();
+  return <Navigate to={`/survey/${id}`} replace />;
+};
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,9 +61,11 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="/preview/:publicCode" element={<PublicSurveyPreview />} />
-                  <Route path="/survey-response/:id" element={<Navigate to="/survey/:id" replace />} />
+                  <Route path="/survey-response/:id" element={<RedirectSurveyResponse />} />
+
+
                   <Route path="*" element={<NotFound />} />
-                  
+
                 </Routes>
               </main>
             </div>
