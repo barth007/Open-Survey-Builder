@@ -55,6 +55,7 @@ const Index = () => {
     }
 
     return () => {
+      
       if (saveTimer) clearTimeout(saveTimer);
     };
   }, [pendingChanges, handleSave]);
@@ -161,28 +162,6 @@ const Index = () => {
               ))}
             </div>
 
-            <button
-              onClick={() => {
-                const baseUrl = window.location.origin;
-                const fakeSurvey = {
-                  id: "123",
-                  publicCode: "abc",
-                  isPublished: false
-                };
-                const link = fakeSurvey.isPublished
-                  ? `${baseUrl}/survey/${fakeSurvey.id}`
-                  : `${baseUrl}/preview/${fakeSurvey.publicCode}`;
-                console.log("Testing link copy:", link);
-                navigator.clipboard.writeText(link);
-              }}
-              className="ml-2 px-3 py-1 bg-sky-200 rounded text-sm text-sky-800"
-            >
-              Test Copy
-            </button>
-            <Button onClick={handleCopyLink} className="bg-violet-500 text-white px-3 py-1 rounded">
-              Copy Link (Debug)
-            </Button>
-
 
             <TooltipProvider>
               <Tooltip>
@@ -214,6 +193,22 @@ const Index = () => {
                 )}
               </Tooltip>
             </TooltipProvider>
+          </div>
+          <div style={{ backgroundColor: 'yellow', padding: '10px' }}>
+            Debug Button Area
+            <button
+              style={{ padding: '6px 10px', backgroundColor: 'black', color: 'white' }}
+              onClick={() => {
+                const baseUrl = window.location.origin;
+                const url = survey.isPublished
+                  ? `${baseUrl}/survey/${survey.id}`
+                  : `${baseUrl}/preview/${survey.publicCode}`;
+                console.log("🔗 DEBUG COPY:", url);
+                navigator.clipboard.writeText(url);
+              }}
+            >
+              Copy Test
+            </button>
           </div>
         </header>
 
