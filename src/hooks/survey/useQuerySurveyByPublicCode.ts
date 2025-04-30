@@ -13,8 +13,8 @@ const mapToSurvey = (data: any): Survey => {
     description: data.description,
     questions: data.questions || [],
     isPublished: data.is_published,
-    createdAt: new Date(data.created_at),
-    updatedAt: data.updated_at ? new Date(data.updated_at) : undefined,
+    // Match property names with the Survey type definition
+    // The Survey type doesn't have createdAt/updatedAt properties
     folderId: data.folder_id,
     publicCode: data.public_code,
   };

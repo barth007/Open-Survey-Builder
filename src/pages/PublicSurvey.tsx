@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Answer } from '@/types/survey';
 
 interface PublicSurveyProps {
-  isPreviewMode?: boolean; // New prop to indicate if this is preview mode
+  isPreviewMode?: boolean; // Prop to indicate if this is preview mode
 }
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
@@ -34,9 +35,15 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
         return;
       }
 
+      // Transform answers from Record to Answer[] format
+      const formattedAnswers: Answer[] = Object.entries(answers).map(([questionId, value]) => ({
+        questionId,
+        value
+      }));
+
       await submitResponse({
         surveyId: survey.id,
-        answers,
+        answers: formattedAnswers,
         metadata: {
           submitTime: new Date().toISOString(),
           userAgent: navigator.userAgent,
