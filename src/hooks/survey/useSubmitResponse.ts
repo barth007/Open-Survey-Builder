@@ -12,11 +12,15 @@ export function useSubmitResponse() {
     mutationFn: async ({ 
       surveyId, 
       answers, 
-      saveToDatabase 
+      saveToDatabase,
+      participantId,
+      metadata 
     }: { 
       surveyId: string; 
       answers: Answer[]; 
       saveToDatabase: boolean;
+      participantId?: string;
+      metadata?: Record<string, any>;
     }) => {
       // If the survey isn't published, don't save to database
       if (!saveToDatabase) {
@@ -29,7 +33,9 @@ export function useSubmitResponse() {
           id: crypto.randomUUID(),
           surveyId,
           answers,
-          submittedAt: new Date().toISOString()
+          submittedAt: new Date().toISOString(),
+          participantId,
+          metadata
         };
 
         // Convert to database format
@@ -40,7 +46,9 @@ export function useSubmitResponse() {
           .insert({
             survey_id: dbResponse.survey_id,
             answers: dbResponse.answers,
-            submitted_at: dbResponse.submitted_at
+            submitted_at: dbResponse.submitted_at,
+            participant_id: participantId,
+            metadata: metadata || {}
           });
 
         if (error) {
@@ -56,12 +64,20 @@ export function useSubmitResponse() {
     }
   });
 
-  const submitResponse = async (surveyId: string, answers: Answer[], isPublished: boolean) => {
+  const submitResponse = async (
+    surveyId: string, 
+    answers: Answer[], 
+    isPublished: boolean,
+    participantId?: string,
+    metadata?: Record<string, any>
+  ) => {
     try {
       return await mutation.mutateAsync({ 
         surveyId, 
         answers, 
-        saveToDatabase: isPublished 
+        saveToDatabase: isPublished,
+        participantId,
+        metadata
       });
     } catch (error) {
       console.error("Failed to submit response:", error);

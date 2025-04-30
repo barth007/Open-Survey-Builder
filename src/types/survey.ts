@@ -48,6 +48,7 @@ export interface Survey {
   sharableLink?: string;
   responseLimit?: number;
   responses?: SurveyResponse[];
+  publicCode?: string; // Added public code field
 }
 
 /**
@@ -66,6 +67,8 @@ export interface SurveyResponse {
   surveyId: string;
   answers: Answer[];
   submittedAt: string;
+  participantId?: string; // Added participant ID field
+  metadata?: Record<string, any>; // Added metadata field
 }
 
 export const LIKERT_5_LABELS = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];

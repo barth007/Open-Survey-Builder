@@ -61,18 +61,24 @@ export type Database = {
         Row: {
           answers: Json
           id: string
+          metadata: Json | null
+          participant_id: string | null
           submitted_at: string | null
           survey_id: string | null
         }
         Insert: {
           answers: Json
           id?: string
+          metadata?: Json | null
+          participant_id?: string | null
           submitted_at?: string | null
           survey_id?: string | null
         }
         Update: {
           answers?: Json
           id?: string
+          metadata?: Json | null
+          participant_id?: string | null
           submitted_at?: string | null
           survey_id?: string | null
         }
@@ -101,6 +107,7 @@ export type Database = {
           id: string
           is_published: boolean | null
           name: string
+          public_code: string | null
           questions: Json | null
           user_id: string | null
         }
@@ -111,6 +118,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           name: string
+          public_code?: string | null
           questions?: Json | null
           user_id?: string | null
         }
@@ -121,6 +129,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           name?: string
+          public_code?: string | null
           questions?: Json | null
           user_id?: string | null
         }
@@ -149,6 +158,10 @@ export type Database = {
       create_user_profile: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      generate_random_string: {
+        Args: { length: number }
+        Returns: string
       }
     }
     Enums: {

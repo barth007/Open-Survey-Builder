@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Question, Answer } from '@/types/survey';
 import { useSubmitResponse } from './useSubmitResponse';
 import { useToast } from "@/hooks/use-toast";
+import { getParticipantId, collectMetadata } from '@/utils/participantUtils';
 
 export function useSurveyResponseLogic(surveyId: string | undefined) {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
@@ -61,7 +62,11 @@ export function useSurveyResponseLogic(surveyId: string | undefined) {
     }));
     
     try {
-      await submitResponse(surveyId, formattedAnswers, isPublished);
+      // Collect participant ID and metadata
+      const participantId = getParticipantId();
+      const metadata = await collectMetadata();
+      
+      await submitResponse(surveyId, formattedAnswers, isPublished, participantId, metadata);
       
       // Show different messages based on whether responses are being saved
       if (isPublished) {
