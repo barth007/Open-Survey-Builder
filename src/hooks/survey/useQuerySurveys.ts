@@ -15,7 +15,7 @@ export function useQuerySurveys() {
           return { folders: [], unorganizedSurveys: [] };
         }
 
-        // Log that we're fetching data to help with debugging
+        // Enhanced logging to debug folder retrieval issues
         console.log('Fetching folders and surveys for user:', user.id);
 
         const [foldersResult, surveysResult] = await Promise.all([
@@ -35,20 +35,15 @@ export function useQuerySurveys() {
         // Better error handling with specific logging
         if (foldersResult.error) {
           console.error("Error fetching folders:", foldersResult.error);
-          if (foldersResult.error.message?.includes("relation \"public.folders\" does not exist")) {
-            throw new Error("The folders table doesn't exist in the Supabase database. Please create the required tables first.");
-          }
           throw foldersResult.error;
         }
         
         if (surveysResult.error) {
           console.error("Error fetching surveys:", surveysResult.error);
-          if (surveysResult.error.message?.includes("relation \"public.surveys\" does not exist")) {
-            throw new Error("The surveys table doesn't exist in the Supabase database. Please create the required tables first.");
-          }
           throw surveysResult.error;
         }
         
+        // Debug log the results to see what's coming back from the database
         console.log('Folders data:', foldersResult.data);
         console.log('Surveys data:', surveysResult.data);
         

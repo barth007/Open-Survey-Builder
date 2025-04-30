@@ -65,7 +65,7 @@ const App = () => (
                   />
                   {/* Public survey access */}
                   <Route path="/p/:publicCode" element={<PublicSurvey />} />
-                  {/* New preview route for unpublished surveys */}
+                  {/* New preview route for unpublished surveys - not wrapped in ProtectedRoute */}
                   <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
