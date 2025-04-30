@@ -179,6 +179,10 @@ const Index = () => {
             >
               Test Copy
             </button>
+            <Button onClick={handleCopyLink} className="bg-violet-500 text-white px-3 py-1 rounded">
+              Copy Link (Debug)
+            </Button>
+
 
             <TooltipProvider>
               <Tooltip>
