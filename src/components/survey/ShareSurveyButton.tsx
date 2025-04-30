@@ -25,7 +25,9 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ survey }) 
     );
   }
   
-  const publicUrl = `${window.location.origin}/p/${survey.publicCode}`;
+  const publicUrl = survey.isPublished
+  ? `${window.location.origin}/survey/${survey.id}`
+  : `${window.location.origin}/preview/${survey.publicCode}`;
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(publicUrl);
