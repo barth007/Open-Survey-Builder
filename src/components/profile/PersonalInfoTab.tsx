@@ -18,17 +18,15 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [website, setWebsite] = useState(profile?.website || '');
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
   const [isSaving, setIsSaving] = useState(false);
+  
+  console.log("PersonalInfoTab rendering with profile:", profile);
   
   useEffect(() => {
     // Update local state when profile changes
     if (profile) {
       setFullName(profile.full_name || '');
-      setBio(profile.bio || '');
-      setWebsite(profile.website || '');
       setAvatarUrl(profile.avatar_url || '');
     }
   }, [profile]);
@@ -41,18 +39,20 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
       setIsSaving(true);
       const success = await updateProfile({
         full_name: fullName,
-        bio,
-        website,
         avatar_url: avatarUrl
       });
 
       if (success) {
-        toast("Profile updated", { description: "Your profile has been updated successfully." });
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully."
+        });
         setIsEditing(false); // Switch to non-edit mode after saving
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast("Profile Update Error", {
+      toast({
+        title: "Profile Update Error",
         description: "There was an error updating your profile."
       });
     } finally {
@@ -84,7 +84,7 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
           </Avatar>
           <div>
             <h2 className="text-2xl font-semibold">{profile?.full_name || user?.email?.split('@')[0] || 'User'}</h2>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <p className="text-sm text-muted-foreground">{profile?.email || user?.email}</p>
           </div>
         </div>
 
@@ -102,24 +102,6 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium">Bio</label>
-                <Textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us about yourself"
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">Website</label>
-                <Input
-                  type="text"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://yourwebsite.com"
-                />
-              </div>
-              <div className="space-y-2">
                 <label className="block text-sm font-medium">Avatar URL</label>
                 <Input
                   type="text"
@@ -127,6 +109,16 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="https://example.com/avatar.jpg"
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Email</label>
+                <Input
+                  type="text"
+                  value={profile?.email || user?.email || ''}
+                  disabled
+                  className="bg-gray-100"
+                />
+                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
               </div>
               <div className="flex justify-end gap-4">
                 <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -145,26 +137,8 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
               </div>
               
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-1">Bio</h3>
-                <p>{profile?.bio || 'No bio yet'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-1">Website</h3>
-                <p>
-                  {profile?.website ? (
-                    <a 
-                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      {profile.website}
-                    </a>
-                  ) : (
-                    'No website yet'
-                  )}
-                </p>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-1">Email</h3>
+                <p className="font-medium">{profile?.email || user?.email || 'Not set'}</p>
               </div>
               
               <div className="flex justify-end">

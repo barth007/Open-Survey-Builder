@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
 
 interface UserProfileProps {
@@ -15,13 +15,14 @@ interface UserProfileProps {
 const UserProfile = ({ compact = false }: UserProfileProps) => {
   const { user, signOut } = useAuth();
   const { profile, loading } = useProfile();
-  const { toast } = useToast();
   const navigate = useNavigate();
+
+  console.log('UserProfile rendering:', { user: user?.id, profileId: profile?.id, loading, compact });
 
   if (!user) return null;
 
   const getInitials = () => {
-    const displayName = profile?.full_name || user.user_metadata?.full_name;
+    const displayName = profile?.full_name;
     if (displayName) {
       return displayName
         .split(' ')
@@ -39,14 +40,13 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
       await signOut();
       toast({
         title: "Signed out successfully",
-        description: "You have been signed out of your account",
+        description: "You have been signed out of your account"
       });
       navigate('/login');
     } catch (error) {
       toast({
         title: "Error signing out",
-        description: "There was a problem signing out. Please try again.",
-        variant: "destructive"
+        description: "There was a problem signing out. Please try again."
       });
     }
   };
@@ -63,13 +63,13 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     );
   }
 
-  // Use avatar from profile or from user metadata as fallback
-  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
+  // Use avatar from profile
+  const avatarUrl = profile?.avatar_url;
 
   if (compact) {
     return (
       <Avatar className="h-8 w-8 border-2 border-background">
-        <AvatarImage src={avatarUrl} />
+        <AvatarImage src={avatarUrl || undefined} />
         <AvatarFallback className="bg-primary text-primary-foreground text-xs">
           {getInitials()}
         </AvatarFallback>
@@ -83,16 +83,16 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
       onClick={handleProfileClick}
     >
       <Avatar className="h-10 w-10">
-        <AvatarImage src={avatarUrl} />
+        <AvatarImage src={avatarUrl || undefined} />
         <AvatarFallback className="bg-primary text-primary-foreground">
           {getInitials()}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 overflow-hidden">
         <p className="text-sm font-medium truncate">
-          {profile?.full_name || user.user_metadata?.full_name || user.email}
+          {profile?.full_name || user.email?.split('@')[0] || user.email}
         </p>
-        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
       </div>
       <Button variant="ghost" size="icon" onClick={handleSignOut}>
         <LogOut className="h-4 w-4" />
