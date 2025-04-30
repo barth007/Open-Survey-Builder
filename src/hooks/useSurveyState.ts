@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
@@ -44,41 +43,32 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   const togglePublish = async () => {
     const newPublishState = !survey.isPublished;
-    setSurvey(prev => ({
-      ...prev,
-      isPublished: newPublishState
-    }));
-    
+
     try {
       if (surveyId) {
+        // Call the updateSurvey function
         await updateSurvey({
           surveyId,
-          updates: { 
-            isPublished: newPublishState
-          }
+          updates: {
+            isPublished: newPublishState,
+          },
         });
-        
-        queryClient.invalidateQueries({ queryKey: ['surveys'] });
-        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-        
+
+        // ✅ Fetch the updated survey data directly
+        await queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+
         toast({
           title: newPublishState ? "Survey published" : "Survey unpublished",
-          description: newPublishState 
-            ? "The survey is now live and can receive responses" 
+          description: newPublishState
+            ? "The survey is now live and can receive responses"
             : "The survey is now in draft mode",
         });
       }
     } catch (error) {
-      setSurvey(prev => ({
-        ...prev,
-        isPublished: !newPublishState
-      }));
-      
       console.error("Error updating survey publish status:", error);
       toast({
         title: "Error updating survey",
-        description: "There was an error updating your survey. Please try again.",
-        variant: "destructive"
+        description: "An error occurred while updating the survey's publish status.",
       });
     }
   };
