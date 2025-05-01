@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { useSurveyData } from '@/hooks/useSurveyData';
 import { Plus } from 'lucide-react';
+import { SurveyFoldersList } from '@/components/survey/SurveyFoldersList';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
