@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
@@ -22,7 +21,7 @@ const Index = () => {
   const {
     surveyData,
     isLoading: foldersLoading,
-    createFolder,
+    createFolder: createFolderMutation,
     createSurvey,
     deleteSurvey,
     deleteFolder,
@@ -62,6 +61,17 @@ const Index = () => {
       if (saveTimer) clearTimeout(saveTimer);
     };
   }, [pendingChanges, handleSave]);
+
+  // Create wrapper functions to adapt the return types
+  const handleCreateFolder = async (name: string): Promise<void> => {
+    try {
+      await createFolderMutation(name);
+      // Return void to match the expected type
+    } catch (error) {
+      console.error("Error in handleCreateFolder:", error);
+      throw error;
+    }
+  };
 
   const handleSurveyTitleChange = (title: string) => {
     handleTitleChange(title);
@@ -128,7 +138,7 @@ const Index = () => {
             <SurveyFoldersList 
               folders={surveyData?.folders || []}
               unorganizedSurveys={surveyData?.unorganizedSurveys || []}
-              onCreateFolder={createFolder}
+              onCreateFolder={handleCreateFolder}
               onDeleteFolder={deleteFolder}
               onDeleteSurvey={deleteSurvey}
               onUpdateOrder={updateSurveyOrder}
