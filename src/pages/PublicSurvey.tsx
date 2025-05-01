@@ -8,16 +8,11 @@ import { useSubmitResponse } from '@/hooks/survey/useSubmitResponse';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/sonner';
 import { Loader } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
 
-interface PublicSurveyProps {
-  isPreviewMode?: boolean; // Prop to indicate if this is preview mode
-}
-
-const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
+const PublicSurvey = () => {
   const { publicCode } = useParams<{ publicCode: string }>();
-  const { data: survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
+  const { data: survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', false);
   const { answers, handleAnswerChange, isSubmitting } = useSurveyResponseLogic(survey?.id);
   const { submitResponse } = useSubmitResponse();
 
@@ -26,14 +21,6 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     
     try {
       if (!survey) return;
-      
-      // In preview mode, don't actually submit the response
-      if (isPreviewMode) {
-        toast("Preview Submission", {
-          description: "This is a preview. Your response has not been recorded.",
-        });
-        return;
-      }
 
       // Transform answers from Record to Answer[] format
       const formattedAnswers: Answer[] = Object.entries(answers).map(([questionId, value]) => ({
@@ -75,7 +62,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
         <div className="p-6 bg-destructive/10 rounded-lg">
           <h2 className="text-xl font-bold mb-2 text-destructive">Survey Not Available</h2>
           <p className="text-destructive-foreground">
-            {error?.message || "This survey does not exist or is not published yet."}
+            {error?.message || "This survey does not exist or is not available yet."}
           </p>
         </div>
       </div>
@@ -84,16 +71,6 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
 
   return (
     <div className="container max-w-3xl py-10 px-4">
-      {/* Preview Mode Banner */}
-      {isPreviewMode && (
-        <Alert className="mb-6 border-amber-500 bg-amber-50">
-          <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
-          <AlertDescription className="text-amber-700">
-            This is a preview of your survey. Responses submitted here will not be recorded.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
         {survey.description && (
@@ -118,8 +95,6 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
-            ) : isPreviewMode ? (
-              "Preview Submit"
             ) : (
               "Submit Response"
             )}

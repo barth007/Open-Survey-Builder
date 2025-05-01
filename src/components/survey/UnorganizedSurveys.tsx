@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Plus } from 'lucide-react';
-import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Survey } from '@/types/survey-organization';
 import { DraggableSurveyList } from './DraggableSurveyList';
@@ -20,15 +19,15 @@ export function UnorganizedSurveys({
   onUpdateOrder
 }: UnorganizedSurveysProps) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="flex justify-between items-center">
+    <div className="mb-4">
+      <div className="text-sm font-medium mb-2 flex justify-between items-center">
         <span>Other Surveys {surveys.length > 0 && `(${surveys.length})`}</span>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={onCreateSurvey}
-                className="hover:bg-sidebar-accent rounded-md p-1"
+                className="hover:bg-gray-100 rounded-md p-1"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -38,14 +37,14 @@ export function UnorganizedSurveys({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </SidebarGroupLabel>
-      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
+      </div>
+      <div className="space-y-1 list-none">
         <DraggableSurveyList
           surveys={surveys}
           onDeleteSurvey={onDeleteSurvey}
           onUpdateOrder={onUpdateOrder}
         />
-      </SidebarGroupContent>
-    </SidebarGroup>
+      </div>
+    </div>
   );
 }

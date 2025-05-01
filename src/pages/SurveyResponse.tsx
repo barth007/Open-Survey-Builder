@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -55,33 +54,6 @@ const SurveyResponse = () => {
   }
   
   // Only show "Survey Not Found" if there is an error or survey data is missing
-  if (error || !surveyData) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="text-center p-8 max-w-md text-magma">
-          <h2 className="text-2xl font-semibold mb-4">Survey Not Found</h2>
-          <p>The survey you're looking for doesn't exist or has been removed.</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // Render the survey content if survey data exists
-  return (
-    <div className="min-h-screen bg-pebble">
-      <h1 className="text-center text-3xl font-bold">{getSurveyTitle()}</h1>
-      {/* Add the rest of your survey rendering logic here */}
-    </div>
-  );
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
-      </div>
-    );
-  }
-
   if (error || !surveyData) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">

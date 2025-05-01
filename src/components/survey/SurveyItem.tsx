@@ -5,7 +5,6 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
-import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -91,34 +90,33 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
         currentSurveyId === survey.id && "bg-accent text-accent-foreground rounded-md"
       )}
     >
-      <SidebarMenuItem className="flex-1">
-        <SidebarMenuButton
-          asChild
-          className="w-full"
-          onClick={() => !isEditing && navigate(`/survey/${survey.id}`)}
-          onDoubleClick={() => setIsEditing(true)}
-        >
-          {isEditing ? (
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={handleEdit}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleEdit();
-                if (e.key === 'Escape') {
-                  setName(survey.name);
-                  setIsEditing(false);
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="h-8"
-              autoFocus
-            />
-          ) : (
+      <div className="rounded-md flex-1">
+        {isEditing ? (
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={handleEdit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleEdit();
+              if (e.key === 'Escape') {
+                setName(survey.name);
+                setIsEditing(false);
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="h-8"
+            autoFocus
+          />
+        ) : (
+          <button
+            className="flex items-center w-full px-2 py-1 text-sm rounded-md hover:bg-gray-100"
+            onClick={() => !isEditing && navigate(`/survey/${survey.id}`)}
+            onDoubleClick={() => setIsEditing(true)}
+          >
             <span className="truncate">{name}</span>
-          )}
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+          </button>
+        )}
+      </div>
 
       <TooltipProvider>
         <Tooltip>
@@ -128,7 +126,7 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
                 e.stopPropagation();
                 onDelete();
               }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent rounded-md mr-1"
+              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded-md mr-1"
             >
               <Trash2 className="h-4 w-4" />
             </button>
