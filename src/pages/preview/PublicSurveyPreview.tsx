@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,7 @@ const PublicSurveyPreview = () => {
       <div className="min-h-screen bg-pebble flex items-center justify-center">
         <div className="text-center p-8 max-w-md text-magma">
           <h2 className="text-2xl font-semibold mb-4">Survey Not Available</h2>
-          <p>This survey is not currently available.</p>
+          <p>This survey is not currently published, and you may not have access.</p>
         </div>
       </div>
     );
@@ -67,6 +66,11 @@ const PublicSurveyPreview = () => {
         <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
           <h2 className="text-2xl font-bold mb-2 text-carbon">{getSurveyTitle()}</h2>
           <p className="text-gray-600 mb-6">{surveyData.description}</p>
+
+          <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+            <p className="text-sm font-medium">This is a preview</p>
+            <p className="text-xs">Responses will not be saved</p>
+          </div>
 
           {questions.map((question, index) =>
             isQuestionVisible(question) ? (
@@ -83,7 +87,7 @@ const PublicSurveyPreview = () => {
           {questions.length > 0 && (
             <Button
               className="mt-4 bg-sunset hover:opacity-90"
-              onClick={() => handleSubmit(false)}
+              onClick={() => handleSubmit(false)}  // disables saving
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Submitting...' : 'Preview Submit'}

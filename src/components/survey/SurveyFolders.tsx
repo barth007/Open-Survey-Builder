@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SurveyFolder } from '@/types/survey-organization';
 import { DraggableSurveyList } from './DraggableSurveyList';
@@ -31,15 +32,15 @@ export function SurveyFolders({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
-    <div className="mb-4">
-      <div className="text-sm font-medium mb-2 flex justify-between items-center">
+    <SidebarGroup>
+      <SidebarGroupLabel className="flex justify-between items-center">
         <span>Folders</span>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="hover:bg-gray-100 rounded-md p-1"
+                className="hover:bg-sidebar-accent rounded-md p-1"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -49,8 +50,8 @@ export function SurveyFolders({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </div>
-      <div className="space-y-1 list-none">
+      </SidebarGroupLabel>
+      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
         {folders.map((folder) => (
           <FolderItem
             key={folder.id}
@@ -63,12 +64,12 @@ export function SurveyFolders({
             onUpdateOrder={onUpdateOrder}
           />
         ))}
-      </div>
+      </SidebarGroupContent>
       <CreateFolderDialog
         isOpen={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
         onCreateFolder={onCreateFolder}
       />
-    </div>
+    </SidebarGroup>
   );
 }

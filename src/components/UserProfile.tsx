@@ -73,7 +73,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   return (
     <div 
-      className="w-full flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+      className="w-full flex items-center gap-3 p-3 cursor-pointer hover:bg-sidebar-accent transition-colors"
       onClick={handleProfileClick}
     >
       <Avatar className="h-10 w-10">
