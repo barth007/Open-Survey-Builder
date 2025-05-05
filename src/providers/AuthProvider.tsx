@@ -1,108 +1,137 @@
 
-// src/providers/AuthProvider.tsx
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase-client';
-import type { User } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/sonner';
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-};
+}
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  isLoading: true,
+  signInWithGoogle: async () => {},
+  signOut: async () => {},
+});
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Handle user session and profile creation/update
   useEffect(() => {
-    const getSession = async () => {
+    // Set up auth listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('Auth state changed:', event, currentSession?.user?.id);
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        // If the user just signed in, create or update their profile
+        if (event === 'SIGNED_IN' && currentSession?.user) {
+          // Use setTimeout to avoid Supabase deadlock
+          setTimeout(async () => {
+            try {
+              const { data: existingProfile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', currentSession.user!.id)
+                .single();
+                
+              if (profileError && !existingProfile) {
+                console.log('Creating new profile for user:', currentSession.user.id);
+                // Create a profile if it doesn't exist
+                const { error: insertError } = await supabase
+                  .from('profiles')
+                  .upsert({
+                    id: currentSession.user!.id,
+                    avatar_url: currentSession.user!.user_metadata?.avatar_url || null,
+                    full_name: currentSession.user!.user_metadata?.full_name || null,
+                  });
+                
+                if (insertError) {
+                  console.error('Error creating profile:', insertError);
+                } else {
+                  console.log('Profile created successfully');
+                }
+              }
+            } catch (error) {
+              console.error('Error checking/creating user profile:', error);
+            }
+          }, 0);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // Then check for an existing session
+    const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log('Initial auth session:', initialSession?.user?.id);
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
       } catch (error) {
-        console.error('Error getting session:', error);
-        toast("Authentication Error", {
-          description: "Failed to check your session status. Please try again."
-        });
+        console.error('Error getting initial session:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
-    getSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      setUser(session?.user || null);
-      setIsLoading(false);
-    });
+    
+    initializeAuth();
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
 
+  // Sign in with Google
   const signInWithGoogle = async () => {
     try {
-      const redirectTo = 'https://93d9f5a0-8bb1-44d2-b2e2-0fc1b20d521f.lovableproject.com/';
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
+          redirectTo: window.location.origin + '/profile',
         },
       });
 
       if (error) {
         console.error('Google sign-in error:', error.message);
-        toast("Authentication Failed", {
-          description: error.message
+        toast('Authentication Failed', {
+          description: error.message,
         });
         throw error;
       }
 
-      if (data && data.url) {
-        console.log('Redirect URL:', data.url);
-      }
+      console.log('OAuth sign-in initiated:', data);
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      toast("Authentication Error", {
-        description: "Failed to sign in with Google. Please try again."
+      toast('Authentication Error', {
+        description: 'Failed to sign in with Google. Please try again.',
       });
       throw error;
     }
   };
 
+  // Sign out
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast("Sign Out Error", {
-          description: error.message
-        });
         throw error;
       }
-      setUser(null);
-      toast("Signed Out", {
-        description: "You have been successfully signed out."
-      });
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
@@ -110,7 +139,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        isLoading,
+        signInWithGoogle,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,3 @@
-// src/components/survey/SurveySidebar.tsx
-
 import React from 'react';
 import { Sidebar, SidebarGroup, SidebarContent } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
@@ -97,13 +95,9 @@ export function SurveySidebar() {
           </SidebarContent>
         </div>
 
-        <div
-          onClick={() => navigate('/profile')}
-          className="cursor-pointer group hover:bg-sidebar-accent transition-colors w-full h-full flex items-center justify-start"
-        >
+        <div className="w-full h-full">
           <UserProfile />
         </div>
-
       </Sidebar>
 
       <CreateFolderDialog

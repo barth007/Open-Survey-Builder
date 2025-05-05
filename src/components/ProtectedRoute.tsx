@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
@@ -11,15 +10,17 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  
+  const [hasNotified, setHasNotified] = useState(false); // Flag to show toast only once
+
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !user && !hasNotified) {
       console.log('ProtectedRoute - Authentication required for path:', location.pathname);
       toast("Authentication Required", {
         description: "Please sign in to access this page"
       });
+      setHasNotified(true); // Set flag to true so toast won't be shown again
     }
-  }, [user, isLoading, location.pathname]);
+  }, [user, isLoading, location.pathname, hasNotified]);
 
   if (isLoading) {
     return (
