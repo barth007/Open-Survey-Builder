@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Users, Plus, Mail, Trash, UserPlus, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -95,7 +94,11 @@ const TeamTab = () => {
 
   const handleCreateTeam = async (data: TeamFormValues) => {
     try {
-      createTeam(data);
+      // We now know that name is definitely defined because of the form validation
+      createTeam({
+        name: data.name, // Explicitly pass the name property
+        description: data.description
+      });
       setIsCreateTeamDialogOpen(false);
       teamForm.reset();
     } catch (error: any) {
