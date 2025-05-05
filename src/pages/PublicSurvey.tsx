@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
-import { QuestionRenderer } from '@/components/survey/response/QuestionRenderer';
+import { QuestionItem } from '@/components/survey/response/QuestionItem';
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { useSubmitResponse } from '@/hooks/survey/useSubmitResponse';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,21 @@ import { toast } from '@/components/ui/sonner';
 import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
+import { PublicSidebarLayout } from '@/components/survey/PublicSidebarLayout';
 
 interface PublicSurveyProps {
-  isPreviewMode?: boolean; // Prop to indicate if this is preview mode
+  isPreviewMode?: boolean;
 }
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   const { publicCode } = useParams<{ publicCode: string }>();
   const { data: survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
-  const { answers, handleAnswerChange, isSubmitting } = useSurveyResponseLogic(survey?.id);
+  const { 
+    answers, 
+    handleAnswerChange, 
+    isSubmitting,
+    isQuestionVisible
+  } = useSurveyResponseLogic(survey?.id);
   const { submitResponse } = useSubmitResponse();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,70 +69,80 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <PublicSidebarLayout surveyTitle="Loading..." isPreviewMode={isPreviewMode}>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </PublicSidebarLayout>
     );
   }
 
   if (error || !survey) {
     return (
-      <div className="container max-w-3xl py-10 px-4">
-        <div className="p-6 bg-destructive/10 rounded-lg">
-          <h2 className="text-xl font-bold mb-2 text-destructive">Survey Not Available</h2>
-          <p className="text-destructive-foreground">
-            {error?.message || "This survey does not exist or is not published yet."}
-          </p>
+      <PublicSidebarLayout surveyTitle="Survey Not Available" isPreviewMode={isPreviewMode}>
+        <div className="container max-w-3xl py-10 px-4">
+          <div className="p-6 bg-destructive/10 rounded-lg">
+            <h2 className="text-xl font-bold mb-2 text-destructive">Survey Not Available</h2>
+            <p className="text-destructive-foreground">
+              {error?.message || "This survey does not exist or is not published yet."}
+            </p>
+          </div>
         </div>
-      </div>
+      </PublicSidebarLayout>
     );
   }
 
   return (
-    <div className="container max-w-3xl py-10 px-4">
-      {/* Preview Mode Banner */}
-      {isPreviewMode && (
-        <Alert className="mb-6 border-amber-500 bg-amber-50">
-          <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
-          <AlertDescription className="text-amber-700">
-            This is a preview of your survey. Responses submitted here will not be recorded.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
-        {survey.description && (
-          <p className="text-muted-foreground">{survey.description}</p>
+    <PublicSidebarLayout 
+      surveyTitle={survey.title} 
+      isPreviewMode={isPreviewMode}
+    >
+      <div className="container max-w-3xl py-10 px-4">
+        {/* Preview Mode Banner */}
+        {isPreviewMode && (
+          <Alert className="mb-6 border-amber-500 bg-amber-50">
+            <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              This is a preview of your survey. Responses submitted here will not be recorded.
+            </AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {(survey.questions || []).map((question, index) => (
-          <QuestionRenderer
-            key={question.id || index}
-            question={question}
-            answers={answers}
-            onAnswerChange={handleAnswerChange}
-          />
-        ))}
-
-        <div className="pt-4">
-          <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : isPreviewMode ? (
-              "Preview Submit"
-            ) : (
-              "Submit Response"
-            )}
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
+          {survey.description && (
+            <p className="text-muted-foreground">{survey.description}</p>
+          )}
         </div>
-      </form>
-    </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
+            <QuestionItem
+              key={question.id}
+              question={question}
+              index={index}
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+            />
+          ))}
+
+          <div className="pt-4">
+            <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : isPreviewMode ? (
+                "Preview Submit"
+              ) : (
+                "Submit Response"
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </PublicSidebarLayout>
   );
 };
 

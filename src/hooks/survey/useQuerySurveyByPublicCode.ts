@@ -2,23 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Survey } from '@/types/survey';
-
-/**
- * Maps the database survey record to the Survey type
- */
-const mapToSurvey = (data: any): Survey => {
-  return {
-    id: data.id,
-    title: data.title || data.name,
-    description: data.description,
-    questions: data.questions || [],
-    isPublished: data.is_published,
-    // Match property names with the Survey type definition
-    // The Survey type doesn't have createdAt/updatedAt properties
-    folderId: data.folder_id,
-    publicCode: data.public_code,
-  };
-};
+import { dbSurveyToSurvey } from '@/utils/type-mappers';
 
 /**
  * Custom hook to fetch a survey by its public code
@@ -64,7 +48,8 @@ export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = f
           throw new Error('Survey not found');
         }
 
-        return mapToSurvey(data);
+        // Use the type mapper utility to convert the database format to our frontend format
+        return dbSurveyToSurvey(data);
       } catch (error) {
         console.error("Error fetching survey by public code:", error);
         throw error;

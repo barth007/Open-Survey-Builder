@@ -32,46 +32,56 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <SidebarProvider>
-            <div className="flex min-h-screen w-full">
-              <SurveySidebar />
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Index />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/survey/:id"
-                    element={
-                      <ProtectedRoute>
-                        <Index />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/survey-response/:id" element={<SurveyResponse />} />
-                  <Route
-                    path="/profile"
-                    element={
-                      <ProtectedRoute>
-                        <Profile />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* Public survey access */}
-                  <Route path="/p/:publicCode" element={<PublicSurvey />} />
-                  {/* New preview route for unpublished surveys - not wrapped in ProtectedRoute */}
-                  <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </SidebarProvider>
+          
+          {/* Routes for public surveys don't need SidebarProvider */}
+          <Routes>
+            <Route path="/p/:publicCode" element={
+              <PublicSurvey />
+            } />
+            <Route path="/preview/:publicCode" element={
+              <PublicSurvey isPreviewMode={true} />
+            } />
+            
+            {/* All other routes with standard layout */}
+            <Route path="*" element={
+              <SidebarProvider>
+                <div className="flex min-h-screen w-full">
+                  <SurveySidebar />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute>
+                            <Index />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/survey/:id"
+                        element={
+                          <ProtectedRoute>
+                            <Index />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/survey-response/:id" element={<SurveyResponse />} />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute>
+                            <Profile />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                </div>
+              </SidebarProvider>
+            } />
+          </Routes>
         </TooltipProvider>
       </AuthProvider>
     </BrowserRouter>
