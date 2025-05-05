@@ -38,16 +38,10 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     e.stopPropagation();
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account"
-      });
+      toast("You have been signed out of your account");
       navigate('/login');
     } catch (error) {
-      toast({
-        title: "Error signing out",
-        description: "There was a problem signing out. Please try again."
-      });
+      toast("There was a problem signing out. Please try again.");
     }
   };
 

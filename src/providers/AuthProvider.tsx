@@ -54,17 +54,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Only log an error if it's not a "no rows returned" error
                 if (!profileError.message.includes('No rows found')) {
                   console.error('Error fetching profile:', profileError);
-                  toast({
-                    title: "Profile Error",
-                    description: "Couldn't verify your profile information"
-                  });
+                  toast("Couldn't verify your profile information");
                 } else {
                   // This is expected for new users if the trigger hasn't run yet
                   console.warn('No profile found for user:', currentSession.user.id);
-                  toast({
-                    title: "Welcome!",
-                    description: "Your profile will be set up automatically."
-                  });
+                  toast("Your profile will be set up automatically.");
                   // We don't manually create a profile here, as the trigger should handle it
                 }
               } else {
@@ -115,20 +109,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Google sign-in error:', error.message);
-        toast({
-          title: "Authentication Failed",
-          description: error.message
-        });
+        toast(error.message);
         throw error;
       }
 
       console.log('OAuth sign-in initiated:', data);
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      toast({
-        title: "Authentication Error",
-        description: "Failed to sign in with Google. Please try again."
-      });
+      toast("Failed to sign in with Google. Please try again.");
       throw error;
     }
   };
