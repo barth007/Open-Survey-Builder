@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 export type Profile = {
-  id: string;
+  id: string;  // Changed from user_id to id
   avatar_url: string | null;
   full_name: string | null;
   bio: string | null;
@@ -22,37 +22,60 @@ export function useProfile() {
 
   // Fetch profile on component mount or when user changes
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchProfile() {
       if (!user) {
-        setProfile(null);
-        setLoading(false);
+        if (isMounted) {
+          setProfile(null);
+          setLoading(false);
+        }
         return;
       }
 
       try {
         setLoading(true);
+        console.log('Fetching profile for user:', user.id);
+        
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
-          .single();
+          .eq('id', user.id)  // Changed from user_id to id
+          .maybeSingle();
 
         if (fetchError) {
           console.error('Error fetching profile:', fetchError);
           throw fetchError;
         }
 
-        setProfile(data as Profile);
+        if (isMounted) {
+          console.log('Profile fetched successfully:', data);
+          setProfile(data as Profile);
+          setError(null);
+        }
       } catch (error) {
         console.error('Error in profile fetch:', error);
-        setError(error as Error);
+        if (isMounted) {
+          setError(error as Error);
+          toast({
+            title: "Profile Error",
+            description: "Couldn't load your profile information",
+            variant: "destructive"
+          });
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchProfile();
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, toast]);
 
   // Function to update profile
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -65,10 +88,12 @@ export function useProfile() {
         updated_at: new Date().toISOString(),
       };
       
+      console.log('Updating profile with data:', updatedData);
+      
       const { error: updateError } = await supabase
         .from('profiles')
         .update(updatedData)
-        .eq('id', user.id);
+        .eq('id', user.id);  // Changed from user_id to id
 
       if (updateError) {
         throw updateError;

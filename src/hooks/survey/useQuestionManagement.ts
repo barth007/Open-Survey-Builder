@@ -9,7 +9,7 @@ export const useQuestionManagement = (initialQuestions: Question[] = []) => {
 
   const addQuestion = () => {
     const newQuestion: Question = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       type: 'text',
       text: '',
       isRequired: false,
@@ -21,19 +21,35 @@ export const useQuestionManagement = (initialQuestions: Question[] = []) => {
   };
 
   const updateQuestion = (updatedQuestion: Question) => {
+    // Validate the question structure
+    if (!updatedQuestion.id) {
+      console.error("Cannot update question without an ID");
+      return;
+    }
+
     setQuestions(prev => 
       prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q)
     );
   };
 
   const deleteQuestion = (questionId: string) => {
+    if (!questionId) {
+      console.error("Cannot delete question without an ID");
+      return;
+    }
+    
     setQuestions(prev => prev.filter(q => q.id !== questionId));
   };
 
   const duplicateQuestion = (questionToDuplicate: Question) => {
+    if (!questionToDuplicate.id) {
+      console.error("Cannot duplicate question without an ID");
+      return questionToDuplicate;
+    }
+
     const newQuestion: Question = {
       ...questionToDuplicate,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       options: questionToDuplicate.options.map(option => ({
         ...option,
         id: `${Date.now()}-${option.id}`
@@ -42,6 +58,11 @@ export const useQuestionManagement = (initialQuestions: Question[] = []) => {
 
     setQuestions(prev => {
       const questionIndex = prev.findIndex(q => q.id === questionToDuplicate.id);
+      if (questionIndex === -1) {
+        // If not found, just append to the end
+        return [...prev, newQuestion];
+      }
+      
       const updatedQuestions = [...prev];
       updatedQuestions.splice(questionIndex + 1, 0, newQuestion);
       return updatedQuestions;

@@ -1,6 +1,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
+import { surveyToDbSurvey } from '@/utils/type-mappers';
+import { Survey } from '@/types/survey';
 
 export function useMutateSurvey() {
   const queryClient = useQueryClient();
@@ -8,14 +10,25 @@ export function useMutateSurvey() {
   const createSurvey = useMutation({
     mutationFn: async ({ name, folderId }: { name: string, folderId?: string }) => {
       try {
+        const newSurvey: Partial<Survey> = {
+          title: name,
+          folderId: folderId,
+          description: '',
+          questions: [],
+          isPublished: false
+        };
+
+        // Convert to DB format
+        const dbSurvey = surveyToDbSurvey(newSurvey as Survey);
+
         const { data, error } = await supabase
           .from('surveys')
           .insert([{
-            name,
-            folder_id: folderId,
-            description: '',
-            questions: [],
-            is_published: false
+            name: dbSurvey.name,
+            folder_id: dbSurvey.folder_id,
+            description: dbSurvey.description || '',
+            questions: dbSurvey.questions || [],
+            is_published: dbSurvey.is_published || false
           }])
           .select()
           .single();
@@ -48,28 +61,20 @@ export function useMutateSurvey() {
   const updateSurvey = useMutation({
     mutationFn: async ({ surveyId, updates }: { 
       surveyId: string; 
-      updates: Partial<{ 
-        name: string;
-        description: string; 
-        questions: any[]; 
-        isPublished: boolean;
-        folderId?: string | null;
-      }>
+      updates: Partial<Survey>
     }) => {
       try {
-        // Convert from camelCase to snake_case for the database
-        const dbUpdates: any = {};
+        // Convert the updates to database format
+        const dbUpdates = surveyToDbSurvey(updates as Survey);
         
-        if (updates.name !== undefined) dbUpdates.name = updates.name;
-        if (updates.description !== undefined) dbUpdates.description = updates.description;
-        if (updates.questions !== undefined) dbUpdates.questions = updates.questions;
-        if (updates.isPublished !== undefined) dbUpdates.is_published = updates.isPublished;
-        // Handle folder_id updates for moving surveys between folders
-        if (updates.folderId !== undefined) dbUpdates.folder_id = updates.folderId;
-        
+        // Remove undefined values
+        const cleanedUpdates = Object.fromEntries(
+          Object.entries(dbUpdates).filter(([_, v]) => v !== undefined)
+        );
+
         const { data, error } = await supabase
           .from('surveys')
-          .update(dbUpdates)
+          .update(cleanedUpdates)
           .eq('id', surveyId)
           .select()
           .single();
@@ -84,8 +89,9 @@ export function useMutateSurvey() {
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      queryClient.invalidateQueries({ queryKey: ['survey', variables.surveyId] });
     }
   });
 

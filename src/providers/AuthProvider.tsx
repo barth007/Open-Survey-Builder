@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/sonner';
 
@@ -29,15 +29,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Handle user session and profile creation/update
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // Set up auth listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.id);
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // If the user just signed in, create or update their profile
+        // If the user just signed in, ensure they have a profile
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
@@ -45,25 +47,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const { data: existingProfile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', currentSession.user!.id)
-                .single();
+                .eq('id', currentSession.user!.id)  // Changed from user_id to id
+                .maybeSingle();
                 
-              if (profileError && !existingProfile) {
+              if (profileError && !profileError.message.includes('No rows found')) {
+                console.error('Error fetching profile:', profileError);
+              }
+
+              if (!existingProfile) {
+                // If the profile doesn't exist, create it
                 console.log('Creating new profile for user:', currentSession.user.id);
-                // Create a profile if it doesn't exist
                 const { error: insertError } = await supabase
                   .from('profiles')
-                  .upsert({
-                    id: currentSession.user!.id,
-                    avatar_url: currentSession.user!.user_metadata?.avatar_url || null,
-                    full_name: currentSession.user!.user_metadata?.full_name || null,
+                  .insert({
+                    id: currentSession.user!.id,  // Changed from user_id to id
+                    avatar_url: currentSession.user?.user_metadata?.avatar_url || null,
+                    full_name: currentSession.user?.user_metadata?.full_name || null,
+                    updated_at: new Date().toISOString()
                   });
-                
+
                 if (insertError) {
                   console.error('Error creating profile:', insertError);
+                  toast('Profile Creation Error', {
+                    description: 'There was an issue setting up your profile.',
+                  });
                 } else {
                   console.log('Profile created successfully');
                 }
+              } else {
+                console.log('Profile already exists for user:', currentSession.user.id);
               }
             } catch (error) {
               console.error('Error checking/creating user profile:', error);
@@ -78,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Then check for an existing session
     const initializeAuth = async () => {
       try {
+        setIsLoading(true);
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log('Initial auth session:', initialSession?.user?.id);
         

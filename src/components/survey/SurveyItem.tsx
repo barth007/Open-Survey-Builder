@@ -56,7 +56,10 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
       try {
         await updateSurvey({
           surveyId: survey.id,
-          updates: { name }
+          updates: { 
+            // Using title instead of name since that's the property in Survey type
+            title: name 
+          }
         });
         
         // Immediately update survey data in cache
@@ -64,7 +67,6 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
           if (!oldData) return oldData;
           return {
             ...oldData,
-            name,
             title: name
           };
         });

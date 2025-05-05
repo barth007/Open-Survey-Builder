@@ -1,6 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
+import { dbSurveyResponseToSurveyResponse } from '@/utils/type-mappers';
+import { DbSurveyResponse } from '@/types/database';
 import { SurveyResponse } from '@/types/survey';
 
 export function useQuerySurveyResponses(surveyId: string | undefined) {
@@ -21,13 +23,10 @@ export function useQuerySurveyResponses(surveyId: string | undefined) {
         throw error;
       }
 
-      // Map the data to our Survey Response type
-      return (data || []).map((item): SurveyResponse => ({
-        id: item.id,
-        surveyId: item.survey_id,
-        answers: item.answers as any,
-        submittedAt: item.submitted_at
-      }));
+      // Map the database responses to our frontend format
+      return (data || []).map((item) => 
+        dbSurveyResponseToSurveyResponse(item as DbSurveyResponse)
+      );
     },
     enabled: !!surveyId
   });

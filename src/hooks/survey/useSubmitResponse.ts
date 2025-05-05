@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Answer } from '@/types/survey';
 import { useToast } from '@/hooks/use-toast';
+import { surveyResponseToDbSurveyResponse } from '@/utils/type-mappers';
 
 export function useSubmitResponse() {
   const { toast } = useToast();
@@ -11,11 +12,15 @@ export function useSubmitResponse() {
     mutationFn: async ({ 
       surveyId, 
       answers, 
-      saveToDatabase 
+      saveToDatabase,
+      participantId,
+      metadata 
     }: { 
       surveyId: string; 
       answers: Answer[]; 
       saveToDatabase: boolean;
+      participantId?: string;
+      metadata?: Record<string, any>;
     }) => {
       // If the survey isn't published, don't save to database
       if (!saveToDatabase) {
@@ -24,17 +29,26 @@ export function useSubmitResponse() {
       }
 
       try {
-        const formattedAnswers = answers.map(answer => ({
-          questionId: answer.questionId,
-          value: answer.value
-        }));
+        const surveyResponse = {
+          id: crypto.randomUUID(),
+          surveyId,
+          answers,
+          submittedAt: new Date().toISOString(),
+          participantId,
+          metadata
+        };
+
+        // Convert to database format
+        const dbResponse = surveyResponseToDbSurveyResponse(surveyResponse);
 
         const { data, error } = await supabase
           .from('survey_responses')
           .insert({
-            survey_id: surveyId,
-            answers: formattedAnswers,
-            submitted_at: new Date().toISOString()
+            survey_id: dbResponse.survey_id,
+            answers: dbResponse.answers,
+            submitted_at: dbResponse.submitted_at,
+            participant_id: participantId,
+            metadata: metadata || {}
           });
 
         if (error) {
@@ -50,12 +64,20 @@ export function useSubmitResponse() {
     }
   });
 
-  const submitResponse = async (surveyId: string, answers: Answer[], isPublished: boolean) => {
+  const submitResponse = async (
+    surveyId: string, 
+    answers: Answer[], 
+    isPublished: boolean,
+    participantId?: string,
+    metadata?: Record<string, any>
+  ) => {
     try {
       return await mutation.mutateAsync({ 
         surveyId, 
         answers, 
-        saveToDatabase: isPublished 
+        saveToDatabase: isPublished,
+        participantId,
+        metadata
       });
     } catch (error) {
       console.error("Failed to submit response:", error);

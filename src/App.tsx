@@ -13,9 +13,7 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
-import { Teams } from "@/components/teams/Teams";
-import TeamsCreate from './pages/TeamsCreate';
-import TeamDetails from './pages/TeamDetails';
+import PublicSurvey from "@/pages/PublicSurvey"; // New public survey page
 import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({
@@ -58,30 +56,6 @@ const App = () => (
                   />
                   <Route path="/survey-response/:id" element={<SurveyResponse />} />
                   <Route
-                    path="/teams"
-                    element={
-                      <ProtectedRoute>
-                        <Teams />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/teams/create"
-                    element={
-                      <ProtectedRoute>
-                        <TeamsCreate />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/teams/:id"
-                    element={
-                      <ProtectedRoute>
-                        <TeamDetails />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
                     path="/profile"
                     element={
                       <ProtectedRoute>
@@ -89,6 +63,8 @@ const App = () => (
                       </ProtectedRoute>
                     }
                   />
+                  {/* New route for public survey access */}
+                  <Route path="/p/:publicCode" element={<PublicSurvey />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
