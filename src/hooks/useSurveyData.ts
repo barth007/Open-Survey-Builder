@@ -4,14 +4,6 @@ import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useMutateFolder } from './survey/useMutateFolder';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
-import { Survey } from '@/types/survey';
-
-export interface SurveyItem {
-  id: string;
-  name: string;
-  createdAt: Date;
-  folderId?: string | null;
-}
 
 export function useSurveyData() {
   const queryClient = useQueryClient();
@@ -54,7 +46,7 @@ export function useSurveyData() {
   };
 
   // Helper function to find a survey by ID across all folders and unorganized surveys
-  const findSurveyById = (id: string): SurveyItem | null => {
+  const findSurveyById = (id: string) => {
     if (!surveyData) return null;
     
     // Check unorganized surveys first

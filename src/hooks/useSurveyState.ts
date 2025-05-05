@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +7,7 @@ import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSurveyTitle } from './survey/useSurveyTitle';
 import { useQuestionManagement } from './survey/useQuestionManagement';
+import { Json } from '@/lib/database.types';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
@@ -31,11 +33,36 @@ export const useSurveyState = (surveyId: string | undefined) => {
   } = useQuestionManagement(survey.questions);
 
   useEffect(() => {
-    setSurvey(surveyData || survey); // always sync when surveyData updates
     if (surveyData) {
-      setQuestions(surveyData.questions);
+      // Convert database structure to application structure
+      const parsedQuestions: Question[] = Array.isArray(surveyData.questions) 
+        ? surveyData.questions.map((q: any) => ({
+            id: q.id || "",
+            type: q.type || "text",
+            text: q.text || "",
+            description: q.description,
+            isRequired: q.isRequired || false,
+            options: Array.isArray(q.options) ? q.options : [],
+            maxSelections: q.maxSelections,
+            figmaPrototypeUrl: q.figmaPrototypeUrl,
+            media: q.media,
+            conditionalLogic: q.conditionalLogic,
+            isVisible: q.isVisible
+          }))
+        : [];
+
+      const newSurvey: Survey = {
+        id: surveyData.id,
+        title: surveyData.name || "Untitled Survey",
+        description: surveyData.description || "Survey description",
+        questions: parsedQuestions,
+        isPublished: surveyData.is_published || false
+      };
+      
+      setSurvey(newSurvey);
+      setQuestions(parsedQuestions);
     }
-  }, [surveyData, setQuestions]);  
+  }, [surveyData, setQuestions]);
 
   const handleDescriptionChange = (description: string) => {
     setSurvey((prev) => ({ ...prev, description }));
@@ -43,32 +70,41 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   const togglePublish = async () => {
     const newPublishState = !survey.isPublished;
-
+    setSurvey(prev => ({
+      ...prev,
+      isPublished: newPublishState
+    }));
+    
     try {
       if (surveyId) {
-        // Call the updateSurvey function
         await updateSurvey({
           surveyId,
-          updates: {
-            isPublished: newPublishState,
-          },
+          updates: { 
+            isPublished: newPublishState
+          }
         });
-
-        // ✅ Fetch the updated survey data directly
-        await queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-
+        
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
         toast({
           title: newPublishState ? "Survey published" : "Survey unpublished",
-          description: newPublishState
-            ? "The survey is now live and can receive responses"
+          description: newPublishState 
+            ? "The survey is now live and can receive responses" 
             : "The survey is now in draft mode",
         });
       }
     } catch (error) {
+      setSurvey(prev => ({
+        ...prev,
+        isPublished: !newPublishState
+      }));
+      
       console.error("Error updating survey publish status:", error);
       toast({
         title: "Error updating survey",
-        description: "An error occurred while updating the survey's publish status.",
+        description: "There was an error updating your survey. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -79,7 +115,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         await updateSurvey({
           surveyId,
           updates: { 
-            title: survey.title,
+            name: survey.title,
             description: survey.description,
             questions: questions,
             isPublished: survey.isPublished
