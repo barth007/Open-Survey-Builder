@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import PersonalInfoTab from '@/components/profile/PersonalInfoTab';
 import TeamTab from '@/components/profile/TeamTab';
 import AccountSettingsTab from '@/components/profile/AccountSettingsTab';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, Users, Settings } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,22 +70,36 @@ const Profile = () => {
           <h1 className="text-2xl font-bold">Your Profile</h1>
         </header>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "personal" | "team" | "settings")} className="space-y-4">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(v) => setActiveTab(v as "personal" | "team" | "settings")} 
+          className="space-y-4"
+        >
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="personal">Personal Info</TabsTrigger>
-            <TabsTrigger value="team">Team</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="personal" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Personal Info</span>
+              <span className="sm:hidden">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>Team</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="personal" className="space-y-4">
+          <TabsContent value="personal" className="space-y-4 mt-6">
             <PersonalInfoTab profile={profile} updateProfile={updateProfile} />
           </TabsContent>
 
-          <TabsContent value="team" className="space-y-4">
+          <TabsContent value="team" className="space-y-4 mt-6">
             <TeamTab />
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-4">
+          <TabsContent value="settings" className="space-y-4 mt-6">
             <AccountSettingsTab />
           </TabsContent>
         </Tabs>

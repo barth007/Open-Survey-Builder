@@ -7,17 +7,15 @@ import { useSurveyData } from "@/hooks/useSurveyData";
 import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Folder, Loader, Home, User, AlertCircle } from 'lucide-react';
+import { Loader, AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { Button } from '@/components/ui/button';
 
 export function SurveySidebar() {
   const [openDialog, setOpenDialog] = React.useState<"createFolder" | "createSurvey" | null>(null);
   const { surveyData, isLoading, createFolder, createSurvey, error, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   const { user } = useAuth();
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
-  const navigate = useNavigate();
 
   // If user is not authenticated, don't render the sidebar
   if (!user) {
@@ -46,14 +44,6 @@ export function SurveySidebar() {
     }
   };
 
-  const navigateToProfile = () => {
-    navigate('/profile');
-  };
-
-  const navigateToHome = () => {
-    navigate('/');
-  };
-
   const toggleFolder = (id: string) => {
     setOpenFolders(prev => {
       const newOpenFolders = new Set(prev);
@@ -71,33 +61,9 @@ export function SurveySidebar() {
       <Sidebar className="border-r border-border flex flex-col h-screen">
         <div className="flex-1 flex flex-col overflow-hidden">
           <SidebarContent className="flex-1 overflow-auto">
-            {/* App Title and Navigation */}
             <SidebarGroup>
               <div className="mb-4">
                 <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
-              </div>
-              
-              {/* Navigation Items */}
-              <div className="space-y-1 mb-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full flex justify-start items-center gap-2 text-left"
-                  onClick={navigateToHome}
-                >
-                  <Home className="h-4 w-4" />
-                  Home
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full flex justify-start items-center gap-2 text-left"
-                  onClick={navigateToProfile}
-                >
-                  <User className="h-4 w-4" />
-                  Profile
-                </Button>
               </div>
 
               {/* Survey Content */}
@@ -121,19 +87,6 @@ export function SurveySidebar() {
                 </div>
               ) : (
                 <>
-                  {/* Create Folder Button */}
-                  <div className="mb-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full flex justify-center items-center gap-2"
-                      onClick={() => setOpenDialog("createFolder")}
-                    >
-                      <Folder className="h-4 w-4" />
-                      Create Folder
-                    </Button>
-                  </div>
-                  
                   {/* Folders Section - Always show even if empty */}
                   <SurveyFolders
                     folders={surveyData?.folders || []}

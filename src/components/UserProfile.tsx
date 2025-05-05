@@ -4,9 +4,17 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useProfile } from '@/hooks/useProfile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2, Settings } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 interface UserProfileProps {
   compact?: boolean;
@@ -72,25 +80,38 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   }
 
   return (
-    <div 
-      className="w-full flex items-center gap-3 p-3 cursor-pointer hover:bg-sidebar-accent transition-colors"
-      onClick={handleProfileClick}
-    >
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={avatarUrl || undefined} />
-        <AvatarFallback className="bg-primary text-primary-foreground">
-          {getInitials()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 overflow-hidden">
-        <p className="text-sm font-medium truncate">
-          {profile?.full_name || user.email?.split('@')[0] || user.email}
-        </p>
-        <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
-      </div>
-      <Button variant="ghost" size="icon" onClick={handleSignOut}>
-        <LogOut className="h-4 w-4" />
-      </Button>
+    <div className="w-full p-3 border-t">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-full flex items-center justify-start gap-3 px-2 hover:bg-muted">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={avatarUrl || undefined} />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 overflow-hidden text-left">
+              <p className="text-sm font-medium truncate">
+                {profile?.full_name || user.email?.split('@')[0] || user.email}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
+            </div>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleProfileClick} className="flex items-center gap-2 cursor-pointer">
+            <Settings className="h-4 w-4" />
+            <span>Profile Settings</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+            <LogOut className="h-4 w-4" />
+            <span>Sign Out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };
