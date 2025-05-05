@@ -1,172 +1,129 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   public: {
     Tables: {
-      folders: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
-          avatar_url: string | null
-          email: string | null
-          full_name: string | null
-          id: string
-          updated_at: string | null
-        }
+          id: string;
+          avatar_url: string | null;
+          full_name: string | null;
+          bio: string | null;
+          website: string | null;
+          updated_at: string | null;
+        };
         Insert: {
-          avatar_url?: string | null
-          email?: string | null
-          full_name?: string | null
-          id: string
-          updated_at?: string | null
-        }
+          id: string;
+          avatar_url?: string | null;
+          full_name?: string | null;
+          bio?: string | null;
+          website?: string | null;
+          updated_at?: string | null;
+        };
         Update: {
-          avatar_url?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          full_name?: string | null;
+          bio?: string | null;
+          website?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      folders: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          name: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          name: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
       survey_responses: {
         Row: {
-          answers: Json
-          id: string
-          metadata: Json | null
-          participant_id: string | null
-          submitted_at: string | null
-          survey_id: string | null
-        }
+          answers: Json;
+          id: string;
+          submitted_at: string | null;
+          survey_id: string | null;
+        };
         Insert: {
-          answers: Json
-          id?: string
-          metadata?: Json | null
-          participant_id?: string | null
-          submitted_at?: string | null
-          survey_id?: string | null
-        }
+          answers: Json;
+          id?: string;
+          submitted_at?: string | null;
+          survey_id?: string | null;
+        };
         Update: {
-          answers?: Json
-          id?: string
-          metadata?: Json | null
-          participant_id?: string | null
-          submitted_at?: string | null
-          survey_id?: string | null
-        }
+          answers?: Json;
+          id?: string;
+          submitted_at?: string | null;
+          survey_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "fk_survey_responses_survey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "survey_responses_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+            foreignKeyName: "survey_responses_survey_id_fkey";
+            columns: ["survey_id"];
+            isOneToOne: false;
+            referencedRelation: "surveys";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       surveys: {
         Row: {
-          created_at: string | null
-          description: string | null
-          folder_id: string | null
-          id: string
-          is_published: boolean | null
-          name: string
-          public_code: string | null
-          questions: Json | null
-          user_id: string | null
-        }
+          created_at: string | null;
+          description: string | null;
+          folder_id: string | null;
+          id: string;
+          is_published: boolean | null;
+          name: string;
+          questions: Json | null;
+        };
         Insert: {
-          created_at?: string | null
-          description?: string | null
-          folder_id?: string | null
-          id?: string
-          is_published?: boolean | null
-          name: string
-          public_code?: string | null
-          questions?: Json | null
-          user_id?: string | null
-        }
+          created_at?: string | null;
+          description?: string | null;
+          folder_id?: string | null;
+          id?: string;
+          is_published?: boolean | null;
+          name: string;
+          questions?: Json | null;
+        };
         Update: {
-          created_at?: string | null
-          description?: string | null
-          folder_id?: string | null
-          id?: string
-          is_published?: boolean | null
-          name?: string
-          public_code?: string | null
-          questions?: Json | null
-          user_id?: string | null
-        }
+          created_at?: string | null;
+          description?: string | null;
+          folder_id?: string | null;
+          id?: string;
+          is_published?: boolean | null;
+          name?: string;
+          questions?: Json | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "fk_surveys_folder"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "surveys_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      generate_random_string: {
-        Args: { length: number }
-        Returns: string
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+            foreignKeyName: "surveys_folder_id_fkey";
+            columns: ["folder_id"];
+            isOneToOne: false;
+            referencedRelation: "folders";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+    };
+    Views: {};
+    Functions: {};
+    Enums: {};
+    CompositeTypes: {};
+  };
+};
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -193,7 +150,7 @@ export type Tables<
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
@@ -216,7 +173,7 @@ export type TablesInsert<
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
@@ -239,7 +196,7 @@ export type TablesUpdate<
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
@@ -254,7 +211,7 @@ export type Enums<
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
@@ -269,10 +226,34 @@ export type CompositeTypes<
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {},
   },
-} as const
+} as const;
+
+/**
+ * Database Survey type - matches the structure in Supabase
+ */
+export interface DbSurvey {
+  id: string;
+  name: string;
+  description: string | null;
+  is_published: boolean | null;
+  questions: Json | null;
+  folder_id: string | null;
+  created_at: string | null;
+  user_id: string | null;
+}
+
+/**
+ * Database Survey Response type - matches the structure in Supabase
+ */
+export interface DbSurveyResponse {
+  id: string;
+  survey_id: string | null;
+  answers: Json;
+  submitted_at: string | null;
+}

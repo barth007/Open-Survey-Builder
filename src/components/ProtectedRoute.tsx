@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,7 +12,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  
+
   useEffect(() => {
     if (!isLoading && !user) {
       console.log('ProtectedRoute - Authentication required for path:', location.pathname);
@@ -23,9 +24,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Verifying your session...</p>
         </div>
       </div>

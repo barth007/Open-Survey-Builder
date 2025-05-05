@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Answer } from '@/types/survey';
 import { useToast } from '@/hooks/use-toast';
+import { surveyResponseToDbSurveyResponse } from '@/utils/type-mappers';
 
 export function useSubmitResponse() {
   const { toast } = useToast();
@@ -11,30 +12,31 @@ export function useSubmitResponse() {
     mutationFn: async ({ 
       surveyId, 
       answers, 
-      saveToDatabase 
+      metadata 
     }: { 
       surveyId: string; 
       answers: Answer[]; 
-      saveToDatabase: boolean;
+      metadata?: Record<string, any>;
     }) => {
-      // If the survey isn't published, don't save to database
-      if (!saveToDatabase) {
-        console.log('Survey is not published, responses will not be saved');
-        return { success: true, preview: true };
-      }
-
       try {
-        const formattedAnswers = answers.map(answer => ({
-          questionId: answer.questionId,
-          value: answer.value
-        }));
+        const surveyResponse = {
+          id: crypto.randomUUID(),
+          surveyId,
+          answers,
+          submittedAt: new Date().toISOString(),
+          metadata
+        };
+
+        // Convert to database format
+        const dbResponse = surveyResponseToDbSurveyResponse(surveyResponse);
 
         const { data, error } = await supabase
           .from('survey_responses')
           .insert({
-            survey_id: surveyId,
-            answers: formattedAnswers,
-            submitted_at: new Date().toISOString()
+            survey_id: dbResponse.survey_id,
+            answers: dbResponse.answers,
+            submitted_at: dbResponse.submitted_at,
+            metadata: metadata || {}
           });
 
         if (error) {
@@ -50,26 +52,8 @@ export function useSubmitResponse() {
     }
   });
 
-  const submitResponse = async (surveyId: string, answers: Answer[], isPublished: boolean) => {
-    try {
-      return await mutation.mutateAsync({ 
-        surveyId, 
-        answers, 
-        saveToDatabase: isPublished 
-      });
-    } catch (error) {
-      console.error("Failed to submit response:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem submitting your response",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
   return {
-    submitResponse,
+    submitResponse: mutation.mutateAsync,
     isSubmitting: mutation.isPending
   };
 }

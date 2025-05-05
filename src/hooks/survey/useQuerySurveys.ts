@@ -1,28 +1,51 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-client';
+import { supabase } from '@/integrations/supabase/client';
 import type { SurveyFolder } from '@/types/survey-organization';
+import { useAuth } from '@/providers/AuthProvider';
 
 export function useQuerySurveys() {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ['surveys'],
+    queryKey: ['surveys', user?.id],
     queryFn: async () => {
       try {
+        if (!user) {
+          return { folders: [], unorganizedSurveys: [] };
+        }
+
+        // Enhanced logging to debug folder retrieval issues
+        console.log('Fetching folders and surveys for user:', user.id);
+
         const [foldersResult, surveysResult] = await Promise.all([
-          supabase.from('folders').select('*').order('created_at', { ascending: true }),
-          supabase.from('surveys').select('*').order('created_at', { ascending: true })
+          supabase
+            .from('folders')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true }),
+          
+          supabase
+            .from('surveys')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true })
         ]);
         
-        if (foldersResult.error && foldersResult.error.message?.includes("relation \"public.folders\" does not exist")) {
-          throw new Error("The folders table doesn't exist in the Supabase database. Please create the required tables first.");
+        // Better error handling with specific logging
+        if (foldersResult.error) {
+          console.error("Error fetching folders:", foldersResult.error);
+          throw foldersResult.error;
         }
         
-        if (surveysResult.error && surveysResult.error.message?.includes("relation \"public.surveys\" does not exist")) {
-          throw new Error("The surveys table doesn't exist in the Supabase database. Please create the required tables first.");
+        if (surveysResult.error) {
+          console.error("Error fetching surveys:", surveysResult.error);
+          throw surveysResult.error;
         }
         
-        if (foldersResult.error) throw foldersResult.error;
-        if (surveysResult.error) throw surveysResult.error;
+        // Debug log the results to see what's coming back from the database
+        console.log('Folders data:', foldersResult.data);
+        console.log('Surveys data:', surveysResult.data);
         
         const folders: SurveyFolder[] = foldersResult.data.map(folder => ({
           id: folder.id,
@@ -53,6 +76,7 @@ export function useQuerySurveys() {
         console.error("Error fetching survey data:", err);
         throw err;
       }
-    }
+    },
+    enabled: !!user
   });
 }
