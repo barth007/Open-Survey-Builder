@@ -33,27 +33,24 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          bio: string | null
+          email: string | null
           full_name: string | null
           id: string
           updated_at: string | null
-          website: string | null
         }
         Insert: {
           avatar_url?: string | null
-          bio?: string | null
+          email?: string | null
           full_name?: string | null
           id: string
           updated_at?: string | null
-          website?: string | null
         }
         Update: {
           avatar_url?: string | null
-          bio?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
           updated_at?: string | null
-          website?: string | null
         }
         Relationships: []
       }
@@ -155,10 +152,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_user_profile: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       generate_random_string: {
         Args: { length: number }
         Returns: string

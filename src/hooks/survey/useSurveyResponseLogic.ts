@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Question, Answer } from '@/types/survey';
 import { useSubmitResponse } from './useSubmitResponse';
 import { useToast } from "@/hooks/use-toast";
-import { getParticipantId, collectMetadata } from '@/utils/participantUtils';
 
 export function useSurveyResponseLogic(surveyId: string | undefined) {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
@@ -50,36 +49,36 @@ export function useSurveyResponseLogic(surveyId: string | undefined) {
     }
   };
 
-  const handleSubmit = async (isPublished: boolean) => {
+  // Updated handleSubmit to match the signature of submitResponse
+  const handleSubmit = async (isPreviewMode: boolean) => {
     if (!surveyId) return;
 
     setIsSubmitting(true);
     
-    // Transform answers into the format expected by the API
-    const formattedAnswers = Object.entries(answers).map(([questionId, value]) => ({
+    // Transform answers from Record to Answer[] format
+    const formattedAnswers: Answer[] = Object.entries(answers).map(([questionId, value]) => ({
       questionId,
       value
     }));
     
     try {
-      // Collect participant ID and metadata
-      const participantId = getParticipantId();
-      const metadata = await collectMetadata();
+      // Updated to match the new submitResponse signature
+      await submitResponse({
+        surveyId,
+        answers: formattedAnswers,
+        metadata: {
+          submitTime: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+        }
+      });
       
-      await submitResponse(surveyId, formattedAnswers, isPublished, participantId, metadata);
-      
-      // Show different messages based on whether responses are being saved
-      if (isPublished) {
-        toast({
-          title: "Success",
-          description: "Your response has been submitted. Thank you!",
-        });
-      } else {
-        toast({
-          title: "Response viewed",
-          description: "This survey is currently in preview mode. Your responses were not saved.",
-        });
-      }
+      // Show different messages based on preview mode
+      toast({
+        title: isPreviewMode ? "Preview Submission" : "Success",
+        description: isPreviewMode 
+          ? "This is a preview. Your response has not been recorded." 
+          : "Your response has been submitted. Thank you!",
+      });
       
       // Clear form
       setAnswers({});

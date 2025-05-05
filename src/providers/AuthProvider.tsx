@@ -27,19 +27,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Handle user session and profile creation/update
+  // Handle user session
   useEffect(() => {
     console.log('Setting up auth state listener');
     
-    // Set up auth listener first
+    // Set up auth listener first to avoid missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.id);
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // If the user just signed in, ensure they have a profile
+        // If the user just signed in, check if they have a profile
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
@@ -47,38 +47,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const { data: existingProfile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', currentSession.user!.id)  // Changed from user_id to id
-                .maybeSingle();
+                .eq('id', currentSession.user!.id)
+                .single();
                 
-              if (profileError && !profileError.message.includes('No rows found')) {
-                console.error('Error fetching profile:', profileError);
-              }
-
-              if (!existingProfile) {
-                // If the profile doesn't exist, create it
-                console.log('Creating new profile for user:', currentSession.user.id);
-                const { error: insertError } = await supabase
-                  .from('profiles')
-                  .insert({
-                    id: currentSession.user!.id,  // Changed from user_id to id
-                    avatar_url: currentSession.user?.user_metadata?.avatar_url || null,
-                    full_name: currentSession.user?.user_metadata?.full_name || null,
-                    updated_at: new Date().toISOString()
-                  });
-
-                if (insertError) {
-                  console.error('Error creating profile:', insertError);
-                  toast('Profile Creation Error', {
-                    description: 'There was an issue setting up your profile.',
-                  });
+              if (profileError) {
+                // Only log an error if it's not a "no rows returned" error
+                if (!profileError.message.includes('No rows found')) {
+                  console.error('Error fetching profile:', profileError);
+                  toast("Couldn't verify your profile information");
                 } else {
-                  console.log('Profile created successfully');
+                  // This is expected for new users if the trigger hasn't run yet
+                  console.warn('No profile found for user:', currentSession.user.id);
+                  toast("Your profile will be set up automatically.");
+                  // We don't manually create a profile here, as the trigger should handle it
                 }
               } else {
-                console.log('Profile already exists for user:', currentSession.user.id);
+                console.log('Profile exists for user:', existingProfile);
               }
             } catch (error) {
-              console.error('Error checking/creating user profile:', error);
+              console.error('Error checking profile:', error);
             }
           }, 0);
         }
@@ -116,24 +103,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/profile',
+          redirectTo: window.location.origin,
         },
       });
 
       if (error) {
         console.error('Google sign-in error:', error.message);
-        toast('Authentication Failed', {
-          description: error.message,
-        });
+        toast(error.message);
         throw error;
       }
 
       console.log('OAuth sign-in initiated:', data);
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      toast('Authentication Error', {
-        description: 'Failed to sign in with Google. Please try again.',
-      });
+      toast("Failed to sign in with Google. Please try again.");
       throw error;
     }
   };

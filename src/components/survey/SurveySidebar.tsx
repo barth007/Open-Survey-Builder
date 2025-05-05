@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sidebar, SidebarGroup, SidebarContent } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
@@ -7,6 +8,9 @@ import { CreateFolderDialog } from "@/components/survey/CreateFolderDialog";
 import UserProfile from '@/components/UserProfile';
 import { useAuth } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Folder, Loader, Home, User, AlertCircle } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 export function SurveySidebar() {
   const [openDialog, setOpenDialog] = React.useState<"createFolder" | "createSurvey" | null>(null);
@@ -15,6 +19,7 @@ export function SurveySidebar() {
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
+  // If user is not authenticated, don't render the sidebar
   if (!user) {
     return null;
   }
@@ -22,18 +27,31 @@ export function SurveySidebar() {
   const handleCreateSurvey = async () => {
     try {
       await createSurvey({ name: "Untitled Survey" });
+      toast("New survey created successfully");
     } catch (error) {
       console.error("Error creating survey:", error);
+      toast("Failed to create survey. Please try again.");
     }
   };
 
   const handleCreateFolder = async (name: string) => {
     try {
+      console.log("Creating folder:", name);
       await createFolder(name);
+      toast(`Folder "${name}" created successfully`);
       setOpenDialog(null);
     } catch (error) {
       console.error("Error creating folder:", error);
+      toast("Failed to create folder. Please try again.");
     }
+  };
+
+  const navigateToProfile = () => {
+    navigate('/profile');
+  };
+
+  const navigateToHome = () => {
+    navigate('/');
   };
 
   const toggleFolder = (id: string) => {
@@ -53,53 +71,101 @@ export function SurveySidebar() {
       <Sidebar className="border-r border-border flex flex-col h-screen">
         <div className="flex-1 flex flex-col overflow-hidden">
           <SidebarContent className="flex-1 overflow-auto">
+            {/* App Title and Navigation */}
             <SidebarGroup>
               <div className="mb-4">
                 <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
               </div>
+              
+              {/* Navigation Items */}
+              <div className="space-y-1 mb-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full flex justify-start items-center gap-2 text-left"
+                  onClick={navigateToHome}
+                >
+                  <Home className="h-4 w-4" />
+                  Home
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full flex justify-start items-center gap-2 text-left"
+                  onClick={navigateToProfile}
+                >
+                  <User className="h-4 w-4" />
+                  Profile
+                </Button>
+              </div>
 
+              {/* Survey Content */}
               {isLoading ? (
                 <div className="flex items-center justify-center h-[100px]">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+                  <Loader className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : error ? (
-                <div className="text-destructive text-center p-2 text-sm">
-                  Error loading surveys
+                <div className="flex flex-col items-center justify-center text-destructive text-center p-4 border border-destructive/20 rounded-md bg-destructive/10">
+                  <AlertCircle className="h-5 w-5 mb-2" />
+                  <p className="text-sm font-medium">Error loading surveys</p>
+                  <p className="text-xs mt-1">{error.message}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => window.location.reload()}
+                  >
+                    Retry
+                  </Button>
                 </div>
               ) : (
                 <>
-                  {surveyData?.folders && surveyData.folders.length > 0 && (
-                    <SurveyFolders
-                      folders={surveyData.folders}
-                      openFolders={openFolders}
-                      onToggleFolder={toggleFolder}
-                      onCreateFolder={handleCreateFolder}
-                      onCreateSurvey={createSurvey}
-                      onDeleteSurvey={deleteSurvey}
-                      onDeleteFolder={deleteFolder}
-                      onUpdateOrder={updateSurveyOrder}
-                    />
-                  )}
+                  {/* Create Folder Button */}
+                  <div className="mb-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full flex justify-center items-center gap-2"
+                      onClick={() => setOpenDialog("createFolder")}
+                    >
+                      <Folder className="h-4 w-4" />
+                      Create Folder
+                    </Button>
+                  </div>
+                  
+                  {/* Folders Section - Always show even if empty */}
+                  <SurveyFolders
+                    folders={surveyData?.folders || []}
+                    openFolders={openFolders}
+                    onToggleFolder={toggleFolder}
+                    onCreateFolder={handleCreateFolder}
+                    onCreateSurvey={createSurvey}
+                    onDeleteSurvey={deleteSurvey}
+                    onDeleteFolder={deleteFolder}
+                    onUpdateOrder={updateSurveyOrder}
+                  />
 
-                  {surveyData?.unorganizedSurveys && (
-                    <UnorganizedSurveys
-                      surveys={surveyData.unorganizedSurveys}
-                      onCreateSurvey={handleCreateSurvey}
-                      onDeleteSurvey={deleteSurvey}
-                      onUpdateOrder={updateSurveyOrder}
-                    />
-                  )}
+                  {/* Unorganized Surveys */}
+                  <UnorganizedSurveys
+                    surveys={surveyData?.unorganizedSurveys || []}
+                    onCreateSurvey={handleCreateSurvey}
+                    onDeleteSurvey={deleteSurvey}
+                    onUpdateOrder={updateSurveyOrder}
+                  />
                 </>
               )}
             </SidebarGroup>
           </SidebarContent>
         </div>
 
-        <div className="w-full h-full">
+        {/* User Profile Section */}
+        <div className="w-full">
           <UserProfile />
         </div>
       </Sidebar>
 
+      {/* Create Folder Dialog */}
       <CreateFolderDialog
         isOpen={openDialog === "createFolder"}
         onClose={() => setOpenDialog(null)}

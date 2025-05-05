@@ -6,22 +6,20 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
+import { useNavigate } from 'react-router-dom';
 
 const AccountSettingsTab = () => {
+  const navigate = useNavigate();
+  console.log("AccountSettingsTab rendering");
+  
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast("Signed out", {
-        description: "You have been signed out successfully.",
-      });
+      toast("You have been signed out successfully.");
+      navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
-      toast("Error", {
-        description: "There was a problem signing out. Please try again.",
-        // The sonner toast doesn't have a variant property in its type
-        // Using the correct property for error styling
-        style: { backgroundColor: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))' }
-      });
+      toast("There was a problem signing out. Please try again.");
     }
   };
 

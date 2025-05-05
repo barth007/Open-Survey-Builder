@@ -4,6 +4,8 @@ import { Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const TeamTab = () => {
+  console.log("TeamTab rendering");
+  
   return (
     <div className="space-y-6">
       <Card className="border-dashed border-2">
