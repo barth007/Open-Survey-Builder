@@ -14,7 +14,6 @@ import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
 import PublicSurvey from "@/pages/PublicSurvey";
-import PublicSurveyPreview from '@/pages/preview/PublicSurveyPreview';
 import Profile from './pages/Profile';
 
 const queryClient = new QueryClient({

@@ -43,12 +43,16 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
       });
 
       if (success) {
-        toast("Your profile has been updated successfully.");
+        toast({
+          description: "Your profile has been updated successfully."
+        });
         setIsEditing(false); // Switch to non-edit mode after saving
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast("There was an error updating your profile.");
+      toast({
+        description: "There was an error updating your profile."
+      });
     } finally {
       setIsSaving(false);
     }
