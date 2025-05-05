@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Survey, Question } from '@/types/survey';
+import { Survey } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
@@ -34,33 +33,15 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   useEffect(() => {
     if (surveyData) {
-      // Convert database structure to application structure
-      const parsedQuestions: Question[] = Array.isArray(surveyData.questions) 
-        ? surveyData.questions.map((q: any) => ({
-            id: q.id || "",
-            type: q.type || "text",
-            text: q.text || "",
-            description: q.description,
-            isRequired: q.isRequired || false,
-            options: Array.isArray(q.options) ? q.options : [],
-            maxSelections: q.maxSelections,
-            figmaPrototypeUrl: q.figmaPrototypeUrl,
-            media: q.media,
-            conditionalLogic: q.conditionalLogic,
-            isVisible: q.isVisible
-          }))
-        : [];
-
-      const newSurvey: Survey = {
+      const newSurvey = {
         id: surveyData.id,
         title: surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
-        questions: parsedQuestions,
+        questions: Array.isArray(surveyData.questions) ? surveyData.questions : [],
         isPublished: surveyData.is_published || false
       };
-      
       setSurvey(newSurvey);
-      setQuestions(parsedQuestions);
+      setQuestions(Array.isArray(surveyData.questions) ? surveyData.questions : []);
     }
   }, [surveyData, setQuestions]);
 
@@ -80,7 +61,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         await updateSurvey({
           surveyId,
           updates: { 
-            isPublished: newPublishState
+            is_published: newPublishState
           }
         });
         
@@ -118,7 +99,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
             name: survey.title,
             description: survey.description,
             questions: questions,
-            isPublished: survey.isPublished
+            is_published: survey.isPublished
           }
         });
         

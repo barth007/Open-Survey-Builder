@@ -24,16 +24,11 @@ export function useSubmitResponse() {
       }
 
       try {
-        const formattedAnswers = answers.map(answer => ({
-          questionId: answer.questionId,
-          value: answer.value
-        }));
-
         const { data, error } = await supabase
           .from('survey_responses')
           .insert({
             survey_id: surveyId,
-            answers: formattedAnswers,
+            answers: answers as any, // Cast answers to any to match Json type expectation
             submitted_at: new Date().toISOString()
           });
 
