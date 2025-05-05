@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/sonner';
 interface SurveyFoldersListProps {
   folders: SurveyFolder[];
   unorganizedSurveys: Survey[];
-  onCreateFolder: (name: string) => Promise<void>;
+  onCreateFolder: (name: string) => Promise<any>; // Updated return type to Promise<any> instead of Promise<void>
   onDeleteFolder: (id: string) => void;
   onDeleteSurvey: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
