@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import UserProfile from '@/components/UserProfile';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
+import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
@@ -68,24 +69,6 @@ const Index = () => {
         return { ...oldData, title, name: title };
       });
     }
-  };
-
-  const handleCopyLink = () => {
-    if (!surveyId) return;
-    
-    const baseUrl = window.location.origin;
-    const surveyUrl = `${baseUrl}/survey-response/${surveyId}`;
-    
-    navigator.clipboard.writeText(surveyUrl);
-    
-    toast({
-      title: survey.isPublished 
-        ? "Survey Link Copied" 
-        : "Preview Link Copied",
-      description: survey.isPublished
-        ? "You have copied the Survey link"
-        : "You have copied the Preview link"
-    });
   };
 
   const handleQuestionChange = (updatedQuestion: any) => {
@@ -159,36 +142,7 @@ const Index = () => {
               ))}
             </div>
             
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex">
-                    <Button 
-                      onClick={togglePublish} 
-                      className={`
-                        ${survey.isPublished 
-                          ? "border-transparent bg-green-500 bg-opacity-10 text-green-700 hover:bg-green-500 hover:bg-opacity-20" 
-                          : "border-transparent bg-orange-500 bg-opacity-10 text-orange-700 hover:bg-orange-500 hover:bg-opacity-20"}
-                        rounded-r-none border-r
-                      `}
-                    >
-                      {survey.isPublished ? "Unpublish" : "Publish"}
-                    </Button>
-                    <Button
-                      className="bg-transparent text-gray-500 hover:bg-gray-100 rounded-l-none pl-2"
-                      onClick={handleCopyLink}
-                    >
-                      <Link2 size={18} />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                {!survey.isPublished && (
-                  <TooltipContent>
-                    <p>Preview the survey</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            <ShareSurveyButton survey={survey} onPublishToggle={togglePublish} />
           </div>
         </header>
 

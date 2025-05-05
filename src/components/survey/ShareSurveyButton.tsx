@@ -11,39 +11,68 @@ import {
 import { Survey } from '@/types/survey';
 import { Separator } from '@/components/ui/separator';
 import { TeamSelector } from '@/components/survey/TeamSelector';
-import { Shield, Globe, Users } from 'lucide-react';
+import { Shield, Globe, Users, Link, Eye } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 interface ShareSurveyButtonProps {
   survey: Survey;
+  onPublishToggle?: () => void;
 }
 
-export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ survey }) => {
+export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ 
+  survey,
+  onPublishToggle
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Don't allow sharing if the survey is not published
-  const isShareable = survey.isPublished;
-  
   const publicUrl = `${window.location.origin}/p/${survey.publicCode}`;
+  const previewUrl = `${window.location.origin}/preview/${survey.publicCode}`;
   
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(publicUrl);
-    toast("Link copied!", {
-      description: "The survey link has been copied to your clipboard.",
+  const copyToClipboard = (url: string, type: 'public' | 'preview') => {
+    navigator.clipboard.writeText(url);
+    toast(`${type === 'public' ? 'Public' : 'Preview'} link copied!`, {
+      description: `The ${type === 'public' ? 'public' : 'preview'} link has been copied to your clipboard.`,
     });
-    setIsOpen(false);
   };
   
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline">
-          {isShareable ? "Share Survey" : "Sharing Options"}
+          <Link className="h-4 w-4 mr-2" />
+          Share
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <div className="space-y-4">
+      <PopoverContent className="w-[350px] p-0">
+        <div className="p-4 pb-2">
+          <h3 className="font-medium text-sm">Share Survey</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Configure how others access your survey
+          </p>
+        </div>
+        
+        <div className="px-4 py-2 flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Publishing</span>
+            <span className="text-xs text-muted-foreground">
+              {survey.isPublished ? "Survey is live and collecting responses" : "Survey is in draft mode"}
+            </span>
+          </div>
+          <Switch 
+            checked={survey.isPublished} 
+            onCheckedChange={onPublishToggle}
+            className={cn(
+              survey.isPublished ? "bg-green-500" : "bg-gray-200"
+            )}
+          />
+        </div>
+        
+        <Separator className="my-2" />
+        
+        <div className="space-y-4 p-4">
           <div>
-            <h3 className="font-medium flex items-center gap-2">
+            <h3 className="font-medium flex items-center gap-2 text-sm">
               <Users className="h-4 w-4" />
               Team Sharing
             </h3>
@@ -59,11 +88,34 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ survey }) 
           <Separator />
           
           <div>
-            <h3 className="font-medium flex items-center gap-2">
+            <h3 className="font-medium flex items-center gap-2 text-sm">
+              <Eye className="h-4 w-4" />
+              Preview Link
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 mb-2">
+              Share for testing - responses won't be recorded
+            </p>
+            <div className="flex gap-2">
+              <Input 
+                value={previewUrl}
+                readOnly
+                className="text-xs"
+              />
+              <Button 
+                onClick={() => copyToClipboard(previewUrl, 'preview')}
+                size="sm"
+              >
+                Copy
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-medium flex items-center gap-2 text-sm">
               <Globe className="h-4 w-4" />
               Public Link
             </h3>
-            {isShareable ? (
+            {survey.isPublished ? (
               <>
                 <p className="text-xs text-muted-foreground mt-1 mb-2">
                   Anyone with this link can respond to your survey
@@ -74,7 +126,10 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ survey }) 
                     readOnly
                     className="text-xs"
                   />
-                  <Button onClick={copyToClipboard}>
+                  <Button 
+                    onClick={() => copyToClipboard(publicUrl, 'public')}
+                    size="sm"
+                  >
                     Copy
                   </Button>
                 </div>
