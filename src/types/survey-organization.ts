@@ -11,4 +11,5 @@ export interface Survey {
   name: string;
   createdAt: Date;
   folderId?: string;
+  teamId?: string;
 }

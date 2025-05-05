@@ -106,6 +106,7 @@ export type Database = {
           name: string
           public_code: string | null
           questions: Json | null
+          team_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -117,6 +118,7 @@ export type Database = {
           name: string
           public_code?: string | null
           questions?: Json | null
+          team_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -128,6 +130,7 @@ export type Database = {
           name?: string
           public_code?: string | null
           questions?: Json | null
+          team_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -145,15 +148,136 @@ export type Database = {
             referencedRelation: "folders"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "surveys_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      team_invitations: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          invitation_code: string
+          status: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          invitation_code: string
+          status?: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_code?: string
+          status?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string | null
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      generate_invitation_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_random_string: {
         Args: { length: number }
+        Returns: string
+      }
+      is_team_admin: {
+        Args: { team_id: string; user_id?: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { team_id: string; user_id?: string }
+        Returns: boolean
+      }
+      is_team_owner: {
+        Args: { team_id: string; user_id?: string }
+        Returns: boolean
+      }
+      process_team_invitation: {
+        Args: { invitation_code: string }
         Returns: string
       }
     }

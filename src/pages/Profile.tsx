@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import PersonalInfoTab from '@/components/profile/PersonalInfoTab';
 import TeamTab from '@/components/profile/TeamTab';
 import AccountSettingsTab from '@/components/profile/AccountSettingsTab';
-import { Loader2, User, Users, Settings } from 'lucide-react';
+import { Loader2, User, Users, Settings, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,8 +66,18 @@ const Profile = () => {
   return (
     <div className="min-h-screen py-8">
       <div className="container max-w-3xl">
-        <header className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Your Profile</h1>
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <Button 
+              variant="ghost" 
+              className="mb-2 -ml-4 p-2 flex items-center text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <h1 className="text-2xl font-bold">Your Profile</h1>
+          </div>
         </header>
 
         <Tabs 
