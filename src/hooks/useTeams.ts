@@ -49,8 +49,12 @@ export const useTeams = () => {
       const { data, error } = await supabase
         .from('teams')
         .select(`
-          *,
-          team_members!inner(*)
+          teams:id,
+          teams:name,
+          teams:description,
+          teams:created_at,
+          teams:owner_id,
+          team_members!inner(user_id)
         `)
         .eq('team_members.user_id', user.id);
       
@@ -75,7 +79,11 @@ export const useTeams = () => {
         const { data, error } = await supabase
           .from('team_members')
           .select(`
-            *,
+            id,
+            team_id,
+            user_id,
+            role,
+            joined_at,
             profiles:profiles(full_name, email, avatar_url)
           `)
           .eq('team_id', team.id);
