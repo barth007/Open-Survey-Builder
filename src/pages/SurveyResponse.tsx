@@ -18,6 +18,34 @@ const SurveyResponse = () => {
   const { submitResponse } = useSubmitResponse();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Helper function to ensure we're working with an array of questions
+  const getQuestions = (): Question[] => {
+    if (!surveyData || !surveyData.questions) return [];
+    
+    // Make sure we're working with an array and convert to Question type
+    const questions = Array.isArray(surveyData.questions) ? surveyData.questions : [];
+    
+    return questions.map((q: any) => ({
+      id: q.id || "",
+      type: q.type || "text",
+      text: q.text || "",
+      description: q.description,
+      isRequired: q.isRequired || false,
+      options: Array.isArray(q.options) ? q.options : [],
+      maxSelections: q.maxSelections,
+      figmaPrototypeUrl: q.figmaPrototypeUrl,
+      media: q.media,
+      conditionalLogic: q.conditionalLogic,
+      isVisible: q.isVisible !== undefined ? q.isVisible : true
+    }));
+  };
+
+  // Helper to get survey title
+  const getSurveyTitle = (): string => {
+    if (!surveyData) return "Untitled Survey";
+    return surveyData.name || "Untitled Survey";
+  };
+
   const handleSubmit = async () => {
     if (!surveyId || !surveyData) return;
 
@@ -68,7 +96,8 @@ const SurveyResponse = () => {
     const { dependsOn, operator, value } = question.conditionalLogic;
     const answer = answers[dependsOn];
     
-    const dependentQuestion = surveyData?.questions.find(q => q.id === dependsOn);
+    const questions = getQuestions();
+    const dependentQuestion = questions.find(q => q.id === dependsOn);
     if (!dependentQuestion) return true;
 
     switch (operator) {
@@ -106,7 +135,10 @@ const SurveyResponse = () => {
 
   const handleCheckboxChange = (questionId: string, optionId: string) => {
     const currentAnswers = answers[questionId] as string[] || [];
-    const maxSelections = surveyData?.questions.find(q => q.id === questionId)?.maxSelections;
+    
+    // Find the specific question to get maxSelections
+    const question = getQuestions().find(q => q.id === questionId);
+    const maxSelections = question?.maxSelections;
     
     if (currentAnswers.includes(optionId)) {
       handleAnswerChange(
@@ -292,12 +324,13 @@ const SurveyResponse = () => {
   }
 
   const isPublished = surveyData.is_published === true;
+  const questions = getQuestions();
 
   return (
     <div className="min-h-screen bg-pebble py-8">
       <div className="container max-w-3xl">
         <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
-          <h2 className="text-2xl font-bold mb-2 text-carbon">{surveyData.title || surveyData.name}</h2>
+          <h2 className="text-2xl font-bold mb-2 text-carbon">{getSurveyTitle()}</h2>
           <p className="text-gray-600 mb-6">{surveyData.description}</p>
 
           {!isPublished && (
@@ -307,7 +340,7 @@ const SurveyResponse = () => {
             </div>
           )}
 
-          {surveyData.questions.map((question, index) => (
+          {questions.map((question, index) => (
             isQuestionVisible(question) && (
               <div key={question.id} className="mb-6 pb-6 border-b border-ice last:border-b-0">
                 <h3 className="font-medium mb-2 text-carbon">
@@ -361,7 +394,7 @@ const SurveyResponse = () => {
             )
           ))}
 
-          {surveyData.questions.length > 0 && (
+          {questions.length > 0 && (
             <Button 
               className="mt-4 bg-sunset hover:opacity-90"
               onClick={handleSubmit}
@@ -371,7 +404,7 @@ const SurveyResponse = () => {
             </Button>
           )}
 
-          {surveyData.questions.length === 0 && (
+          {questions.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <p>This survey has no questions.</p>
             </div>

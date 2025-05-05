@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { Survey } from '@/types/survey';
+import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSurveyTitle } from './survey/useSurveyTitle';
 import { useQuestionManagement } from './survey/useQuestionManagement';
+import { Json } from '@/lib/database.types';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
@@ -33,15 +34,33 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   useEffect(() => {
     if (surveyData) {
-      const newSurvey = {
+      // Convert database structure to application structure
+      const parsedQuestions: Question[] = Array.isArray(surveyData.questions) 
+        ? surveyData.questions.map((q: any) => ({
+            id: q.id || "",
+            type: q.type || "text",
+            text: q.text || "",
+            description: q.description,
+            isRequired: q.isRequired || false,
+            options: Array.isArray(q.options) ? q.options : [],
+            maxSelections: q.maxSelections,
+            figmaPrototypeUrl: q.figmaPrototypeUrl,
+            media: q.media,
+            conditionalLogic: q.conditionalLogic,
+            isVisible: q.isVisible
+          }))
+        : [];
+
+      const newSurvey: Survey = {
         id: surveyData.id,
-        title: surveyData.title || surveyData.name || "Untitled Survey",
+        title: surveyData.name || "Untitled Survey",
         description: surveyData.description || "Survey description",
-        questions: surveyData.questions || [],
-        isPublished: surveyData.isPublished || surveyData.is_published || false
+        questions: parsedQuestions,
+        isPublished: surveyData.is_published || false
       };
+      
       setSurvey(newSurvey);
-      setQuestions(newSurvey.questions);
+      setQuestions(parsedQuestions);
     }
   }, [surveyData, setQuestions]);
 
@@ -50,7 +69,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
   };
 
   const togglePublish = async () => {
-    // Update local state first
     const newPublishState = !survey.isPublished;
     setSurvey(prev => ({
       ...prev,
@@ -58,7 +76,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }));
     
     try {
-      // Immediately save to database
       if (surveyId) {
         await updateSurvey({
           surveyId,
@@ -67,7 +84,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
           }
         });
         
-        // Invalidate queries to reflect the changes
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
         
@@ -79,7 +95,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
         });
       }
     } catch (error) {
-      // Revert local state if the save failed
       setSurvey(prev => ({
         ...prev,
         isPublished: !newPublishState
@@ -102,7 +117,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
           updates: { 
             name: survey.title,
             description: survey.description,
-            questions: questions, // Use questions from useQuestionManagement
+            questions: questions,
             isPublished: survey.isPublished
           }
         });
@@ -125,7 +140,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   };
 
-  // Create a new survey object that includes the latest questions
   const currentSurvey: Survey = {
     ...survey,
     questions
