@@ -11,7 +11,7 @@ import {
 import { Survey } from '@/types/survey';
 import { Separator } from '@/components/ui/separator';
 import { TeamSelector } from '@/components/survey/TeamSelector';
-import { Shield, Globe, Users, Link, Eye } from 'lucide-react';
+import { Shield, Globe, Users, Link, Eye, Check, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
@@ -39,9 +39,18 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline">
-          <Link className="h-4 w-4 mr-2" />
-          Share
+        <Button 
+          variant="outline"
+          className={cn(
+            survey.isPublished ? "text-green-600 border-green-400 hover:bg-green-50" : "text-gray-600 border-gray-300"
+          )}
+        >
+          {survey.isPublished ? (
+            <Check className="h-4 w-4 mr-2 text-green-600" />
+          ) : (
+            <X className="h-4 w-4 mr-2 text-gray-500" />
+          )}
+          {survey.isPublished ? "Published" : "Unpublished"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[350px] p-0">

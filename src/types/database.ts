@@ -86,6 +86,7 @@ export type Database = {
           is_published: boolean | null;
           name: string;
           questions: Json | null;
+          public_code: string | null;
         };
         Insert: {
           created_at?: string | null;
@@ -95,6 +96,7 @@ export type Database = {
           is_published?: boolean | null;
           name: string;
           questions?: Json | null;
+          public_code?: string | null;
         };
         Update: {
           created_at?: string | null;
@@ -104,6 +106,7 @@ export type Database = {
           is_published?: boolean | null;
           name?: string;
           questions?: Json | null;
+          public_code?: string | null;
         };
         Relationships: [
           {
@@ -246,6 +249,7 @@ export interface DbSurvey {
   folder_id: string | null;
   created_at: string | null;
   user_id: string | null;
+  public_code: string | null; // Added public_code field
 }
 
 /**

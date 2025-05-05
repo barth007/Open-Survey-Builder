@@ -1,4 +1,3 @@
-
 import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
 
@@ -29,7 +28,10 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     description: dbSurvey.description || "",
     questions: parsedQuestions,
     isPublished: dbSurvey.is_published || false,
-    folderId: dbSurvey.folder_id || undefined
+    // Match property names with the Survey type definition
+    // The Survey type doesn't have createdAt/updatedAt properties
+    folderId: dbSurvey.folder_id || undefined,
+    publicCode: dbSurvey.public_code || undefined
   };
 }
 
