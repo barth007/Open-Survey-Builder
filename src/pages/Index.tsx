@@ -68,42 +68,19 @@ const Index = () => {
   };
 
   const handleCopyLink = () => {
+    if (!survey) return;
     const baseUrl = window.location.origin;
-
-    const isPublished = survey.isPublished;
-    const hasPublicCode = !!survey.publicCode;
-
-    console.log("🔁 Current state →", {
-      isPublished,
-      id: survey.id,
-      publicCode: survey.publicCode,
-    });
-
-    if (!survey.id) {
-      toast({
-        title: "Missing Survey ID",
-        description: "Cannot generate a link without a survey ID",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const surveyUrl = isPublished
+    const surveyUrl = survey.isPublished
       ? `${baseUrl}/survey/${survey.id}`
-      : hasPublicCode
-        ? `${baseUrl}/preview/${survey.publicCode}`
-        : `${baseUrl}/survey/${survey.id}`; // fallback
-
+      : `${baseUrl}/preview/${survey.publicCode}`;
     navigator.clipboard.writeText(surveyUrl);
-
     toast({
-      title: isPublished ? "Survey Link Copied" : "Preview Link Copied",
-      description: isPublished
+      title: survey.isPublished ? "Survey Link Copied" : "Preview Link Copied",
+      description: survey.isPublished
         ? "You have copied the Survey link"
-        : "You have copied the Preview link",
+        : "You have copied the Preview link"
     });
   };
-
 
   const handleQuestionChange = (q: any) => { updateQuestion(q); setPendingChanges(true); };
   const handleDescriptionChangeWithTracking = (desc: string) => { handleDescriptionChange(desc); setPendingChanges(true); };
