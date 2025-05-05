@@ -51,6 +51,8 @@ const App = () => (
               <Route path="/survey/:id" element={<SurveyResponse />} />
               <Route path="/preview/:publicCode" element={<PublicSurveyPreview />} />
               <Route path="/survey-response/:id" element={<RedirectSurveyResponse />} />
+              {/* Add a direct redirect for IDs without the /survey prefix */}
+              <Route path="/:id" element={<RedirectSurveyResponse />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
