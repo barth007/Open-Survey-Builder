@@ -48,16 +48,23 @@ export const useTeams = () => {
       
       // We now select columns without the "teams:" prefix to match our Team type
       const { data, error } = await supabase
-        .from('teams')
-        .select(`
-          id,
-          name,
-          description,
-          created_at,
-          owner_id,
-          team_members!inner(user_id)
-        `)
-        .eq('team_members.user_id', user.id);
+  .from('teams')
+  .select(`
+    id,
+    name,
+    description,
+    created_at,
+    owner_id,
+    team_members:team_members!inner(
+      id,
+      team_id,
+      user_id,
+      role,
+      joined_at
+    )
+  `)
+  .eq('team_members.user_id', user.id);
+˙˙
       
       if (error) {
         console.error('Error fetching teams:', error);
