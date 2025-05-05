@@ -10,7 +10,7 @@ import { toast } from '@/components/ui/sonner';
 import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
-import { PublicSidebarLayout } from '@/components/survey/PublicSidebarLayout';
+import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
 
 interface PublicSurveyProps {
   isPreviewMode?: boolean;
@@ -69,17 +69,17 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
 
   if (isLoading) {
     return (
-      <PublicSidebarLayout surveyTitle="Loading..." isPreviewMode={isPreviewMode}>
+      <PublicSurveyLayout surveyTitle="Loading..." isPreviewMode={isPreviewMode}>
         <div className="flex items-center justify-center min-h-screen">
           <Loader className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </PublicSidebarLayout>
+      </PublicSurveyLayout>
     );
   }
 
   if (error || !survey) {
     return (
-      <PublicSidebarLayout surveyTitle="Survey Not Available" isPreviewMode={isPreviewMode}>
+      <PublicSurveyLayout surveyTitle="Survey Not Available" isPreviewMode={isPreviewMode}>
         <div className="container max-w-3xl py-10 px-4">
           <div className="p-6 bg-destructive/10 rounded-lg">
             <h2 className="text-xl font-bold mb-2 text-destructive">Survey Not Available</h2>
@@ -88,12 +88,12 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
             </p>
           </div>
         </div>
-      </PublicSidebarLayout>
+      </PublicSurveyLayout>
     );
   }
 
   return (
-    <PublicSidebarLayout 
+    <PublicSurveyLayout 
       surveyTitle={survey.title} 
       isPreviewMode={isPreviewMode}
     >
@@ -142,7 +142,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           </div>
         </form>
       </div>
-    </PublicSidebarLayout>
+    </PublicSurveyLayout>
   );
 };
 
