@@ -87,7 +87,7 @@ export const useTeams = () => {
             joined_at,
             profiles:profiles(full_name, email, avatar_url)
           `)
-          .eq('team_id', team.id);
+          .eq('team_members.team_id', team.id);
         
         if (error) {
           console.error(`Error fetching members for team ${team.id}:`, error);
@@ -113,8 +113,8 @@ export const useTeams = () => {
         const { data, error } = await supabase
           .from('team_invitations')
           .select('*')
-          .eq('team_id', team.id)
-          .eq('status', 'pending');
+          .eq('team_invitations.team_id', team.id)
+          .eq('team_invitations.status', 'pending');
         
         if (error) {
           console.error(`Error fetching invitations for team ${team.id}:`, error);
@@ -237,8 +237,8 @@ export const useTeams = () => {
       const { error } = await supabase
         .from('team_members')
         .delete()
-        .eq('team_id', teamId)
-        .eq('user_id', userId);
+        .eq('team_members.team_id', teamId)
+        .eq('team_members.user_id', userId);
       
       if (error) {
         console.error('Error removing team member:', error);
@@ -263,7 +263,7 @@ export const useTeams = () => {
       const { error } = await supabase
         .from('teams')
         .delete()
-        .eq('id', teamId);
+        .eq('teams.id', teamId);
       
       if (error) {
         console.error('Error deleting team:', error);
