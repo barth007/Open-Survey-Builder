@@ -18,7 +18,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     title: "Untitled Survey",
     description: "Survey description",
     questions: [],
-    isPublished: false // We keep this for compatibility with the Survey type
+    isPublished: false
   });
 
   const {
@@ -41,6 +41,38 @@ export const useSurveyState = (surveyId: string | undefined) => {
     setSurvey((prev) => ({ ...prev, description }));
   };
 
+  const togglePublish = async () => {
+    const newPublishState = !survey.isPublished;
+
+    try {
+      if (surveyId) {
+        // Call the updateSurvey function
+        await updateSurvey({
+          surveyId,
+          updates: {
+            isPublished: newPublishState,
+          },
+        });
+
+        // ✅ Fetch the updated survey data directly
+        await queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+
+        toast({
+          title: newPublishState ? "Survey published" : "Survey unpublished",
+          description: newPublishState
+            ? "The survey is now live and can receive responses"
+            : "The survey is now in draft mode",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating survey publish status:", error);
+      toast({
+        title: "Error updating survey",
+        description: "An error occurred while updating the survey's publish status.",
+      });
+    }
+  };
+
   const handleSave = async () => {
     try {
       if (surveyId) {
@@ -50,7 +82,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
             title: survey.title,
             description: survey.description,
             questions: questions,
-            // We keep isPublished in the data structure but don't expose functionality to change it
             isPublished: survey.isPublished
           }
         });
@@ -86,6 +117,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     updateQuestion,
     deleteQuestion,
     duplicateQuestion,
+    togglePublish,
     handleSave,
     isLoading,
     error
