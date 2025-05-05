@@ -39,35 +39,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // If the user just signed in, check if they have a profile
         if (event === 'SIGNED_IN' && currentSession?.user) {
-          // Use setTimeout to avoid Supabase deadlock
-          setTimeout(async () => {
-            try {
-              const { data: existingProfile, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentSession.user!.id)
-                .single();
-                
-              if (profileError) {
-                // Only log an error if it's not a "no rows returned" error
-                if (!profileError.message.includes('No rows found')) {
-                  console.error('Error fetching profile:', profileError);
-                  toast("Couldn't verify your profile information");
-                } else {
-                  // This is expected for new users if the trigger hasn't run yet
-                  console.warn('No profile found for user:', currentSession.user.id);
-                  toast("Your profile will be set up automatically.");
-                  // We don't manually create a profile here, as the trigger should handle it
-                }
-              } else {
-                console.log('Profile exists for user:', existingProfile);
-              }
-            } catch (error) {
-              console.error('Error checking profile:', error);
-            }
-          }, 0);
+          toast("Successfully signed in");
+        } else if (event === 'SIGNED_OUT') {
+          toast("You have been signed out");
         }
         
         setIsLoading(false);
@@ -126,6 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
+        console.error('Error signing out:', error);
+        toast("Failed to sign out. Please try again.");
         throw error;
       }
     } catch (error) {

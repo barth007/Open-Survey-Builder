@@ -35,11 +35,12 @@ export function useProfile() {
         setLoading(true);
         console.log('Fetching profile for user:', user.id);
         
+        // Use maybeSingle instead of single to handle case where profile doesn't exist
         const { data, error: fetchError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (fetchError) {
           console.error('Error fetching profile:', fetchError);
@@ -47,20 +48,57 @@ export function useProfile() {
         }
 
         if (isMounted) {
-          console.log('Profile fetched successfully:', data);
-          setProfile(data as Profile);
-          setError(null);
+          if (data) {
+            console.log('Profile fetched successfully:', data);
+            setProfile(data as Profile);
+            setError(null);
+          } else {
+            console.log('No profile found, creating a new one');
+            // Create a new profile if one doesn't exist
+            await createProfile();
+          }
         }
       } catch (error) {
         console.error('Error in profile fetch:', error);
         if (isMounted) {
           setError(error as Error);
-          toast("Couldn't load your profile information");
+          toast("Couldn't load your profile information. Please try again later.");
         }
       } finally {
         if (isMounted) {
           setLoading(false);
         }
+      }
+    }
+
+    // Helper function to create a new profile
+    async function createProfile() {
+      if (!user) return;
+      
+      try {
+        const newProfile = {
+          id: user.id,
+          full_name: user.user_metadata?.full_name || null,
+          avatar_url: user.user_metadata?.avatar_url || null,
+          email: user.email,
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([newProfile]);
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          toast("Couldn't create your profile. Please try again later.");
+          throw insertError;
+        }
+
+        setProfile(newProfile);
+        console.log('New profile created successfully:', newProfile);
+      } catch (error) {
+        console.error('Error creating profile:', error);
+        setError(error as Error);
       }
     }
 
@@ -90,6 +128,8 @@ export function useProfile() {
         .eq('id', user.id);
 
       if (updateError) {
+        console.error('Error updating profile:', updateError);
+        toast("There was a problem updating your profile");
         throw updateError;
       }
 
