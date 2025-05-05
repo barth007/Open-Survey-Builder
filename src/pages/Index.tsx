@@ -71,15 +71,13 @@ const Index = () => {
   };
 
   const handleCopyLink = () => {
-    if (!survey) return;
-  
+    if (!surveyId) return;
+    
     const baseUrl = window.location.origin;
-    const surveyUrl = survey.isPublished
-      ? `${baseUrl}/survey/${survey.id}`
-      : `${baseUrl}/preview/${survey.publicCode}`;
-  
+    const surveyUrl = `${baseUrl}/survey-response/${surveyId}`;
+    
     navigator.clipboard.writeText(surveyUrl);
-  
+    
     toast({
       title: survey.isPublished 
         ? "Survey Link Copied" 
@@ -88,7 +86,7 @@ const Index = () => {
         ? "You have copied the Survey link"
         : "You have copied the Preview link"
     });
-  };  
+  };
 
   const handleQuestionChange = (updatedQuestion: any) => {
     updateQuestion(updatedQuestion);
