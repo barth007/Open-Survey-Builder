@@ -1,9 +1,7 @@
 
-import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
-import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,40 +9,20 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      console.log('ProtectedRoute - Authentication required for path:', location.pathname);
-      toast("Authentication Required", {
-        description: "Please sign in to access this page"
-      });
-    }
-  }, [user, isLoading, location.pathname]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Verifying your session...</p>
-        </div>
+      <div className="min-h-screen bg-pebble flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
       </div>
     );
   }
 
-  if (user) {
-    return <>{children}</>;
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
-  console.log('ProtectedRoute - Redirecting to login from:', location.pathname);
-  return (
-    <Navigate
-      to="/login"
-      state={{ from: location.pathname + location.search }}
-      replace
-    />
-  );
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

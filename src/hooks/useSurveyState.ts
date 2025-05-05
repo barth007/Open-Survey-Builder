@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Survey, Question } from '@/types/survey';
+import { Survey } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
@@ -31,44 +32,64 @@ export const useSurveyState = (surveyId: string | undefined) => {
   } = useQuestionManagement(survey.questions);
 
   useEffect(() => {
-    setSurvey(surveyData || survey); // always sync when surveyData updates
     if (surveyData) {
-      setQuestions(surveyData.questions);
+      const newSurvey = {
+        id: surveyData.id,
+        title: surveyData.title || surveyData.name || "Untitled Survey",
+        description: surveyData.description || "Survey description",
+        questions: surveyData.questions || [],
+        isPublished: surveyData.isPublished || surveyData.is_published || false
+      };
+      setSurvey(newSurvey);
+      setQuestions(newSurvey.questions);
     }
-  }, [surveyData, setQuestions]);  
+  }, [surveyData, setQuestions]);
 
   const handleDescriptionChange = (description: string) => {
     setSurvey((prev) => ({ ...prev, description }));
   };
 
   const togglePublish = async () => {
+    // Update local state first
     const newPublishState = !survey.isPublished;
-
+    setSurvey(prev => ({
+      ...prev,
+      isPublished: newPublishState
+    }));
+    
     try {
+      // Immediately save to database
       if (surveyId) {
-        // Call the updateSurvey function
         await updateSurvey({
           surveyId,
-          updates: {
-            isPublished: newPublishState,
-          },
+          updates: { 
+            isPublished: newPublishState
+          }
         });
-
-        // ✅ Fetch the updated survey data directly
-        await queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-
+        
+        // Invalidate queries to reflect the changes
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
         toast({
           title: newPublishState ? "Survey published" : "Survey unpublished",
-          description: newPublishState
-            ? "The survey is now live and can receive responses"
+          description: newPublishState 
+            ? "The survey is now live and can receive responses" 
             : "The survey is now in draft mode",
         });
       }
     } catch (error) {
+      // Revert local state if the save failed
+      setSurvey(prev => ({
+        ...prev,
+        isPublished: !newPublishState
+      }));
+      
       console.error("Error updating survey publish status:", error);
       toast({
         title: "Error updating survey",
-        description: "An error occurred while updating the survey's publish status.",
+        description: "There was an error updating your survey. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -79,9 +100,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
         await updateSurvey({
           surveyId,
           updates: { 
-            title: survey.title,
+            name: survey.title,
             description: survey.description,
-            questions: questions,
+            questions: questions, // Use questions from useQuestionManagement
             isPublished: survey.isPublished
           }
         });
@@ -104,6 +125,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   };
 
+  // Create a new survey object that includes the latest questions
   const currentSurvey: Survey = {
     ...survey,
     questions

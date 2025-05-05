@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
-import { useProfile } from '@/hooks/useProfile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Loader2 } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
-import { useNavigate } from 'react-router-dom';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfileProps {
   compact?: boolean;
@@ -14,17 +12,14 @@ interface UserProfileProps {
 
 const UserProfile = ({ compact = false }: UserProfileProps) => {
   const { user, signOut } = useAuth();
-  const { profile, loading } = useProfile();
-  const navigate = useNavigate();
-
-  console.log('UserProfile rendering:', { user: user?.id, profileId: profile?.id, loading, compact });
+  const { toast } = useToast();
 
   if (!user) return null;
 
+  // Function to get initials from name or email
   const getInitials = () => {
-    const displayName = profile?.full_name;
-    if (displayName) {
-      return displayName
+    if (user.user_metadata?.full_name) {
+      return user.user_metadata.full_name
         .split(' ')
         .map((n: string) => n[0])
         .join('')
@@ -34,36 +29,26 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
     return user.email?.substring(0, 2).toUpperCase() || 'U';
   };
 
-  const handleSignOut = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSignOut = async () => {
     try {
       await signOut();
-      toast("You have been signed out of your account");
-      navigate('/login');
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account",
+      });
     } catch (error) {
-      toast("There was a problem signing out. Please try again.");
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleProfileClick = () => {
-    navigate('/profile');
-  };
-
-  if (loading && !compact) {
-    return (
-      <div className="w-full flex items-center justify-center p-3">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  // Use avatar from profile
-  const avatarUrl = profile?.avatar_url;
-
   if (compact) {
     return (
-      <Avatar className="h-8 w-8 border-2 border-background">
-        <AvatarImage src={avatarUrl || undefined} />
+      <Avatar className="border-2 border-background h-8 w-8">
+        <AvatarImage src={user.user_metadata?.avatar_url} />
         <AvatarFallback className="bg-primary text-primary-foreground text-xs">
           {getInitials()}
         </AvatarFallback>
@@ -72,25 +57,26 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   }
 
   return (
-    <div 
-      className="w-full flex items-center gap-3 p-3 cursor-pointer hover:bg-sidebar-accent transition-colors"
-      onClick={handleProfileClick}
-    >
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={avatarUrl || undefined} />
-        <AvatarFallback className="bg-primary text-primary-foreground">
-          {getInitials()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 overflow-hidden">
-        <p className="text-sm font-medium truncate">
-          {profile?.full_name || user.email?.split('@')[0] || user.email}
-        </p>
-        <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
+    <div className="p-4 mt-auto border-t">
+      <div className="flex items-center gap-3">
+        <Avatar>
+          <AvatarImage src={user.user_metadata?.avatar_url} />
+          <AvatarFallback className="bg-primary text-primary-foreground">
+            {getInitials()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm font-medium truncate">
+            {user.user_metadata?.full_name || user.email}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {user.email}
+          </p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={handleSignOut}>
+          <LogOut className="h-4 w-4" />
+        </Button>
       </div>
-      <Button variant="ghost" size="icon" onClick={handleSignOut}>
-        <LogOut className="h-4 w-4" />
-      </Button>
     </div>
   );
 };
