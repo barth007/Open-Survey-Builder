@@ -46,14 +46,15 @@ export const useTeams = () => {
       
       console.log('Fetching teams for user:', user.id);
       
+      // We now select columns without the "teams:" prefix to match our Team type
       const { data, error } = await supabase
         .from('teams')
         .select(`
-          teams:id,
-          teams:name,
-          teams:description,
-          teams:created_at,
-          teams:owner_id,
+          id,
+          name,
+          description,
+          created_at,
+          owner_id,
           team_members!inner(user_id)
         `)
         .eq('team_members.user_id', user.id);
