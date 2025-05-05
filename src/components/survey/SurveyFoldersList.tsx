@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Folder, FolderOpen, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -133,7 +132,7 @@ export function SurveyFoldersList({
                 {folder.surveys.map(survey => (
                   <div key={survey.id} className="flex items-center justify-between group">
                     <Link 
-                      to={`/${survey.id}`}
+                      to={`/survey/${survey.id}`}
                       className="text-sm py-1 px-2 rounded-md hover:bg-gray-100 w-full text-left"
                     >
                       {survey.name}
@@ -163,7 +162,7 @@ export function SurveyFoldersList({
           {unorganizedSurveys.map(survey => (
             <div key={survey.id} className="flex items-center justify-between group">
               <Link 
-                to={`/${survey.id}`}
+                to={`/survey/${survey.id}`}
                 className="text-sm py-1 px-2 rounded-md hover:bg-gray-100 w-full text-left"
               >
                 {survey.name}
