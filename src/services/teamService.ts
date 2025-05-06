@@ -1,6 +1,6 @@
 
 // Re-export all team services from their respective modules
-export { validateSession, performDeepSessionValidation } from './team/teamAuthService';
+export { performDeepSessionValidation } from './team/teamAuthService';
 export { fetchTeams, fetchTeamMembers, fetchTeamInvitations } from './team/teamQueryService';
 export { createTeam, getAuthStateDebugInfo } from './team/teamCreationService';
 export { sendInvitation, processInvitation } from './team/teamInvitationService';
