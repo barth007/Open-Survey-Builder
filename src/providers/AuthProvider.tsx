@@ -38,15 +38,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         userId: currentSession?.user?.id || 'none',
         expires: currentSession?.expires_at ? new Date(currentSession.expires_at * 1000).toISOString() : 'none',
         storageType: typeof localStorage,
+        accessTokenLength: currentSession?.access_token?.length || 0,
+        refreshTokenLength: currentSession?.refresh_token?.length || 0,
       }
     );
+  };
+
+  // Force a complete session refresh to resolve RLS issues
+  const forceRefreshSession = async (): Promise<boolean> => {
+    try {
+      console.log('Forcing full session refresh...');
+      
+      // Get the current user's email
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.user?.email) {
+        console.log('No user email found for session refresh');
+        return false;
+      }
+      
+      // Sign out first
+      await supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear all supabase-related data from localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('sb-'))) {
+          console.log('Clearing localStorage key:', key);
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Wait a moment for browser to process
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // We would need a way to sign in again automatically here
+      // This would typically require a password or token that we don't have
+      // So we'll need to redirect to login
+      
+      console.log('Force refresh complete - user needs to sign in again');
+      return false;
+    } catch (error) {
+      console.error('Error during forced session refresh:', error);
+      return false;
+    }
   };
 
   // Session recovery function
   const refreshSession = async (): Promise<boolean> => {
     try {
       console.log('Manually refreshing session...');
-      const { data, error } = await supabase.auth.getSession();
+      
+      // First try refreshing the token
+      const { data, error } = await supabase.auth.refreshSession();
       
       if (error) {
         console.error('Error refreshing session:', error);
@@ -162,12 +205,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Sign out
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // Clear supabase-related localStorage items
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('supabase') || key.includes('sb-'))) {
+          console.log('Clearing localStorage key before signout:', key);
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error('Error signing out:', error);
         toast("Failed to sign out. Please try again.");
         throw error;
       }
+      
+      // Force clear session state
+      setUser(null);
+      setSession(null);
+      
+      console.log('Sign out completed successfully');
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
