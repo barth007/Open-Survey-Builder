@@ -95,9 +95,7 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
     // Close the dialog
     onOpenChange(false);
     // The navigate will happen in the AuthProvider
-    toast({
-      description: "You'll be redirected to the login page"
-    });
+    toast("You'll be redirected to the login page");
   };
 
   return (
