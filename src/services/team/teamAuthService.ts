@@ -8,20 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function performDeepSessionValidation() {
   try {
-    // Attempt to refresh session first to ensure token is valid
-    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-    
-    if (refreshError) {
-      console.error('Session refresh error:', refreshError);
-      throw new Error('Authentication error: Your session could not be refreshed.');
-    }
-    
-    if (!refreshData.session) {
-      console.error('No active session found after refresh attempt');
-      throw new Error('Authentication error: Please sign in again to continue.');
-    }
-    
-    // Check the current session after refresh
+    // Check the current session first
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
@@ -31,7 +18,16 @@ export async function performDeepSessionValidation() {
     
     if (!sessionData.session) {
       console.error('No active session found during validation');
-      throw new Error('Authentication error: Please sign in again to continue.');
+      
+      // Try to refresh the session automatically
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError || !refreshData.session) {
+        console.error('Session refresh error:', refreshError || 'No session after refresh');
+        throw new Error('Authentication error: Please sign in again to continue.');
+      }
+      
+      console.log('Session refreshed automatically during validation');
     }
     
     // Verify session with server-side validation

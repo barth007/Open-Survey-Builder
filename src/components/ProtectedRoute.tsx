@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -27,7 +26,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           console.log('Session recovery result:', recovered);
           
           if (!recovered) {
-            toast("Authentication Required", {
+            console.log('Session recovery failed, will redirect to login');
+            toast.error("Authentication Required", {
               description: "Please sign in to access this page"
             });
           }
@@ -43,14 +43,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     checkAndRecoverSession();
   }, [user, session, isLoading, recoveryAttempted, refreshSession]);
 
+  // Attempt deep validation if we have a session but keep failing RLS policies
   useEffect(() => {
-    if (!isLoading && !isRecovering && !user) {
-      console.log('ProtectedRoute - Authentication required for path:', location.pathname);
-      toast("Authentication Required", {
-        description: "Please sign in to access this page"
-      });
+    // If we have both a user and session, but still hit RLS issues,
+    // a periodic refresh of the session can help
+    if (user && session && !isLoading && !isRecovering) {
+      const periodicRefresh = setInterval(async () => {
+        try {
+          await refreshSession();
+          console.log('Regular session refresh completed in ProtectedRoute');
+        } catch (e) {
+          console.error('Regular session refresh failed:', e);
+        }
+      }, 60000); // Refresh every minute
+      
+      return () => clearInterval(periodicRefresh);
     }
-  }, [user, isLoading, isRecovering, location.pathname]);
+  }, [user, session, isLoading, isRecovering, refreshSession]);
 
   // Show loading state while checking or recovering session
   if (isLoading || isRecovering) {

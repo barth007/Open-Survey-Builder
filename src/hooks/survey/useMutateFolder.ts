@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
+import { performDeepSessionValidation } from '@/services/team/teamAuthService';
 
 export function useMutateFolder() {
   const queryClient = useQueryClient();
@@ -17,6 +18,9 @@ export function useMutateFolder() {
       try {
         // Ensure session is fresh
         await refreshSession();
+        
+        // Perform deep session validation
+        await performDeepSessionValidation();
         
         console.log('Creating folder with name:', name, 'for user:', user.id);
         
@@ -51,10 +55,10 @@ export function useMutateFolder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
-      toast("Folder created", { description: "Your folder has been created successfully" });
+      toast.success("Folder created", { description: "Your folder has been created successfully" });
     },
     onError: (error: Error) => {
-      toast("Failed to create folder", { description: error.message || "Unknown error" });
+      toast.error("Failed to create folder", { description: error.message || "Unknown error" });
     }
   });
 
@@ -67,6 +71,9 @@ export function useMutateFolder() {
       try {
         // Ensure session is fresh
         await refreshSession();
+        
+        // Perform deep session validation
+        await performDeepSessionValidation();
         
         const { error } = await supabase
           .from('folders')
@@ -88,10 +95,10 @@ export function useMutateFolder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
-      toast("Folder deleted", { description: "Your folder has been deleted" });
+      toast.success("Folder deleted", { description: "Your folder has been deleted" });
     },
     onError: (error: Error) => {
-      toast("Failed to delete folder", { description: error.message || "Unknown error" });
+      toast.error("Failed to delete folder", { description: error.message || "Unknown error" });
     }
   });
 

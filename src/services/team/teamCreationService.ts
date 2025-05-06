@@ -39,38 +39,13 @@ export async function createTeam(userId: string, name: string, description?: str
     if (teamError) {
       console.error('Error creating team:', teamError);
       
-      // Specific error handling for RLS policy violations
       if (teamError.message?.includes('violates row-level security policy')) {
         console.error('RLS policy violation details:', {
           errorCode: teamError.code,
           hint: teamError.hint,
           details: teamError.details
         });
-        
-        // Try to refresh the session directly here as a last resort
-        const { data: refreshResult } = await supabase.auth.refreshSession();
-        if (!refreshResult.session) {
-          throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
-        }
-        
-        // Retry the operation with the fresh token
-        const { data: retryData, error: retryError } = await supabase
-          .from('teams')
-          .insert([{ 
-            name, 
-            description, 
-            owner_id: userId 
-          }])
-          .select()
-          .single();
-          
-        if (retryError) {
-          console.error('Error on retry:', retryError);
-          throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
-        }
-        
-        console.log('Team created successfully on retry:', retryData);
-        return retryData;
+        throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
       }
       
       throw teamError;

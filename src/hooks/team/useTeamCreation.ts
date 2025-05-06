@@ -26,29 +26,23 @@ export function useTeamCreation() {
       
       try {
         // Always refresh session before team creation
-        const refreshSuccess = await refreshSession();
-        console.log('Session refresh result:', refreshSuccess);
-        
-        if (!refreshSuccess) {
-          // Manual token refresh through the API if our helper didn't work
-          const { data, error } = await supabase.auth.refreshSession();
-          if (error || !data.session) {
-            console.error('Manual token refresh failed:', error);
-            throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
-          }
-        }
+        await refreshSession();
         
         // Extra verification step with deep validation
         try {
           await performDeepSessionValidation();
         } catch (validationError) {
           console.error('Session validation failed:', validationError);
-          toast.error('Authentication error: Please sign out and sign in again to refresh your session.');
           throw validationError;
         }
         
         console.log('Session is valid, proceeding with team creation');
-        return await createTeam(user.id, name, description);
+        const team = await createTeam(user.id, name, description);
+        
+        // Immediately invalidate teams query to refresh the UI
+        queryClient.invalidateQueries({ queryKey: ['teams'] });
+        
+        return team;
       } catch (error: any) {
         console.error('Team creation error:', error);
         
@@ -72,6 +66,3 @@ export function useTeamCreation() {
     }
   });
 }
-
-// Add missing import
-import { supabase } from '@/integrations/supabase/client';

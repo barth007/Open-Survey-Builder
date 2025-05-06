@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const { signInWithGoogle, user, isLoading, session, refreshSession } = useAuth();
@@ -48,25 +49,34 @@ const Login = () => {
     }
   }, [location]);
 
-  // Attempt session recovery once on login page load
+  // Clear any stale RLS errors on login page visit
   useEffect(() => {
-    const attemptRecovery = async () => {
-      if (!recoveryAttempted && !user && !isLoading) {
-        console.log('Login - Attempting session recovery');
+    const clearSessionErrors = async () => {
+      const currentSession = await supabase.auth.getSession();
+      
+      // If we're on the login page but have a session token that might be invalid,
+      // let's try to refresh it once
+      if (currentSession.data?.session && !recoveryAttempted) {
+        console.log('Found existing session on login page, attempting refresh');
         try {
-          const recovered = await refreshSession();
-          console.log('Login - Session recovery result:', recovered);
+          await refreshSession();
           setRecoveryAttempted(true);
-        } catch (error) {
-          console.error('Login - Session recovery failed:', error);
-          setRecoveryAttempted(true);
+        } catch (e) {
+          console.error('Failed to refresh session on login page:', e);
+          // If refresh fails, sign out to clear any invalid tokens
+          try {
+            await supabase.auth.signOut();
+            console.log('Signed out to clear invalid session');
+          } catch (signOutErr) {
+            console.error('Error during sign out:', signOutErr);
+          }
         }
       }
     };
+    
+    clearSessionErrors();
+  }, [refreshSession, recoveryAttempted]);
 
-    attemptRecovery();
-  }, [refreshSession, user, isLoading, recoveryAttempted]);
-  
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
   
