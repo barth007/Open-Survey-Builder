@@ -96,7 +96,6 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
     onOpenChange(false);
     // The navigate will happen in the AuthProvider
     toast({
-      title: "Please sign out",
       description: "You'll be redirected to the login page"
     });
   };
