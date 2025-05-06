@@ -81,40 +81,58 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
   console.log(`Starting fetchTeamMembers for team ${teamId}`);
   
   try {
-    const { data, error } = await supabase
+    // Fetch team members first
+    const { data: membersData, error: membersError } = await supabase
       .from('team_members')
-      .select(`
-        id,
-        team_id,
-        user_id,
-        role,
-        joined_at,
-        profiles(
-          full_name, 
-          email, 
-          avatar_url
-        )
-      `)
+      .select('*')
       .eq('team_id', teamId);
     
-    if (error) {
-      console.error(`Error fetching members for team ${teamId}:`, error);
-      throw error;
+    if (membersError) {
+      console.error(`Error fetching members for team ${teamId}:`, membersError);
+      throw membersError;
+    }
+
+    // Convert to array if not already
+    const members = Array.isArray(membersData) ? membersData : [];
+    console.log(`Team ${teamId} members basic data:`, members);
+    
+    // Now fetch profiles separately and join them in memory
+    const userIds = members.map(member => member.user_id);
+    
+    // If no members, return empty array
+    if (userIds.length === 0) {
+      return members as TeamMember[];
     }
     
-    console.log(`Team ${teamId} members data:`, data);
+    // Fetch profiles for all member user IDs
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, avatar_url')
+      .in('id', userIds);
     
-    // Verify the data structure returned
-    if (data && data.length > 0) {
-      console.log('Sample member data structure:', {
-        id: data[0].id,
-        user_id: data[0].user_id,
-        role: data[0].role,
-        profile: data[0].profiles
-      });
+    if (profilesError) {
+      console.error(`Error fetching profiles for team ${teamId}:`, profilesError);
+      // Don't throw here, we can still return members without profiles
+      console.log(`Returning members without profile data`);
+      return members as TeamMember[];
     }
     
-    return data as TeamMember[];
+    // Create a map of profiles by user ID for quick lookup
+    const profilesMap: Record<string, any> = {};
+    (profilesData || []).forEach(profile => {
+      profilesMap[profile.id] = profile;
+    });
+
+    console.log(`Profiles data fetched:`, profilesData);
+    
+    // Join the profiles with members
+    const membersWithProfiles = members.map(member => ({
+      ...member,
+      profile: profilesMap[member.user_id] || null
+    }));
+    
+    console.log(`Team ${teamId} members with profiles:`, membersWithProfiles);
+    return membersWithProfiles as TeamMember[];
   } catch (error) {
     console.error(`Error in fetchTeamMembers for team ${teamId}:`, error);
     throw error;
