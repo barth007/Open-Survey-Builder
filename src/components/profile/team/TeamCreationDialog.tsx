@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/sonner';
 import { useTeams } from '@/hooks/useTeams';
+import { Loader2 } from 'lucide-react';
 
 const teamSchema = z.object({
   name: z.string().min(3, "Team name must be at least 3 characters"),
@@ -33,6 +33,7 @@ interface TeamCreationDialogProps {
 
 export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogProps) => {
   const { createTeam } = useTeams();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const form = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
@@ -44,14 +45,18 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
 
   const handleCreateTeam = async (data: TeamFormValues) => {
     try {
-      createTeam({
+      setIsSubmitting(true);
+      await createTeam({
         name: data.name,
         description: data.description
       });
       onOpenChange(false);
       form.reset();
     } catch (error: any) {
+      console.error('Team creation form error:', error);
       toast(`Failed to create team: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -97,9 +102,18 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSubmitting}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">Create Team</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Team'
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
