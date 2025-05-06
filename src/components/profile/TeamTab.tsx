@@ -12,6 +12,7 @@ import { InvitationDialog } from './team/InvitationDialog';
 import { TeamDetails } from './team/TeamDetails';
 import { EmptyTeamState } from './team/EmptyTeamState';
 import { RemoveMemberDialog, DeleteTeamDialog } from './team/ConfirmationDialogs';
+import { ChangeRoleDialog } from './team/ChangeRoleDialog';
 
 const TeamTab = () => {
   const { user } = useAuth();
@@ -21,6 +22,12 @@ const TeamTab = () => {
   const [activeTeamTab, setActiveTeamTab] = useState<string | null>(null);
   const [memberToRemove, setMemberToRemove] = useState<{ teamId: string; userId: string; name: string | null } | null>(null);
   const [teamToDelete, setTeamToDelete] = useState<string | null>(null);
+  const [memberRoleToChange, setMemberRoleToChange] = useState<{
+    teamId: string;
+    userId: string;
+    name: string | null;
+    currentRole: string;
+  } | null>(null);
 
   const { 
     teams, 
@@ -29,6 +36,8 @@ const TeamTab = () => {
     isLoading, 
     error,
     removeTeamMember,
+    updateTeamMemberRole,
+    updateTeam,
     deleteTeam
   } = useTeams();
 
@@ -56,6 +65,20 @@ const TeamTab = () => {
     } catch (error: any) {
       console.error(`Failed to remove member:`, error);
     }
+  };
+
+  const handleUpdateMemberRole = (newRole: 'admin' | 'member') => {
+    if (!memberRoleToChange) return;
+    
+    updateTeamMemberRole({
+      teamId: memberRoleToChange.teamId,
+      userId: memberRoleToChange.userId,
+      newRole
+    });
+  };
+
+  const handleUpdateTeam = (teamId: string, updates: { name: string; description: string }) => {
+    updateTeam({ teamId, updates });
   };
 
   const handleDeleteTeam = () => {
@@ -146,6 +169,11 @@ const TeamTab = () => {
                     onDeleteTeam={setTeamToDelete}
                     onRemoveMember={(teamId, userId, name) => 
                       setMemberToRemove({ teamId, userId, name })}
+                    onUpdateTeam={handleUpdateTeam}
+                    onUpdateMemberRole={(teamId, userId, name, currentRole, newRole) => {
+                      setMemberRoleToChange({ teamId, userId, name, currentRole });
+                      updateTeamMemberRole({ teamId, userId, newRole });
+                    }}
                   />
                 </TabsContent>
               ))}
