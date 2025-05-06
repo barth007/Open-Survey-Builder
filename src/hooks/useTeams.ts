@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
@@ -45,7 +46,7 @@ export const useTeams = () => {
       
       console.log('Fetching teams for user:', user.id);
       
-      // We now select columns without the "teams:" prefix to match our Team type
+      // Use explicit column names instead of wildcards to avoid ambiguity
       const { data, error } = await supabase
         .from('teams')
         .select(`
@@ -54,7 +55,7 @@ export const useTeams = () => {
           description,
           created_at,
           owner_id,
-          team_members:team_members!inner(
+          team_members!inner(
             id,
             team_id,
             user_id,
@@ -82,6 +83,7 @@ export const useTeams = () => {
       const teamMembersMap: Record<string, TeamMember[]> = {};
       
       await Promise.all(teams.map(async (team) => {
+        // Use explicit column names for team_members and profiles
         const { data, error } = await supabase
           .from('team_members')
           .select(`
@@ -90,9 +92,13 @@ export const useTeams = () => {
             user_id,
             role,
             joined_at,
-            profiles:profiles(full_name, email, avatar_url)
+            profiles(
+              full_name, 
+              email, 
+              avatar_url
+            )
           `)
-          .eq('team_members.team_id', team.id);
+          .eq('team_id', team.id);
         
         if (error) {
           console.error(`Error fetching members for team ${team.id}:`, error);
@@ -115,11 +121,20 @@ export const useTeams = () => {
       const invitationsMap: Record<string, TeamInvitation[]> = {};
       
       await Promise.all(teams.map(async (team) => {
+        // List explicit columns for team_invitations
         const { data, error } = await supabase
           .from('team_invitations')
-          .select('*')
-          .eq('team_invitations.team_id', team.id)
-          .eq('team_invitations.status', 'pending');
+          .select(`
+            id,
+            team_id,
+            email,
+            created_at,
+            expires_at,
+            invitation_code,
+            status
+          `)
+          .eq('team_id', team.id)
+          .eq('status', 'pending');
         
         if (error) {
           console.error(`Error fetching invitations for team ${team.id}:`, error);
@@ -138,10 +153,17 @@ export const useTeams = () => {
     mutationFn: async ({ name, description }: { name: string; description?: string }) => {
       if (!user) throw new Error('You must be logged in to create a team');
       
+      // Fix the ambiguous column issue by specifying explicit columns
       const { data, error } = await supabase
         .from('teams')
         .insert([{ name, description, owner_id: user.id }])
-        .select()
+        .select(`
+          id,
+          name,
+          description,
+          created_at,
+          owner_id
+        `)
         .single();
       
       if (error) {
@@ -169,6 +191,7 @@ export const useTeams = () => {
       // Generate invitation code using Supabase function
       const { data: invitationCode } = await supabase.rpc('generate_invitation_code');
       
+      // Use explicit column names to avoid ambiguity
       const { data, error } = await supabase
         .from('team_invitations')
         .insert([{
@@ -178,7 +201,15 @@ export const useTeams = () => {
           invitation_code: invitationCode,
           status: 'pending'
         }])
-        .select()
+        .select(`
+          id,
+          team_id,
+          email,
+          created_at,
+          expires_at,
+          invitation_code,
+          status
+        `)
         .single();
       
       if (error) {
@@ -242,8 +273,8 @@ export const useTeams = () => {
       const { error } = await supabase
         .from('team_members')
         .delete()
-        .eq('team_members.team_id', teamId)
-        .eq('team_members.user_id', userId);
+        .eq('team_id', teamId)
+        .eq('user_id', userId);
       
       if (error) {
         console.error('Error removing team member:', error);
@@ -268,7 +299,7 @@ export const useTeams = () => {
       const { error } = await supabase
         .from('teams')
         .delete()
-        .eq('teams.id', teamId);
+        .eq('id', teamId);
       
       if (error) {
         console.error('Error deleting team:', error);

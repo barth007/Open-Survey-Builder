@@ -15,7 +15,18 @@ export function useTeamSurveys() {
           .from('surveys')
           .update({ team_id: teamId })
           .eq('id', surveyId)
-          .select()
+          .select(`
+            id,
+            name,
+            description,
+            team_id,
+            folder_id,
+            created_at,
+            is_published,
+            public_code,
+            user_id,
+            questions
+          `)
           .single();
 
         if (error) {
@@ -61,7 +72,18 @@ export function useTeamSurveys() {
         const { data, error } = await supabase
           .from('surveys')
           .insert([newSurvey])
-          .select()
+          .select(`
+            id,
+            name,
+            description,
+            team_id,
+            folder_id,
+            created_at,
+            is_published,
+            public_code,
+            user_id,
+            questions
+          `)
           .single();
 
         if (error) {

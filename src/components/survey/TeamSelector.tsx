@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +32,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch teams the user is a member of
+  // Fetch teams the user is a member of with explicit column selection
   const { data: teams, isLoading: teamsLoading } = useQuery({
     queryKey: ['user_teams', user?.id],
     queryFn: async () => {
@@ -42,8 +41,18 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
       const { data, error } = await supabase
         .from('teams')
         .select(`
-          *,
-          team_members!inner(*)
+          id,
+          name,
+          created_at,
+          description,
+          owner_id,
+          team_members!inner(
+            id,
+            team_id,
+            user_id,
+            role,
+            joined_at
+          )
         `)
         .eq('team_members.user_id', user.id)
         .order('name');
