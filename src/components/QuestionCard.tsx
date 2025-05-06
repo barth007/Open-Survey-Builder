@@ -291,7 +291,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         {/* Media Section */}
         <div className="space-y-3">
           <div className="border-t border-ice pt-3">
-            <h4 className="text-sm font-medium mb-3">Media</h4>
             <QuestionMediaUpload onFileSelected={handleQuestionMediaUpload} />
             
             {question.media && (
@@ -324,7 +323,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {/* Figma Prototype */}
         <div className="border-t border-ice pt-3">
-          <h4 className="text-sm font-medium mb-2">Figma Prototype</h4>
           <div className="flex items-center gap-2">
             <LinkIcon size={16} className="text-abyss shrink-0" />
             <Input
@@ -399,7 +397,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
           {(question.type === 'multipleChoice' || question.type === 'checkboxes') && !isLikertType && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium mb-3">Answer Options</h4>
               {question.options.map((option) => (
                 <div key={option.id} className="flex items-start gap-2">
                   {question.type === 'multipleChoice' ? (
@@ -478,78 +475,94 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
 
         {/* Conditional Logic */}
-        <div className="border-t border-ice pt-3">
-          <Collapsible open={conditionalLogicOpen} onOpenChange={setConditionalLogicOpen}>
-            <CollapsibleTrigger className="flex items-center w-full text-left">
-              <h4 className="text-sm font-medium">Conditional Logic</h4>
-              {hasConditionalLogic && (
-                <span className="ml-2 w-2 h-2 rounded-full bg-blue-500"></span>
-              )}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3 space-y-3">
-              <div className="flex items-center gap-2 w-full">
-                <Label className="w-24 shrink-0">Show when</Label>
-                <Select
-                  value={question.conditionalLogic?.dependsOn || 'none'}
-                  onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select question" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Always show</SelectItem>
-                    {availableQuestions.map((q) => (
-                      <SelectItem key={q.id} value={q.id}>
-                        {q.text.substring(0, 30)}{q.text.length > 30 ? '...' : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="mt-4">
+          <Collapsible open={isLogicExpanded} onOpenChange={setIsLogicExpanded}>
+            <div className="mb-4 p-3 bg-ice rounded-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {question.conditionalLogic?.dependsOn && (
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  )}
+                  <h4 className="text-sm font-medium">Conditional Logic</h4>
+                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    {isLogicExpanded ? (
+                      <ChevronUp className="h-4 w-4" />  
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
               </div>
-
-              {question.conditionalLogic?.dependsOn && (
-                <>
+              
+              <CollapsibleContent>
+                <div className="space-y-3 mt-2">
                   <div className="flex items-center gap-2 w-full">
-                    <Label className="w-24 shrink-0">Operator</Label>
+                    <Label className="w-24 shrink-0">Show when</Label>
                     <Select
-                      value={question.conditionalLogic?.operator || 'equals'}
-                      onValueChange={(value) => handleConditionalLogicChange('operator', value)}
+                      value={question.conditionalLogic?.dependsOn || 'none'}
+                      onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
                     >
                       <SelectTrigger className="flex-1">
-                        <SelectValue />
+                        <SelectValue placeholder="Select question" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="equals">Equals</SelectItem>
-                        <SelectItem value="notEquals">Does not equal</SelectItem>
-                        <SelectItem value="isAnswered">Is answered</SelectItem>
-                        <SelectItem value="isNotAnswered">Is not answered</SelectItem>
+                        <SelectItem value="none">Always show</SelectItem>
+                        {availableQuestions.map((q) => (
+                          <SelectItem key={q.id} value={q.id}>
+                            {q.text.substring(0, 30)}...
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
-                  {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
-                    <div className="flex items-center gap-2 w-full">
-                      <Label className="w-24 shrink-0">Value</Label>
-                      <Select
-                        value={question.conditionalLogic?.value || ''}
-                        onValueChange={(value) => handleConditionalLogicChange('value', value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select option" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedDependentQuestion.options.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.text}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  {question.conditionalLogic?.dependsOn && (
+                    <>
+                      <div className="flex items-center gap-2 w-full">
+                        <Label className="w-24 shrink-0">Operator</Label>
+                        <Select
+                          value={question.conditionalLogic?.operator || 'equals'}
+                          onValueChange={(value) => handleConditionalLogicChange('operator', value)}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="equals">Equals</SelectItem>
+                            <SelectItem value="notEquals">Does not equal</SelectItem>
+                            <SelectItem value="isAnswered">Is answered</SelectItem>
+                            <SelectItem value="isNotAnswered">Is not answered</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
+                        <div className="flex items-center gap-2 w-full">
+                          <Label className="w-24 shrink-0">Value</Label>
+                          <Select
+                            value={question.conditionalLogic?.value || ''}
+                            onValueChange={(value) => handleConditionalLogicChange('value', value)}
+                          >
+                            <SelectTrigger className="flex-1">
+                              <SelectValue placeholder="Select option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedDependentQuestion.options.map((option) => (
+                                <SelectItem key={option.id} value={option.id}>
+                                  {option.text}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </CollapsibleContent>
+                </div>
+              </CollapsibleContent>
+            </div>
           </Collapsible>
         </div>
       </CardContent>
