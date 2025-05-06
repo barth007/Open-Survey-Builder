@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,6 +22,8 @@ import {
   Check, 
   ExternalLink,
   FileImage,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { 
   Question, 
@@ -476,7 +477,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {/* Conditional Logic */}
         <div className="mt-4">
-          <Collapsible open={isLogicExpanded} onOpenChange={setIsLogicExpanded}>
+          <Collapsible open={conditionalLogicOpen} onOpenChange={setConditionalLogicOpen}>
             <div className="mb-4 p-3 bg-ice rounded-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -487,22 +488,24 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 </div>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    {isLogicExpanded ? (
-                      <ChevronUp className="h-4 w-4" />  
+                    {conditionalLogicOpen ? (
+                      <ChevronUp className="h-4 w-4" />
                     ) : (
                       <ChevronDown className="h-4 w-4" />
                     )}
                   </Button>
                 </CollapsibleTrigger>
               </div>
-              
+
               <CollapsibleContent>
                 <div className="space-y-3 mt-2">
                   <div className="flex items-center gap-2 w-full">
                     <Label className="w-24 shrink-0">Show when</Label>
                     <Select
                       value={question.conditionalLogic?.dependsOn || 'none'}
-                      onValueChange={(value) => handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)}
+                      onValueChange={(value) =>
+                        handleConditionalLogicChange('dependsOn', value === 'none' ? '' : value)
+                      }
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Select question" />
@@ -511,7 +514,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                         <SelectItem value="none">Always show</SelectItem>
                         {availableQuestions.map((q) => (
                           <SelectItem key={q.id} value={q.id}>
-                            {q.text.substring(0, 30)}...
+                            {q.text.substring(0, 30)}{q.text.length > 30 ? '...' : ''}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -538,26 +541,27 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                         </Select>
                       </div>
 
-                      {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') && selectedDependentQuestion && (
-                        <div className="flex items-center gap-2 w-full">
-                          <Label className="w-24 shrink-0">Value</Label>
-                          <Select
-                            value={question.conditionalLogic?.value || ''}
-                            onValueChange={(value) => handleConditionalLogicChange('value', value)}
-                          >
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Select option" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {selectedDependentQuestion.options.map((option) => (
-                                <SelectItem key={option.id} value={option.id}>
-                                  {option.text}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
+                      {['equals', 'notEquals'].includes(question.conditionalLogic?.operator || '') &&
+                        selectedDependentQuestion && (
+                          <div className="flex items-center gap-2 w-full">
+                            <Label className="w-24 shrink-0">Value</Label>
+                            <Select
+                              value={question.conditionalLogic?.value || ''}
+                              onValueChange={(value) => handleConditionalLogicChange('value', value)}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue placeholder="Select option" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {selectedDependentQuestion.options.map((option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    {option.text}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                     </>
                   )}
                 </div>
