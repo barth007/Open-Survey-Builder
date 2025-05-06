@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
@@ -165,8 +166,17 @@ export const useTeams = () => {
         throw new Error('Valid authentication session required');
       }
       
-      // FIXED: Use clean insert with simple select() to avoid any columns parameter in URL
+      // Check token expiry
+      const tokenExpiry = sessionData.session.expires_at
+        ? new Date(sessionData.session.expires_at * 1000)
+        : null;
+      console.log('Token expires at:', tokenExpiry?.toISOString());
+      
+      // Log the actual HTTP request we'll make to help debug any issues
       console.log('Executing team insert with owner_id:', user.id);
+      console.log(`Will insert: { name: "${name}", description: ${description ? `"${description}"` : 'null'}, owner_id: "${user.id}" }`);
+      
+      // FIXED: Use clean insert with simple select() to avoid any columns parameter in URL
       const { data, error } = await supabase
         .from('teams')
         .insert([{ 
@@ -179,9 +189,17 @@ export const useTeams = () => {
       
       if (error) {
         console.error('Error creating team:', error);
+        // Additional error context
+        console.error('Error details:', {
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          message: error.message
+        });
         throw error;
       }
       
+      console.log('Team created successfully:', data);
       return data;
     },
     onSuccess: () => {
