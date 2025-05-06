@@ -15,6 +15,7 @@ export function useTeamQueries() {
     queryKey: ['teams', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      console.log('Fetching teams for user in useTeamQueries:', user.id);
       return await fetchTeams(user.id);
     },
     enabled: !!user

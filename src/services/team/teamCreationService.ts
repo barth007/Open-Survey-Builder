@@ -12,27 +12,43 @@ export async function createTeam(userId: string, name: string, description?: str
   console.log('Executing team insert with owner_id:', userId);
   console.log(`Will insert: { name: "${name}", description: ${description ? `"${description}"` : 'null'}, owner_id: "${userId}" }`);
   
-  const { data, error } = await supabase
-    .from('teams')
-    .insert([{ 
-      name, 
-      description, 
-      owner_id: userId 
-    }])
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error creating team:', error);
-    console.error('Error details:', {
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-      message: error.message
-    });
+  try {
+    // First create the team
+    const { data: teamData, error: teamError } = await supabase
+      .from('teams')
+      .insert([{ 
+        name, 
+        description, 
+        owner_id: userId 
+      }])
+      .select()
+      .single();
+    
+    if (teamError) {
+      console.error('Error creating team:', teamError);
+      throw teamError;
+    }
+    
+    console.log('Team created successfully:', teamData);
+    
+    // Then explicitly create the team member record for the owner
+    // This is a safeguard in case the database trigger fails
+    const { error: memberError } = await supabase
+      .from('team_members')
+      .insert([{
+        team_id: teamData.id,
+        user_id: userId,
+        role: 'owner'
+      }]);
+    
+    if (memberError) {
+      console.error('Error adding owner as team member:', memberError);
+      // Don't throw here, as the team was created successfully
+    }
+    
+    return teamData;
+  } catch (error) {
+    console.error('Error in createTeam:', error);
     throw error;
   }
-  
-  console.log('Team created successfully:', data);
-  return data;
 }

@@ -10,30 +10,59 @@ import { Team, TeamMember, TeamInvitation } from '@/types/team-types';
 export async function fetchTeams(userId: string): Promise<Team[]> {
   console.log('Fetching teams for user:', userId);
   
-  const { data, error } = await supabase
-    .from('teams')
-    .select(`
-      id,
-      name,
-      description,
-      created_at,
-      owner_id,
-      team_members!inner(
-        id,
-        team_id,
-        user_id,
-        role,
-        joined_at
-      )
-    `)
-    .eq('team_members.user_id', userId);
-  
-  if (error) {
-    console.error('Error fetching teams:', error);
+  try {
+    // First fetch teams where user is the owner
+    const { data: ownedTeams, error: ownedError } = await supabase
+      .from('teams')
+      .select('*')
+      .eq('owner_id', userId);
+    
+    if (ownedError) {
+      console.error('Error fetching owned teams:', ownedError);
+      throw ownedError;
+    }
+    
+    // Then fetch team IDs where user is a member (avoiding the problematic join)
+    const { data: memberships, error: memberError } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', userId);
+    
+    if (memberError) {
+      console.error('Error fetching team memberships:', memberError);
+      throw memberError;
+    }
+    
+    // Extract team IDs from memberships
+    const teamIds = memberships.map(m => m.team_id);
+    
+    // If user is a member of any teams, fetch those teams
+    let memberTeams: any[] = [];
+    if (teamIds.length > 0) {
+      const { data: teams, error: teamsError } = await supabase
+        .from('teams')
+        .select('*')
+        .in('id', teamIds);
+      
+      if (teamsError) {
+        console.error('Error fetching member teams:', teamsError);
+        throw teamsError;
+      }
+      
+      memberTeams = teams || [];
+    }
+    
+    // Combine and deduplicate the results
+    const allTeams = [...(ownedTeams || []), ...memberTeams];
+    const uniqueTeams = allTeams.filter((team, index, self) =>
+      index === self.findIndex(t => t.id === team.id)
+    );
+    
+    return uniqueTeams as Team[];
+  } catch (error) {
+    console.error('Error in fetchTeams:', error);
     throw error;
   }
-  
-  return data as Team[];
 }
 
 /**
