@@ -6,7 +6,7 @@ import { toast } from '@/components/ui/sonner';
 
 export function useMutateFolder() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
 
   const createFolder = useMutation({
     mutationFn: async (name: string) => {
@@ -15,9 +15,11 @@ export function useMutateFolder() {
       }
 
       try {
+        // Ensure session is fresh
+        await refreshSession();
+        
         console.log('Creating folder with name:', name, 'for user:', user.id);
         
-        // The user_id will be set automatically by the database trigger
         const { data, error } = await supabase
           .from('folders')
           .insert([{ name }])
@@ -30,6 +32,8 @@ export function useMutateFolder() {
             throw new Error('A folder with this name already exists');
           } else if (error.message?.includes("relation \"public.folders\" does not exist")) {
             throw new Error("The folders table doesn't exist in the Supabase database. Please create the required tables first.");
+          } else if (error.message?.includes("violates row-level security policy")) {
+            throw new Error("Authentication error: Please sign out and sign in again to refresh your session.");
           }
           throw new Error(`Database error: ${error.message}`);
         }
@@ -42,13 +46,15 @@ export function useMutateFolder() {
         return data;
       } catch (err) {
         console.error("Error in createFolderMutation:", err);
-        toast("Failed to create folder", { description: err instanceof Error ? err.message : "Unknown error" });
         throw err;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       toast("Folder created", { description: "Your folder has been created successfully" });
+    },
+    onError: (error: Error) => {
+      toast("Failed to create folder", { description: error.message || "Unknown error" });
     }
   });
 
@@ -59,27 +65,33 @@ export function useMutateFolder() {
       }
 
       try {
+        // Ensure session is fresh
+        await refreshSession();
+        
         const { error } = await supabase
           .from('folders')
           .delete()
-          .eq('id', folderId)
-          .eq('user_id', user.id);
+          .eq('id', folderId);
 
         if (error) {
           if (error.message?.includes("relation \"public.folders\" does not exist")) {
             throw new Error("The folders table doesn't exist in the Supabase database");
+          } else if (error.message?.includes("violates row-level security policy")) {
+            throw new Error("Authentication error: Please sign out and sign in again to refresh your session.");
           }
           throw new Error(`Database error: ${error.message}`);
         }
       } catch (err) {
         console.error("Error in deleteFolderMutation:", err);
-        toast("Failed to delete folder", { description: err instanceof Error ? err.message : "Unknown error" });
         throw err;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       toast("Folder deleted", { description: "Your folder has been deleted" });
+    },
+    onError: (error: Error) => {
+      toast("Failed to delete folder", { description: error.message || "Unknown error" });
     }
   });
 

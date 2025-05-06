@@ -26,7 +26,17 @@ export function useTeamCreation() {
       
       try {
         // Always refresh session before team creation
-        await refreshSession();
+        const refreshSuccess = await refreshSession();
+        console.log('Session refresh result:', refreshSuccess);
+        
+        if (!refreshSuccess) {
+          // Manual token refresh through the API if our helper didn't work
+          const { data, error } = await supabase.auth.refreshSession();
+          if (error || !data.session) {
+            console.error('Manual token refresh failed:', error);
+            throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
+          }
+        }
         
         // Extra verification step with deep validation
         try {
@@ -62,3 +72,6 @@ export function useTeamCreation() {
     }
   });
 }
+
+// Add missing import
+import { supabase } from '@/integrations/supabase/client';

@@ -1,15 +1,20 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { surveyToDbSurvey } from '@/utils/type-mappers';
 import { Survey } from '@/types/survey';
+import { useAuth } from '@/providers/AuthProvider';
+import { toast } from '@/components/ui/sonner';
 
 export function useMutateSurvey() {
   const queryClient = useQueryClient();
+  const { refreshSession } = useAuth();
 
   const createSurvey = useMutation({
     mutationFn: async ({ name, folderId }: { name: string, folderId?: string }) => {
       try {
+        // Ensure session is fresh before creating survey
+        await refreshSession();
+        
         const newSurvey: Partial<Survey> = {
           title: name,
           folderId: folderId,
@@ -39,6 +44,8 @@ export function useMutateSurvey() {
             throw new Error('The selected folder does not exist');
           } else if (error.message?.includes("relation \"public.surveys\" does not exist")) {
             throw new Error("The surveys table doesn't exist in the Supabase database. Please create the required tables first.");
+          } else if (error.message?.includes("violates row-level security policy")) {
+            throw new Error("Authentication error: Please sign out and sign in again to refresh your session.");
           }
           throw new Error(`Database error: ${error.message}`);
         }
@@ -55,6 +62,10 @@ export function useMutateSurvey() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      toast("Survey created successfully");
+    },
+    onError: (error: Error) => {
+      toast("Failed to create survey", { description: error.message || "Unknown error" });
     }
   });
 
