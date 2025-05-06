@@ -25,23 +25,13 @@ export function useTeamSurveys() {
       await ensureAuthSession();
       
       try {
-        // Clean update call without problematic parameters
+        // FIXED: Clean update call without problematic parameters
+        console.log('Executing survey team update for surveyId:', surveyId, 'teamId:', teamId);
         const { data, error } = await supabase
           .from('surveys')
           .update({ team_id: teamId })
           .eq('id', surveyId)
-          .select(`
-            id,
-            name,
-            description,
-            team_id,
-            folder_id,
-            created_at,
-            is_published,
-            public_code,
-            user_id,
-            questions
-          `)
+          .select()
           .single();
 
         if (error) {
@@ -101,22 +91,12 @@ export function useTeamSurveys() {
             new Date(sessionData.session.expires_at * 1000).toISOString() : 'unknown'
         });
 
-        // Clean insert call without problematic parameters
+        // FIXED: Clean insert call without problematic parameters
+        console.log('Executing team survey insert');
         const { data, error } = await supabase
           .from('surveys')
           .insert([newSurvey])
-          .select(`
-            id,
-            name,
-            description,
-            team_id,
-            folder_id,
-            created_at,
-            is_published,
-            public_code,
-            user_id,
-            questions
-          `)
+          .select()
           .single();
 
         if (error) {

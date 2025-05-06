@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
@@ -166,7 +165,8 @@ export const useTeams = () => {
         throw new Error('Valid authentication session required');
       }
       
-      // Clean insert call without problematic parameters
+      // FIXED: Use clean insert with simple select() to avoid any columns parameter in URL
+      console.log('Executing team insert with owner_id:', user.id);
       const { data, error } = await supabase
         .from('teams')
         .insert([{ 
@@ -174,13 +174,7 @@ export const useTeams = () => {
           description, 
           owner_id: user.id 
         }])
-        .select(`
-          id,
-          name,
-          description,
-          created_at,
-          owner_id
-        `)
+        .select()
         .single();
       
       if (error) {

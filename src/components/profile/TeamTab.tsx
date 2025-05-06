@@ -94,6 +94,15 @@ const TeamTab = () => {
 
   const handleCreateTeam = async (data: TeamFormValues) => {
     try {
+      // Enhanced debug logging
+      console.log('TeamTab - Creating team with auth state:', { 
+        hasUser: !!user, 
+        userId: user?.id,
+        hasSession: !!session,
+        tokenExists: !!session?.access_token,
+        tokenExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : 'unknown'
+      });
+      
       // Check for valid authentication before attempting to create team
       if (!user || !session?.access_token) {
         toast("Authentication required", {
@@ -104,7 +113,7 @@ const TeamTab = () => {
       
       // We now know that name is definitely defined because of the form validation
       createTeam({
-        name: data.name, // Explicitly pass the name property
+        name: data.name,
         description: data.description
       });
       setIsCreateTeamDialogOpen(false);
