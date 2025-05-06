@@ -51,17 +51,17 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
   React.useEffect(() => {
     if (isOpen) {
       setAuthError(null);
+      form.reset();
     }
-  }, [isOpen]);
+  }, [isOpen, form]);
 
   const handleCreateTeam = async (data: TeamFormValues) => {
     try {
       setIsSubmitting(true);
       setAuthError(null);
       
-      // Optional: Try to refresh auth session before team creation
+      // Try to refresh auth session before team creation
       if (user) {
-        console.log('Refreshing session before team creation');
         await refreshSession();
       }
       
@@ -70,10 +70,10 @@ export const TeamCreationDialog = ({ isOpen, onOpenChange }: TeamCreationDialogP
         description: data.description
       });
       
+      toast('Team created successfully');
       onOpenChange(false);
-      form.reset();
     } catch (error: any) {
-      console.error('Team creation form error:', error);
+      console.error('Team creation error:', error);
       
       // Set special auth error if it's authentication related
       if (error.message && (

@@ -81,13 +81,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_survey_responses_survey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "survey_responses_survey_id_fkey"
             columns: ["survey_id"]
             isOneToOne: false
@@ -134,13 +127,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_surveys_folder"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "surveys_folder_id_fkey"
             columns: ["folder_id"]
@@ -256,6 +242,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_team: {
+        Args: { team_id_param: string }
+        Returns: boolean
+      }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -278,6 +268,10 @@ export type Database = {
       }
       process_team_invitation: {
         Args: { invitation_code: string }
+        Returns: string
+      }
+      validate_auth_session: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
     }

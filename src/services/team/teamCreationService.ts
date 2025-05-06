@@ -43,7 +43,7 @@ export async function createTeam(userId: string, name: string, description?: str
       console.error('Error getting user info:', e);
     }
     
-    // First create the team
+    // Create the team - the trigger will automatically add the owner as a member
     console.log('Executing team insert...');
     const { data: teamData, error: teamError } = await supabase
       .from('teams')
@@ -57,7 +57,6 @@ export async function createTeam(userId: string, name: string, description?: str
     
     if (teamError) {
       console.error('Error creating team:', teamError);
-      // Enhanced error handling with more specific messages
       if (teamError.message?.includes('violates row-level security policy')) {
         console.error('RLS policy violation details:', {
           errorCode: teamError.code,
@@ -70,30 +69,6 @@ export async function createTeam(userId: string, name: string, description?: str
     }
     
     console.log('Team created successfully:', teamData);
-    
-    // Add detailed logging for team member creation
-    console.log('Now creating team member record for owner...');
-    const { data: memberData, error: memberError } = await supabase
-      .from('team_members')
-      .insert([{
-        team_id: teamData.id,
-        user_id: userId,
-        role: 'owner'
-      }])
-      .select();
-    
-    if (memberError) {
-      console.error('Error adding owner as team member:', memberError);
-      console.log('Team was created but owner member record failed:', {
-        teamId: teamData.id,
-        userId: userId,
-        error: memberError
-      });
-      // Don't throw here, as the team was created successfully
-    } else {
-      console.log('Team member record created successfully:', memberData);
-    }
-    
     console.log('=== TEAM CREATION COMPLETE ===');
     return teamData;
   } catch (error) {
