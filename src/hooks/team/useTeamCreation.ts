@@ -2,8 +2,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
-import { createTeam, getAuthStateDebugInfo } from '@/services/teamService';
-import { performDeepSessionValidation } from '@/services/teamService';
+import { createTeam, getAuthStateDebugInfo } from '@/services/team/teamCreationService';
+import { performDeepSessionValidation } from '@/services/team/teamAuthService';
 
 export function useTeamCreation() {
   const { user, refreshSession } = useAuth();
@@ -29,7 +29,13 @@ export function useTeamCreation() {
         await refreshSession();
         
         // Extra verification step with deep validation
-        await performDeepSessionValidation();
+        try {
+          await performDeepSessionValidation();
+        } catch (validationError) {
+          console.error('Session validation failed:', validationError);
+          toast.error('Authentication error: Please sign out and sign in again to refresh your session.');
+          throw validationError;
+        }
         
         console.log('Session is valid, proceeding with team creation');
         return await createTeam(user.id, name, description);
@@ -48,9 +54,11 @@ export function useTeamCreation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+      toast.success('Team created successfully!');
     },
     onError: (error: Error) => {
       console.error('Error in team creation mutation:', error);
+      toast.error(error.message || 'Failed to create team');
     }
   });
 }

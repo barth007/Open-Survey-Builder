@@ -24,25 +24,6 @@ export async function createTeam(userId: string, name: string, description?: str
       throw authError;
     }
     
-    // Special auth debug info
-    try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      console.log('Auth user check:', {
-        hasUser: !!userData?.user,
-        userId: userData?.user?.id,
-        error: userError?.message
-      });
-      
-      if (userData?.user?.id !== userId) {
-        console.warn('Warning: Auth user ID mismatch:', {
-          authUserId: userData?.user?.id,
-          providedUserId: userId
-        });
-      }
-    } catch (e) {
-      console.error('Error getting user info:', e);
-    }
-    
     // Create the team - the trigger will automatically add the owner as a member
     console.log('Executing team insert...');
     const { data: teamData, error: teamError } = await supabase

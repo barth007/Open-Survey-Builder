@@ -35,26 +35,6 @@ export function useProfile() {
         setLoading(true);
         console.log('Fetching profile for user:', user.id);
         
-        // Check if the avatars bucket exists, and if not, attempt to create it
-        const { data: buckets, error: bucketsError } = await supabase
-          .storage
-          .listBuckets();
-          
-        if (!bucketsError && buckets) {
-          const avatarBucketExists = buckets.some(bucket => bucket.name === 'avatars');
-          
-          if (!avatarBucketExists) {
-            try {
-              // Try to create the bucket silently
-              await supabase.storage.createBucket('avatars', { public: true });
-              console.log('Created avatars bucket');
-            } catch (bucketError) {
-              // Bucket might already exist or user doesn't have permission
-              console.log('Note: Could not create avatars bucket', bucketError);
-            }
-          }
-        }
-        
         // Use maybeSingle instead of single to handle case where profile doesn't exist
         const { data, error: fetchError } = await supabase
           .from('profiles')
@@ -110,8 +90,25 @@ export function useProfile() {
 
         if (insertError) {
           console.error('Error creating profile:', insertError);
-          toast("Couldn't create your profile. Please try again later.");
-          throw insertError;
+          if (insertError.message?.includes('violates row-level security policy')) {
+            // This is likely happening because our insert is not matching the RLS policy
+            console.error('RLS violation during profile creation. Current user:', user.id);
+            
+            // Try refreshing the session before retrying
+            await supabase.auth.refreshSession();
+            
+            // Try again after refresh
+            const { error: retryError } = await supabase
+              .from('profiles')
+              .insert([newProfile]);
+              
+            if (retryError) {
+              console.error('Profile creation retry failed:', retryError);
+              throw retryError;
+            }
+          } else {
+            throw insertError;
+          }
         }
 
         setProfile(newProfile);

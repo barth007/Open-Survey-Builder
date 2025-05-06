@@ -1,88 +1,43 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Validates that the user has a valid session
- * Throws an error if no valid session exists
- * @returns The validated session object
+ * Performs a deep session validation to verify the authentication state
+ * This is useful for operations that require confirmed authentication
+ * @returns The validated user ID
  */
-export async function validateSession() {
-  console.log('Validating session...');
-  
+export async function performDeepSessionValidation() {
   try {
+    // Get the current session
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
       console.error('Session validation error:', sessionError);
-      throw new Error('Authentication failed: Unable to validate your session');
+      throw new Error('Authentication error: Your session could not be validated.');
     }
     
-    if (!sessionData.session || !sessionData.session.access_token) {
-      console.error('No valid session found during validation');
-      throw new Error('Authentication required: Please sign in again');
+    if (!sessionData.session) {
+      console.error('No active session found during validation');
+      throw new Error('Authentication error: Please sign in again to continue.');
     }
     
-    // Check if user exists in session
-    if (!sessionData.session.user?.id) {
-      console.error('No user ID found in session during validation');
-      throw new Error('Authentication problem: User ID not found');
-    }
-    
-    // Check token expiry
-    const tokenExpiryTime = sessionData.session.expires_at 
-      ? new Date(sessionData.session.expires_at * 1000) 
-      : null;
+    // Verify session with server-side validation
+    try {
+      const { data, error } = await supabase.rpc('validate_auth_session');
       
-    if (tokenExpiryTime && tokenExpiryTime <= new Date()) {
-      console.error('Session token expired during validation:', tokenExpiryTime);
-      throw new Error('Your session has expired: Please sign in again');
-    }
-    
-    // Log session details for debugging
-    console.log('Session validation successful', {
-      userId: sessionData.session.user.id,
-      expiresAt: tokenExpiryTime?.toISOString(),
-      isTokenValid: tokenExpiryTime ? tokenExpiryTime > new Date() : false
-    });
-    
-    return sessionData.session;
-  } catch (error) {
-    console.error('Session validation failed with exception:', error);
-    throw error;
-  }
-}
-
-/**
- * Enhanced session validation that performs additional checks
- * and attempts to verify authentication status with the server
- */
-export async function performDeepSessionValidation() {
-  console.log('Performing deep session validation...');
-  
-  try {
-    // First validate the basic session
-    const session = await validateSession();
-    
-    // Next, verify the session is actually working by making a test request
-    const { data: testData, error: testError } = await supabase
-      .from('teams')
-      .select('id')
-      .limit(1);
-    
-    if (testError) {
-      if (testError.message?.includes('JWT') || testError.message?.includes('token') || 
-          testError.message?.includes('auth') || testError.message?.includes('permission')) {
-        console.error('JWT validation failed on server:', testError);
-        throw new Error('Server rejected authentication token: Please sign out and sign in again');
+      if (error) {
+        console.error('Deep auth validation failed:', error);
+        throw new Error('Authentication error: Your session could not be verified.');
       }
-      // Other errors might not be auth related
-      console.error('Database test request failed (might not be auth related):', testError);
-    } else {
-      console.log('Deep validation successful - database request succeeded');
+      
+      console.log('Auth validation successful:', data);
+      return data; // This should be the user ID
+    } catch (e) {
+      console.error('RPC execution error:', e);
+      throw new Error('Authentication error: Please sign in again to continue.');
     }
-    
-    return session;
   } catch (error) {
-    console.error('Deep session validation failed:', error);
+    console.error('Session validation failed:', error);
     throw error;
   }
 }
