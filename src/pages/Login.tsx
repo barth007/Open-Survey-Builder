@@ -8,8 +8,9 @@ import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
 
 const Login = () => {
-  const { signInWithGoogle, user, isLoading } = useAuth();
+  const { signInWithGoogle, user, isLoading, session, refreshSession } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [recoveryAttempted, setRecoveryAttempted] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -24,18 +25,58 @@ const Login = () => {
     for (const [key, value] of urlParams.entries()) {
       console.log(`URL param: ${key} = ${value}`);
     }
+
+    // Log hash parameters if present (often used for tokens)
+    if (window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      for (const [key, value] of hashParams.entries()) {
+        console.log(`Hash param: ${key} = ${value.substring(0, 10)}...`);
+      }
+    }
+
+    // Check local storage for session data
+    try {
+      const hasLocalStorage = !!window.localStorage;
+      console.log('LocalStorage available:', hasLocalStorage);
+      
+      if (hasLocalStorage) {
+        const supabaseSession = localStorage.getItem('sb-gtzcjxzllsrtaieopsgc-auth-token');
+        console.log('Supabase session in storage:', !!supabaseSession);
+      }
+    } catch (e) {
+      console.error('Error accessing localStorage:', e);
+    }
   }, [location]);
+
+  // Attempt session recovery once on login page load
+  useEffect(() => {
+    const attemptRecovery = async () => {
+      if (!recoveryAttempted && !user && !isLoading) {
+        console.log('Login - Attempting session recovery');
+        try {
+          const recovered = await refreshSession();
+          console.log('Login - Session recovery result:', recovered);
+          setRecoveryAttempted(true);
+        } catch (error) {
+          console.error('Login - Session recovery failed:', error);
+          setRecoveryAttempted(true);
+        }
+      }
+    };
+
+    attemptRecovery();
+  }, [refreshSession, user, isLoading, recoveryAttempted]);
   
   // Get the path to redirect to after login
   const from = location.state?.from || '/';
   
   // If already logged in, redirect
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && session?.access_token && !isLoading) {
       console.log('User already authenticated, redirecting to:', from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, navigate, from]);
+  }, [user, session, isLoading, navigate, from]);
 
   const handleGoogleLogin = async () => {
     try {

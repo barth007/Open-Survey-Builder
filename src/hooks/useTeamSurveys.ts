@@ -5,14 +5,24 @@ import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
 
 export function useTeamSurveys() {
-  const { user } = useAuth();
+  const { user, session, refreshSession } = useAuth();
   const queryClient = useQueryClient();
+
+  // Helper function to ensure valid auth session
+  const ensureAuthSession = async () => {
+    if (!user || !session?.access_token) {
+      console.log('No valid session found, attempting to refresh');
+      const recovered = await refreshSession();
+      if (!recovered) {
+        throw new Error("You must be logged in to perform this action");
+      }
+    }
+    return true;
+  };
 
   const updateSurveyTeam = useMutation({
     mutationFn: async ({ surveyId, teamId }: { surveyId: string; teamId: string | null }) => {
-      if (!user) {
-        throw new Error("You must be logged in to update a survey team");
-      }
+      await ensureAuthSession();
       
       try {
         // Clean update call without problematic parameters
@@ -60,17 +70,20 @@ export function useTeamSurveys() {
 
   const createTeamSurvey = useMutation({
     mutationFn: async ({ name, teamId }: { name: string; teamId: string }) => {
-      if (!user) {
-        throw new Error("You must be logged in to create a survey");
-      }
+      await ensureAuthSession();
       
-      // Get current session to ensure token is valid
+      // Double-check current session to ensure token is valid
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session || !sessionData.session.access_token) {
         throw new Error('Valid authentication session required');
       }
 
       try {
+        // Verify user ID is available
+        if (!user?.id) {
+          throw new Error('User ID is required to create a survey');
+        }
+        
         const newSurvey = {
           name,
           team_id: teamId,
@@ -79,6 +92,14 @@ export function useTeamSurveys() {
           is_published: false,
           user_id: user.id
         };
+
+        // Log auth state before making the request
+        console.log('Creating team survey with auth state:', { 
+          userId: user.id,
+          hasSession: !!sessionData.session,
+          tokenExpiry: sessionData.session?.expires_at ? 
+            new Date(sessionData.session.expires_at * 1000).toISOString() : 'unknown'
+        });
 
         // Clean insert call without problematic parameters
         const { data, error } = await supabase

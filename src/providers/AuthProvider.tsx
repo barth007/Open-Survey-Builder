@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   signInWithGoogle: async () => {},
   signOut: async () => {},
+  refreshSession: async () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -27,14 +29,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Debug function for session state
+  const logSessionState = (prefix: string, currentSession: Session | null) => {
+    console.log(
+      `${prefix} - Session state:`, 
+      {
+        hasSession: !!currentSession,
+        userId: currentSession?.user?.id || 'none',
+        expires: currentSession?.expires_at ? new Date(currentSession.expires_at * 1000).toISOString() : 'none',
+        storageType: typeof localStorage,
+      }
+    );
+  };
+
+  // Session recovery function
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      console.log('Manually refreshing session...');
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error refreshing session:', error);
+        return false;
+      }
+      
+      if (data.session) {
+        logSessionState('Session refreshed', data.session);
+        setSession(data.session);
+        setUser(data.session.user);
+        return true;
+      } else {
+        console.log('No session found during refresh');
+        return false;
+      }
+    } catch (error) {
+      console.error('Exception during session refresh:', error);
+      return false;
+    }
+  };
+
   // Handle user session
   useEffect(() => {
     console.log('Setting up auth state listener');
+    let mounted = true;
     
     // Set up auth listener first to avoid missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.id);
+        logSessionState('Auth state change event', currentSession);
+        
+        if (!mounted) return;
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -43,6 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           toast("Successfully signed in");
         } else if (event === 'SIGNED_OUT') {
           toast("You have been signed out");
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed automatically');
         }
         
         setIsLoading(false);
@@ -52,22 +99,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Then check for an existing session
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth state...');
+        // Always start with loading state
         setIsLoading(true);
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log('Initial auth session:', initialSession?.user?.id);
         
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
+        // Get the session from storage
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        logSessionState('Initial auth session', initialSession);
+        
+        if (mounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+        }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        console.error('Exception during auth initialization:', error);
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
     
     initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -119,6 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         signInWithGoogle,
         signOut,
+        refreshSession,
       }}
     >
       {children}
