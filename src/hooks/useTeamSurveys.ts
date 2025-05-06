@@ -10,7 +10,12 @@ export function useTeamSurveys() {
 
   const updateSurveyTeam = useMutation({
     mutationFn: async ({ surveyId, teamId }: { surveyId: string; teamId: string | null }) => {
+      if (!user) {
+        throw new Error("You must be logged in to update a survey team");
+      }
+      
       try {
+        // Clean update call without problematic parameters
         const { data, error } = await supabase
           .from('surveys')
           .update({ team_id: teamId })
@@ -55,11 +60,17 @@ export function useTeamSurveys() {
 
   const createTeamSurvey = useMutation({
     mutationFn: async ({ name, teamId }: { name: string; teamId: string }) => {
-      try {
-        if (!user) {
-          throw new Error("You must be logged in to create a survey");
-        }
+      if (!user) {
+        throw new Error("You must be logged in to create a survey");
+      }
+      
+      // Get current session to ensure token is valid
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session || !sessionData.session.access_token) {
+        throw new Error('Valid authentication session required');
+      }
 
+      try {
         const newSurvey = {
           name,
           team_id: teamId,
@@ -69,6 +80,7 @@ export function useTeamSurveys() {
           user_id: user.id
         };
 
+        // Clean insert call without problematic parameters
         const { data, error } = await supabase
           .from('surveys')
           .insert([newSurvey])

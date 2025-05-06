@@ -265,15 +265,15 @@ export type Database = {
         Returns: string
       }
       is_team_admin: {
-        Args: { team_id: string; user_id?: string }
+        Args: { team_id_param: string }
         Returns: boolean
       }
       is_team_member: {
-        Args: { team_id: string; user_id?: string }
+        Args: { team_id_param: string }
         Returns: boolean
       }
       is_team_owner: {
-        Args: { team_id: string; user_id?: string }
+        Args: { team_id: string; user_id?: string } | { team_id_param: string }
         Returns: boolean
       }
       process_team_invitation: {

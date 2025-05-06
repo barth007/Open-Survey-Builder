@@ -55,7 +55,7 @@ type TeamFormValues = z.infer<typeof teamSchema>;
 type InviteFormValues = z.infer<typeof inviteSchema>;
 
 const TeamTab = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [isCreateTeamDialogOpen, setIsCreateTeamDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -94,6 +94,14 @@ const TeamTab = () => {
 
   const handleCreateTeam = async (data: TeamFormValues) => {
     try {
+      // Check for valid authentication before attempting to create team
+      if (!user || !session?.access_token) {
+        toast("Authentication required", {
+          description: "Please sign in again to create a team"
+        });
+        return;
+      }
+      
       // We now know that name is definitely defined because of the form validation
       createTeam({
         name: data.name, // Explicitly pass the name property

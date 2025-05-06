@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, session } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -22,6 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }
   }, [user, isLoading, location.pathname]);
 
+  // Enhanced authentication check to ensure both user and session exist
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -33,11 +34,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (user) {
+  // Check that both user and valid session exist
+  if (user && session?.access_token) {
     return <>{children}</>;
   }
 
-  console.log('ProtectedRoute - Redirecting to login from:', location.pathname);
+  console.log('ProtectedRoute - Redirecting to login from:', location.pathname, 
+    'Auth state:', { user: !!user, session: !!session });
+    
   return (
     <Navigate
       to="/login"

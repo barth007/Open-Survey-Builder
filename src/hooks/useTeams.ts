@@ -151,12 +151,29 @@ export const useTeams = () => {
   
   const createTeam = useMutation({
     mutationFn: async ({ name, description }: { name: string; description?: string }) => {
+      // Enhanced authentication validation
       if (!user) throw new Error('You must be logged in to create a team');
       
-      // Fix the ambiguous column issue by specifying explicit columns
+      // Log authentication state for debugging
+      console.log('Creating team with auth state:', { 
+        userId: user.id, 
+        authenticated: !!user 
+      });
+      
+      // Get current session to ensure token is valid
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session || !sessionData.session.access_token) {
+        throw new Error('Valid authentication session required');
+      }
+      
+      // Clean insert call without problematic parameters
       const { data, error } = await supabase
         .from('teams')
-        .insert([{ name, description, owner_id: user.id }])
+        .insert([{ 
+          name, 
+          description, 
+          owner_id: user.id 
+        }])
         .select(`
           id,
           name,
