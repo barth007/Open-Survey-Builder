@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash, Shield, ShieldOff, MoreHorizontal } from 'lucide-react';
 import {
   Table,
@@ -43,6 +43,15 @@ export const TeamMembersList = ({
     role: string
   } | null>(null);
   
+  useEffect(() => {
+    console.log('TeamMembersList rendered with:', {
+      teamMembersCount: teamMembers?.length,
+      teamMembers,
+      currentUserId,
+      userRole
+    });
+  }, [teamMembers, currentUserId, userRole]);
+  
   const getInitials = (name: string | null) => {
     if (!name) return '??';
     return name
@@ -55,6 +64,9 @@ export const TeamMembersList = ({
 
   const canManageMembers = userRole === 'owner' || userRole === 'admin';
   const isOwner = userRole === 'owner';
+
+  console.log('TeamMembersList: Can manage members?', canManageMembers);
+  console.log('TeamMembersList: Is owner?', isOwner);
 
   return (
     <Card>
@@ -80,6 +92,16 @@ export const TeamMembersList = ({
               const canManageThisMember = 
                 (isOwner || (userRole === 'admin' && member.role !== 'owner' && member.role !== 'admin')) && 
                 !isCurrentUser;
+              
+              console.log('TeamMembersList: Member details', {
+                memberId: member.id,
+                memberUserId: member.user_id,
+                memberRole: member.role,
+                memberName: member.profile?.full_name,
+                isCurrentUser,
+                isMemberOwner,
+                canManageThisMember
+              });
               
               return (
                 <TableRow key={member.id}>
@@ -112,11 +134,18 @@ export const TeamMembersList = ({
                           <DropdownMenuContent align="end">
                             {isOwner && member.role !== 'owner' && (
                               <DropdownMenuItem
-                                onClick={() => setMemberToChangeRole({
-                                  userId: member.user_id,
-                                  name: member.profile?.full_name || null,
-                                  role: member.role
-                                })}
+                                onClick={() => {
+                                  console.log('TeamMembersList: Setting member to change role', {
+                                    userId: member.user_id,
+                                    name: member.profile?.full_name,
+                                    role: member.role
+                                  });
+                                  setMemberToChangeRole({
+                                    userId: member.user_id,
+                                    name: member.profile?.full_name || null,
+                                    role: member.role
+                                  });
+                                }}
                                 className="flex items-center"
                               >
                                 {member.role === 'admin' ? (
@@ -133,7 +162,13 @@ export const TeamMembersList = ({
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
-                              onClick={() => onRemoveMember(member.user_id, member.profile?.full_name)}
+                              onClick={() => {
+                                console.log('TeamMembersList: Remove member clicked', {
+                                  userId: member.user_id,
+                                  name: member.profile?.full_name
+                                });
+                                onRemoveMember(member.user_id, member.profile?.full_name);
+                              }}
                               className="flex items-center text-destructive"
                             >
                               <Trash className="h-4 w-4 mr-2" />
@@ -156,10 +191,19 @@ export const TeamMembersList = ({
         {memberToChangeRole && (
           <ChangeRoleDialog
             isOpen={!!memberToChangeRole}
-            onOpenChange={(isOpen) => !isOpen && setMemberToChangeRole(null)}
+            onOpenChange={(isOpen) => {
+              console.log('TeamMembersList: Role dialog open state changed to', isOpen);
+              if (!isOpen) setMemberToChangeRole(null);
+            }}
             memberName={memberToChangeRole.name}
             currentRole={memberToChangeRole.role}
             onConfirm={(newRole) => {
+              console.log('TeamMembersList: Role change confirmed', {
+                userId: memberToChangeRole.userId,
+                name: memberToChangeRole.name,
+                oldRole: memberToChangeRole.role,
+                newRole
+              });
               onChangeRole(memberToChangeRole.userId, memberToChangeRole.name, memberToChangeRole.role);
               setMemberToChangeRole(null);
             }}

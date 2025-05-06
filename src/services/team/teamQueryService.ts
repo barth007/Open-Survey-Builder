@@ -22,6 +22,8 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       throw ownedError;
     }
     
+    console.log('Owned teams fetched:', ownedTeams);
+    
     // Then fetch team IDs where user is a member (avoiding the problematic join)
     const { data: memberships, error: memberError } = await supabase
       .from('team_members')
@@ -33,8 +35,11 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       throw memberError;
     }
     
+    console.log('Team memberships fetched:', memberships);
+    
     // Extract team IDs from memberships
     const teamIds = memberships.map(m => m.team_id);
+    console.log('Team IDs from memberships:', teamIds);
     
     // If user is a member of any teams, fetch those teams
     let memberTeams: any[] = [];
@@ -50,6 +55,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       }
       
       memberTeams = teams || [];
+      console.log('Member teams fetched:', memberTeams);
     }
     
     // Combine and deduplicate the results
@@ -58,6 +64,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       index === self.findIndex(t => t.id === team.id)
     );
     
+    console.log('Final combined teams (after deduplication):', uniqueTeams);
     return uniqueTeams as Team[];
   } catch (error) {
     console.error('Error in fetchTeams:', error);
@@ -71,28 +78,47 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
  * @returns Promise resolving to an array of team members
  */
 export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from('team_members')
-    .select(`
-      id,
-      team_id,
-      user_id,
-      role,
-      joined_at,
-      profiles(
-        full_name, 
-        email, 
-        avatar_url
-      )
-    `)
-    .eq('team_id', teamId);
+  console.log(`Starting fetchTeamMembers for team ${teamId}`);
   
-  if (error) {
-    console.error(`Error fetching members for team ${teamId}:`, error);
+  try {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select(`
+        id,
+        team_id,
+        user_id,
+        role,
+        joined_at,
+        profiles(
+          full_name, 
+          email, 
+          avatar_url
+        )
+      `)
+      .eq('team_id', teamId);
+    
+    if (error) {
+      console.error(`Error fetching members for team ${teamId}:`, error);
+      throw error;
+    }
+    
+    console.log(`Team ${teamId} members data:`, data);
+    
+    // Verify the data structure returned
+    if (data && data.length > 0) {
+      console.log('Sample member data structure:', {
+        id: data[0].id,
+        user_id: data[0].user_id,
+        role: data[0].role,
+        profile: data[0].profiles
+      });
+    }
+    
+    return data as TeamMember[];
+  } catch (error) {
+    console.error(`Error in fetchTeamMembers for team ${teamId}:`, error);
     throw error;
   }
-  
-  return data as TeamMember[];
 }
 
 /**
@@ -101,24 +127,32 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
  * @returns Promise resolving to an array of team invitations
  */
 export async function fetchTeamInvitations(teamId: string): Promise<TeamInvitation[]> {
-  const { data, error } = await supabase
-    .from('team_invitations')
-    .select(`
-      id,
-      team_id,
-      email,
-      created_at,
-      expires_at,
-      invitation_code,
-      status
-    `)
-    .eq('team_id', teamId)
-    .eq('status', 'pending');
+  console.log(`Starting fetchTeamInvitations for team ${teamId}`);
   
-  if (error) {
-    console.error(`Error fetching invitations for team ${teamId}:`, error);
+  try {
+    const { data, error } = await supabase
+      .from('team_invitations')
+      .select(`
+        id,
+        team_id,
+        email,
+        created_at,
+        expires_at,
+        invitation_code,
+        status
+      `)
+      .eq('team_id', teamId)
+      .eq('status', 'pending');
+    
+    if (error) {
+      console.error(`Error fetching invitations for team ${teamId}:`, error);
+      throw error;
+    }
+    
+    console.log(`Team ${teamId} invitations data:`, data);
+    return data as TeamInvitation[];
+  } catch (error) {
+    console.error(`Error in fetchTeamInvitations for team ${teamId}:`, error);
     throw error;
   }
-  
-  return data as TeamInvitation[];
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash, PenLine, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TeamMembersList } from './TeamMembersList';
@@ -34,7 +34,28 @@ export const TeamDetails = ({
 }: TeamDetailsProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
-  if (!currentUserId) return null;
+  useEffect(() => {
+    console.log('TeamDetails rendered with:', {
+      team,
+      teamId: team?.id,
+      teamName: team?.name,
+      teamMembersCount: teamMembers?.length,
+      invitationsCount: invitations?.length,
+      userRole,
+      currentUserId,
+      teamMembers,
+      invitations
+    });
+  }, [team, teamMembers, invitations, userRole, currentUserId]);
+
+  if (!currentUserId) {
+    console.log('TeamDetails: No currentUserId, returning null');
+    return null;
+  }
+  
+  console.log('TeamDetails: Rendering UI with userRole:', userRole);
+  console.log('TeamDetails: Can show owner controls?', userRole === 'owner');
+  console.log('TeamDetails: Can show admin controls?', userRole === 'owner' || userRole === 'admin');
   
   return (
     <div className="space-y-4">
@@ -50,7 +71,10 @@ export const TeamDetails = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setIsEditDialogOpen(true)}
+              onClick={() => {
+                console.log('TeamDetails: Edit button clicked for team', team.id);
+                setIsEditDialogOpen(true);
+              }}
             >
               <PenLine className="h-4 w-4 mr-2" />
               Edit
@@ -61,7 +85,10 @@ export const TeamDetails = ({
             <Button 
               variant="secondary" 
               size="sm"
-              onClick={() => onOpenInvite(team.id)}
+              onClick={() => {
+                console.log('TeamDetails: Invite button clicked for team', team.id);
+                onOpenInvite(team.id);
+              }}
             >
               <UserPlus className="h-4 w-4 mr-2" />
               Invite
@@ -72,7 +99,10 @@ export const TeamDetails = ({
             <Button 
               variant="destructive" 
               size="sm"
-              onClick={() => onDeleteTeam(team.id)}
+              onClick={() => {
+                console.log('TeamDetails: Delete team button clicked for team', team.id);
+                onDeleteTeam(team.id);
+              }}
             >
               <Trash className="h-4 w-4 mr-2" />
               Delete Team
@@ -86,9 +116,14 @@ export const TeamDetails = ({
         teamMembers={teamMembers || []} 
         currentUserId={currentUserId}
         userRole={userRole}
-        onRemoveMember={(userId, name) => onRemoveMember(team.id, userId, name)}
-        onChangeRole={(userId, name, currentRole) => 
-          onUpdateMemberRole(team.id, userId, name, currentRole, currentRole === 'admin' ? 'member' : 'admin')}
+        onRemoveMember={(userId, name) => {
+          console.log('TeamDetails: Remove member initiated', { userId, name });
+          onRemoveMember(team.id, userId, name);
+        }}
+        onChangeRole={(userId, name, currentRole) => {
+          console.log('TeamDetails: Change role initiated', { userId, name, currentRole });
+          onUpdateMemberRole(team.id, userId, name, currentRole, currentRole === 'admin' ? 'member' : 'admin');
+        }}
       />
 
       {/* Pending invitations */}
@@ -100,8 +135,14 @@ export const TeamDetails = ({
       <EditTeamDialog
         team={team}
         isOpen={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        onSave={(teamId, updates) => onUpdateTeam(teamId, updates)}
+        onOpenChange={(isOpen) => {
+          console.log('TeamDetails: EditTeamDialog state changed to', isOpen);
+          setIsEditDialogOpen(isOpen);
+        }}
+        onSave={(teamId, updates) => {
+          console.log('TeamDetails: Team update requested', { teamId, updates });
+          onUpdateTeam(teamId, updates);
+        }}
       />
     </div>
   );

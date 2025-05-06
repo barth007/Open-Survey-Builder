@@ -16,7 +16,14 @@ export function useTeamQueries() {
     queryFn: async () => {
       if (!user) return [];
       console.log('Fetching teams for user in useTeamQueries:', user.id);
-      return await fetchTeams(user.id);
+      try {
+        const fetchedTeams = await fetchTeams(user.id);
+        console.log('Teams fetched successfully:', fetchedTeams);
+        return fetchedTeams;
+      } catch (fetchError) {
+        console.error('Error fetching teams:', fetchError);
+        throw fetchError;
+      }
     },
     enabled: !!user
   });
@@ -27,13 +34,22 @@ export function useTeamQueries() {
       if (!teams || teams.length === 0) return {};
       
       const teamMembersMap: Record<string, any[]> = {};
+      console.log('Fetching team members for teams:', teams);
       
-      await Promise.all(teams.map(async (team) => {
-        const members = await fetchTeamMembers(team.id);
-        teamMembersMap[team.id] = members;
-      }));
-      
-      return teamMembersMap;
+      try {
+        await Promise.all(teams.map(async (team) => {
+          console.log(`Fetching members for team ${team.id}`);
+          const members = await fetchTeamMembers(team.id);
+          console.log(`Team ${team.id} members:`, members);
+          teamMembersMap[team.id] = members;
+        }));
+        
+        console.log('All team members fetched:', teamMembersMap);
+        return teamMembersMap;
+      } catch (fetchError) {
+        console.error('Error fetching team members:', fetchError);
+        throw fetchError;
+      }
     },
     enabled: !!teams && teams.length > 0
   });
@@ -44,13 +60,22 @@ export function useTeamQueries() {
       if (!teams || teams.length === 0) return {};
       
       const invitationsMap: Record<string, any[]> = {};
+      console.log('Fetching invitations for teams:', teams);
       
-      await Promise.all(teams.map(async (team) => {
-        const teamInvitations = await fetchTeamInvitations(team.id);
-        invitationsMap[team.id] = teamInvitations;
-      }));
-      
-      return invitationsMap;
+      try {
+        await Promise.all(teams.map(async (team) => {
+          console.log(`Fetching invitations for team ${team.id}`);
+          const teamInvitations = await fetchTeamInvitations(team.id);
+          console.log(`Team ${team.id} invitations:`, teamInvitations);
+          invitationsMap[team.id] = teamInvitations;
+        }));
+        
+        console.log('All team invitations fetched:', invitationsMap);
+        return invitationsMap;
+      } catch (fetchError) {
+        console.error('Error fetching team invitations:', fetchError);
+        throw fetchError;
+      }
     },
     enabled: !!teams && teams.length > 0
   });
