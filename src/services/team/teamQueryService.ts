@@ -81,7 +81,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
   console.log(`Starting fetchTeamMembers for team ${teamId}`);
   
   try {
-    // Fetch team members first
+    // Fetch team members directly without trying to join with profiles
     const { data: membersData, error: membersError } = await supabase
       .from('team_members')
       .select('*')

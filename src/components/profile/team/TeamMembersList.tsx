@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Trash, Shield, ShieldOff, MoreHorizontal } from 'lucide-react';
+import { Trash, Shield, ShieldOff, MoreHorizontal, AlertCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -67,6 +67,37 @@ export const TeamMembersList = ({
 
   console.log('TeamMembersList: Can manage members?', canManageMembers);
   console.log('TeamMembersList: Is owner?', isOwner);
+
+  // Check if we have a valid array of team members
+  if (!teamMembers || !Array.isArray(teamMembers)) {
+    return (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-base flex items-center">
+            <AlertCircle className="h-4 w-4 mr-2 text-amber-500" />
+            Team Members
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Unable to load team members data.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If the array is empty but valid, show a different message
+  if (teamMembers.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="py-3">
+          <CardTitle className="text-base">Team Members</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">This team has no members yet.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

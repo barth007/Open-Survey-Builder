@@ -39,9 +39,14 @@ export function useTeamQueries() {
       try {
         await Promise.all(teams.map(async (team) => {
           console.log(`Fetching members for team ${team.id}`);
-          const members = await fetchTeamMembers(team.id);
-          console.log(`Team ${team.id} members:`, members);
-          teamMembersMap[team.id] = members;
+          try {
+            const members = await fetchTeamMembers(team.id);
+            console.log(`Team ${team.id} members:`, members);
+            teamMembersMap[team.id] = members;
+          } catch (memberError) {
+            console.error(`Error fetching members for team ${team.id}:`, memberError);
+            teamMembersMap[team.id] = [];
+          }
         }));
         
         console.log('All team members fetched:', teamMembersMap);

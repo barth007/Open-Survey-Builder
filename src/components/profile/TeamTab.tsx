@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -115,7 +114,7 @@ const TeamTab = () => {
   };
 
   const userRole = (team: Team) => {
-    if (!teamMembers) {
+    if (!teamMembers || !user) {
       console.log(`No teamMembers data available for team ${team.id}`);
       return null;
     }
@@ -124,7 +123,14 @@ const TeamTab = () => {
     console.log(`Getting userRole for team ${team.id}. Members:`, members);
     console.log(`Current user ID: ${user?.id}`);
     
-    const currentMember = members.find(member => member.user_id === user?.id);
+    // Check if user is the team owner first
+    if (team.owner_id === user.id) {
+      console.log(`User is the owner of team ${team.id}`);
+      return 'owner';
+    }
+    
+    // Otherwise check team_members for role
+    const currentMember = members.find(member => member.user_id === user.id);
     console.log(`Current member found:`, currentMember);
     
     return currentMember?.role || null;
