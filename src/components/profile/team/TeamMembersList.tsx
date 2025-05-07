@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Trash, Shield, ShieldOff, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -9,18 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { TeamMember } from '@/types/team-types';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ChangeRoleDialog } from './ChangeRoleDialog';
+import { TeamMemberRow } from './TeamMemberRow';
 
 interface TeamMembersListProps {
   teamMembers: TeamMember[];
@@ -51,16 +43,6 @@ export const TeamMembersList = ({
       userRole
     });
   }, [teamMembers, currentUserId, userRole]);
-  
-  const getInitials = (name: string | null) => {
-    if (!name) return '??';
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const canManageMembers = userRole === 'owner' || userRole === 'admin';
   const isOwner = userRole === 'owner';
@@ -99,6 +81,19 @@ export const TeamMembersList = ({
     );
   }
 
+  const handleMemberRoleChange = (userId: string, name: string | null, currentRole: string) => {
+    console.log('TeamMembersList: Setting member to change role', {
+      userId,
+      name,
+      role: currentRole
+    });
+    setMemberToChangeRole({
+      userId,
+      name,
+      role: currentRole
+    });
+  };
+
   return (
     <Card>
       <CardHeader className="py-3">
@@ -119,7 +114,6 @@ export const TeamMembersList = ({
           <TableBody>
             {teamMembers.map(member => {
               const isCurrentUser = member.user_id === currentUserId;
-              const isMemberOwner = member.role === 'owner';
               // Modified logic: don't allow owners to manage other owners or admins to manage owners/admins
               const canManageThisMember = 
                 (isOwner || (userRole === 'admin' && member.role !== 'owner' && member.role !== 'admin')) && 
@@ -131,89 +125,19 @@ export const TeamMembersList = ({
                 memberRole: member.role,
                 memberName: member.profile?.full_name,
                 isCurrentUser,
-                isMemberOwner,
                 canManageThisMember
               });
               
               return (
-                <TableRow key={member.id}>
-                  <TableCell className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={member.profile?.avatar_url || undefined} />
-                      <AvatarFallback>{getInitials(member.profile?.full_name)}</AvatarFallback>
-                    </Avatar>
-                    <span>
-                      {member.profile?.full_name || 'Unknown User'}
-                      {isCurrentUser && <span className="text-xs text-muted-foreground ml-2">(You)</span>}
-                    </span>
-                  </TableCell>
-                  <TableCell>{member.profile?.email || 'No email'}</TableCell>
-                  <TableCell>
-                    <Badge variant={isMemberOwner ? 'default' : (member.role === 'admin' ? 'secondary' : 'outline')}>
-                      {member.role}
-                    </Badge>
-                  </TableCell>
-                  {canManageMembers && (
-                    <TableCell className="text-right">
-                      {canManageThisMember ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Actions</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {isOwner && member.role !== 'owner' && (
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  console.log('TeamMembersList: Setting member to change role', {
-                                    userId: member.user_id,
-                                    name: member.profile?.full_name,
-                                    role: member.role
-                                  });
-                                  setMemberToChangeRole({
-                                    userId: member.user_id,
-                                    name: member.profile?.full_name || null,
-                                    role: member.role
-                                  });
-                                }}
-                                className="flex items-center"
-                              >
-                                {member.role === 'admin' ? (
-                                  <>
-                                    <ShieldOff className="h-4 w-4 mr-2" />
-                                    <span>Remove Admin</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Shield className="h-4 w-4 mr-2" />
-                                    <span>Make Admin</span>
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() => {
-                                console.log('TeamMembersList: Remove member clicked', {
-                                  userId: member.user_id,
-                                  name: member.profile?.full_name
-                                });
-                                onRemoveMember(member.user_id, member.profile?.full_name);
-                              }}
-                              className="flex items-center text-destructive"
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              <span>Remove</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                  )}
-                </TableRow>
+                <TeamMemberRow
+                  key={member.id}
+                  member={member}
+                  isCurrentUser={isCurrentUser}
+                  canManageThisMember={canManageThisMember}
+                  userRole={userRole}
+                  onRemoveMember={onRemoveMember}
+                  onChangeRole={handleMemberRoleChange}
+                />
               );
             })}
           </TableBody>
