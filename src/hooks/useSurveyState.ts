@@ -69,7 +69,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
           surveyId,
           updates: { 
             isPublished: newPublishState,
-            public_code: publicCode
+            publicCode
           }
         });
         
@@ -115,9 +115,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
             title: survey.title,
             description: survey.description,
             questions: questions,
-            is_published: survey.isPublished,
-            public_code: publicCode,
-            team_id: survey.teamId
+            isPublished: survey.isPublished,
+            publicCode,
+            teamId: survey.teamId
           }
         });
         

@@ -1,4 +1,3 @@
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
@@ -249,6 +248,7 @@ export interface DbSurvey {
   folder_id: string | null;
   created_at: string | null;
   user_id: string | null;
+  team_id: string | null; // Added team_id field
   public_code: string | null; // Added public_code field
 }
 
