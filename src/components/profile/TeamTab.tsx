@@ -9,11 +9,12 @@ import { EmptyTeamState } from './team/EmptyTeamState';
 import { TeamProvider, useTeamContext } from '@/contexts/TeamContext';
 import { TeamTabLoader } from './team/TeamTabLoader';
 import { TeamList } from './team/TeamList';
-import { TeamTabContent } from './team/TeamTabContent';
+import { TeamTabContent as TeamContent } from './team/TeamTabContent';
 import { TeamDialogs } from './team/TeamDialogs';
 import { useTeamTabLogic } from '@/hooks/team/useTeamTabLogic';
 
-const TeamTabContent = () => {
+// Renamed the component to prevent naming conflict with the imported component
+const TeamTabInner = () => {
   const { user } = useAuth();
   const { activeTeamTab, setActiveTeamTab } = useTeamContext();
   const {
@@ -79,7 +80,7 @@ const TeamTabContent = () => {
             }}
           >
             <TeamList teams={teams} userRole={userRole} />
-            <TeamTabContent 
+            <TeamContent 
               teams={teams} 
               teamMembers={teamMembers} 
               invitations={invitations}
@@ -110,7 +111,7 @@ const TeamTab = () => {
   return (
     <TeamProvider>
       <div className="space-y-6">
-        <TeamTabContent />
+        <TeamTabInner />
       </div>
     </TeamProvider>
   );
