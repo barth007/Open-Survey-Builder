@@ -29,8 +29,8 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     questions: parsedQuestions,
     isPublished: dbSurvey.is_published || false,
     // Match property names with the Survey type definition
-    // The Survey type doesn't have createdAt/updatedAt properties
     folderId: dbSurvey.folder_id || undefined,
+    teamId: dbSurvey.team_id || undefined, // Map team_id to teamId
     publicCode: dbSurvey.public_code || undefined
   };
 }
@@ -46,7 +46,9 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     is_published: survey.isPublished,
     // Cast questions to Json as it's stored as JSONB in the database
     questions: survey.questions as unknown as Json,
-    folder_id: survey.folderId
+    folder_id: survey.folderId,
+    team_id: survey.teamId, // Map teamId to team_id
+    public_code: survey.publicCode
   };
 }
 

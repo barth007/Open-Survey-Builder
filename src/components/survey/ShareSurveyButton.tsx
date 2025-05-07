@@ -94,7 +94,7 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
             </p>
             <TeamSelector 
               surveyId={survey.id} 
-              currentTeamId={survey.folderId as string}
+              currentTeamId={survey.teamId}
             />
           </div>
           

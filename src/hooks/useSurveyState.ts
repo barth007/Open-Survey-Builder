@@ -20,7 +20,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
     description: "Survey description",
     questions: [],
     isPublished: false,
-    publicCode: '' // Ensure we initialize with an empty string rather than undefined
+    publicCode: '', // Ensure we initialize with an empty string rather than undefined
+    teamId: undefined // Initialize teamId as undefined
   });
 
   const {
@@ -43,14 +44,19 @@ export const useSurveyState = (surveyId: string | undefined) => {
     setSurvey((prev) => ({ ...prev, description }));
   };
 
+  const generatePublicCode = () => {
+    return `s-${Math.random().toString(36).substring(2, 10)}`;
+  };
+
   const togglePublish = async () => {
     const newPublishState = !survey.isPublished;
     
     // Generate a public code if it doesn't exist and we're publishing
     const publicCode = newPublishState && !survey.publicCode 
-      ? `s-${Math.random().toString(36).substring(2, 10)}` 
+      ? generatePublicCode()
       : survey.publicCode;
     
+    // Update local state immediately for better UX
     setSurvey(prev => ({
       ...prev,
       isPublished: newPublishState,
@@ -63,10 +69,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
           surveyId,
           updates: { 
             isPublished: newPublishState,
-            publicCode
+            public_code: publicCode
           }
         });
         
+        // Update local cache after successful update
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
         
@@ -78,6 +85,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         });
       }
     } catch (error) {
+      // Revert local state on error
       setSurvey(prev => ({
         ...prev,
         isPublished: !newPublishState,
@@ -98,7 +106,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       if (surveyId) {
         // Make sure we have a public code if the survey is published
         const publicCode = survey.isPublished && !survey.publicCode 
-          ? `s-${Math.random().toString(36).substring(2, 10)}` 
+          ? generatePublicCode()
           : survey.publicCode;
           
         await updateSurvey({
@@ -107,8 +115,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
             title: survey.title,
             description: survey.description,
             questions: questions,
-            isPublished: survey.isPublished,
-            publicCode
+            is_published: survey.isPublished,
+            public_code: publicCode,
+            team_id: survey.teamId
           }
         });
         
@@ -141,7 +150,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
   const currentSurvey: Survey = {
     ...survey,
     questions,
-    publicCode: survey.publicCode || '' // Ensure publicCode is always at least an empty string
+    publicCode: survey.publicCode || '', // Ensure publicCode is always at least an empty string
+    teamId: survey.teamId // Include teamId in the returned survey
   };
 
   return {

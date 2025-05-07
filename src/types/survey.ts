@@ -45,10 +45,11 @@ export interface Survey {
   questions: Question[];
   isPublished: boolean;
   folderId?: string;
+  teamId?: string; // Added teamId property
   sharableLink?: string;
   responseLimit?: number;
   responses?: SurveyResponse[];
-  publicCode?: string; // Added public code field
+  publicCode?: string;
 }
 
 /**
@@ -67,8 +68,8 @@ export interface SurveyResponse {
   surveyId: string;
   answers: Answer[];
   submittedAt: string;
-  participantId?: string; // Added participant ID field
-  metadata?: Record<string, any>; // Added metadata field
+  participantId?: string;
+  metadata?: Record<string, any>;
 }
 
 export const LIKERT_5_LABELS = ['Strongly disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly agree'];
