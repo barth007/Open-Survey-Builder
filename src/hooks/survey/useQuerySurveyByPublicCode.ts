@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Survey } from '@/types/survey';
 import { dbSurveyToSurvey } from '@/utils/type-mappers';
+import { DbSurvey } from '@/types/database';
 
 /**
  * Custom hook to fetch a survey by its public code
@@ -48,8 +49,16 @@ export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = f
           throw new Error('Survey not found');
         }
 
+        // Handle possibly missing fields that are now required in DbSurvey
+        const surveyData: DbSurvey = {
+          ...data,
+          welcome_instructions: data.welcome_instructions || null,
+          welcome_button_text: data.welcome_button_text || null,
+          thank_you_button_text: data.thank_you_button_text || null
+        };
+
         // Use the type mapper utility to convert the database format to our frontend format
-        return dbSurveyToSurvey(data);
+        return dbSurveyToSurvey(surveyData);
       } catch (error) {
         console.error("Error fetching survey by public code:", error);
         throw error;
