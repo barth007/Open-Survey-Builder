@@ -9,7 +9,7 @@ export type { Team, TeamMember, TeamInvitation };
 
 export const useTeams = () => {
   const { teams, teamMembers, invitations, isLoading, error } = useTeamQueries();
-  const { sendInvitation, acceptInvitation } = useTeamInvitation();
+  const { sendInvitation, acceptInvitation, isSending, isAccepting } = useTeamInvitation();
   const { 
     removeTeamMember, 
     updateTeamMemberRole, 
@@ -30,6 +30,8 @@ export const useTeams = () => {
     removeTeamMember,
     updateTeamMemberRole,
     updateTeam,
-    deleteTeam
+    deleteTeam,
+    isSending,
+    isAccepting
   };
 };

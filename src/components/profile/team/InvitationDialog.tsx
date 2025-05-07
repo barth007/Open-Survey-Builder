@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/sonner';
 import { useTeams } from '@/hooks/useTeams';
+import { Loader2 } from 'lucide-react';
 
 const inviteSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -31,7 +32,7 @@ interface InvitationDialogProps {
 }
 
 export const InvitationDialog = ({ isOpen, onOpenChange, teamId }: InvitationDialogProps) => {
-  const { sendInvitation } = useTeams();
+  const { sendInvitation, isSending } = useTeams();
   
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
@@ -41,13 +42,19 @@ export const InvitationDialog = ({ isOpen, onOpenChange, teamId }: InvitationDia
   });
 
   const handleInvite = async (data: InviteFormValues) => {
-    if (!teamId) return;
+    if (!teamId) {
+      toast('No team selected');
+      return;
+    }
+    
+    console.log('Sending invitation to', data.email, 'for team', teamId);
     
     try {
-      sendInvitation({ teamId, email: data.email });
+      await sendInvitation({ teamId, email: data.email });
       onOpenChange(false);
       form.reset();
     } catch (error: any) {
+      console.error('Error caught in InvitationDialog:', error);
       toast(`Failed to send invitation: ${error.message}`);
     }
   };
@@ -80,9 +87,16 @@ export const InvitationDialog = ({ isOpen, onOpenChange, teamId }: InvitationDia
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline" disabled={isSending}>Cancel</Button>
               </DialogClose>
-              <Button type="submit">Send Invitation</Button>
+              <Button type="submit" disabled={isSending}>
+                {isSending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : 'Send Invitation'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
