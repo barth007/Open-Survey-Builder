@@ -38,7 +38,7 @@ const PagesTab: React.FC<PagesTabProps> = ({
         <TabsList className="mb-4">
           <TabsTrigger value="welcome">Welcome Page</TabsTrigger>
           <TabsTrigger value="thankyou">Thank You Page</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="preview">Pages Preview</TabsTrigger>
         </TabsList>
         
         <TabsContent value="welcome">
