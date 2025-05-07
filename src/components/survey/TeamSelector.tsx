@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,31 +39,35 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
     queryFn: async () => {
       if (!user) return [];
       
-      const { data, error } = await supabase
-        .from('teams')
-        .select(`
-          id,
-          name,
-          created_at,
-          description,
-          owner_id,
-          team_members!inner(
-            id,
-            team_id,
-            user_id,
-            role,
-            joined_at
-          )
-        `)
-        .eq('team_members.user_id', user.id)
-        .order('name');
+      console.log('Fetching teams for user:', user.id);
       
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('team_id, role')
+        .eq('user_id', user.id);
+        
       if (error) {
-        console.error('Error fetching teams:', error);
+        console.error('Error fetching team memberships:', error);
         throw error;
       }
       
-      return data as Team[];
+      if (!data || data.length === 0) return [];
+      
+      const teamIds = data.map(member => member.team_id);
+      console.log('Found team IDs:', teamIds);
+      
+      const { data: teamsData, error: teamsError } = await supabase
+        .from('teams')
+        .select('id, name, description')
+        .in('id', teamIds);
+        
+      if (teamsError) {
+        console.error('Error fetching teams:', teamsError);
+        throw teamsError;
+      }
+      
+      console.log('Teams data loaded:', teamsData);
+      return teamsData as Team[];
     },
     enabled: !!user
   });
@@ -72,6 +77,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
     
     setIsLoading(true);
     try {
+      console.log('Updating survey team:', { surveyId, teamId });
       await updateSurveyTeam({ surveyId, teamId });
     } catch (error) {
       console.error('Error updating survey team:', error);
@@ -112,7 +118,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
           <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[200px]">
+      <DropdownMenuContent className="w-[200px] bg-white">
         <DropdownMenuItem 
           className="flex items-center" 
           onSelect={() => handleTeamSelect(null)}

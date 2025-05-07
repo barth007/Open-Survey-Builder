@@ -26,8 +26,12 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  const publicUrl = `${window.location.origin}/p/${survey.publicCode}`;
-  const previewUrl = `${window.location.origin}/preview/${survey.publicCode}`;
+  // Use a fallback for the public code to avoid undefined in URLs
+  const publicCode = survey.publicCode || '';
+  
+  const baseUrl = window.location.origin;
+  const publicUrl = `${baseUrl}/p/${publicCode}`;
+  const previewUrl = `${baseUrl}/preview/${publicCode}`;
   
   const copyToClipboard = (url: string, type: 'public' | 'preview') => {
     navigator.clipboard.writeText(url);
@@ -53,7 +57,7 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
           {survey.isPublished ? "Published" : "Unpublished"}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[350px] p-0">
+      <PopoverContent className="w-[350px] p-0 bg-white">
         <div className="p-4 pb-2">
           <h3 className="font-medium text-sm">Share Survey</h3>
           <p className="text-xs text-muted-foreground mt-1">
@@ -106,13 +110,14 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
             </p>
             <div className="flex gap-2">
               <Input 
-                value={previewUrl}
+                value={publicCode ? previewUrl : 'Publish survey to generate link'}
                 readOnly
                 className="text-xs"
               />
               <Button 
                 onClick={() => copyToClipboard(previewUrl, 'preview')}
                 size="sm"
+                disabled={!publicCode}
               >
                 Copy
               </Button>
@@ -131,13 +136,14 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
                 </p>
                 <div className="flex gap-2">
                   <Input 
-                    value={publicUrl}
+                    value={publicCode ? publicUrl : 'Publish survey to generate link'}
                     readOnly
                     className="text-xs"
                   />
                   <Button 
                     onClick={() => copyToClipboard(publicUrl, 'public')}
                     size="sm"
+                    disabled={!publicCode}
                   >
                     Copy
                   </Button>
