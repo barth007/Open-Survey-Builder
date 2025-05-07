@@ -254,6 +254,10 @@ export type Database = {
         Args: { length: number }
         Returns: string
       }
+      get_current_user_email: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       is_team_admin: {
         Args: { team_id_param: string }
         Returns: boolean
