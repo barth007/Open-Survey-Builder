@@ -33,6 +33,7 @@ export interface Question {
   media?: Media;
   conditionalLogic?: ConditionalLogic;
   isVisible?: boolean;
+  customLikertLabels?: boolean; // Flag to indicate if the question uses custom Likert labels
 }
 
 /**
@@ -50,11 +51,15 @@ export interface Survey {
   responseLimit?: number;
   responses?: SurveyResponse[];
   publicCode?: string;
-  // New fields for welcome and thank you pages
+  // Welcome page fields
   welcomeTitle?: string;
   welcomeMessage?: string;
+  welcomeInstructions?: string;
+  welcomeButtonText?: string;
+  // Thank you page fields
   thankYouTitle?: string;
   thankYouMessage?: string;
+  thankYouButtonText?: string;
   redirectUrl?: string;
 }
 

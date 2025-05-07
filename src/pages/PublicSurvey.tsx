@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
@@ -129,6 +128,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           <WelcomePage
             title={survey.welcomeTitle}
             message={survey.welcomeMessage}
+            instructions={survey.welcomeInstructions}
+            buttonText={survey.welcomeButtonText}
             onStart={handleStartSurvey}
           />
         )}
@@ -177,6 +178,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           <ThankYouPage
             title={survey.thankYouTitle}
             message={survey.thankYouMessage}
+            buttonText={survey.thankYouButtonText}
             redirectUrl={survey.redirectUrl}
             onClose={() => setFlowState('welcome')}
           />

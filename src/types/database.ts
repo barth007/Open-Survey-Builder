@@ -248,13 +248,16 @@ export interface DbSurvey {
   folder_id: string | null;
   created_at: string | null;
   user_id: string | null;
-  team_id: string | null; // Added team_id field
-  public_code: string | null; // Added public_code field
-  welcome_title: string | null; // Added welcome_title field
-  welcome_message: string | null; // Added welcome_message field
-  thank_you_title: string | null; // Added thank_you_title field
-  thank_you_message: string | null; // Added thank_you_message field
-  redirect_url: string | null; // Added redirect_url field
+  team_id: string | null;
+  public_code: string | null;
+  welcome_title: string | null;
+  welcome_message: string | null;
+  welcome_instructions: string | null;
+  welcome_button_text: string | null;
+  thank_you_title: string | null;
+  thank_you_message: string | null;
+  thank_you_button_text: string | null;
+  redirect_url: string | null;
 }
 
 /**

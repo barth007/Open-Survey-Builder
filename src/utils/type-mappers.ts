@@ -19,7 +19,8 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
         figmaPrototypeUrl: q.figmaPrototypeUrl,
         media: q.media,
         conditionalLogic: q.conditionalLogic,
-        isVisible: q.isVisible !== undefined ? q.isVisible : true
+        isVisible: q.isVisible !== undefined ? q.isVisible : true,
+        customLikertLabels: q.customLikertLabels
       }))
     : [];
 
@@ -33,11 +34,15 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     folderId: dbSurvey.folder_id || undefined,
     teamId: dbSurvey.team_id || undefined,
     publicCode: dbSurvey.public_code || undefined,
-    // New fields for welcome and thank you pages
+    // Welcome page fields
     welcomeTitle: dbSurvey.welcome_title || undefined,
     welcomeMessage: dbSurvey.welcome_message || undefined,
+    welcomeInstructions: dbSurvey.welcome_instructions || undefined,
+    welcomeButtonText: dbSurvey.welcome_button_text || undefined,
+    // Thank you page fields
     thankYouTitle: dbSurvey.thank_you_title || undefined,
     thankYouMessage: dbSurvey.thank_you_message || undefined,
+    thankYouButtonText: dbSurvey.thank_you_button_text || undefined,
     redirectUrl: dbSurvey.redirect_url || undefined
   };
 }
@@ -56,11 +61,15 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     folder_id: survey.folderId,
     team_id: survey.teamId,
     public_code: survey.publicCode,
-    // New fields for welcome and thank you pages
+    // Welcome page fields
     welcome_title: survey.welcomeTitle,
     welcome_message: survey.welcomeMessage,
+    welcome_instructions: survey.welcomeInstructions,
+    welcome_button_text: survey.welcomeButtonText,
+    // Thank you page fields
     thank_you_title: survey.thankYouTitle,
     thank_you_message: survey.thankYouMessage,
+    thank_you_button_text: survey.thankYouButtonText,
     redirect_url: survey.redirectUrl
   };
 }

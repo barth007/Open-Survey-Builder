@@ -106,12 +106,24 @@ const Index = () => {
     updateSurvey({ welcomeMessage });
   };
 
+  const handleWelcomeInstructionsChange = (welcomeInstructions: string) => {
+    updateSurvey({ welcomeInstructions });
+  };
+
+  const handleWelcomeButtonTextChange = (welcomeButtonText: string) => {
+    updateSurvey({ welcomeButtonText });
+  };
+
   const handleThankYouTitleChange = (thankYouTitle: string) => {
     updateSurvey({ thankYouTitle });
   };
 
   const handleThankYouMessageChange = (thankYouMessage: string) => {
     updateSurvey({ thankYouMessage });
+  };
+
+  const handleThankYouButtonTextChange = (thankYouButtonText: string) => {
+    updateSurvey({ thankYouButtonText });
   };
 
   const handleRedirectUrlChange = (redirectUrl: string) => {
@@ -207,8 +219,11 @@ const Index = () => {
               survey={survey}
               onWelcomeTitleChange={handleWelcomeTitleChange}
               onWelcomeMessageChange={handleWelcomeMessageChange}
+              onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
+              onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
               onThankYouTitleChange={handleThankYouTitleChange}
               onThankYouMessageChange={handleThankYouMessageChange}
+              onThankYouButtonTextChange={handleThankYouButtonTextChange}
               onRedirectUrlChange={handleRedirectUrlChange}
             />
           </TabsContent>

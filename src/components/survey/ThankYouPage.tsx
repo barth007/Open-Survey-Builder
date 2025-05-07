@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 interface ThankYouPageProps {
   title?: string;
   message?: string;
+  buttonText?: string;
   redirectUrl?: string;
   onClose?: () => void;
 }
@@ -13,6 +14,7 @@ interface ThankYouPageProps {
 export const ThankYouPage: React.FC<ThankYouPageProps> = ({ 
   title = "Thank you for your responses",
   message = "Your feedback has been submitted successfully.",
+  buttonText = "Close",
   redirectUrl,
   onClose
 }) => {
@@ -43,7 +45,7 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({
       <CardFooter>
         {!redirectUrl && onClose && (
           <Button onClick={onClose} className="w-full md:w-auto">
-            Close
+            {buttonText}
           </Button>
         )}
       </CardFooter>

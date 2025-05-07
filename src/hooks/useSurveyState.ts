@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
@@ -25,8 +24,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
     // Initialize welcome and thank you page fields
     welcomeTitle: '',
     welcomeMessage: '',
+    welcomeInstructions: '',
+    welcomeButtonText: '',
     thankYouTitle: '',
     thankYouMessage: '',
+    thankYouButtonText: '',
     redirectUrl: ''
   });
 
@@ -127,8 +129,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
             // Include welcome and thank you page fields
             welcomeTitle: survey.welcomeTitle,
             welcomeMessage: survey.welcomeMessage,
+            welcomeInstructions: survey.welcomeInstructions,
+            welcomeButtonText: survey.welcomeButtonText,
             thankYouTitle: survey.thankYouTitle,
             thankYouMessage: survey.thankYouMessage,
+            thankYouButtonText: survey.thankYouButtonText,
             redirectUrl: survey.redirectUrl
           }
         });

@@ -13,8 +13,11 @@ interface PagesTabProps {
   survey: Survey;
   onWelcomeTitleChange: (value: string) => void;
   onWelcomeMessageChange: (value: string) => void;
+  onWelcomeInstructionsChange: (value: string) => void;
+  onWelcomeButtonTextChange: (value: string) => void;
   onThankYouTitleChange: (value: string) => void;
   onThankYouMessageChange: (value: string) => void;
+  onThankYouButtonTextChange: (value: string) => void;
   onRedirectUrlChange: (value: string) => void;
 }
 
@@ -22,8 +25,11 @@ const PagesTab: React.FC<PagesTabProps> = ({
   survey,
   onWelcomeTitleChange,
   onWelcomeMessageChange,
+  onWelcomeInstructionsChange,
+  onWelcomeButtonTextChange,
   onThankYouTitleChange,
   onThankYouMessageChange,
+  onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
   return (
@@ -64,6 +70,24 @@ const PagesTab: React.FC<PagesTabProps> = ({
                     rows={4}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="welcomeInstructions">Instructions</Label>
+                  <Input 
+                    id="welcomeInstructions"
+                    placeholder="Click the button below to begin the survey."
+                    value={survey.welcomeInstructions || ''}
+                    onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="welcomeButtonText">Button Text</Label>
+                  <Input 
+                    id="welcomeButtonText"
+                    placeholder="Start Survey"
+                    value={survey.welcomeButtonText || ''}
+                    onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -99,6 +123,15 @@ const PagesTab: React.FC<PagesTabProps> = ({
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="thankYouButtonText">Button Text</Label>
+                  <Input 
+                    id="thankYouButtonText"
+                    placeholder="Close"
+                    value={survey.thankYouButtonText || ''}
+                    onChange={(e) => onThankYouButtonTextChange(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="redirectUrl">Redirect URL (Optional)</Label>
                   <Input 
                     id="redirectUrl"
@@ -121,6 +154,8 @@ const PagesTab: React.FC<PagesTabProps> = ({
             <WelcomePage 
               title={survey.welcomeTitle} 
               message={survey.welcomeMessage}
+              instructions={survey.welcomeInstructions}
+              buttonText={survey.welcomeButtonText}
               onStart={() => {}}
             />
             
@@ -128,6 +163,7 @@ const PagesTab: React.FC<PagesTabProps> = ({
             <ThankYouPage 
               title={survey.thankYouTitle} 
               message={survey.thankYouMessage}
+              buttonText={survey.thankYouButtonText}
               redirectUrl={survey.redirectUrl}
             />
           </div>

@@ -24,6 +24,7 @@ import {
   FileImage,
   ChevronUp,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { 
   Question, 
@@ -39,6 +40,7 @@ import MediaUploadButton from './MediaUploadButton';
 import QuestionMediaUpload from './QuestionMediaUpload';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
+import LikertOptionsDialog from './survey/LikertOptionsDialog';
 
 interface QuestionCardProps {
   question: Question;
@@ -61,6 +63,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
   const [hasUrlChanged, setHasUrlChanged] = useState(false);
   const [conditionalLogicOpen, setConditionalLogicOpen] = useState(!!question.conditionalLogic?.dependsOn);
+
+  const [likertOptionsDialogOpen, setLikertOptionsDialogOpen] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
   
@@ -106,7 +110,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       onQuestionChange({ 
         ...question, 
         type,
-        options 
+        options,
+        customLikertLabels: false 
       });
     } else {
       onQuestionChange({ ...question, type });
@@ -256,6 +261,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     onQuestionChange({
       ...question,
       conditionalLogic: updatedLogic,
+    });
+  };
+
+  const handleLikertOptionsEdit = () => {
+    setLikertOptionsDialogOpen(true);
+  };
+
+  const saveLikertOptions = (newOptions: QuestionOption[]) => {
+    onQuestionChange({
+      ...question,
+      options: newOptions,
+      customLikertLabels: true
     });
   };
 
@@ -458,7 +475,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
           {isLikertType && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium mb-3">Likert Scale Options</h4>
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-sm font-medium">Likert Scale Options</h4>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleLikertOptionsEdit}
+                  className="flex items-center gap-1"
+                >
+                  <Settings size={14} />
+                  Customize Options
+                </Button>
+              </div>
               <RadioGroup>
                 <div className="grid grid-cols-5 md:grid-cols-7 lg:grid-cols-10 gap-2 mt-2">
                   {question.options.map((option, index) => (
@@ -607,6 +635,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           </Button>
         </div>
       </CardFooter>
+
+      {/* Likert Scale Options Edit Dialog */}
+      <LikertOptionsDialog
+        isOpen={likertOptionsDialogOpen}
+        onClose={() => setLikertOptionsDialogOpen(false)}
+        options={question.options}
+        onSave={saveLikertOptions}
+      />
     </Card>
   );
 };
