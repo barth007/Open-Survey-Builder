@@ -50,12 +50,12 @@ export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = f
         }
 
         // Handle possibly missing fields that are now required in DbSurvey
-        const surveyData: DbSurvey = {
+        const surveyData = {
           ...data,
-          welcome_instructions: data.welcome_instructions || null,
-          welcome_button_text: data.welcome_button_text || null,
-          thank_you_button_text: data.thank_you_button_text || null
-        };
+          welcome_instructions: null,
+          welcome_button_text: null,
+          thank_you_button_text: null
+        } as DbSurvey;
 
         // Use the type mapper utility to convert the database format to our frontend format
         return dbSurveyToSurvey(surveyData);
