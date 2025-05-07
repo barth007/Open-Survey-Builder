@@ -289,6 +289,18 @@ export type Database = {
         Args: { invitation_code: string }
         Returns: string
       }
+      user_is_team_admin: {
+        Args: { team_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
+      user_is_team_member: {
+        Args: { team_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
+      user_owns_team: {
+        Args: { team_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
       validate_auth_session: {
         Args: Record<PropertyKey, never>
         Returns: string

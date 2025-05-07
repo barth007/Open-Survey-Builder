@@ -28,6 +28,11 @@ export const TeamTabContent = ({
 }: TeamTabContentProps) => {
   const { setTeamToDelete, setMemberToRemove } = useTeamContext();
 
+  if (!teams || teams.length === 0) {
+    console.log('TeamTabContent: No teams available to display');
+    return null;
+  }
+
   return (
     <>
       {teams.map(team => {
@@ -35,7 +40,6 @@ export const TeamTabContent = ({
         const members = teamMembers?.[team.id];
         const teamInvitations = invitations?.[team.id];
         
-        // Enhanced debug logging
         console.log(`TeamTabContent: Rendering team ${team.id} (${team.name})`, {
           teamOwnerId: team.owner_id,
           currentUserId,
