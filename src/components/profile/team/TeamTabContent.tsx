@@ -35,13 +35,14 @@ export const TeamTabContent = ({
         const members = teamMembers?.[team.id];
         const teamInvitations = invitations?.[team.id];
         
-        // Additional debug logging
-        console.log(`TeamTabContent: Rendering details for team ${team.id} (${team.name}):`, {
-          role,
+        // Enhanced debug logging
+        console.log(`TeamTabContent: Rendering team ${team.id} (${team.name})`, {
+          teamOwnerId: team.owner_id,
           currentUserId,
+          isOwner: team.owner_id === currentUserId,
+          role,
           members: members ? {
             count: members.length,
-            hasCurrentUserAsMember: members.some(m => m.user_id === currentUserId),
             memberUserIds: members.map(m => m.user_id),
             memberRoles: members.map(m => m.role),
           } : 'No members data',

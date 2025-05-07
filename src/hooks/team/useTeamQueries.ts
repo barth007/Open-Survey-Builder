@@ -34,17 +34,17 @@ export function useTeamQueries() {
       if (!teams || teams.length === 0) return {};
       
       const teamMembersMap: Record<string, any[]> = {};
-      console.log('Fetching team members for teams:', teams);
+      console.log(`Fetching members for ${teams.length} teams`);
       
       try {
         await Promise.all(teams.map(async (team) => {
-          console.log(`Fetching members for team ${team.id}`);
+          console.log(`Fetching members for team ${team.id} (${team.name})`);
           try {
             const members = await fetchTeamMembers(team.id);
             
-            // Add debug logging for each team's members
+            // Enhanced debug logging
             if (members && Array.isArray(members)) {
-              console.log(`Team ${team.id} members fetched:`, {
+              console.log(`Team ${team.id} (${team.name}) members fetched:`, {
                 count: members.length,
                 memberDetails: members.map(m => ({
                   id: m.id,
@@ -57,14 +57,13 @@ export function useTeamQueries() {
               console.warn(`Team ${team.id} returned invalid members data:`, members);
             }
             
-            teamMembersMap[team.id] = members;
+            teamMembersMap[team.id] = members || [];
           } catch (memberError) {
             console.error(`Error fetching members for team ${team.id}:`, memberError);
             teamMembersMap[team.id] = [];
           }
         }));
         
-        console.log('All team members fetched:', teamMembersMap);
         return teamMembersMap;
       } catch (fetchError) {
         console.error('Error fetching team members:', fetchError);
@@ -87,10 +86,9 @@ export function useTeamQueries() {
           console.log(`Fetching invitations for team ${team.id}`);
           const teamInvitations = await fetchTeamInvitations(team.id);
           console.log(`Team ${team.id} invitations:`, teamInvitations);
-          invitationsMap[team.id] = teamInvitations;
+          invitationsMap[team.id] = teamInvitations || [];
         }));
         
-        console.log('All team invitations fetched:', invitationsMap);
         return invitationsMap;
       } catch (fetchError) {
         console.error('Error fetching team invitations:', fetchError);

@@ -36,9 +36,9 @@ export function useTeamTabLogic() {
   
   useEffect(() => {
     console.log('TeamTab data updated:', { 
-      teams, 
-      teamMembers, 
-      invitations, 
+      teams: teams?.length, 
+      teamMembers: teamMembers ? Object.keys(teamMembers).length : 0, 
+      invitations: invitations ? Object.keys(invitations).length : 0,
       isLoading, 
       error,
       activeTeamTab
@@ -61,13 +61,6 @@ export function useTeamTabLogic() {
         // Verify if the owner is in the members list
         const ownerInMembersList = members.some(member => member.user_id === team.owner_id);
         console.log(`Owner is in members list for team ${team.id}: ${ownerInMembersList}`);
-        
-        // Count members by role
-        const roleCount = members.reduce((acc, member) => {
-          acc[member.role] = (acc[member.role] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-        console.log(`Role distribution in team ${team.id}:`, roleCount);
       });
     }
   }, [teams, teamMembers, invitations, isLoading, error, activeTeamTab, user]);
@@ -127,20 +120,24 @@ export function useTeamTabLogic() {
   };
 
   const userRole = (team: Team) => {
-    if (!teamMembers || !user) {
+    if (!user) {
+      console.log(`No current user`);
+      return null;
+    }
+    
+    // First check: if user is the team owner, return 'owner'
+    if (team.owner_id === user.id) {
+      console.log(`User ${user.id} is the owner of team ${team.id} (${team.name})`);
+      return 'owner';
+    }
+    
+    // If no team members data available yet, return null
+    if (!teamMembers || !teamMembers[team.id]) {
       console.log(`No teamMembers data available for team ${team.id}`);
       return null;
     }
     
-    // Special case: if user is the team owner, return 'owner' regardless of member status
-    if (team.owner_id === user.id) {
-      console.log(`User ${user.id} is the owner of team ${team.id}`);
-      return 'owner';
-    }
-    
     const members = teamMembers[team.id] || [];
-    console.log(`Getting userRole for team ${team.id}. Members:`, members);
-    console.log(`Current user ID: ${user?.id}`);
     
     // Check team_members for role
     const currentMember = members.find(member => member.user_id === user.id);
