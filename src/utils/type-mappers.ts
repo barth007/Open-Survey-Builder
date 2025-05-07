@@ -1,3 +1,4 @@
+
 import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
 
@@ -30,7 +31,7 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     isPublished: dbSurvey.is_published || false,
     // Match property names with the Survey type definition
     folderId: dbSurvey.folder_id || undefined,
-    teamId: dbSurvey.team_id || undefined, // Map team_id to teamId
+    teamId: dbSurvey.team_id || undefined,
     publicCode: dbSurvey.public_code || undefined
   };
 }
@@ -47,7 +48,7 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     // Cast questions to Json as it's stored as JSONB in the database
     questions: survey.questions as unknown as Json,
     folder_id: survey.folderId,
-    team_id: survey.teamId, // Map teamId to team_id
+    team_id: survey.teamId,
     public_code: survey.publicCode
   };
 }
