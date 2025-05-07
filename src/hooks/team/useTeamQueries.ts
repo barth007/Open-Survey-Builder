@@ -41,7 +41,22 @@ export function useTeamQueries() {
           console.log(`Fetching members for team ${team.id}`);
           try {
             const members = await fetchTeamMembers(team.id);
-            console.log(`Team ${team.id} members:`, members);
+            
+            // Add debug logging for each team's members
+            if (members && Array.isArray(members)) {
+              console.log(`Team ${team.id} members fetched:`, {
+                count: members.length,
+                memberDetails: members.map(m => ({
+                  id: m.id,
+                  userId: m.user_id,
+                  role: m.role,
+                  name: m.profile?.full_name || 'Unknown'
+                }))
+              });
+            } else {
+              console.warn(`Team ${team.id} returned invalid members data:`, members);
+            }
+            
             teamMembersMap[team.id] = members;
           } catch (memberError) {
             console.error(`Error fetching members for team ${team.id}:`, memberError);

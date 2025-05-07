@@ -42,6 +42,15 @@ export const TeamMembersList = ({
       currentUserId,
       userRole
     });
+
+    // Log if the current user is in the members list
+    if (teamMembers && currentUserId) {
+      const currentUserMember = teamMembers.find(member => member.user_id === currentUserId);
+      console.log('Current user in members list?', 
+        currentUserMember 
+          ? `Yes, with role: ${currentUserMember.role}` 
+          : 'No');
+    }
   }, [teamMembers, currentUserId, userRole]);
 
   const canManageMembers = userRole === 'owner' || userRole === 'admin';
@@ -52,6 +61,7 @@ export const TeamMembersList = ({
 
   // Check if we have a valid array of team members
   if (!teamMembers || !Array.isArray(teamMembers)) {
+    console.log('TeamMembersList: Invalid team members data', teamMembers);
     return (
       <Card>
         <CardHeader className="py-3">
@@ -69,6 +79,7 @@ export const TeamMembersList = ({
 
   // If the array is empty but valid, show a different message
   if (teamMembers.length === 0) {
+    console.log('TeamMembersList: No team members found in the array');
     return (
       <Card>
         <CardHeader className="py-3">
@@ -97,7 +108,7 @@ export const TeamMembersList = ({
   return (
     <Card>
       <CardHeader className="py-3">
-        <CardTitle className="text-base">Team Members</CardTitle>
+        <CardTitle className="text-base">Team Members ({teamMembers.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

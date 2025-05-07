@@ -57,6 +57,17 @@ export function useTeamTabLogic() {
         // Check if current user is team owner
         const isUserOwner = team.owner_id === user.id;
         console.log(`User ${user.id} is owner of team ${team.id}: ${isUserOwner}`);
+        
+        // Verify if the owner is in the members list
+        const ownerInMembersList = members.some(member => member.user_id === team.owner_id);
+        console.log(`Owner is in members list for team ${team.id}: ${ownerInMembersList}`);
+        
+        // Count members by role
+        const roleCount = members.reduce((acc, member) => {
+          acc[member.role] = (acc[member.role] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        console.log(`Role distribution in team ${team.id}:`, roleCount);
       });
     }
   }, [teams, teamMembers, invitations, isLoading, error, activeTeamTab, user]);
@@ -121,17 +132,17 @@ export function useTeamTabLogic() {
       return null;
     }
     
+    // Special case: if user is the team owner, return 'owner' regardless of member status
+    if (team.owner_id === user.id) {
+      console.log(`User ${user.id} is the owner of team ${team.id}`);
+      return 'owner';
+    }
+    
     const members = teamMembers[team.id] || [];
     console.log(`Getting userRole for team ${team.id}. Members:`, members);
     console.log(`Current user ID: ${user?.id}`);
     
-    // Check if user is the team owner first
-    if (team.owner_id === user.id) {
-      console.log(`User is the owner of team ${team.id}`);
-      return 'owner';
-    }
-    
-    // Otherwise check team_members for role
+    // Check team_members for role
     const currentMember = members.find(member => member.user_id === user.id);
     console.log(`Current member found:`, currentMember);
     
