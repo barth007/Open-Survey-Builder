@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Trash, PenLine, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { TeamMembersList } from './TeamMembersList';
 import { PendingInvitations } from './PendingInvitations';
 import { TeamMember, TeamInvitation, Team } from '@/types/team-types';
 import { EditTeamDialog } from './EditTeamDialog';
+import { TeamHeader } from './TeamHeader';
 
 interface TeamDetailsProps {
   team: Team;
@@ -59,57 +58,13 @@ export const TeamDetails = ({
   
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-medium">{team.name}</h3>
-          {team.description && (
-            <p className="text-sm text-muted-foreground mt-1">{team.description}</p>
-          )}
-        </div>
-        <div className="space-x-2">
-          {userRole === 'owner' && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                console.log('TeamDetails: Edit button clicked for team', team.id);
-                setIsEditDialogOpen(true);
-              }}
-            >
-              <PenLine className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          )}
-          
-          {(userRole === 'owner' || userRole === 'admin') && (
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={() => {
-                console.log('TeamDetails: Invite button clicked for team', team.id);
-                onOpenInvite(team.id);
-              }}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Invite
-            </Button>
-          )}
-          
-          {userRole === 'owner' && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => {
-                console.log('TeamDetails: Delete team button clicked for team', team.id);
-                onDeleteTeam(team.id);
-              }}
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Delete Team
-            </Button>
-          )}
-        </div>
-      </div>
+      <TeamHeader 
+        team={team}
+        userRole={userRole}
+        onEditTeam={() => setIsEditDialogOpen(true)}
+        onInvite={onOpenInvite}
+        onDeleteTeam={onDeleteTeam}
+      />
       
       {/* Team members */}
       <TeamMembersList 
