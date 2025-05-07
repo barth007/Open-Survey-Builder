@@ -101,6 +101,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
     
     // If no members, return empty array
     if (userIds.length === 0) {
+      console.log(`No members found for team ${teamId}, returning empty array`);
       return members as TeamMember[];
     }
     

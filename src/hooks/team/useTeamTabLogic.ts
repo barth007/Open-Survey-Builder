@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useTeams, Team } from '@/hooks/useTeams';
@@ -42,7 +43,23 @@ export function useTeamTabLogic() {
       error,
       activeTeamTab
     });
-  }, [teams, teamMembers, invitations, isLoading, error, activeTeamTab]);
+
+    // Debug team membership data
+    if (teams && teamMembers && user) {
+      teams.forEach(team => {
+        const members = teamMembers[team.id] || [];
+        console.log(`Team ${team.id} (${team.name}) members:`, members);
+        
+        // Check if current user is in the members list
+        const isUserMember = members.some(member => member.user_id === user.id);
+        console.log(`User ${user.id} is member of team ${team.id}: ${isUserMember}`);
+        
+        // Check if current user is team owner
+        const isUserOwner = team.owner_id === user.id;
+        console.log(`User ${user.id} is owner of team ${team.id}: ${isUserOwner}`);
+      });
+    }
+  }, [teams, teamMembers, invitations, isLoading, error, activeTeamTab, user]);
 
   // Initialize activeTeamTab with the first team's ID when teams are loaded
   useEffect(() => {

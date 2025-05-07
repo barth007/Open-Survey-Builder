@@ -120,6 +120,7 @@ export const TeamMembersList = ({
             {teamMembers.map(member => {
               const isCurrentUser = member.user_id === currentUserId;
               const isMemberOwner = member.role === 'owner';
+              // Modified logic: don't allow owners to manage other owners or admins to manage owners/admins
               const canManageThisMember = 
                 (isOwner || (userRole === 'admin' && member.role !== 'owner' && member.role !== 'admin')) && 
                 !isCurrentUser;
