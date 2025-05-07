@@ -99,8 +99,13 @@ export type Database = {
           name: string
           public_code: string | null
           questions: Json | null
+          redirect_url: string | null
           team_id: string | null
+          thank_you_message: string | null
+          thank_you_title: string | null
           user_id: string | null
+          welcome_message: string | null
+          welcome_title: string | null
         }
         Insert: {
           created_at?: string | null
@@ -111,8 +116,13 @@ export type Database = {
           name: string
           public_code?: string | null
           questions?: Json | null
+          redirect_url?: string | null
           team_id?: string | null
+          thank_you_message?: string | null
+          thank_you_title?: string | null
           user_id?: string | null
+          welcome_message?: string | null
+          welcome_title?: string | null
         }
         Update: {
           created_at?: string | null
@@ -123,8 +133,13 @@ export type Database = {
           name?: string
           public_code?: string | null
           questions?: Json | null
+          redirect_url?: string | null
           team_id?: string | null
+          thank_you_message?: string | null
+          thank_you_title?: string | null
           user_id?: string | null
+          welcome_message?: string | null
+          welcome_title?: string | null
         }
         Relationships: [
           {

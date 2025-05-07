@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import EditTab from '@/components/survey/EditTab';
 import PreviewTab from '@/components/survey/PreviewTab';
 import AnswersTab from '@/components/AnswersTab';
+import PagesTab from '@/components/survey/PagesTab';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,7 +16,7 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers" | "pages">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -96,6 +97,39 @@ const Index = () => {
     setPendingChanges(true);
   };
 
+  // New handlers for welcome and thank you pages
+  const handleWelcomeTitleChange = (welcomeTitle: string) => {
+    updateSurvey({ welcomeTitle });
+  };
+
+  const handleWelcomeMessageChange = (welcomeMessage: string) => {
+    updateSurvey({ welcomeMessage });
+  };
+
+  const handleThankYouTitleChange = (thankYouTitle: string) => {
+    updateSurvey({ thankYouTitle });
+  };
+
+  const handleThankYouMessageChange = (thankYouMessage: string) => {
+    updateSurvey({ thankYouMessage });
+  };
+
+  const handleRedirectUrlChange = (redirectUrl: string) => {
+    updateSurvey({ redirectUrl });
+  };
+
+  // Helper function to update survey properties
+  const updateSurvey = (updates: Partial<typeof survey>) => {
+    if (!surveyId) return;
+
+    queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
+      if (!oldData) return oldData;
+      return { ...oldData, ...updates };
+    });
+    
+    setPendingChanges(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-pebble flex items-center justify-center">
@@ -146,9 +180,10 @@ const Index = () => {
           </div>
         </header>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview" | "answers")} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 bg-ice">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4 bg-ice">
             <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
+            <TabsTrigger value="pages" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Pages</TabsTrigger>
             <TabsTrigger value="preview" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Preview</TabsTrigger>
             <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">
               Answers
@@ -164,6 +199,17 @@ const Index = () => {
               onDeleteQuestion={handleDeleteQuestion}
               onDuplicateQuestion={handleDuplicateQuestion}
               onAddQuestion={handleAddQuestion}
+            />
+          </TabsContent>
+
+          <TabsContent value="pages" className="space-y-4">
+            <PagesTab
+              survey={survey}
+              onWelcomeTitleChange={handleWelcomeTitleChange}
+              onWelcomeMessageChange={handleWelcomeMessageChange}
+              onThankYouTitleChange={handleThankYouTitleChange}
+              onThankYouMessageChange={handleThankYouMessageChange}
+              onRedirectUrlChange={handleRedirectUrlChange}
             />
           </TabsContent>
 

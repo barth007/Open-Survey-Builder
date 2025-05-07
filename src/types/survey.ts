@@ -45,11 +45,17 @@ export interface Survey {
   questions: Question[];
   isPublished: boolean;
   folderId?: string;
-  teamId?: string; // Added teamId property
+  teamId?: string; 
   sharableLink?: string;
   responseLimit?: number;
   responses?: SurveyResponse[];
   publicCode?: string;
+  // New fields for welcome and thank you pages
+  welcomeTitle?: string;
+  welcomeMessage?: string;
+  thankYouTitle?: string;
+  thankYouMessage?: string;
+  redirectUrl?: string;
 }
 
 /**

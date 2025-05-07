@@ -21,7 +21,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
     questions: [],
     isPublished: false,
     publicCode: '', // Ensure we initialize with an empty string rather than undefined
-    teamId: undefined // Initialize teamId as undefined
+    teamId: undefined, // Initialize teamId as undefined
+    // Initialize welcome and thank you page fields
+    welcomeTitle: '',
+    welcomeMessage: '',
+    thankYouTitle: '',
+    thankYouMessage: '',
+    redirectUrl: ''
   });
 
   const {
@@ -117,7 +123,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
             questions: questions,
             isPublished: survey.isPublished,
             publicCode,
-            teamId: survey.teamId
+            teamId: survey.teamId,
+            // Include welcome and thank you page fields
+            welcomeTitle: survey.welcomeTitle,
+            welcomeMessage: survey.welcomeMessage,
+            thankYouTitle: survey.thankYouTitle,
+            thankYouMessage: survey.thankYouMessage,
+            redirectUrl: survey.redirectUrl
           }
         });
         

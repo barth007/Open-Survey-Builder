@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
 import { QuestionItem } from '@/components/survey/response/QuestionItem';
@@ -11,10 +11,15 @@ import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
 import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
+import { WelcomePage } from '@/components/survey/WelcomePage';
+import { ThankYouPage } from '@/components/survey/ThankYouPage';
 
 interface PublicSurveyProps {
   isPreviewMode?: boolean;
 }
+
+// Define enum for survey flow states
+type SurveyFlowState = 'welcome' | 'questions' | 'thankYou';
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   const { publicCode } = useParams<{ publicCode: string }>();
@@ -26,6 +31,13 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     isQuestionVisible
   } = useSurveyResponseLogic(survey?.id);
   const { submitResponse } = useSubmitResponse();
+  
+  // Track the current state of the survey flow
+  const [flowState, setFlowState] = useState<SurveyFlowState>('welcome');
+
+  const handleStartSurvey = () => {
+    setFlowState('questions');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +47,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       
       // In preview mode, don't actually submit the response
       if (isPreviewMode) {
+        setFlowState('thankYou');
         toast("Preview Submission", {
           description: "This is a preview. Your response has not been recorded.",
         });
@@ -55,6 +68,9 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           userAgent: navigator.userAgent,
         },
       });
+
+      // Change flow state to thank you page
+      setFlowState('thankYou');
 
       toast("Response submitted", {
         description: "Thank you for completing the survey",
@@ -108,39 +124,63 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           </Alert>
         )}
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
-          {survey.description && (
-            <p className="text-muted-foreground">{survey.description}</p>
-          )}
-        </div>
+        {/* Welcome page */}
+        {flowState === 'welcome' && (
+          <WelcomePage
+            title={survey.welcomeTitle}
+            message={survey.welcomeMessage}
+            onStart={handleStartSurvey}
+          />
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
-            <QuestionItem
-              key={question.id}
-              question={question}
-              index={index}
-              answers={answers}
-              onAnswerChange={handleAnswerChange}
-            />
-          ))}
-
-          <div className="pt-4">
-            <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : isPreviewMode ? (
-                "Preview Submit"
-              ) : (
-                "Submit Response"
+        {/* Questions */}
+        {flowState === 'questions' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
+              {survey.description && (
+                <p className="text-muted-foreground">{survey.description}</p>
               )}
-            </Button>
-          </div>
-        </form>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
+                <QuestionItem
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                />
+              ))}
+
+              <div className="pt-4">
+                <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : isPreviewMode ? (
+                    "Preview Submit"
+                  ) : (
+                    "Submit Response"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
+
+        {/* Thank You page */}
+        {flowState === 'thankYou' && (
+          <ThankYouPage
+            title={survey.thankYouTitle}
+            message={survey.thankYouMessage}
+            redirectUrl={survey.redirectUrl}
+            onClose={() => setFlowState('welcome')}
+          />
+        )}
       </div>
     </PublicSurveyLayout>
   );

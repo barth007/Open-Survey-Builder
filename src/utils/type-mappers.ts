@@ -32,7 +32,13 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     // Match property names with the Survey type definition
     folderId: dbSurvey.folder_id || undefined,
     teamId: dbSurvey.team_id || undefined,
-    publicCode: dbSurvey.public_code || undefined
+    publicCode: dbSurvey.public_code || undefined,
+    // New fields for welcome and thank you pages
+    welcomeTitle: dbSurvey.welcome_title || undefined,
+    welcomeMessage: dbSurvey.welcome_message || undefined,
+    thankYouTitle: dbSurvey.thank_you_title || undefined,
+    thankYouMessage: dbSurvey.thank_you_message || undefined,
+    redirectUrl: dbSurvey.redirect_url || undefined
   };
 }
 
@@ -49,7 +55,13 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     questions: survey.questions as unknown as Json,
     folder_id: survey.folderId,
     team_id: survey.teamId,
-    public_code: survey.publicCode
+    public_code: survey.publicCode,
+    // New fields for welcome and thank you pages
+    welcome_title: survey.welcomeTitle,
+    welcome_message: survey.welcomeMessage,
+    thank_you_title: survey.thankYouTitle,
+    thank_you_message: survey.thankYouMessage,
+    redirect_url: survey.redirectUrl
   };
 }
 
