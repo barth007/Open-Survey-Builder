@@ -1,17 +1,15 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 
 const PendingApproval = () => {
   const { signOut, isLoading, user, checkApprovalStatus } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
-  const [statusCheckCount, setStatusCheckCount] = useState(0);
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -19,65 +17,41 @@ const PendingApproval = () => {
     navigate('/login');
   };
   
-  // Periodically check if the user's approval status has changed
-  useEffect(() => {
-    if (!user) return;
+  const checkUserStatus = async () => {
+    if (!user || checkingStatus) return;
     
-    // Clean up any existing interval on component mount/unmount
-    if (checkIntervalRef.current) {
-      clearInterval(checkIntervalRef.current);
-    }
-    
-    const checkUserApprovalStatus = async () => {
-      if (!user || checkingStatus) return;
+    try {
+      setCheckingStatus(true);
+      console.log('PendingApproval: Checking approval status for user:', user.id);
       
-      try {
-        setCheckingStatus(true);
-        console.log('PendingApproval: Checking approval status for user:', user.id);
+      // Use the centralized approval status check
+      const status = await checkApprovalStatus();
+      
+      // If the user has been approved, redirect to dashboard
+      if (status === 'approved') {
+        console.log('User is now approved, redirecting to dashboard');
+        toast.success('Your account has been approved!', {
+          description: 'You can now access the application.'
+        });
         
-        // Use the centralized and throttled approval status check
-        const status = await checkApprovalStatus();
-        
-        // Update check count for UI
-        setStatusCheckCount(prev => prev + 1);
-        
-        // If the user has been approved, redirect directly to dashboard
-        if (status === 'approved') {
-          console.log('User is now approved, redirecting to dashboard');
-          toast.success('Your account has been approved!', {
-            description: 'You can now access the application.'
-          });
-          
-          // Clear the interval before navigating
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-            checkIntervalRef.current = null;
-          }
-          
-          // Navigate directly to dashboard instead of login
-          navigate('/dashboard', { replace: true });
-        }
-      } catch (err) {
-        console.error('Error during approval status check:', err);
-      } finally {
-        setCheckingStatus(false);
+        navigate('/dashboard', { replace: true });
       }
-    };
-    
-    // Do an immediate check when component mounts
-    checkUserApprovalStatus();
-    
-    // Set up periodic checks every 15 seconds, but only if no existing interval
-    checkIntervalRef.current = setInterval(checkUserApprovalStatus, 15000);
-    
-    // Clean up interval on unmount
-    return () => {
-      if (checkIntervalRef.current) {
-        clearInterval(checkIntervalRef.current);
-        checkIntervalRef.current = null;
-      }
-    };
-  }, [user, navigate, checkApprovalStatus]);
+    } catch (err) {
+      console.error('Error during approval status check:', err);
+      toast.error('Error checking approval status', {
+        description: 'Please try again later'
+      });
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
+  
+  // Check status once when component mounts
+  useEffect(() => {
+    if (user) {
+      checkUserStatus();
+    }
+  }, [user]);
   
   if (isLoading) {
     return (
@@ -101,25 +75,33 @@ const PendingApproval = () => {
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
-            <p className="text-lg font-medium">Your account is waiting for approval</p>
+            <p className="text-lg font-medium">Your request is still being reviewed</p>
             <p className="text-muted-foreground">
-              An administrator will review your access request shortly.
-              We'll notify you when your account has been approved.
+              Please check back later.
             </p>
             
             {checkingStatus ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
+              <div className="flex items-center gap-2 mt-4">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                <span>Checking approval status...</span>
+                <span className="text-sm text-muted-foreground">Checking approval status...</span>
               </div>
-            ) : statusCheckCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-4">
-                Automatically checking for approval every 15 seconds...
-              </p>
-            )}
+            ) : null}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={checkUserStatus}
+            disabled={checkingStatus}
+            className="flex items-center gap-2"
+          >
+            {checkingStatus ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Check Status
+          </Button>
           <Button variant="outline" onClick={handleSignOut}>
             Sign Out
           </Button>
