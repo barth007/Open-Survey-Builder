@@ -1,10 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 
@@ -12,6 +11,7 @@ const PendingApproval = () => {
   const { signOut, isLoading, user, checkApprovalStatus } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [statusCheckCount, setStatusCheckCount] = useState(0);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -23,17 +23,23 @@ const PendingApproval = () => {
   useEffect(() => {
     if (!user) return;
     
-    let statusCheckInterval: NodeJS.Timeout;
+    // Clean up any existing interval on component mount/unmount
+    if (checkIntervalRef.current) {
+      clearInterval(checkIntervalRef.current);
+    }
     
     const checkUserApprovalStatus = async () => {
-      if (!user) return;
+      if (!user || checkingStatus) return;
       
       try {
         setCheckingStatus(true);
-        console.log('Checking approval status for user:', user.id);
+        console.log('PendingApproval: Checking approval status for user:', user.id);
         
-        // Use the centralized approval status check
+        // Use the centralized and throttled approval status check
         const status = await checkApprovalStatus();
+        
+        // Update check count for UI
+        setStatusCheckCount(prev => prev + 1);
         
         // If the user has been approved, redirect directly to dashboard
         if (status === 'approved') {
@@ -43,7 +49,10 @@ const PendingApproval = () => {
           });
           
           // Clear the interval before navigating
-          clearInterval(statusCheckInterval);
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
           
           // Navigate directly to dashboard instead of login
           navigate('/dashboard', { replace: true });
@@ -52,19 +61,21 @@ const PendingApproval = () => {
         console.error('Error during approval status check:', err);
       } finally {
         setCheckingStatus(false);
-        setStatusCheckCount(prev => prev + 1);
       }
     };
     
     // Do an immediate check when component mounts
     checkUserApprovalStatus();
     
-    // Set up periodic checks every 15 seconds
-    statusCheckInterval = setInterval(checkUserApprovalStatus, 15000);
+    // Set up periodic checks every 15 seconds, but only if no existing interval
+    checkIntervalRef.current = setInterval(checkUserApprovalStatus, 15000);
     
     // Clean up interval on unmount
     return () => {
-      clearInterval(statusCheckInterval);
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+        checkIntervalRef.current = null;
+      }
     };
   }, [user, navigate, checkApprovalStatus]);
   

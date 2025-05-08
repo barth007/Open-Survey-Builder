@@ -13,16 +13,15 @@ const Login = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
   // Debug current URL and search parameters
   useEffect(() => {
     console.log('Login page loaded at:', window.location.href);
-    console.log('URL search params:', window.location.search);
-    console.log('URL hash:', window.location.hash);
     
-    // Parse URL parameters
+    // Only log URL details on first load
     const urlParams = new URLSearchParams(window.location.search);
     for (const [key, value] of urlParams.entries()) {
       console.log(`URL param: ${key} = ${value}`);
@@ -30,10 +29,7 @@ const Login = () => {
 
     // Log hash parameters if present (often used for tokens)
     if (window.location.hash) {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      for (const [key, value] of hashParams.entries()) {
-        console.log(`Hash param: ${key} = ${value.substring(0, 10)}...`);
-      }
+      console.log('Hash params present:', window.location.hash.substring(0, 20) + '...');
     }
 
     // Check local storage for session data
@@ -48,11 +44,12 @@ const Login = () => {
     } catch (e) {
       console.error('Error accessing localStorage:', e);
     }
-  }, [location]);
+  }, []); // Only run once on component mount
 
   // Clear any stale RLS errors on login page visit
   useEffect(() => {
     const clearSessionErrors = async () => {
+      // Only attempt refresh if not already attempted and we have a session
       const currentSession = await supabase.auth.getSession();
       
       // If we're on the login page but have a session token that might be invalid,
@@ -74,47 +71,60 @@ const Login = () => {
   // Get the path to redirect to after login
   const from = location.state?.from || '/dashboard';
   
-  // Check if user is authenticated and redirect appropriately
+  // Handle authenticated user and redirection
   useEffect(() => {
+    // Don't try to check status if we're already redirecting or don't have a user/session
+    if (!user || !session?.access_token || isLoading || redirecting || checkingStatus) {
+      return;
+    }
+
+    // Only check status when needed (when we have a user but haven't redirected)
     const handleAuthenticatedUser = async () => {
-      // Only proceed if:
-      // 1. We have a user and session
-      // 2. We're not already loading or authenticating
-      // 3. We're not already redirecting
-      if (user && session?.access_token && !isLoading && !isAuthenticating && !redirecting) {
+      try {
         setRedirecting(true);
+        setCheckingStatus(true);
         
-        try {
-          // Check user approval status
-          const status = await checkApprovalStatus();
-          
-          console.log('User status from database:', status);
-          
-          if (status === 'approved') {
-            console.log('User is approved, redirecting to:', from);
-            navigate(from, { replace: true });
-          } else if (status === 'pending') {
-            toast("Your account is pending approval", { 
-              description: "An administrator will review your request soon."
-            });
-            navigate('/pending', { replace: true });
-          } else if (status === 'rejected') {
-            toast.error("Access denied", {
-              description: "Your access request was not approved."
-            });
-            navigate('/', { replace: true });
-          }
-        } catch (error) {
-          console.error('Error checking user approval status:', error);
-          toast.error("Unable to check access status");
-        } finally {
-          setRedirecting(false);
+        // Check user approval status using the throttled function
+        console.log('Login page checking approval status');
+        const status = await checkApprovalStatus();
+        
+        console.log('Login page: User status is', status);
+        
+        if (status === 'approved') {
+          console.log('User is approved, redirecting to:', from);
+          navigate(from, { replace: true });
+        } else if (status === 'pending') {
+          toast("Your account is pending approval", { 
+            description: "An administrator will review your request soon."
+          });
+          navigate('/pending', { replace: true });
+        } else if (status === 'rejected') {
+          toast.error("Access denied", {
+            description: "Your access request was not approved."
+          });
+          navigate('/', { replace: true });
+        } else {
+          // If status is unknown due to errors, don't get stuck in a redirect loop
+          console.log('Status unknown, waiting before retry');
+          // Allow one more attempt after a delay
+          setTimeout(() => {
+            setRedirecting(false);
+            setCheckingStatus(false);
+          }, 5000);
         }
+      } catch (error) {
+        console.error('Error checking user approval status:', error);
+        toast.error("Unable to check access status");
+        // Release flags to allow one more attempt
+        setTimeout(() => {
+          setRedirecting(false);
+          setCheckingStatus(false);
+        }, 5000);
       }
     };
     
     handleAuthenticatedUser();
-  }, [user, session, isLoading, isAuthenticating, redirecting, navigate, from, checkApprovalStatus]);
+  }, [user, session, isLoading, redirecting, checkingStatus, navigate, from, checkApprovalStatus]);
 
   const handleGoogleLogin = async () => {
     try {

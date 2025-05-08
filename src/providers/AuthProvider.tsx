@@ -1,10 +1,16 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/sonner';
 
 type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'checking' | 'unknown';
+
+interface StatusCache {
+  status: ApprovalStatus;
+  timestamp: number;
+  attemptCount: number;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +41,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('unknown');
+  
+  // Cache for status checks with throttling
+  const statusCacheRef = useRef<StatusCache>({
+    status: 'unknown',
+    timestamp: 0,
+    attemptCount: 0
+  });
+  
+  // Request in progress tracker
+  const checkingStatusRef = useRef<boolean>(false);
+  
+  // Max retries for failed status checks
+  const MAX_STATUS_CHECK_RETRIES = 3;
+  
+  // Minimum time between status checks (5 seconds)
+  const MIN_STATUS_CHECK_INTERVAL = 5000;
 
   // Debug function for session state
   const logSessionState = (prefix: string, currentSession: Session | null) => {
@@ -51,12 +73,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  // Centralized function to check user approval status
+  // Centralized function to check user approval status with throttling and circuit breaking
   const checkApprovalStatus = async (): Promise<ApprovalStatus> => {
+    // If no user, return unknown immediately
     if (!user) return 'unknown';
     
+    // Check if a request is already in progress
+    if (checkingStatusRef.current) {
+      console.log('Status check already in progress, using cached value:', statusCacheRef.current.status);
+      return statusCacheRef.current.status;
+    }
+    
+    // Calculate time since last check
+    const now = Date.now();
+    const timeSinceLastCheck = now - statusCacheRef.current.timestamp;
+    
+    // If we checked recently and have a valid status, return cached value
+    if (timeSinceLastCheck < MIN_STATUS_CHECK_INTERVAL && statusCacheRef.current.status !== 'unknown') {
+      console.log('Using cached status check:', statusCacheRef.current.status, 
+        'Age:', Math.round(timeSinceLastCheck/1000), 'seconds');
+      return statusCacheRef.current.status;
+    }
+    
+    // Check if we've hit max retries for failed requests
+    if (statusCacheRef.current.attemptCount >= MAX_STATUS_CHECK_RETRIES && 
+        statusCacheRef.current.status === 'unknown') {
+      console.log('Max retries reached for status check, circuit broken');
+      // Reset attempt count after a cooling period (30 seconds)
+      if (timeSinceLastCheck > 30000) {
+        statusCacheRef.current.attemptCount = 0;
+      } else {
+        return 'unknown';
+      }
+    }
+    
     try {
+      // Mark that we're checking
+      checkingStatusRef.current = true;
       setApprovalStatus('checking');
+      
+      console.log('Checking profile status for user:', user.id, 
+        'Attempt:', statusCacheRef.current.attemptCount + 1);
       
       const { data, error } = await supabase
         .from('profiles')
@@ -66,25 +123,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
       if (error) {
         console.error('Error checking profile status:', error);
+        // Update cache with error attempt
+        statusCacheRef.current.attemptCount += 1;
+        statusCacheRef.current.timestamp = now;
         setApprovalStatus('unknown');
         return 'unknown';
       }
       
-      console.log('Profile status:', data?.status);
+      console.log('Profile status result:', data?.status);
       
       if (!data) {
+        // Reset cache on success but no data
+        statusCacheRef.current = {
+          status: 'unknown',
+          timestamp: now,
+          attemptCount: 0
+        };
         setApprovalStatus('unknown');
         return 'unknown';
       }
       
-      // Set and return the status
+      // Success - reset attempt counter and update cache
       const status = data.status as ApprovalStatus;
+      statusCacheRef.current = {
+        status,
+        timestamp: now,
+        attemptCount: 0
+      };
       setApprovalStatus(status);
       return status;
     } catch (err) {
       console.error('Error in checkApprovalStatus:', err);
+      // Update cache with error attempt
+      statusCacheRef.current.attemptCount += 1;
+      statusCacheRef.current.timestamp = now;
       setApprovalStatus('unknown');
       return 'unknown';
+    } finally {
+      // Release the lock
+      checkingStatusRef.current = false;
     }
   };
 
@@ -173,10 +250,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_IN' && currentSession?.user) {
           toast("Successfully signed in");
-          checkApprovalStatus(); // Check approval status on sign-in
+          // Reset status cache on sign-in
+          statusCacheRef.current = {
+            status: 'unknown',
+            timestamp: 0,
+            attemptCount: 0
+          };
+          // Check approval status only once on sign-in
+          setTimeout(() => {
+            checkApprovalStatus();
+          }, 1000);
         } else if (event === 'SIGNED_OUT') {
           toast("You have been signed out");
-          setApprovalStatus('unknown'); // Reset approval status on sign-out
+          setApprovalStatus('unknown');
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Token refreshed automatically');
         }
@@ -207,9 +293,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
-          // Check approval status if we have a user
+          // Don't check approval status immediately on initial load
+          // Components will handle it when needed with throttling
           if (initialSession?.user) {
-            checkApprovalStatus();
+            // Just set a timeout to avoid conflicts with component mounts
+            setTimeout(() => {
+              checkApprovalStatus();
+            }, 1500);
           }
         }
       } catch (error) {

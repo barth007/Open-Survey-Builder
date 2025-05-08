@@ -44,23 +44,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     checkAndRecoverSession();
   }, [user, session, isLoading, recoveryAttempted, refreshSession]);
 
-  // Check user approval status
+  // Check user approval status, but only if we need to
   useEffect(() => {
-    const verifyUserAccess = async () => {
-      if (user && !isLoading && !isRecovering) {
+    // Don't check if we're already checking
+    if (isCheckingStatus) return;
+    
+    // Only check if we have a user and need verification
+    // If approvalStatus is already approved, we don't need to check again
+    if (user && !isLoading && !isRecovering && approvalStatus !== 'approved') {
+      const verifyUserAccess = async () => {
         setIsCheckingStatus(true);
         
         try {
           // Use the centralized approval status check from AuthProvider
+          console.log('ProtectedRoute checking status');
           await checkApprovalStatus();
         } finally {
           setIsCheckingStatus(false);
         }
-      }
-    };
-    
-    verifyUserAccess();
-  }, [user, isLoading, isRecovering, checkApprovalStatus]);
+      };
+      
+      verifyUserAccess();
+    }
+  }, [user, isLoading, isRecovering, approvalStatus, checkApprovalStatus, isCheckingStatus]);
 
   // Attempt deep validation if we have a session but keep failing RLS policies
   useEffect(() => {
@@ -117,8 +123,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   } else if (approvalStatus === 'pending') {
     console.log('ProtectedRoute - User not approved, redirecting to pending');
     return <Navigate to="/pending" replace />;
+  } else if (approvalStatus === 'unknown') {
+    // Show loading state if we don't know the status yet
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verifying your access permissions...</p>
+        </div>
+      </div>
+    );
   } else {
-    // Wait for approval status if it's still being determined
+    // Show loading state if status is still being checked or on error
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
