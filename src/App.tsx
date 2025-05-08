@@ -15,6 +15,8 @@ import NotFound from "@/pages/NotFound";
 import SurveyResponse from "@/pages/SurveyResponse";
 import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
+import Landing from './pages/Landing';
+import AdminPanel from './pages/AdminPanel';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,12 +37,9 @@ const App = () => (
           
           {/* Routes for public surveys don't need SidebarProvider */}
           <Routes>
-            <Route path="/p/:publicCode" element={
-              <PublicSurvey />
-            } />
-            <Route path="/preview/:publicCode" element={
-              <PublicSurvey isPreviewMode={true} />
-            } />
+            <Route path="/" element={<Landing />} />
+            <Route path="/p/:publicCode" element={<PublicSurvey />} />
+            <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
             
             {/* All other routes with standard layout */}
             <Route path="*" element={
@@ -51,10 +50,18 @@ const App = () => (
                     <Routes>
                       <Route path="/login" element={<Login />} />
                       <Route
-                        path="/"
+                        path="/dashboard"
                         element={
                           <ProtectedRoute>
                             <Index />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <ProtectedRoute>
+                            <AdminPanel />
                           </ProtectedRoute>
                         }
                       />
