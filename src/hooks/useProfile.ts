@@ -19,10 +19,14 @@ export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [profileCreated, setProfileCreated] = useState(false);
 
   // Fetch profile on component mount or when user changes
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryDelay = 1000;
     
     async function fetchProfile() {
       if (!user) {
@@ -58,6 +62,7 @@ export function useProfile() {
             
             setProfile(data as Profile);
             setError(null);
+            setProfileCreated(true);
           } else {
             console.log('No profile found, creating a new one');
             // Create a new profile if one doesn't exist
@@ -69,17 +74,29 @@ export function useProfile() {
         if (isMounted) {
           setError(error as Error);
           
-          // Let's try to create a profile if we couldn't find one
-          if ((error as any).code === 'PGRST116') {
-            console.log('Trying to create a profile after fetch error');
-            try {
-              await createProfile();
-            } catch (createError) {
-              console.error('Error creating profile after fetch error:', createError);
-              toast("Couldn't load or create your profile information. Please try again later.");
-            }
+          // Retry logic for profile fetch
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying profile fetch (${retryCount}/${maxRetries}) after ${retryDelay}ms`);
+            
+            setTimeout(() => {
+              if (isMounted && !profileCreated) {
+                fetchProfile();
+              }
+            }, retryDelay * retryCount);
           } else {
-            toast("Couldn't load your profile information. Please try again later.");
+            // Let's try to create a profile if we couldn't find one
+            if ((error as any).code === 'PGRST116') {
+              console.log('Trying to create a profile after fetch error');
+              try {
+                await createProfile();
+              } catch (createError) {
+                console.error('Error creating profile after fetch error:', createError);
+                toast("Couldn't load or create your profile information. Please try again later.");
+              }
+            } else {
+              toast("Couldn't load your profile information. Please try again later.");
+            }
           }
         }
       } finally {
@@ -97,7 +114,7 @@ export function useProfile() {
         // Create profile with standardized fields
         const newProfile = {
           id: user.id,
-          full_name: user.user_metadata?.full_name || null,
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
           email: user.email,
           status: 'pending', // Use standardized status
@@ -134,12 +151,14 @@ export function useProfile() {
               throw retryError;
             } else if (retryData) {
               setProfile(retryData as Profile);
+              setProfileCreated(true);
             }
           } else {
             throw insertError;
           }
         } else if (data) {
           setProfile(data as Profile);
+          setProfileCreated(true);
         }
 
         console.log('New profile created successfully:', data || newProfile);
@@ -155,7 +174,7 @@ export function useProfile() {
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user, profileCreated]);
 
   // Function to update profile
   const updateProfile = async (updates: Partial<Profile>) => {

@@ -10,6 +10,8 @@ import { toast } from '@/components/ui/sonner';
 const PendingApproval = () => {
   const { signOut, isLoading, user, checkApprovalStatus } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
+  const [sessionStabilized, setSessionStabilized] = useState(false);
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -60,32 +62,48 @@ const PendingApproval = () => {
       });
     } finally {
       setCheckingStatus(false);
+      setInitialCheckComplete(true);
     }
   };
   
-  // Check status once when component mounts
+  // Add delay to initial session stabilization
   useEffect(() => {
-    // Only check status on initial load, not redirecting while on this page
-    if (user && !isLoading) {
+    const timer = setTimeout(() => {
+      setSessionStabilized(true);
+    }, 2000); // Give session 2 seconds to stabilize
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Check status once when component mounts and session is stable
+  useEffect(() => {
+    // Only check status when user is loaded and session is stabilized
+    if (user && !isLoading && sessionStabilized && !initialCheckComplete) {
       checkUserStatus();
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, sessionStabilized, initialCheckComplete]);
   
-  if (isLoading) {
+  // If still loading or waiting for session to stabilize, show loading state
+  if (isLoading || !sessionStabilized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
+            Verifying your session...
+          </p>
+        </div>
       </div>
     );
   }
   
   // If no user is logged in, redirect to login
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isLoading && !user && initialCheckComplete) {
       console.log('No user found on pending page, redirecting to login');
       navigate('/login');
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, initialCheckComplete]);
   
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

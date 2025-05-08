@@ -27,15 +27,34 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Notify-admin function called");
+    
     // Get project URL for links back to the admin panel
     const url = new URL(req.url);
     const projectUrl = `${url.protocol}//${url.host}`;
     const adminPanelUrl = `${projectUrl}/admin`;
     
     // Parse request body
-    const { userId, userEmail, userName } = await req.json() as NotifyRequest;
+    let requestData: NotifyRequest;
+    
+    try {
+      requestData = await req.json() as NotifyRequest;
+      console.log("Request data:", requestData);
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid request format" }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+    
+    const { userId, userEmail, userName } = requestData;
     
     if (!userId || !userEmail) {
+      console.error("Missing required fields in request:", requestData);
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { 
@@ -46,9 +65,11 @@ serve(async (req) => {
     }
 
     // Initialize Supabase client
+    console.log("Initializing Supabase client");
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Query admin emails
+    console.log("Querying for admin users");
     const { data: admins, error: adminsError } = await supabase
       .from("profiles")
       .select("email")
@@ -73,8 +94,10 @@ serve(async (req) => {
 
     // Extract admin emails
     const adminEmails = admins.map(admin => admin.email).filter(Boolean);
+    console.log(`Found ${adminEmails.length} admin emails:`, adminEmails);
     
     // Initialize Resend
+    console.log("Initializing Resend with API key:", resendApiKey ? "PROVIDED" : "MISSING");
     const resend = new Resend(resendApiKey);
 
     // Send email to each admin
@@ -83,6 +106,7 @@ serve(async (req) => {
       
       try {
         const displayName = userName || userEmail.split("@")[0];
+        console.log(`Sending email to admin: ${adminEmail}`);
         
         const emailResponse = await resend.emails.send({
           from: "Survey Tool <notifications@danieleveri.it>",
@@ -113,6 +137,7 @@ serve(async (req) => {
     // Wait for all email sending attempts to complete
     const results = await Promise.all(emailPromises);
     const successCount = results.filter(Boolean).length;
+    console.log(`${successCount} of ${emailPromises.length} emails sent successfully`);
 
     // Return response
     return new Response(
