@@ -35,6 +35,11 @@ const PendingApproval = () => {
         });
         
         navigate('/dashboard', { replace: true });
+      } else if (status === 'pending') {
+        // If still pending, show a message
+        toast.info('Your request is still being reviewed', {
+          description: 'Please check back later.'
+        });
       }
     } catch (err) {
       console.error('Error during approval status check:', err);
@@ -48,10 +53,11 @@ const PendingApproval = () => {
   
   // Check status once when component mounts
   useEffect(() => {
-    if (user) {
+    // Only check status on initial load, not redirecting while on this page
+    if (user && !isLoading) {
       checkUserStatus();
     }
-  }, [user]);
+  }, [user, isLoading]);
   
   if (isLoading) {
     return (

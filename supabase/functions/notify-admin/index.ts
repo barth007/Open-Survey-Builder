@@ -85,7 +85,7 @@ serve(async (req) => {
         const displayName = userName || userEmail.split("@")[0];
         
         const emailResponse = await resend.emails.send({
-          from: "Admin Notifications <notifications@resend.dev>",
+          from: "Survey Tool <notifications@danieleveri.it>",
           to: adminEmail,
           subject: "New User Approval Request",
           html: `
@@ -98,7 +98,6 @@ serve(async (req) => {
                   Go to Admin Panel
                 </a>
               </div>
-              <p style="color: #666; font-size: 12px;">This is an automated notification.</p>
             </div>
           `,
         });
