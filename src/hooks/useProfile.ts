@@ -68,7 +68,19 @@ export function useProfile() {
         console.error('Error in profile fetch:', error);
         if (isMounted) {
           setError(error as Error);
-          toast("Couldn't load your profile information. Please try again later.");
+          
+          // Let's try to create a profile if we couldn't find one
+          if ((error as any).code === 'PGRST116') {
+            console.log('Trying to create a profile after fetch error');
+            try {
+              await createProfile();
+            } catch (createError) {
+              console.error('Error creating profile after fetch error:', createError);
+              toast("Couldn't load or create your profile information. Please try again later.");
+            }
+          } else {
+            toast("Couldn't load your profile information. Please try again later.");
+          }
         }
       } finally {
         if (isMounted) {
@@ -95,9 +107,11 @@ export function useProfile() {
         
         console.log('Creating new profile:', newProfile);
         
-        const { error: insertError } = await supabase
+        const { error: insertError, data } = await supabase
           .from('profiles')
-          .insert([newProfile]);
+          .upsert([newProfile])
+          .select()
+          .single();
 
         if (insertError) {
           console.error('Error creating profile:', insertError);
@@ -109,24 +123,30 @@ export function useProfile() {
             await supabase.auth.refreshSession();
             
             // Try again after refresh
-            const { error: retryError } = await supabase
+            const { error: retryError, data: retryData } = await supabase
               .from('profiles')
-              .insert([newProfile]);
+              .upsert([newProfile])
+              .select()
+              .single();
               
             if (retryError) {
               console.error('Profile creation retry failed:', retryError);
               throw retryError;
+            } else if (retryData) {
+              setProfile(retryData as Profile);
             }
           } else {
             throw insertError;
           }
+        } else if (data) {
+          setProfile(data as Profile);
         }
 
-        setProfile(newProfile as Profile);
-        console.log('New profile created successfully:', newProfile);
+        console.log('New profile created successfully:', data || newProfile);
       } catch (error) {
         console.error('Error creating profile:', error);
         setError(error as Error);
+        throw error;
       }
     }
 

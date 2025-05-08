@@ -23,15 +23,15 @@ const Landing = () => {
             .from('profiles')
             .select('status, role')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
-          if (error) {
+          if (error && error.code !== 'PGRST116') {
             console.error('Error fetching profile:', error);
             toast.error('Unable to check access status');
             return;
           }
 
-          console.log('Profile status:', profile?.status);
+          console.log('Profile status check result:', profile);
 
           if (profile) {
             // Use standardized 'approved' status
@@ -39,12 +39,8 @@ const Landing = () => {
               // User is approved, redirect to dashboard
               navigate('/dashboard');
             } else if (profile.status === 'pending') {
-              // User is pending, show pending message
-              setIsPending(true);
-              // Sign out after showing the message
-              setTimeout(() => {
-                signOut();
-              }, 1000);
+              // User is pending, redirect to pending page
+              navigate('/pending', { replace: true });
             } else if (profile.status === 'rejected') {
               // User was rejected
               toast.error('Your access request was denied');
@@ -57,6 +53,13 @@ const Landing = () => {
         } catch (error) {
           console.error('Error in status check:', error);
           toast.error('There was an error checking your status');
+          
+          // If it might be a missing profile issue, try to create one
+          try {
+            await createPendingProfile();
+          } catch (createError) {
+            console.error('Error creating profile after status check failed:', createError);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -74,7 +77,7 @@ const Landing = () => {
 
     try {
       console.log('Creating pending profile for new user:', user.id);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
@@ -84,7 +87,8 @@ const Landing = () => {
           status: 'pending', // Use standardized 'pending' status
           role: 'user', // Default role for new users
           updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        }, { onConflict: 'id' })
+        .select();
 
       if (error) {
         console.error('Error creating profile:', error);
@@ -92,13 +96,10 @@ const Landing = () => {
         return;
       }
 
+      console.log('Profile created successfully:', data);
       setIsPending(true);
       toast.success('Access request submitted successfully');
-      
-      // Sign out after submission
-      setTimeout(() => {
-        signOut();
-      }, 2000);
+      navigate('/pending', { replace: true });
     } catch (error) {
       console.error('Exception during profile creation:', error);
       toast.error('An unexpected error occurred');

@@ -40,6 +40,18 @@ const PendingApproval = () => {
         toast.info('Your request is still being reviewed', {
           description: 'Please check back later.'
         });
+      } else if (status === 'rejected') {
+        // If rejected, show a message and redirect to home
+        toast.error('Your access request was denied', {
+          description: 'Please contact an administrator for more information.'
+        });
+        navigate('/', { replace: true });
+      } else if (status === 'unknown') {
+        // If unknown status (profile might not exist), redirect to home
+        toast.error('Unable to determine account status', {
+          description: 'Redirecting to home page to recreate profile.'
+        });
+        navigate('/', { replace: true });
       }
     } catch (err) {
       console.error('Error during approval status check:', err);
@@ -66,6 +78,14 @@ const PendingApproval = () => {
       </div>
     );
   }
+  
+  // If no user is logged in, redirect to login
+  useEffect(() => {
+    if (!isLoading && !user) {
+      console.log('No user found on pending page, redirecting to login');
+      navigate('/login');
+    }
+  }, [user, isLoading, navigate]);
   
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

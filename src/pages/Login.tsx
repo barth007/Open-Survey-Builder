@@ -103,6 +103,10 @@ const Login = () => {
             description: "Your access request was not approved."
           });
           navigate('/', { replace: true });
+        } else if (status === 'unknown') {
+          // If status is unknown, try to create a profile
+          console.log('Status unknown, redirecting to landing page for profile creation');
+          navigate('/', { replace: true });
         } else {
           // If status is unknown due to errors, don't get stuck in a redirect loop
           console.log('Status unknown, waiting before retry');

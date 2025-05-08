@@ -73,14 +73,59 @@ export async function checkApprovalStatus(
     console.log('Profile status result:', data?.status);
     
     if (!data) {
-      // Reset cache on success but no data
-      statusCacheRef.current = {
-        status: 'unknown',
-        timestamp: now,
-        attemptCount: 0
-      };
-      setApprovalStatus('unknown');
-      return 'unknown';
+      console.log('No profile found, creating one...');
+      
+      try {
+        // Create a profile for this user
+        const userResponse = await supabase.auth.getUser();
+        if (userResponse.error) {
+          console.error('Error getting user for profile creation:', userResponse.error);
+          throw userResponse.error;
+        }
+        
+        const user = userResponse.data.user;
+        
+        // Create new profile
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            full_name: user.user_metadata?.full_name || null,
+            avatar_url: user.user_metadata?.avatar_url || null,
+            email: user.email,
+            status: 'pending',
+            role: 'user',
+            updated_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('Error creating profile during status check:', insertError);
+          statusCacheRef.current = {
+            status: 'unknown',
+            timestamp: now,
+            attemptCount: statusCacheRef.current.attemptCount + 1
+          };
+          setApprovalStatus('unknown');
+          return 'unknown';
+        }
+        
+        console.log('Created new profile during status check:', newProfile);
+        statusCacheRef.current = {
+          status: 'pending',
+          timestamp: now,
+          attemptCount: 0
+        };
+        setApprovalStatus('pending');
+        return 'pending';
+      } catch (err) {
+        console.error('Error in profile creation during status check:', err);
+        statusCacheRef.current.attemptCount += 1;
+        statusCacheRef.current.timestamp = now;
+        setApprovalStatus('unknown');
+        return 'unknown';
+      }
     }
     
     // Success - reset attempt counter and update cache
