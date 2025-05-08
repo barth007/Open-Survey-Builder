@@ -12,6 +12,7 @@ const Login = () => {
   const { signInWithGoogle, user, isLoading, session, refreshSession } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
+  const [isCheckingApproval, setIsCheckingApproval] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -78,14 +79,50 @@ const Login = () => {
   }, [refreshSession, recoveryAttempted]);
 
   // Get the path to redirect to after login
-  const from = location.state?.from || '/';
+  const from = location.state?.from || '/dashboard';
   
-  // If already logged in, redirect
+  // Check if user is approved and redirect if authenticated
   useEffect(() => {
-    if (user && session?.access_token && !isLoading) {
-      console.log('User already authenticated, redirecting to:', from);
-      navigate(from, { replace: true });
-    }
+    const checkUserStatus = async () => {
+      if (user && session?.access_token && !isLoading) {
+        setIsCheckingApproval(true);
+        
+        try {
+          // Check if the user has an approved profile
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('status')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) {
+            console.error('Error checking profile status:', error);
+            return;
+          }
+          
+          if (data?.status === 'approved') {
+            console.log('User is approved, redirecting to:', from);
+            navigate(from, { replace: true });
+          } else if (data?.status === 'pending') {
+            toast("Your account is pending approval", { 
+              description: "An administrator will review your request soon."
+            });
+            navigate('/', { replace: true });
+          } else if (data?.status === 'rejected') {
+            toast.error("Access denied", {
+              description: "Your access request was not approved."
+            });
+            navigate('/', { replace: true });
+          }
+        } catch (error) {
+          console.error('Error checking user approval status:', error);
+        } finally {
+          setIsCheckingApproval(false);
+        }
+      }
+    };
+    
+    checkUserStatus();
   }, [user, session, isLoading, navigate, from]);
 
   const handleGoogleLogin = async () => {
@@ -111,12 +148,14 @@ const Login = () => {
   };
 
   // Only show loading state while checking authentication
-  if (isLoading) {
+  if (isLoading || isCheckingApproval) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-muted-foreground">Checking authentication...</p>
+          <p className="text-muted-foreground">
+            {isCheckingApproval ? "Verifying your access..." : "Checking authentication..."}
+          </p>
         </div>
       </div>
     );

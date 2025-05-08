@@ -16,13 +16,13 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Check, X } from 'lucide-react';
 
-interface UserRequest {
+interface ProfileRequest {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
   status: 'pending' | 'approved' | 'rejected';
   role: 'user' | 'admin';
-  created_at: string;
+  updated_at: string;
 }
 
 const AdminPanel = () => {
@@ -38,7 +38,7 @@ const AdminPanel = () => {
       
       try {
         const { data, error } = await supabase
-          .from('users')
+          .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
@@ -59,32 +59,32 @@ const AdminPanel = () => {
     checkAdminStatus();
   }, [user]);
 
-  // Query to fetch pending user requests
+  // Query to fetch pending access requests
   const { data: pendingRequests, isLoading } = useQuery({
     queryKey: ['pendingRequests'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
       
       if (error) {
         console.error("Error fetching pending requests:", error);
         throw error;
       }
       
-      return data as UserRequest[];
+      return data as ProfileRequest[];
     },
     enabled: isAdmin && !isCheckingAdmin
   });
 
-  // Mutation to update user status
-  const updateUserStatus = useMutation({
+  // Mutation to update profile status
+  const updateProfileStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => {
       const { error } = await supabase
-        .from('users')
-        .update({ status })
+        .from('profiles')
+        .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id);
       
       if (error) throw error;
@@ -103,18 +103,18 @@ const AdminPanel = () => {
       toast.success(`User ${variables.status === 'approved' ? 'approved' : 'rejected'} successfully`);
     },
     onError: (error) => {
-      console.error("Error updating user status:", error);
+      console.error("Error updating profile status:", error);
       toast.error("Failed to update user status");
     }
   });
 
   // Handle approve/reject actions
   const handleApprove = (id: string) => {
-    updateUserStatus.mutate({ id, status: 'approved' });
+    updateProfileStatus.mutate({ id, status: 'approved' });
   };
 
   const handleReject = (id: string) => {
-    updateUserStatus.mutate({ id, status: 'rejected' });
+    updateProfileStatus.mutate({ id, status: 'rejected' });
   };
 
   if (isCheckingAdmin) {
@@ -166,7 +166,7 @@ const AdminPanel = () => {
                 <TableBody>
                   {pendingRequests.map((request) => (
                     <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.name}</TableCell>
+                      <TableCell className="font-medium">{request.full_name || 'No name'}</TableCell>
                       <TableCell>{request.email}</TableCell>
                       <TableCell>
                         <Badge variant={request.status === 'pending' ? 'outline' : 'default'}>
@@ -174,7 +174,7 @@ const AdminPanel = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {new Date(request.created_at).toLocaleDateString()}
+                        {new Date(request.updated_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ const AdminPanel = () => {
                             size="sm"
                             variant="default"
                             onClick={() => handleApprove(request.id)}
-                            disabled={updateUserStatus.isPending}
+                            disabled={updateProfileStatus.isPending}
                             className="flex items-center gap-1"
                           >
                             <Check className="h-4 w-4" /> Approve
@@ -191,7 +191,7 @@ const AdminPanel = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleReject(request.id)}
-                            disabled={updateUserStatus.isPending}
+                            disabled={updateProfileStatus.isPending}
                             className="flex items-center gap-1"
                           >
                             <X className="h-4 w-4" /> Reject

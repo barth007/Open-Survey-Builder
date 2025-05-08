@@ -8,6 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from "@/components/survey/SurveySidebar";
 import { AuthProvider } from "@/providers/AuthProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PendingApproval from "@/components/PendingApproval";
 
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -35,11 +36,12 @@ const App = () => (
           <Toaster />
           <Sonner />
           
-          {/* Routes for public surveys don't need SidebarProvider */}
+          {/* Routes for public surveys and landing pages don't need SidebarProvider */}
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/p/:publicCode" element={<PublicSurvey />} />
             <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
+            <Route path="/pending" element={<PendingApproval />} />
             
             {/* All other routes with standard layout */}
             <Route path="*" element={

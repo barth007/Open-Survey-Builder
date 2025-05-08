@@ -9,6 +9,8 @@ export type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   email: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  role: 'user' | 'admin';
   updated_at: string | null;
 };
 
@@ -81,6 +83,8 @@ export function useProfile() {
           full_name: user.user_metadata?.full_name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
           email: user.email,
+          status: 'pending',
+          role: 'user',
           updated_at: new Date().toISOString()
         };
         
@@ -111,7 +115,7 @@ export function useProfile() {
           }
         }
 
-        setProfile(newProfile);
+        setProfile(newProfile as Profile);
         console.log('New profile created successfully:', newProfile);
       } catch (error) {
         console.error('Error creating profile:', error);

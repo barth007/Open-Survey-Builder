@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 
 interface UserProfileProps {
   compact?: boolean;
@@ -67,6 +68,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   // Use avatar from profile
   const avatarUrl = profile?.avatar_url;
+  const isAdmin = profile?.role === 'admin';
 
   if (compact) {
     return (
@@ -91,9 +93,12 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 overflow-hidden text-left">
-              <p className="text-sm font-medium truncate">
-                {profile?.full_name || user.email?.split('@')[0] || user.email}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium truncate">
+                  {profile?.full_name || user.email?.split('@')[0] || user.email}
+                </p>
+                {isAdmin && <Badge variant="success" className="text-xs">Admin</Badge>}
+              </div>
               <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
             </div>
           </Button>
@@ -105,6 +110,15 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
             <Settings className="h-4 w-4" />
             <span>Profile Settings</span>
           </DropdownMenuItem>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/admin')} className="flex items-center gap-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /></svg>
+                <span>Admin Panel</span>
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
             <LogOut className="h-4 w-4" />
