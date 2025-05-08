@@ -52,6 +52,10 @@ export function useProfile() {
         if (isMounted) {
           if (data) {
             console.log('Profile fetched successfully:', data);
+            
+            // Log the exact status value received from the database
+            console.log('Profile status from database:', data.status);
+            
             setProfile(data as Profile);
             setError(null);
           } else {

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -57,7 +58,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             .from('profiles')
             .select('status')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
             
           if (error) {
             console.error('Error checking profile status:', error);
@@ -65,16 +66,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             return;
           }
           
-          // Ensure we're using the standardized 'approved' status
-          setIsApproved(data?.status === 'approved');
+          // Debug the actual value from the database
+          console.log('User profile status from database:', data?.status);
           
-          if (data?.status !== 'approved') {
-            console.log('User status is:', data?.status);
-            toast.error("Access Denied", {
-              description: "Your account has not been approved yet"
-            });
-          } else {
+          // Ensure we're using the standardized 'approved' status
+          const userApproved = data?.status === 'approved';
+          setIsApproved(userApproved);
+          
+          if (userApproved) {
             console.log('User is approved with status:', data?.status);
+          } else {
+            console.log('User status is not approved:', data?.status);
+            if (data?.status === 'pending') {
+              toast.error("Access Denied", {
+                description: "Your account has not been approved yet"
+              });
+            }
           }
         } catch (err) {
           console.error('Error checking approval status:', err);
