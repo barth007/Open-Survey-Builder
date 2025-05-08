@@ -31,7 +31,10 @@ const Landing = () => {
             return;
           }
 
+          console.log('Profile status:', profile?.status);
+
           if (profile) {
+            // Use standardized 'approved' status
             if (profile.status === 'approved') {
               // User is approved, redirect to dashboard
               navigate('/dashboard');
@@ -70,6 +73,7 @@ const Landing = () => {
     if (!user) return;
 
     try {
+      console.log('Creating pending profile for new user:', user.id);
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -77,8 +81,8 @@ const Landing = () => {
           email: user.email,
           full_name: user.user_metadata?.full_name || '',
           avatar_url: user.user_metadata?.avatar_url || '',
-          status: 'pending',
-          role: 'user',
+          status: 'pending', // Use standardized 'pending' status
+          role: 'user', // Default role for new users
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
 

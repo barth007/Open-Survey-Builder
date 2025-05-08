@@ -65,12 +65,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             return;
           }
           
+          // Ensure we're using the standardized 'approved' status
           setIsApproved(data?.status === 'approved');
           
           if (data?.status !== 'approved') {
+            console.log('User status is:', data?.status);
             toast.error("Access Denied", {
               description: "Your account has not been approved yet"
             });
+          } else {
+            console.log('User is approved with status:', data?.status);
           }
         } catch (err) {
           console.error('Error checking approval status:', err);

@@ -78,15 +78,18 @@ export function useProfile() {
       if (!user) return;
       
       try {
+        // Create profile with standardized fields
         const newProfile = {
           id: user.id,
           full_name: user.user_metadata?.full_name || null,
           avatar_url: user.user_metadata?.avatar_url || null,
           email: user.email,
-          status: 'pending',
-          role: 'user',
+          status: 'pending', // Use standardized status
+          role: 'user', // Default role
           updated_at: new Date().toISOString()
         };
+        
+        console.log('Creating new profile:', newProfile);
         
         const { error: insertError } = await supabase
           .from('profiles')

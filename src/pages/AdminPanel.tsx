@@ -49,6 +49,7 @@ const AdminPanel = () => {
           return;
         }
 
+        console.log("User role from database:", data?.role);
         setIsAdmin(data?.role === 'admin');
       } catch (e) {
         console.error("Exception checking admin status:", e);
@@ -64,6 +65,7 @@ const AdminPanel = () => {
   const { data: pendingRequests, isLoading } = useQuery({
     queryKey: ['pendingRequests'],
     queryFn: async () => {
+      console.log("Fetching pending requests, isAdmin:", isAdmin);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -75,6 +77,7 @@ const AdminPanel = () => {
         throw error;
       }
       
+      console.log("Pending requests:", data);
       return data as ProfileRequest[];
     },
     enabled: isAdmin && !isCheckingAdmin
@@ -83,12 +86,16 @@ const AdminPanel = () => {
   // Mutation to update profile status
   const updateProfileStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => {
+      console.log(`Updating profile ${id} status to ${status}`);
       const { error } = await supabase
         .from('profiles')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating profile status:", error);
+        throw error;
+      }
       
       // Placeholder for sending email notification
       if (status === 'approved') {

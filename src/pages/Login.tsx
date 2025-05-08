@@ -97,9 +97,13 @@ const Login = () => {
             
           if (error) {
             console.error('Error checking profile status:', error);
+            toast.error("Unable to check access status");
             return;
           }
           
+          console.log('User status from database:', data?.status);
+          
+          // Use the standardized 'approved' status
           if (data?.status === 'approved') {
             console.log('User is approved, redirecting to:', from);
             navigate(from, { replace: true });
@@ -107,7 +111,7 @@ const Login = () => {
             toast("Your account is pending approval", { 
               description: "An administrator will review your request soon."
             });
-            navigate('/', { replace: true });
+            navigate('/pending', { replace: true });
           } else if (data?.status === 'rejected') {
             toast.error("Access denied", {
               description: "Your access request was not approved."
@@ -116,6 +120,7 @@ const Login = () => {
           }
         } catch (error) {
           console.error('Error checking user approval status:', error);
+          toast.error("Unable to check access status");
         } finally {
           setIsCheckingApproval(false);
         }
