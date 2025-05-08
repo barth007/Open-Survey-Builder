@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamMember, TeamInvitation } from '@/types/team-types';
 
@@ -194,10 +195,11 @@ export async function fetchUserInvitations(userEmail: string): Promise<TeamInvit
         expires_at,
         invitation_code,
         status,
-        teams (
+        teams:team_id (
           id,
           name,
           description,
+          created_at,
           owner_id
         )
       `)
@@ -212,11 +214,16 @@ export async function fetchUserInvitations(userEmail: string): Promise<TeamInvit
     
     console.log(`Found ${data?.length || 0} invitations for ${userEmail}:`, data);
     
-    // Transform the data to include team info directly in the invitation
+    // Transform the data to match our TeamInvitation type
     const invitationsWithTeamInfo = data?.map(inv => ({
-      ...inv,
-      team: inv.teams,
-      teams: undefined // Remove the nested teams object
+      id: inv.id,
+      team_id: inv.team_id,
+      email: inv.email,
+      created_at: inv.created_at,
+      expires_at: inv.expires_at,
+      invitation_code: inv.invitation_code,
+      status: inv.status as 'pending' | 'accepted' | 'rejected',
+      team: inv.teams // Map the nested teams object to team property
     })) || [];
     
     return invitationsWithTeamInfo as TeamInvitation[];
