@@ -9,13 +9,14 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 
 const PendingApproval = () => {
-  const { signOut, isLoading, user } = useAuth();
+  const { signOut, isLoading, user, checkApprovalStatus } = useAuth();
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [statusCheckCount, setStatusCheckCount] = useState(0);
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
     await signOut();
+    navigate('/login');
   };
   
   // Periodically check if the user's approval status has changed
@@ -24,38 +25,28 @@ const PendingApproval = () => {
     
     let statusCheckInterval: NodeJS.Timeout;
     
-    const checkApprovalStatus = async () => {
+    const checkUserApprovalStatus = async () => {
       if (!user) return;
       
       try {
         setCheckingStatus(true);
         console.log('Checking approval status for user:', user.id);
         
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('status')
-          .eq('id', user.id)
-          .maybeSingle();
-          
-        if (error) {
-          console.error('Error checking approval status:', error);
-          return;
-        }
+        // Use the centralized approval status check
+        const status = await checkApprovalStatus();
         
-        console.log('Current user status:', data?.status);
-        
-        // If the user has been approved, redirect to login
-        if (data?.status === 'approved') {
-          console.log('User is now approved, redirecting to login');
+        // If the user has been approved, redirect directly to dashboard
+        if (status === 'approved') {
+          console.log('User is now approved, redirecting to dashboard');
           toast.success('Your account has been approved!', {
-            description: 'You can now log in to access the application.'
+            description: 'You can now access the application.'
           });
           
           // Clear the interval before navigating
           clearInterval(statusCheckInterval);
           
-          // Navigate to login page
-          navigate('/login', { replace: true });
+          // Navigate directly to dashboard instead of login
+          navigate('/dashboard', { replace: true });
         }
       } catch (err) {
         console.error('Error during approval status check:', err);
@@ -66,16 +57,16 @@ const PendingApproval = () => {
     };
     
     // Do an immediate check when component mounts
-    checkApprovalStatus();
+    checkUserApprovalStatus();
     
     // Set up periodic checks every 15 seconds
-    statusCheckInterval = setInterval(checkApprovalStatus, 15000);
+    statusCheckInterval = setInterval(checkUserApprovalStatus, 15000);
     
     // Clean up interval on unmount
     return () => {
       clearInterval(statusCheckInterval);
     };
-  }, [user, navigate]);
+  }, [user, navigate, checkApprovalStatus]);
   
   if (isLoading) {
     return (

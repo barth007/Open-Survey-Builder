@@ -4,22 +4,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/sonner';
 
+type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'checking' | 'unknown';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  approvalStatus: ApprovalStatus;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
+  checkApprovalStatus: () => Promise<ApprovalStatus>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   isLoading: true,
+  approvalStatus: 'unknown',
   signInWithGoogle: async () => {},
   signOut: async () => {},
   refreshSession: async () => false,
+  checkApprovalStatus: async () => 'unknown',
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('unknown');
 
   // Debug function for session state
   const logSessionState = (prefix: string, currentSession: Session | null) => {
@@ -42,6 +49,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshTokenLength: currentSession?.refresh_token?.length || 0,
       }
     );
+  };
+
+  // Centralized function to check user approval status
+  const checkApprovalStatus = async (): Promise<ApprovalStatus> => {
+    if (!user) return 'unknown';
+    
+    try {
+      setApprovalStatus('checking');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('status')
+        .eq('id', user.id)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error checking profile status:', error);
+        setApprovalStatus('unknown');
+        return 'unknown';
+      }
+      
+      console.log('Profile status:', data?.status);
+      
+      if (!data) {
+        setApprovalStatus('unknown');
+        return 'unknown';
+      }
+      
+      // Set and return the status
+      const status = data.status as ApprovalStatus;
+      setApprovalStatus(status);
+      return status;
+    } catch (err) {
+      console.error('Error in checkApprovalStatus:', err);
+      setApprovalStatus('unknown');
+      return 'unknown';
+    }
   };
 
   // Force a complete session refresh to resolve RLS issues
@@ -129,8 +173,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (event === 'SIGNED_IN' && currentSession?.user) {
           toast("Successfully signed in");
+          checkApprovalStatus(); // Check approval status on sign-in
         } else if (event === 'SIGNED_OUT') {
           toast("You have been signed out");
+          setApprovalStatus('unknown'); // Reset approval status on sign-out
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Token refreshed automatically');
         }
@@ -160,6 +206,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (mounted) {
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
+          
+          // Check approval status if we have a user
+          if (initialSession?.user) {
+            checkApprovalStatus();
+          }
         }
       } catch (error) {
         console.error('Exception during auth initialization:', error);
@@ -225,6 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Force clear session state
       setUser(null);
       setSession(null);
+      setApprovalStatus('unknown');
       
       console.log('Sign out completed successfully');
     } catch (error) {
@@ -239,9 +291,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         session,
         isLoading,
+        approvalStatus,
         signInWithGoogle,
         signOut,
         refreshSession,
+        checkApprovalStatus,
       }}
     >
       {children}

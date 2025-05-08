@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -6,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
-  const { signInWithGoogle, user, isLoading, session, refreshSession } = useAuth();
+  const { signInWithGoogle, user, isLoading, session, refreshSession, approvalStatus, checkApprovalStatus } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
-  const [isCheckingApproval, setIsCheckingApproval] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -64,13 +62,6 @@ const Login = () => {
           setRecoveryAttempted(true);
         } catch (e) {
           console.error('Failed to refresh session on login page:', e);
-          // If refresh fails, sign out to clear any invalid tokens
-          try {
-            await supabase.auth.signOut();
-            console.log('Signed out to clear invalid session');
-          } catch (signOutErr) {
-            console.error('Error during sign out:', signOutErr);
-          }
         }
       }
     };
@@ -81,38 +72,31 @@ const Login = () => {
   // Get the path to redirect to after login
   const from = location.state?.from || '/dashboard';
   
-  // Check if user is approved and redirect if authenticated
+  // Check if user is authenticated and redirect appropriately
   useEffect(() => {
-    const checkUserStatus = async () => {
-      if (user && session?.access_token && !isLoading) {
-        setIsCheckingApproval(true);
+    const handleAuthenticatedUser = async () => {
+      // Only proceed if:
+      // 1. We have a user and session
+      // 2. We're not already loading or authenticating
+      // 3. We're not already redirecting
+      if (user && session?.access_token && !isLoading && !isAuthenticating && !redirecting) {
+        setRedirecting(true);
         
         try {
-          // Check if the user has an approved profile
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('status')
-            .eq('id', user.id)
-            .single();
-            
-          if (error) {
-            console.error('Error checking profile status:', error);
-            toast.error("Unable to check access status");
-            return;
-          }
+          // Check user approval status
+          const status = await checkApprovalStatus();
           
-          console.log('User status from database:', data?.status);
+          console.log('User status from database:', status);
           
-          // Use the standardized 'approved' status
-          if (data?.status === 'approved') {
+          if (status === 'approved') {
             console.log('User is approved, redirecting to:', from);
             navigate(from, { replace: true });
-          } else if (data?.status === 'pending') {
+          } else if (status === 'pending') {
             toast("Your account is pending approval", { 
               description: "An administrator will review your request soon."
             });
             navigate('/pending', { replace: true });
-          } else if (data?.status === 'rejected') {
+          } else if (status === 'rejected') {
             toast.error("Access denied", {
               description: "Your access request was not approved."
             });
@@ -122,13 +106,13 @@ const Login = () => {
           console.error('Error checking user approval status:', error);
           toast.error("Unable to check access status");
         } finally {
-          setIsCheckingApproval(false);
+          setRedirecting(false);
         }
       }
     };
     
-    checkUserStatus();
-  }, [user, session, isLoading, navigate, from]);
+    handleAuthenticatedUser();
+  }, [user, session, isLoading, isAuthenticating, redirecting, navigate, from, checkApprovalStatus]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -153,14 +137,26 @@ const Login = () => {
   };
 
   // Only show loading state while checking authentication
-  if (isLoading || isCheckingApproval) {
+  if (isLoading || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           <p className="text-muted-foreground">
-            {isCheckingApproval ? "Verifying your access..." : "Checking authentication..."}
+            {redirecting ? "Preparing your dashboard..." : "Checking authentication..."}
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already authenticated, show a message while redirecting
+  if (user && session?.access_token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Already authenticated, redirecting...</p>
         </div>
       </div>
     );

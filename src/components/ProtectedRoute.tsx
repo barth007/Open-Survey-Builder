@@ -1,22 +1,19 @@
-
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading, session, refreshSession } = useAuth();
+  const { user, isLoading, session, refreshSession, approvalStatus, checkApprovalStatus } = useAuth();
   const location = useLocation();
   const [isRecovering, setIsRecovering] = useState(false);
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
-  const [isApproved, setIsApproved] = useState(false);
 
   // Handle session recovery
   useEffect(() => {
@@ -47,53 +44,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     checkAndRecoverSession();
   }, [user, session, isLoading, recoveryAttempted, refreshSession]);
 
-  // Check if the user is approved to access the application
+  // Check user approval status
   useEffect(() => {
-    const checkApprovalStatus = async () => {
+    const verifyUserAccess = async () => {
       if (user && !isLoading && !isRecovering) {
         setIsCheckingStatus(true);
         
         try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('status')
-            .eq('id', user.id)
-            .maybeSingle();
-            
-          if (error) {
-            console.error('Error checking profile status:', error);
-            setIsApproved(false);
-            return;
-          }
-          
-          // Debug the actual value from the database
-          console.log('User profile status from database:', data?.status);
-          
-          // Ensure we're using the standardized 'approved' status
-          const userApproved = data?.status === 'approved';
-          setIsApproved(userApproved);
-          
-          if (userApproved) {
-            console.log('User is approved with status:', data?.status);
-          } else {
-            console.log('User status is not approved:', data?.status);
-            if (data?.status === 'pending') {
-              toast.error("Access Denied", {
-                description: "Your account has not been approved yet"
-              });
-            }
-          }
-        } catch (err) {
-          console.error('Error checking approval status:', err);
-          setIsApproved(false);
+          // Use the centralized approval status check from AuthProvider
+          await checkApprovalStatus();
         } finally {
           setIsCheckingStatus(false);
         }
       }
     };
     
-    checkApprovalStatus();
-  }, [user, isLoading, isRecovering]);
+    verifyUserAccess();
+  }, [user, isLoading, isRecovering, checkApprovalStatus]);
 
   // Attempt deep validation if we have a session but keep failing RLS policies
   useEffect(() => {
@@ -129,28 +96,38 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Check that both user and valid session exist and user is approved
-  if (user && session?.access_token && isApproved) {
+  // Check that both user and valid session exist
+  if (!user || !session?.access_token) {
+    console.log('ProtectedRoute - Redirecting to login from:', location.pathname, 
+      'Auth state:', { user: !!user, session: !!session, recoveryAttempted });
+      
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location.pathname + location.search }}
+        replace
+      />
+    );
+  }
+
+  // Check if user has approval status
+  if (approvalStatus === 'approved') {
     console.log('ProtectedRoute - Access granted for:', location.pathname);
     return <>{children}</>;
-  }
-
-  // If user is authenticated but not approved, redirect to pending
-  if (user && session?.access_token && !isApproved) {
+  } else if (approvalStatus === 'pending') {
     console.log('ProtectedRoute - User not approved, redirecting to pending');
     return <Navigate to="/pending" replace />;
+  } else {
+    // Wait for approval status if it's still being determined
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verifying your access...</p>
+        </div>
+      </div>
+    );
   }
-
-  console.log('ProtectedRoute - Redirecting to login from:', location.pathname, 
-    'Auth state:', { user: !!user, session: !!session, recoveryAttempted, isApproved });
-    
-  return (
-    <Navigate
-      to="/login"
-      state={{ from: location.pathname + location.search }}
-      replace
-    />
-  );
 };
 
 export default ProtectedRoute;
