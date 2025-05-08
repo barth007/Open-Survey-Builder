@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,17 +14,27 @@ const PendingApproval = () => {
   const [sessionStabilized, setSessionStabilized] = useState(false);
   const navigate = useNavigate();
   
+  // Use refs to avoid dependency issues with useEffect
+  const userRef = useRef(user);
+  const isLoadingRef = useRef(isLoading);
+  
+  // Update refs when props change
+  useEffect(() => {
+    userRef.current = user;
+    isLoadingRef.current = isLoading;
+  }, [user, isLoading]);
+  
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
   };
   
   const checkUserStatus = async () => {
-    if (!user || checkingStatus) return;
+    if (!userRef.current || checkingStatus) return;
     
     try {
       setCheckingStatus(true);
-      console.log('PendingApproval: Checking approval status for user:', user.id);
+      console.log('PendingApproval: Checking approval status for user:', userRef.current.id);
       
       // Use the centralized approval status check
       const status = await checkApprovalStatus();
@@ -75,13 +85,27 @@ const PendingApproval = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Check status once when component mounts and session is stable
+  // Use a separate effect for status checks with stable dependencies
   useEffect(() => {
-    // Only check status when user is loaded and session is stabilized
-    if (user && !isLoading && sessionStabilized && !initialCheckComplete) {
-      checkUserStatus();
+    // Only check status when session is stabilized and we haven't done the initial check
+    if (sessionStabilized && !initialCheckComplete && !checkingStatus) {
+      const timer = setTimeout(() => {
+        if (userRef.current && !isLoadingRef.current) {
+          checkUserStatus();
+        }
+      }, 500); // Small additional delay for extra stability
+      
+      return () => clearTimeout(timer);
     }
-  }, [user, isLoading, sessionStabilized, initialCheckComplete]);
+  }, [sessionStabilized, initialCheckComplete, checkingStatus]);
+  
+  // Handle user not logged in after loading completes
+  useEffect(() => {
+    if (!isLoadingRef.current && !userRef.current && initialCheckComplete) {
+      console.log('No user found on pending page, redirecting to login');
+      navigate('/login');
+    }
+  }, [initialCheckComplete, navigate]);
   
   // If still loading or waiting for session to stabilize, show loading state
   if (isLoading || !sessionStabilized) {
@@ -97,14 +121,7 @@ const PendingApproval = () => {
     );
   }
   
-  // If no user is logged in, redirect to login
-  useEffect(() => {
-    if (!isLoading && !user && initialCheckComplete) {
-      console.log('No user found on pending page, redirecting to login');
-      navigate('/login');
-    }
-  }, [user, isLoading, navigate, initialCheckComplete]);
-  
+  // Render the main content
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
