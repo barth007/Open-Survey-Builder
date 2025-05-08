@@ -124,10 +124,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <>{children}</>;
   }
 
-  // If user is authenticated but not approved, redirect to landing
+  // If user is authenticated but not approved, redirect to pending
   if (user && session?.access_token && !isApproved) {
-    console.log('ProtectedRoute - User not approved, redirecting to landing');
-    return <Navigate to="/" replace />;
+    console.log('ProtectedRoute - User not approved, redirecting to pending');
+    return <Navigate to="/pending" replace />;
   }
 
   console.log('ProtectedRoute - Redirecting to login from:', location.pathname, 

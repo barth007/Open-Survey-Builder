@@ -18,11 +18,12 @@ import { Loader2, Check, X } from 'lucide-react';
 
 interface ProfileRequest {
   id: string;
-  full_name: string;
-  email: string;
+  full_name: string | null;
+  email: string | null;
   status: 'pending' | 'approved' | 'rejected';
   role: 'user' | 'admin';
-  updated_at: string;
+  updated_at: string | null;
+  avatar_url?: string | null;
 }
 
 const AdminPanel = () => {
@@ -174,7 +175,7 @@ const AdminPanel = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {new Date(request.updated_at).toLocaleDateString()}
+                        {new Date(request.updated_at || '').toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

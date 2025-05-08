@@ -36,6 +36,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          role: string | null
+          status: string | null
           updated_at: string | null
         }
         Insert: {
@@ -43,6 +45,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          role?: string | null
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -50,6 +54,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          role?: string | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -249,33 +255,6 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
-        }
-        Relationships: []
-      }
-      users: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          name: string
-          role: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          role?: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          role?: string
-          status?: string
         }
         Relationships: []
       }
