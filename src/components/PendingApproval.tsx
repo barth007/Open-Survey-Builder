@@ -1,16 +1,81 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/sonner';
 
 const PendingApproval = () => {
-  const { signOut, isLoading } = useAuth();
+  const { signOut, isLoading, user } = useAuth();
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [statusCheckCount, setStatusCheckCount] = useState(0);
+  const navigate = useNavigate();
   
   const handleSignOut = async () => {
     await signOut();
   };
+  
+  // Periodically check if the user's approval status has changed
+  useEffect(() => {
+    if (!user) return;
+    
+    let statusCheckInterval: NodeJS.Timeout;
+    
+    const checkApprovalStatus = async () => {
+      if (!user) return;
+      
+      try {
+        setCheckingStatus(true);
+        console.log('Checking approval status for user:', user.id);
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', user.id)
+          .maybeSingle();
+          
+        if (error) {
+          console.error('Error checking approval status:', error);
+          return;
+        }
+        
+        console.log('Current user status:', data?.status);
+        
+        // If the user has been approved, redirect to login
+        if (data?.status === 'approved') {
+          console.log('User is now approved, redirecting to login');
+          toast.success('Your account has been approved!', {
+            description: 'You can now log in to access the application.'
+          });
+          
+          // Clear the interval before navigating
+          clearInterval(statusCheckInterval);
+          
+          // Navigate to login page
+          navigate('/login', { replace: true });
+        }
+      } catch (err) {
+        console.error('Error during approval status check:', err);
+      } finally {
+        setCheckingStatus(false);
+        setStatusCheckCount(prev => prev + 1);
+      }
+    };
+    
+    // Do an immediate check when component mounts
+    checkApprovalStatus();
+    
+    // Set up periodic checks every 15 seconds
+    statusCheckInterval = setInterval(checkApprovalStatus, 15000);
+    
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(statusCheckInterval);
+    };
+  }, [user, navigate]);
   
   if (isLoading) {
     return (
@@ -39,6 +104,17 @@ const PendingApproval = () => {
               An administrator will review your access request shortly.
               We'll notify you when your account has been approved.
             </p>
+            
+            {checkingStatus ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>Checking approval status...</span>
+              </div>
+            ) : statusCheckCount > 0 && (
+              <p className="text-xs text-muted-foreground mt-4">
+                Automatically checking for approval every 15 seconds...
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
