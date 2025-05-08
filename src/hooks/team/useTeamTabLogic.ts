@@ -12,13 +12,18 @@ export function useTeamTabLogic() {
   const { 
     teams, 
     teamMembers, 
-    invitations, 
+    invitations,
+    receivedInvitations,
     isLoading, 
     error,
     removeTeamMember,
     updateTeamMemberRole,
     updateTeam,
-    deleteTeam
+    deleteTeam,
+    acceptInvitation,
+    rejectInvitation,
+    isAccepting,
+    isRejecting
   } = useTeams();
   
   const { 
@@ -39,6 +44,7 @@ export function useTeamTabLogic() {
       teams: teams?.length, 
       teamMembers: teamMembers ? Object.keys(teamMembers).length : 0, 
       invitations: invitations ? Object.keys(invitations).length : 0,
+      receivedInvitations: receivedInvitations?.length,
       isLoading, 
       error,
       activeTeamTab
@@ -63,7 +69,7 @@ export function useTeamTabLogic() {
         console.log(`Owner is in members list for team ${team.id}: ${ownerInMembersList}`);
       });
     }
-  }, [teams, teamMembers, invitations, isLoading, error, activeTeamTab, user]);
+  }, [teams, teamMembers, invitations, receivedInvitations, isLoading, error, activeTeamTab, user]);
 
   // Initialize activeTeamTab with the first team's ID when teams are loaded
   useEffect(() => {
@@ -119,6 +125,16 @@ export function useTeamTabLogic() {
     }
   };
 
+  const handleAcceptInvitation = (invitationId: string) => {
+    console.log('Accepting invitation:', invitationId);
+    acceptInvitation(invitationId);
+  };
+
+  const handleRejectInvitation = (invitationId: string) => {
+    console.log('Rejecting invitation:', invitationId);
+    rejectInvitation(invitationId);
+  };
+
   const userRole = (team: Team) => {
     if (!user) {
       console.log(`No current user`);
@@ -151,6 +167,7 @@ export function useTeamTabLogic() {
     teams,
     teamMembers,
     invitations,
+    receivedInvitations,
     isLoading,
     error,
     isCreateTeamDialogOpen,
@@ -163,6 +180,10 @@ export function useTeamTabLogic() {
     handleUpdateMemberRole,
     handleUpdateTeam,
     handleDeleteTeam,
+    handleAcceptInvitation,
+    handleRejectInvitation,
+    isAccepting,
+    isRejecting,
     userRole
   };
 }

@@ -30,6 +30,7 @@ export const PendingInvitations = ({ invitations }: PendingInvitationsProps) => 
               <TableHead>Email</TableHead>
               <TableHead>Sent</TableHead>
               <TableHead>Expires</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -38,6 +39,11 @@ export const PendingInvitations = ({ invitations }: PendingInvitationsProps) => 
                 <TableCell>{invitation.email}</TableCell>
                 <TableCell>{new Date(invitation.created_at || '').toLocaleDateString()}</TableCell>
                 <TableCell>{new Date(invitation.expires_at).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <span className="inline-block px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">
+                    Pending
+                  </span>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamMember, TeamInvitation } from '@/types/team-types';
 
@@ -172,6 +171,57 @@ export async function fetchTeamInvitations(teamId: string): Promise<TeamInvitati
     return data as TeamInvitation[];
   } catch (error) {
     console.error(`Error in fetchTeamInvitations for team ${teamId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches all pending invitations for the current user's email
+ * @param userEmail The email address to fetch invitations for
+ * @returns Promise resolving to an array of team invitations
+ */
+export async function fetchUserInvitations(userEmail: string): Promise<TeamInvitation[]> {
+  console.log(`Fetching invitations for user email: ${userEmail}`);
+  
+  try {
+    const { data, error } = await supabase
+      .from('team_invitations')
+      .select(`
+        id,
+        team_id,
+        email,
+        created_at,
+        expires_at,
+        invitation_code,
+        status,
+        teams (
+          id,
+          name,
+          description,
+          owner_id
+        )
+      `)
+      .eq('email', userEmail)
+      .eq('status', 'pending')
+      .filter('expires_at', 'gt', new Date().toISOString());
+    
+    if (error) {
+      console.error(`Error fetching invitations for email ${userEmail}:`, error);
+      throw error;
+    }
+    
+    console.log(`Found ${data?.length || 0} invitations for ${userEmail}:`, data);
+    
+    // Transform the data to include team info directly in the invitation
+    const invitationsWithTeamInfo = data?.map(inv => ({
+      ...inv,
+      team: inv.teams,
+      teams: undefined // Remove the nested teams object
+    })) || [];
+    
+    return invitationsWithTeamInfo as TeamInvitation[];
+  } catch (error) {
+    console.error(`Error in fetchUserInvitations for ${userEmail}:`, error);
     throw error;
   }
 }

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -74,4 +73,76 @@ export async function processInvitation(invitationCode: string, userId: string) 
   }
   
   return teamId;
+}
+
+/**
+ * Accepts an invitation and adds the user to the team
+ * @param invitationId The invitation ID to accept
+ * @param userId The user ID to add to the team
+ * @returns The team ID the user was added to
+ */
+export async function acceptInvitation(invitationId: string, userId: string) {
+  // Start transaction
+  const { data: invitation, error: fetchError } = await supabase
+    .from('team_invitations')
+    .select('invitation_code, team_id')
+    .eq('id', invitationId)
+    .eq('status', 'pending')
+    .single();
+
+  if (fetchError) {
+    console.error('Error fetching invitation:', fetchError);
+    throw fetchError;
+  }
+
+  if (!invitation) {
+    throw new Error('Invitation not found or already processed');
+  }
+
+  // Process the invitation using the existing function
+  try {
+    const teamId = await processInvitation(invitation.invitation_code, userId);
+    
+    // Update invitation status
+    const { error: updateError } = await supabase
+      .from('team_invitations')
+      .update({ status: 'accepted' })
+      .eq('id', invitationId);
+    
+    if (updateError) {
+      console.error('Error updating invitation status:', updateError);
+      throw updateError;
+    }
+    
+    return teamId;
+  } catch (error) {
+    console.error('Error accepting invitation:', error);
+    throw error;
+  }
+}
+
+/**
+ * Rejects an invitation
+ * @param invitationId The invitation ID to reject
+ * @returns The updated invitation
+ */
+export async function rejectInvitation(invitationId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('team_invitations')
+      .update({ status: 'rejected' })
+      .eq('id', invitationId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error rejecting invitation:', error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in rejectInvitation:', error);
+    throw error;
+  }
 }

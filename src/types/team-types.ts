@@ -28,4 +28,5 @@ export type TeamInvitation = {
   expires_at: string;
   invitation_code: string;
   status: 'pending' | 'accepted' | 'rejected';
+  team?: Team; // Include team information for received invitations
 };
