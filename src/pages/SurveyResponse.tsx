@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { Survey, Question } from '@/types/survey';
 import { QuestionItem } from '@/components/survey/response/QuestionItem';
+import { ClickProvider } from '@/contexts/ClickContext';
 
 const SurveyResponse = () => {
   const { id: surveyId } = useParams();
@@ -69,49 +70,51 @@ const SurveyResponse = () => {
   const questions = getQuestions();
 
   return (
-    <div className="min-h-screen bg-pebble py-8">
-      <div className="container max-w-3xl">
-        <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
-          <h2 className="text-2xl font-bold mb-2 text-carbon">{getSurveyTitle()}</h2>
-          <p className="text-gray-600 mb-6">{surveyData.description}</p>
+    <ClickProvider>
+      <div className="min-h-screen bg-pebble py-8">
+        <div className="container max-w-3xl">
+          <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
+            <h2 className="text-2xl font-bold mb-2 text-carbon">{getSurveyTitle()}</h2>
+            <p className="text-gray-600 mb-6">{surveyData.description}</p>
 
-          {!isPublished && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
-              <p className="text-sm font-medium">This survey is in preview mode</p>
-              <p className="text-xs">Responses will not be saved until the survey is published</p>
-            </div>
-          )}
+            {!isPublished && (
+              <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+                <p className="text-sm font-medium">This survey is in preview mode</p>
+                <p className="text-xs">Responses will not be saved until the survey is published</p>
+              </div>
+            )}
 
-          {questions.map((question, index) => (
-            isQuestionVisible(question) && (
-              <QuestionItem 
-                key={question.id}
-                question={question}
-                index={index}
-                answers={answers}
-                onAnswerChange={handleAnswerChange}
-              />
-            )
-          ))}
+            {questions.map((question, index) => (
+              isQuestionVisible(question) && (
+                <QuestionItem 
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                />
+              )
+            ))}
 
-          {questions.length > 0 && (
-            <Button 
-              className="mt-4 bg-sunset hover:opacity-90"
-              onClick={() => handleSubmit(isPublished)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </Button>
-          )}
+            {questions.length > 0 && (
+              <Button 
+                className="mt-4 bg-sunset hover:opacity-90"
+                onClick={() => handleSubmit(isPublished)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </Button>
+            )}
 
-          {questions.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>This survey has no questions.</p>
-            </div>
-          )}
+            {questions.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>This survey has no questions.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ClickProvider>
   );
 };
 

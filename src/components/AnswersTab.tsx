@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Survey, Question, Answer } from '@/types/survey';
 import { 
@@ -23,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses';
 import { useToast } from '@/hooks/use-toast';
+import { FigmaHeatmapCard } from './survey/FigmaHeatmapCard';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -43,12 +43,10 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
   const { data: responses, isLoading, error } = useQuerySurveyResponses(survey.id);
 
-  const handleChartTypeChange = (questionId: string, type: "bar" | "pie") => {
-    setChartType(prev => ({
-      ...prev,
-      [questionId]: type
-    }));
-  };
+  // Filter questions with Figma prototypes
+  const figmaQuestions = useMemo(() => {
+    return survey.questions.filter(q => q.figmaPrototypeUrl);
+  }, [survey.questions]);
 
   // Process response data into a format suitable for charts
   const processedResponses = useMemo(() => {
@@ -211,6 +209,23 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
           </div>
         </div>
       </div>
+
+      {/* Display Figma prototype heatmaps if any */}
+      {figmaQuestions.length > 0 && totalResponses > 0 && (
+        <div>
+          <h2 className="text-xl font-bold mb-4 text-carbon">Figma Prototype Interactions</h2>
+          <div className="space-y-4">
+            {figmaQuestions.map(question => (
+              <FigmaHeatmapCard
+                key={question.id}
+                questionId={question.id}
+                questionText={question.text}
+                figmaUrl={question.figmaPrototypeUrl || ''}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {filteredResponses.length === 0 && totalResponses > 0 && (
         <div className="text-center py-16 bg-white rounded-lg border border-ice">

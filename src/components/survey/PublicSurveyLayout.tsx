@@ -7,12 +7,16 @@ interface PublicSurveyLayoutProps {
   children: ReactNode;
   surveyTitle: string;
   isPreviewMode?: boolean;
+  showBackButton?: boolean;
+  onBack?: () => void;
 }
 
 export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({ 
   children, 
   surveyTitle,
-  isPreviewMode = false 
+  isPreviewMode = false,
+  showBackButton = false,
+  onBack
 }) => {
 
   return (
@@ -22,6 +26,16 @@ export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({
         <div className="container max-w-3xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
+              {showBackButton && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onBack}
+                  className="mr-2"
+                >
+                  <ArrowLeft size={18} />
+                </Button>
+              )}
               <h1 className="text-lg font-semibold">{surveyTitle}</h1>
             </div>
           </div>
