@@ -14,10 +14,6 @@ export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({
   surveyTitle,
   isPreviewMode = false 
 }) => {
-  // Function to go back to the previous page
-  const handleBackClick = () => {
-    window.history.back();
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -28,15 +24,6 @@ export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold">{surveyTitle}</h1>
             </div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleBackClick}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
           </div>
           
           {/* Preview mode banner as a small indicator */}
