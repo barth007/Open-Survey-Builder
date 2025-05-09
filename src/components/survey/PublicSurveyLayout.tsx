@@ -27,7 +27,7 @@ export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-semibold">Form Tapestry</h1>
+              <h1 className="text-lg font-semibold">{surveyTitle}</h1>
             </div>
             
             <Button 
