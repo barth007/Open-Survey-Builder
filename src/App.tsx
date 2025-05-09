@@ -18,6 +18,7 @@ import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import AdminPanel from './pages/AdminPanel';
+import Register from './pages/Register'; // This would be imported if you have a Register component
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,8 @@ const App = () => (
                   <main className="flex-1">
                     <Routes>
                       <Route path="/login" element={<Login />} />
+                      {/* Update register route to point to Login component for now */}
+                      <Route path="/register" element={<Login />} />
                       <Route
                         path="/dashboard"
                         element={

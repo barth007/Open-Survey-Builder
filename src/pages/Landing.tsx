@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import { Github, Rocket, ShieldCheck, Server, LayoutGrid } from "lucide-react"
 import { Link } from "react-router-dom"
@@ -17,7 +18,7 @@ export default function Landing() {
           Keep your data private, collaborate with your team, and get the insights you need—without giving up control.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-          <Link to="/register">
+          <Link to="/login">
             <Button
               size="lg"
               className="w-full sm:w-auto flex items-center gap-2 border border-input shadow-sm bg-white text-foreground hover:bg-muted"
@@ -27,7 +28,7 @@ export default function Landing() {
                 alt="Google icon"
                 className="h-5 w-5"
               />
-              Sign up with Google
+              Sign in with Google
             </Button>
           </Link>
         </div>

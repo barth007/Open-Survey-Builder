@@ -25,8 +25,13 @@ const PendingApproval = () => {
   }, [user, isLoading]);
   
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
+    try {
+      await signOut();
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
   };
   
   const checkUserStatus = async () => {
@@ -101,11 +106,11 @@ const PendingApproval = () => {
   
   // Handle user not logged in after loading completes
   useEffect(() => {
-    if (!isLoadingRef.current && !userRef.current && initialCheckComplete) {
+    if (!isLoadingRef.current && !userRef.current) {
       console.log('No user found on pending page, redirecting to login');
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
-  }, [initialCheckComplete, navigate]);
+  }, [isLoading, user, navigate]);
   
   // If still loading or waiting for session to stabilize, show loading state
   if (isLoading || !sessionStabilized) {

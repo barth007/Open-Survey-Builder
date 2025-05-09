@@ -91,8 +91,8 @@ const Login = () => {
         console.log('Login page: User status is', status);
         
         if (status === 'approved') {
-          console.log('User is approved, redirecting to:', from);
-          navigate(from, { replace: true });
+          console.log('User is approved, redirecting to dashboard');
+          navigate('/dashboard', { replace: true });
         } else if (status === 'pending') {
           toast("Your account is pending approval", { 
             description: "An administrator will review your request soon."
@@ -105,8 +105,8 @@ const Login = () => {
           navigate('/', { replace: true });
         } else if (status === 'unknown') {
           // If status is unknown, try to create a profile
-          console.log('Status unknown, redirecting to landing page for profile creation');
-          navigate('/', { replace: true });
+          console.log('Status unknown, redirecting to pending page after creating profile');
+          navigate('/pending', { replace: true });
         } else {
           // If status is unknown due to errors, don't get stuck in a redirect loop
           console.log('Status unknown, waiting before retry');
