@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link, ExternalLink, Upload, Check, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FigmaPrototypeEmbed } from '../survey/response/FigmaPrototypeEmbed';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface FigmaPrototypePreviewProps {
   figmaUrl: string;
@@ -38,10 +37,7 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
     // Basic validation for Figma URL
     const figmaRegex = /figma\.com\/(file|proto)\/([a-zA-Z0-9]+)(?:\/.*)?$/;
     if (!figmaRegex.test(url)) {
-      toast({
-        description: "Please enter a valid Figma prototype or file URL",
-        variant: "destructive"
-      });
+      toast.error("Please enter a valid Figma prototype or file URL");
       return;
     }
 
@@ -54,9 +50,7 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
     const file = e.target.files?.[0];
     if (file && onScreenshotUpload) {
       onScreenshotUpload(file);
-      toast({
-        description: "The prototype screenshot has been uploaded successfully"
-      });
+      toast.success("The prototype screenshot has been uploaded successfully");
     }
   };
 
