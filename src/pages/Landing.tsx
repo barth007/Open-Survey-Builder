@@ -18,13 +18,7 @@ export default function Landing() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link to="/register">
-            <Button size="lg" className="w-full sm:w-auto">Get Started</Button>
-          </Link>
-          <Link to="https://github.com/your-org/survey-tool" target="_blank" rel="noopener noreferrer">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              <Github className="h-5 w-5 mr-2" />
-              GitHub
-            </Button>
+            <Button size="lg" className="w-full sm:w-auto">Sign Up with Google</Button>
           </Link>
         </div>
       </div>
