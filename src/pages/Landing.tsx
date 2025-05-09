@@ -11,14 +11,24 @@ export default function Landing() {
           <Rocket className="h-12 w-12 text-[hsl(var(--ring))]" />
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-          Create smarter surveys, beautifully.
+          Run surveys on your terms.
         </h1>
         <p className="text-lg text-muted-foreground">
-          Powerful tools for teams to gather insights, collaborate, and act—fast.
+          Keep your data private, collaborate with your team, and get the insights you need—without giving up control.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link to="/register">
-            <Button size="lg" className="w-full sm:w-auto">Sign Up with Google</Button>
+            <Button
+              size="lg"
+              className="w-full sm:w-auto flex items-center gap-2 border border-input shadow-sm bg-white text-foreground hover:bg-muted"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google icon"
+                className="h-5 w-5"
+              />
+              Sign up with Google
+            </Button>
           </Link>
         </div>
       </div>
