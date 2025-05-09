@@ -26,7 +26,6 @@ export const PublicSurveyLayout: React.FC<PublicSurveyLayoutProps> = ({
         <div className="container max-w-3xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-primary" />
               <h1 className="text-lg font-semibold">{surveyTitle}</h1>
             </div>
             
