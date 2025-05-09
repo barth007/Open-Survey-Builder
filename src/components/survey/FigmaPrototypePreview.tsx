@@ -39,7 +39,6 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
     const figmaRegex = /figma\.com\/(file|proto)\/([a-zA-Z0-9]+)(?:\/.*)?$/;
     if (!figmaRegex.test(url)) {
       toast({
-        title: "Invalid Figma URL",
         description: "Please enter a valid Figma prototype or file URL",
         variant: "destructive"
       });
@@ -56,7 +55,6 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
     if (file && onScreenshotUpload) {
       onScreenshotUpload(file);
       toast({
-        title: "Screenshot uploaded",
         description: "The prototype screenshot has been uploaded successfully"
       });
     }
