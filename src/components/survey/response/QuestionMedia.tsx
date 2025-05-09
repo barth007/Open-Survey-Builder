@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from "lucide-react";
 import { Media } from '@/types/survey';
 import { FigmaPrototypeEmbed } from './FigmaPrototypeEmbed';
+import { HeatmapVisualization } from '@/components/survey/HeatmapVisualization';
 
 interface QuestionMediaProps {
   media?: Media;

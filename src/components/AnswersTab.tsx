@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Survey, Question, Answer } from '@/types/survey';
 import { 
@@ -42,6 +43,14 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const [filterText, setFilterText] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
   const { data: responses, isLoading, error } = useQuerySurveyResponses(survey.id);
+
+  // Add the missing handleChartTypeChange function
+  const handleChartTypeChange = (questionId: string, type: "bar" | "pie") => {
+    setChartType(prev => ({
+      ...prev,
+      [questionId]: type
+    }));
+  };
 
   // Filter questions with Figma prototypes
   const figmaQuestions = useMemo(() => {
