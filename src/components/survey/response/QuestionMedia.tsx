@@ -1,9 +1,11 @@
 
-import React from 'react';
-import { Link } from "lucide-react";
+import React, { useState } from 'react';
+import { Link, ExternalLink, Upload } from "lucide-react";
 import { Media } from '@/types/survey';
 import { FigmaPrototypeEmbed } from './FigmaPrototypeEmbed';
 import { HeatmapVisualization } from '@/components/survey/HeatmapVisualization';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface QuestionMediaProps {
   media?: Media;
@@ -11,6 +13,8 @@ interface QuestionMediaProps {
   questionId?: string;
   isAnswersTab?: boolean;
   figmaScreenshot?: string;
+  inEditMode?: boolean;
+  onScreenshotUpload?: (file: File) => void;
 }
 
 export const QuestionMedia: React.FC<QuestionMediaProps> = ({ 
@@ -18,8 +22,19 @@ export const QuestionMedia: React.FC<QuestionMediaProps> = ({
   figmaPrototypeUrl, 
   questionId = "",
   isAnswersTab = false,
-  figmaScreenshot = "" 
+  figmaScreenshot = "",
+  inEditMode = false,
+  onScreenshotUpload
 }) => {
+  const [showPrototype, setShowPrototype] = useState(true);
+
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onScreenshotUpload) {
+      onScreenshotUpload(file);
+    }
+  };
+
   return (
     <>
       {media && (
@@ -41,25 +56,58 @@ export const QuestionMedia: React.FC<QuestionMediaProps> = ({
       )}
 
       {figmaPrototypeUrl && !isAnswersTab && (
-        <div className="mb-4">
-          <FigmaPrototypeEmbed 
-            figmaUrl={figmaPrototypeUrl}
-            questionId={questionId}
-          />
-        </div>
-      )}
+        <>
+          {showPrototype ? (
+            <div className="mb-4">
+              <FigmaPrototypeEmbed 
+                figmaUrl={figmaPrototypeUrl}
+                questionId={questionId}
+                inEditMode={inEditMode}
+              />
+              {inEditMode && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <p>Preview only - click tracking is disabled in edit mode. Click interactions will be recorded in the live survey.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div 
+              className="mb-4 border border-dashed border-gray-300 rounded-md p-8 text-center cursor-pointer"
+              onClick={() => setShowPrototype(true)}
+            >
+              <p className="text-muted-foreground">Click to load Figma prototype</p>
+            </div>
+          )}
 
-      {figmaPrototypeUrl && !isAnswersTab && (
-        <div className="mb-4">
-          <a 
-            href={figmaPrototypeUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-sm text-abyss underline flex items-center gap-1"
-          >
-            <Link size={14} /> View Figma prototype
-          </a>
-        </div>
+          <div className="mb-4 flex gap-2">
+            <a 
+              href={figmaPrototypeUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm text-abyss underline flex items-center gap-1"
+            >
+              <ExternalLink size={14} /> View Figma prototype
+            </a>
+            
+            {inEditMode && onScreenshotUpload && (
+              <div className="relative">
+                <Input
+                  type="file"
+                  id={`screenshot-${questionId}`}
+                  accept="image/*"
+                  onChange={handleScreenshotUpload}
+                  className="hidden"
+                />
+                <label 
+                  htmlFor={`screenshot-${questionId}`} 
+                  className="text-sm text-abyss underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Upload size={14} /> Upload screenshot for heatmap
+                </label>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {figmaPrototypeUrl && isAnswersTab && figmaScreenshot && (

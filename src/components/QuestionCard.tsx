@@ -41,6 +41,7 @@ import QuestionMediaUpload from './QuestionMediaUpload';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import LikertOptionsDialog from './survey/LikertOptionsDialog';
+import { FigmaPrototypePreview } from './survey/FigmaPrototypePreview';
 
 interface QuestionCardProps {
   question: Question;
@@ -61,6 +62,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
   const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
+  const [figmaScreenshot, setFigmaScreenshot] = useState(question.figmaScreenshot || '');
   const [hasUrlChanged, setHasUrlChanged] = useState(false);
   const [conditionalLogicOpen, setConditionalLogicOpen] = useState(!!question.conditionalLogic?.dependsOn);
 
@@ -218,12 +220,22 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     setHasUrlChanged(e.target.value !== question.figmaPrototypeUrl);
   };
 
-  const handleFigmaUrlSave = () => {
+  const handleFigmaUrlSave = (url: string) => {
     onQuestionChange({
       ...question,
-      figmaPrototypeUrl: figmaUrl
+      figmaPrototypeUrl: url
     });
-    setHasUrlChanged(false);
+  };
+
+  const handleScreenshotUpload = (file: File) => {
+    const url = URL.createObjectURL(file);
+    
+    onQuestionChange({
+      ...question,
+      figmaScreenshot: url
+    });
+    
+    setFigmaScreenshot(url);
   };
 
   const openFigmaPrototype = () => {
@@ -340,40 +352,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
 
         {/* Figma Prototype */}
-        <div className="border-t border-ice pt-3">
-          <div className="flex items-center gap-2">
-            <LinkIcon size={16} className="text-abyss shrink-0" />
-            <Input
-              value={figmaUrl}
-              onChange={handleFigmaUrlChange}
-              placeholder="Figma Prototype URL (optional)"
-              className="flex-1 text-sm border-ice"
-            />
-            <div className="flex gap-2 shrink-0">
-              <Button 
-                onClick={handleFigmaUrlSave} 
-                size="sm" 
-                variant="outline"
-                disabled={!hasUrlChanged}
-                className="border-abyss text-abyss hover:bg-abyss hover:text-white"
-              >
-                <Check size={16} className="mr-1" />
-                Save
-              </Button>
-              {figmaUrl && (
-                <Button 
-                  onClick={openFigmaPrototype} 
-                  size="sm" 
-                  variant="outline"
-                  className="border-sunset text-sunset hover:bg-sunset hover:text-white"
-                >
-                  <ExternalLink size={16} className="mr-1" />
-                  Open
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+        <FigmaPrototypePreview
+          figmaUrl={question.figmaPrototypeUrl || ''}
+          questionId={question.id}
+          onFigmaUrlSave={handleFigmaUrlSave}
+          onScreenshotUpload={handleScreenshotUpload}
+          hasScreenshot={!!question.figmaScreenshot}
+        />
 
         {/* Question Type & Max Answers */}
         <div className="border-t border-ice pt-3">

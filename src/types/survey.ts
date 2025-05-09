@@ -1,4 +1,3 @@
-
 export type QuestionType = 'text' | 'multipleChoice' | 'checkboxes' | 'likert5' | 'likert7' | 'likert10';
 
 export type MediaType = 'image' | 'video' | 'gif';
@@ -29,11 +28,12 @@ export interface Question {
   isRequired: boolean;
   options: QuestionOption[];
   maxSelections?: number;
-  figmaPrototypeUrl?: string;
   media?: Media;
+  figmaPrototypeUrl?: string;
+  figmaScreenshot?: string;
   conditionalLogic?: ConditionalLogic;
-  isVisible?: boolean;
   customLikertLabels?: boolean; // Flag to indicate if the question uses custom Likert labels
+  isVisible?: boolean;
 }
 
 /**

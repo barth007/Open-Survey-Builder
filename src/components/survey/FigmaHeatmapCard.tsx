@@ -1,25 +1,41 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { HeatmapVisualization } from './HeatmapVisualization';
-import { Image } from 'lucide-react';
+import { Image, Info } from 'lucide-react';
+import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface FigmaHeatmapCardProps {
   questionId: string;
   questionText: string;
   figmaUrl: string;
+  surveyId?: string;
 }
 
 export const FigmaHeatmapCard: React.FC<FigmaHeatmapCardProps> = ({
   questionId,
   questionText,
-  figmaUrl
+  figmaUrl,
+  surveyId
 }) => {
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const { data: surveyData } = useQuerySurvey(surveyId);
+  
+  // Check if there's a screenshot available for this question in the survey data
+  useEffect(() => {
+    if (surveyData) {
+      const question = surveyData.questions.find(q => q.id === questionId);
+      if (question && question.figmaScreenshot) {
+        setScreenshotUrl(question.figmaScreenshot);
+        setShowHeatmap(true);
+      }
+    }
+  }, [surveyData, questionId]);
   
   const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,7 +49,19 @@ export const FigmaHeatmapCard: React.FC<FigmaHeatmapCardProps> = ({
   return (
     <Card className="mb-6 border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">{questionText}</CardTitle>
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          {questionText}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info size={14} className="text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">Click heatmap shows where users clicked on the prototype</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
