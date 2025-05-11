@@ -1,11 +1,9 @@
 
-import React, { useState } from 'react';
-import { Link, ExternalLink, Upload } from "lucide-react";
+import React from 'react';
+import { ExternalLink, Upload } from "lucide-react";
 import { Media } from '@/types/survey';
-import { FigmaPrototypeEmbed } from './FigmaPrototypeEmbed';
-import { HeatmapVisualization } from '@/components/survey/HeatmapVisualization';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { HeatmapVisualization } from '@/components/survey/HeatmapVisualization';
 
 interface QuestionMediaProps {
   media?: Media;
@@ -26,8 +24,6 @@ export const QuestionMedia: React.FC<QuestionMediaProps> = ({
   inEditMode = false,
   onScreenshotUpload
 }) => {
-  const [showPrototype, setShowPrototype] = useState(true);
-
   const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && onScreenshotUpload) {
@@ -56,28 +52,12 @@ export const QuestionMedia: React.FC<QuestionMediaProps> = ({
       )}
 
       {figmaPrototypeUrl && !isAnswersTab && (
-        <>
-          {showPrototype ? (
-            <div className="mb-4">
-              <FigmaPrototypeEmbed 
-                figmaUrl={figmaPrototypeUrl}
-                questionId={questionId}
-                inEditMode={inEditMode}
-              />
-              {inEditMode && (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  <p>Preview only - click tracking is disabled in edit mode. Click interactions will be recorded in the live survey.</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div 
-              className="mb-4 border border-dashed border-gray-300 rounded-md p-8 text-center cursor-pointer"
-              onClick={() => setShowPrototype(true)}
-            >
-              <p className="text-muted-foreground">Click to load Figma prototype</p>
-            </div>
-          )}
+        <div className="mb-4">
+          <div className="border border-gray-200 rounded-md p-4 bg-gray-50 text-center mb-2">
+            <p className="text-sm text-gray-600">
+              Figma prototype is available for this question
+            </p>
+          </div>
 
           <div className="mb-4 flex gap-2">
             <a 
@@ -107,7 +87,7 @@ export const QuestionMedia: React.FC<QuestionMediaProps> = ({
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {figmaPrototypeUrl && isAnswersTab && figmaScreenshot && (

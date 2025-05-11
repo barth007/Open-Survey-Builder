@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
-import { Link, ExternalLink, Upload, Check, X } from 'lucide-react';
+import { Link, ExternalLink, Upload, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { FigmaPrototypeEmbed } from '../survey/response/FigmaPrototypeEmbed';
 import { toast } from 'sonner';
 
 interface FigmaPrototypePreviewProps {
@@ -22,7 +22,6 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
 }) => {
   const [url, setUrl] = useState(figmaUrl || '');
   const [isEditing, setIsEditing] = useState(!figmaUrl);
-  const [showPreview, setShowPreview] = useState(!!figmaUrl);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
@@ -43,7 +42,6 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
 
     onFigmaUrlSave(url);
     setIsEditing(false);
-    setShowPreview(true);
   };
 
   const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,15 +88,9 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
             Save
           </Button>
         </div>
-      ) : showPreview ? (
+      ) : figmaUrl ? (
         <div>
-          <FigmaPrototypeEmbed 
-            figmaUrl={figmaUrl}
-            questionId={questionId}
-            inEditMode={true}
-          />
-          
-          <div className="flex flex-wrap gap-3 mt-3">
+          <div className="flex flex-wrap gap-3 mt-1">
             <a 
               href={figmaUrl} 
               target="_blank" 
@@ -135,11 +127,8 @@ export const FigmaPrototypePreview: React.FC<FigmaPrototypePreviewProps> = ({
           </div>
         </div>
       ) : (
-        <div 
-          className="border border-dashed border-gray-300 rounded-md p-8 text-center cursor-pointer"
-          onClick={() => setShowPreview(true)}
-        >
-          <p className="text-muted-foreground">Click to preview Figma prototype</p>
+        <div className="text-muted-foreground text-sm">
+          <p>No Figma prototype linked</p>
         </div>
       )}
     </div>
