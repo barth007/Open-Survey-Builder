@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Settings,
   FileImage,
+  Link as LinkIcon
 } from "lucide-react";
 import { 
   Question, 
@@ -250,6 +251,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
+  const handleFigmaPrototypeUrlChange = (figmaPrototypeUrl: string) => {
+    onQuestionChange({ ...question, figmaPrototypeUrl });
+  };
+
   const isMultipleType = question.type === 'multipleChoice' || question.type === 'checkboxes';
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';
   
@@ -277,6 +282,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             placeholder="Question description (optional)"
             className="w-full resize-none border-ice focus-visible:ring-abyss"
             rows={2}
+          />
+        </div>
+        
+        {/* Figma Prototype URL */}
+        <div className="flex items-center gap-2">
+          <LinkIcon size={16} className="text-gray-500" />
+          <Input
+            value={question.figmaPrototypeUrl || ''}
+            onChange={(e) => handleFigmaPrototypeUrlChange(e.target.value)}
+            placeholder="Figma prototype URL (optional)"
+            className="flex-1 border-ice focus-visible:ring-abyss"
           />
         </div>
 

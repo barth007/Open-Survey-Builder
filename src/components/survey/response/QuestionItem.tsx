@@ -36,6 +36,14 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
 
       <QuestionMedia media={question.media} />
 
+      {question.figmaPrototypeUrl && (
+        <p className="text-sm text-blue-600 mt-2 mb-4">
+          <a href={question.figmaPrototypeUrl} target="_blank" rel="noopener noreferrer">
+            View Figma Prototype
+          </a>
+        </p>
+      )}
+
       <QuestionRenderer 
         question={question} 
         answers={answers} 
