@@ -9,7 +9,6 @@ import { SurveySidebar } from "@/components/survey/SurveySidebar";
 import { AuthProvider } from "@/providers/AuthProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PendingApproval from "@/components/PendingApproval";
-import { ClickProvider } from "@/contexts/ClickContext";
 
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -37,65 +36,63 @@ const App = () => (
           <Toaster />
           <Sonner />
           
-          <ClickProvider>
-            {/* Routes for public surveys and landing pages don't need SidebarProvider */}
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/p/:publicCode" element={<PublicSurvey />} />
-              <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
-              <Route path="/pending" element={<PendingApproval />} />
-              
-              {/* All other routes with standard layout */}
-              <Route path="*" element={
-                <SidebarProvider>
-                  <div className="flex min-h-screen w-full">
-                    <SurveySidebar />
-                    <main className="flex-1">
-                      <Routes>
-                        <Route path="/login" element={<Login />} />
-                        {/* Update register route to point to Login component for now */}
-                        <Route path="/register" element={<Login />} />
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <ProtectedRoute>
-                              <Index />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin"
-                          element={
-                            <ProtectedRoute>
-                              <AdminPanel />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/survey/:id"
-                          element={
-                            <ProtectedRoute>
-                              <Index />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route path="/survey-response/:id" element={<SurveyResponse />} />
-                        <Route
-                          path="/profile"
-                          element={
-                            <ProtectedRoute>
-                              <Profile />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </main>
-                  </div>
-                </SidebarProvider>
-              } />
-            </Routes>
-          </ClickProvider>
+          {/* Routes for public surveys and landing pages don't need SidebarProvider */}
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/p/:publicCode" element={<PublicSurvey />} />
+            <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
+            <Route path="/pending" element={<PendingApproval />} />
+            
+            {/* All other routes with standard layout */}
+            <Route path="*" element={
+              <SidebarProvider>
+                <div className="flex min-h-screen w-full">
+                  <SurveySidebar />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      {/* Update register route to point to Login component for now */}
+                      <Route path="/register" element={<Login />} />
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <ProtectedRoute>
+                            <Index />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <ProtectedRoute>
+                            <AdminPanel />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/survey/:id"
+                        element={
+                          <ProtectedRoute>
+                            <Index />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="/survey-response/:id" element={<SurveyResponse />} />
+                      <Route
+                        path="/profile"
+                        element={
+                          <ProtectedRoute>
+                            <Profile />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                </div>
+              </SidebarProvider>
+            } />
+          </Routes>
         </TooltipProvider>
       </AuthProvider>
     </BrowserRouter>

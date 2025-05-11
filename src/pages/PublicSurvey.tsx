@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
@@ -12,7 +13,6 @@ import { Answer } from '@/types/survey';
 import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
 import { WelcomePage } from '@/components/survey/WelcomePage';
 import { ThankYouPage } from '@/components/survey/ThankYouPage';
-import { ClickProvider } from '@/contexts/ClickContext';
 
 interface PublicSurveyProps {
   isPreviewMode?: boolean;
@@ -113,80 +113,78 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       surveyTitle={survey?.title || "Loading..."} 
       isPreviewMode={isPreviewMode}
     >
-      <ClickProvider>
-        <div className="container max-w-3xl py-10 px-4">
-          {/* Preview Mode Banner */}
-          {isPreviewMode && (
-            <Alert className="mb-6 border-amber-500 bg-amber-50">
-              <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
-              <AlertDescription className="text-amber-700">
-                This is a preview of your survey. Responses submitted here will not be recorded.
-              </AlertDescription>
-            </Alert>
-          )}
+      <div className="container max-w-3xl py-10 px-4">
+        {/* Preview Mode Banner */}
+        {isPreviewMode && (
+          <Alert className="mb-6 border-amber-500 bg-amber-50">
+            <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              This is a preview of your survey. Responses submitted here will not be recorded.
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {/* Welcome page */}
-          {flowState === 'welcome' && (
-            <WelcomePage
-              title={survey.welcomeTitle}
-              message={survey.welcomeMessage}
-              instructions={survey.welcomeInstructions}
-              buttonText={survey.welcomeButtonText}
-              onStart={handleStartSurvey}
-            />
-          )}
+        {/* Welcome page */}
+        {flowState === 'welcome' && (
+          <WelcomePage
+            title={survey.welcomeTitle}
+            message={survey.welcomeMessage}
+            instructions={survey.welcomeInstructions}
+            buttonText={survey.welcomeButtonText}
+            onStart={handleStartSurvey}
+          />
+        )}
 
-          {/* Questions */}
-          {flowState === 'questions' && (
-            <>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
-                {survey.description && (
-                  <p className="text-muted-foreground">{survey.description}</p>
-                )}
+        {/* Questions */}
+        {flowState === 'questions' && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">{survey.title}</h1>
+              {survey.description && (
+                <p className="text-muted-foreground">{survey.description}</p>
+              )}
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
+                <QuestionItem
+                  key={question.id}
+                  question={question}
+                  index={index}
+                  answers={answers}
+                  onAnswerChange={handleAnswerChange}
+                />
+              ))}
+
+              <div className="pt-4">
+                <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : isPreviewMode ? (
+                    "Preview Submit"
+                  ) : (
+                    "Submit Response"
+                  )}
+                </Button>
               </div>
+            </form>
+          </>
+        )}
 
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
-                  <QuestionItem
-                    key={question.id}
-                    question={question}
-                    index={index}
-                    answers={answers}
-                    onAnswerChange={handleAnswerChange}
-                  />
-                ))}
-
-                <div className="pt-4">
-                  <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : isPreviewMode ? (
-                      "Preview Submit"
-                    ) : (
-                      "Submit Response"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </>
-          )}
-
-          {/* Thank You page */}
-          {flowState === 'thankYou' && (
-            <ThankYouPage
-              title={survey.thankYouTitle}
-              message={survey.thankYouMessage}
-              buttonText={survey.thankYouButtonText}
-              redirectUrl={survey.redirectUrl}
-              onClose={() => setFlowState('welcome')}
-            />
-          )}
-        </div>
-      </ClickProvider>
+        {/* Thank You page */}
+        {flowState === 'thankYou' && (
+          <ThankYouPage
+            title={survey.thankYouTitle}
+            message={survey.thankYouMessage}
+            buttonText={survey.thankYouButtonText}
+            redirectUrl={survey.redirectUrl}
+            onClose={() => setFlowState('welcome')}
+          />
+        )}
+      </div>
     </PublicSurveyLayout>
   );
 };

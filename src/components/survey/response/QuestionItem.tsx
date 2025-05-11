@@ -34,11 +34,7 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
         </p>
       )}
 
-      <QuestionMedia 
-        media={question.media} 
-        figmaPrototypeUrl={question.figmaPrototypeUrl}
-        questionId={question.id}
-      />
+      <QuestionMedia media={question.media} />
 
       <QuestionRenderer 
         question={question} 
