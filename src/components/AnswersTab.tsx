@@ -23,7 +23,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses';
 import { useToast } from '@/hooks/use-toast';
-import { FigmaHeatmapCard } from './survey/FigmaHeatmapCard';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -52,15 +51,10 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
     }));
   };
 
-  // Filter questions with Figma prototypes
-  const figmaQuestions = useMemo(() => {
-    return survey.questions.filter(q => q.figmaPrototypeUrl);
-  }, [survey.questions]);
-
   // Process response data into a format suitable for charts
   const processedResponses = useMemo(() => {
     if (!responses || responses.length === 0) {
-      // Return mock data for development and if there's no responses yet
+      // Return empty array if there's no responses yet
       return [];
     }
 
@@ -146,9 +140,9 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const exportToCSV = () => {
     if (processedResponses.length === 0) {
       toast({
+        variant: "destructive",
         title: "No data to export",
-        description: "There are no responses to export yet.",
-        variant: "destructive"
+        description: "There are no responses to export yet."
       });
       return;
     }
@@ -218,23 +212,6 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
           </div>
         </div>
       </div>
-
-      {/* Display Figma prototype heatmaps if any */}
-      {figmaQuestions.length > 0 && totalResponses > 0 && (
-        <div>
-          <h2 className="text-xl font-bold mb-4 text-carbon">Figma Prototype Interactions</h2>
-          <div className="space-y-4">
-            {figmaQuestions.map(question => (
-              <FigmaHeatmapCard
-                key={question.id}
-                questionId={question.id}
-                questionText={question.text}
-                figmaUrl={question.figmaPrototypeUrl || ''}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       {filteredResponses.length === 0 && totalResponses > 0 && (
         <div className="text-center py-16 bg-white rounded-lg border border-ice">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,12 @@ import {
 import { 
   Trash, 
   GripVertical, 
-  Link as LinkIcon, 
   Copy, 
   Check, 
-  ExternalLink,
-  FileImage,
   ChevronUp,
   ChevronDown,
   Settings,
+  FileImage,
 } from "lucide-react";
 import { 
   Question, 
@@ -36,12 +34,9 @@ import {
   LIKERT_10_LABELS
 } from '@/types/survey';
 import QuestionTypeMenu from './QuestionTypeMenu';
-import MediaUploadButton from './MediaUploadButton';
 import QuestionMediaUpload from './QuestionMediaUpload';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Separator } from "@/components/ui/separator";
 import LikertOptionsDialog from './survey/LikertOptionsDialog';
-import { FigmaPrototypePreview } from './survey/FigmaPrototypePreview';
 
 interface QuestionCardProps {
   question: Question;
@@ -61,11 +56,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   isDragging = false,
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
-  const [figmaUrl, setFigmaUrl] = useState(question.figmaPrototypeUrl || '');
-  const [figmaScreenshot, setFigmaScreenshot] = useState(question.figmaScreenshot || '');
-  const [hasUrlChanged, setHasUrlChanged] = useState(false);
   const [conditionalLogicOpen, setConditionalLogicOpen] = useState(!!question.conditionalLogic?.dependsOn);
-
   const [likertOptionsDialogOpen, setLikertOptionsDialogOpen] = useState(false);
 
   const availableQuestions = questions.filter(q => q.id !== question.id);
@@ -215,35 +206,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     });
   };
 
-  const handleFigmaUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFigmaUrl(e.target.value);
-    setHasUrlChanged(e.target.value !== question.figmaPrototypeUrl);
-  };
-
-  const handleFigmaUrlSave = (url: string) => {
-    onQuestionChange({
-      ...question,
-      figmaPrototypeUrl: url
-    });
-  };
-
-  const handleScreenshotUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    
-    onQuestionChange({
-      ...question,
-      figmaScreenshot: url
-    });
-    
-    setFigmaScreenshot(url);
-  };
-
-  const openFigmaPrototype = () => {
-    if (figmaUrl) {
-      window.open(figmaUrl, '_blank');
-    }
-  };
-
   const duplicateQuestion = () => {
     if (onDuplicateQuestion) {
       onDuplicateQuestion(question);
@@ -350,15 +312,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             )}
           </div>
         </div>
-
-        {/* Figma Prototype */}
-        <FigmaPrototypePreview
-          figmaUrl={question.figmaPrototypeUrl || ''}
-          questionId={question.id}
-          onFigmaUrlSave={handleFigmaUrlSave}
-          onScreenshotUpload={handleScreenshotUpload}
-          hasScreenshot={!!question.figmaScreenshot}
-        />
 
         {/* Question Type & Max Answers */}
         <div className="border-t border-ice pt-3">
