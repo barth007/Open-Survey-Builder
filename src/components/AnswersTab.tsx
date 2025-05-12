@@ -16,7 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download } from "lucide-react";
+import { Download, BarChart as BarChartIcon, PieChart as PieChartIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -277,10 +277,10 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
                           if (value) handleChartTypeChange(item.questionId, value as "bar" | "pie");
                         }}>
                           <ToggleGroupItem value="bar">
-                            <BarChart size={18} />
+                            <BarChartIcon size={18} />
                           </ToggleGroupItem>
                           <ToggleGroupItem value="pie">
-                            <PieChart size={18} />
+                            <PieChartIcon size={18} />
                           </ToggleGroupItem>
                         </ToggleGroup>
                       </div>
