@@ -16,13 +16,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BarChart2, PieChart as PieChartIcon, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses';
 import { useToast } from '@/hooks/use-toast';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -41,6 +43,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const [chartType, setChartType] = React.useState<Record<string, "bar" | "pie">>({});
   const [filterText, setFilterText] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
+  const [selectedResponseGroup, setSelectedResponseGroup] = useState<string | null>(null);
   const { data: responses, isLoading, error } = useQuerySurveyResponses(survey.id);
 
   // Add the missing handleChartTypeChange function
@@ -178,6 +181,10 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
     });
   };
 
+  const handleCardClick = (questionId: string) => {
+    setSelectedResponseGroup(questionId === selectedResponseGroup ? null : questionId);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -196,159 +203,181 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-          <div>
-            <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
-            <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
-            <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
-              <Download size={18} />
-              Export CSV
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {filteredResponses.length === 0 && totalResponses > 0 && (
-        <div className="text-center py-16 bg-white rounded-lg border border-ice">
-          <p className="text-gray-500">No responses match your filter criteria.</p>
-        </div>
-      )}
-
-      {totalResponses === 0 && (
-        <div className="text-center py-16 bg-white rounded-lg border border-ice">
-          <p className="text-gray-500">No responses have been collected for this survey yet.</p>
-        </div>
-      )}
-
-      {filteredResponses.length > 0 && (
-        <>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-            <div className="w-full md:w-1/3">
-              <Input
-                placeholder="Filter questions..."
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div>
-              <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Default order</SelectItem>
-                  <SelectItem value="count">By count (highest first)</SelectItem>
-                  <SelectItem value="alpha">Alphabetically</SelectItem>
-                </SelectContent>
-              </Select>
+    <ResizablePanelGroup direction="horizontal" className="space-y-0">
+      <ResizablePanel defaultSize={60} minSize={40}>
+        <div className="space-y-8 pr-4">
+          <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
+                <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
+                <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
+                  <Download size={18} />
+                  Export CSV
+                </Button>
+              </div>
             </div>
           </div>
 
-          {filteredResponses.map((item) => {
-            const sortedResponses = sortResponses(item.responses);
-            const currentChartType = chartType[item.questionId] || "bar";
+          {filteredResponses.length === 0 && totalResponses > 0 && (
+            <div className="text-center py-16 bg-white rounded-lg border border-ice">
+              <p className="text-gray-500">No responses match your filter criteria.</p>
+            </div>
+          )}
 
-            return (
-              <Card key={item.questionId} className="border-ice">
-                <CardHeader className="border-b border-ice">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">{item.question}</CardTitle>
-                    <ToggleGroup type="single" value={currentChartType} onValueChange={(value) => {
-                      if (value) handleChartTypeChange(item.questionId, value as "bar" | "pie");
-                    }}>
-                      <ToggleGroupItem value="bar">
-                        <BarChart2 size={18} />
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="pie">
-                        <PieChartIcon size={18} />
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  {currentChartType === "bar" ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={sortedResponses} layout={item.likert ? "horizontal" : "vertical"}>
-                        <XAxis dataKey={item.likert ? "answer" : ""} type={item.likert ? "category" : "number"} />
-                        <YAxis dataKey={item.likert ? "" : "answer"} type={item.likert ? "number" : "category"} />
-                        <Tooltip 
-                          formatter={(value, name, props) => {
-                            return [`${value} (${props.payload.percentage}%)`, 'Responses'];
-                          }}
-                        />
-                        <Legend />
-                        <Bar dataKey="count" fill="#2563eb" name="Responses">
-                          {sortedResponses.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {totalResponses === 0 && (
+            <div className="text-center py-16 bg-white rounded-lg border border-ice">
+              <p className="text-gray-500">No responses have been collected for this survey yet.</p>
+            </div>
+          )}
+
+          {filteredResponses.length > 0 && (
+            <>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <div className="w-full md:w-1/3">
+                  <Input
+                    placeholder="Filter questions..."
+                    value={filterText}
+                    onChange={(e) => setFilterText(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Sort by..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Default order</SelectItem>
+                      <SelectItem value="count">By count (highest first)</SelectItem>
+                      <SelectItem value="alpha">Alphabetically</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {filteredResponses.map((item) => {
+                const sortedResponses = sortResponses(item.responses);
+                const currentChartType = chartType[item.questionId] || "bar";
+                const isSelected = selectedResponseGroup === item.questionId;
+
+                return (
+                  <Card 
+                    key={item.questionId} 
+                    className={`border-ice cursor-pointer transition-colors ${isSelected ? 'border-blue-400 ring-1 ring-blue-300' : ''}`}
+                    onClick={() => handleCardClick(item.questionId)}
+                  >
+                    <CardHeader className="border-b border-ice">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg">{item.question}</CardTitle>
+                        <ToggleGroup type="single" value={currentChartType} onValueChange={(value) => {
+                          if (value) handleChartTypeChange(item.questionId, value as "bar" | "pie");
+                        }}>
+                          <ToggleGroupItem value="bar">
+                            <BarChart size={18} />
+                          </ToggleGroupItem>
+                          <ToggleGroupItem value="pie">
+                            <PieChart size={18} />
+                          </ToggleGroupItem>
+                        </ToggleGroup>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      {currentChartType === "bar" ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart data={sortedResponses} layout={item.likert ? "horizontal" : "vertical"}>
+                            <XAxis dataKey={item.likert ? "answer" : ""} type={item.likert ? "category" : "number"} />
+                            <YAxis dataKey={item.likert ? "" : "answer"} type={item.likert ? "number" : "category"} />
+                            <Tooltip 
+                              formatter={(value, name, props) => {
+                                return [`${value} (${props.payload.percentage}%)`, 'Responses'];
+                              }}
+                            />
+                            <Legend />
+                            <Bar dataKey="count" fill="#2563eb" name="Responses">
+                              {sortedResponses.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={sortedResponses}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              outerRadius={100}
+                              fill="#8884d8"
+                              dataKey="count"
+                              nameKey="answer"
+                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            >
+                              {sortedResponses.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip 
+                              formatter={(value, name, entry) => {
+                                // Access the percentage directly from our data
+                                const dataEntry = entry && entry.payload ? entry.payload : {};
+                                const percentage = dataEntry.percentage || 0;
+                                return [`${value} (${percentage}%)`, name];
+                              }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      )}
+                      
+                      <Table className="mt-4">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Answer</TableHead>
+                            <TableHead>Count</TableHead>
+                            <TableHead>Percentage</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sortedResponses.map((response) => (
+                            <TableRow key={response.answer}>
+                              <TableCell>{response.answer}</TableCell>
+                              <TableCell>{response.count}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                                  {response.percentage}%
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={sortedResponses}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="count"
-                          nameKey="answer"
-                          label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {sortedResponses.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value, name, entry) => {
-                            // Access the percentage directly from our data
-                            const dataEntry = entry && entry.payload ? entry.payload : {};
-                            const percentage = dataEntry.percentage || 0;
-                            return [`${value} (${percentage}%)`, name];
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  )}
-                  
-                  <Table className="mt-4">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Answer</TableHead>
-                        <TableHead>Count</TableHead>
-                        <TableHead>Percentage</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedResponses.map((response) => (
-                        <TableRow key={response.answer}>
-                          <TableCell>{response.answer}</TableCell>
-                          <TableCell>{response.count}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                              {response.percentage}%
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </>
-      )}
-    </div>
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </>
+          )}
+        </div>
+      </ResizablePanel>
+
+      <ResizableHandle withHandle />
+      
+      <ResizablePanel defaultSize={40} minSize={30}>
+        <div className="pl-4 h-full">
+          <AnalysisPanel 
+            selectedResponseGroup={selectedResponseGroup} 
+            responseData={selectedResponseGroup ? 
+              processedResponses.find(r => r.questionId === selectedResponseGroup) : null
+            } 
+          />
+        </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 };
 
