@@ -19,9 +19,9 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
   onDeleteQuestion
 }) => {
   return (
-    <div className="flex justify-between border-t px-6 py-3 border-ice">
-      <div className="flex items-center gap-2">
-        <div className="flex items-center">
+    <div className="flex justify-between border-t px-6 py-4 border-ice w-full">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center space-x-2">
           <Switch
             checked={isRequired}
             onCheckedChange={onRequiredChange}
@@ -31,15 +31,15 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
         </div>
       </div>
       
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         {onDuplicateQuestion && (
           <Button 
             variant="outline" 
             size="sm" 
             onClick={onDuplicateQuestion}
-            className="text-abyss border-abyss hover:bg-abyss hover:text-white"
+            className="text-abyss border-abyss hover:bg-abyss hover:text-white px-3"
           >
-            <Copy size={16} className="mr-1" />
+            <Copy size={16} className="mr-2" />
             Duplicate
           </Button>
         )}
@@ -47,9 +47,9 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
           variant="ghost" 
           size="sm" 
           onClick={onDeleteQuestion}
-          className="text-magma hover:text-magma hover:bg-red-50"
+          className="text-magma hover:text-magma hover:bg-red-50 px-3"
         >
-          <Trash size={16} className="mr-1" />
+          <Trash size={16} className="mr-2" />
           Delete
         </Button>
       </div>

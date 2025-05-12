@@ -14,27 +14,25 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
   value,
   onChange
 }) => {
-  const columns = question.options.length;
-  const gridClass = `grid grid-cols-${columns < 5 ? columns : 5} md:grid-cols-${columns} gap-1`;
-  
   return (
-    <div className="mt-4">
+    <div className="mt-6">
       <RadioGroup 
         name={`likert-${question.id}`}
         value={value}
         onValueChange={onChange}
+        className="w-full"
       >
-        <div className={gridClass}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {question.options.map((option) => (
-            <div key={option.id} className="flex flex-col items-center">
+            <div key={option.id} className="flex flex-col items-center p-2">
               <RadioGroupItem
                 value={option.id}
                 id={`likert-${option.id}`}
-                className="mx-auto"
+                className="mx-auto mb-2"
               />
               <label 
                 htmlFor={`likert-${option.id}`}
-                className="text-xs text-center mt-1"
+                className="text-sm text-center mt-2 text-gray-700"
               >
                 {option.text}
               </label>

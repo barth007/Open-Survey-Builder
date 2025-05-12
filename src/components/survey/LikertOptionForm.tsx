@@ -14,10 +14,10 @@ const LikertOptionForm: React.FC<LikertOptionFormProps> = ({
   onOptionTextChange,
 }) => {
   return (
-    <div className="grid gap-4 py-4">
+    <div className="grid gap-5 py-4">
       {options.map((option, index) => (
-        <div key={option.id} className="grid grid-cols-12 items-center gap-2">
-          <Label htmlFor={`option-${index}`} className="col-span-2 text-right">
+        <div key={option.id} className="grid grid-cols-12 items-center gap-4">
+          <Label htmlFor={`option-${index}`} className="col-span-2 text-right font-medium">
             {index + 1}.
           </Label>
           <Input
