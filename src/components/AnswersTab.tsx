@@ -1,23 +1,8 @@
 
 import React, { useState, useMemo } from 'react';
-import { Survey, Question, Answer } from '@/types/survey';
-import { 
-  BarChart, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend, 
-  Bar, 
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Download, BarChart as BarChartIcon, PieChart as PieChartIcon } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Survey } from '@/types/survey';
+import { Card } from "@/components/ui/card";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -25,6 +10,7 @@ import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses'
 import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
+import { ResponseCardItem } from '@/components/survey/analysis/ResponseCardItem';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -70,7 +56,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
         
         // Count occurrences of each answer
         responses.forEach(response => {
-          const answer = response.answers.find((a: Answer) => a.questionId === question.id);
+          const answer = response.answers.find((a) => a.questionId === question.id);
           
           if (answer) {
             if (Array.isArray(answer.value)) {
@@ -265,99 +251,17 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
                 const isSelected = selectedResponseGroup === item.questionId;
 
                 return (
-                  <Card 
-                    key={item.questionId} 
-                    className={`border-ice cursor-pointer transition-colors ${isSelected ? 'border-blue-400 ring-1 ring-blue-300' : ''}`}
+                  <ResponseCardItem
+                    key={item.questionId}
+                    item={{
+                      ...item,
+                      responses: sortedResponses
+                    }}
+                    isSelected={isSelected}
+                    chartType={currentChartType}
+                    onChartTypeChange={handleChartTypeChange}
                     onClick={() => handleCardClick(item.questionId)}
-                  >
-                    <CardHeader className="border-b border-ice">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg">{item.question}</CardTitle>
-                        <ToggleGroup type="single" value={currentChartType} onValueChange={(value) => {
-                          if (value) handleChartTypeChange(item.questionId, value as "bar" | "pie");
-                        }}>
-                          <ToggleGroupItem value="bar">
-                            <BarChartIcon size={18} />
-                          </ToggleGroupItem>
-                          <ToggleGroupItem value="pie">
-                            <PieChartIcon size={18} />
-                          </ToggleGroupItem>
-                        </ToggleGroup>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      {currentChartType === "bar" ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={sortedResponses} layout={item.likert ? "horizontal" : "vertical"}>
-                            <XAxis dataKey={item.likert ? "answer" : ""} type={item.likert ? "category" : "number"} />
-                            <YAxis dataKey={item.likert ? "" : "answer"} type={item.likert ? "number" : "category"} />
-                            <Tooltip 
-                              formatter={(value, name, props) => {
-                                return [`${value} (${props.payload.percentage}%)`, 'Responses'];
-                              }}
-                            />
-                            <Legend />
-                            <Bar dataKey="count" fill="#2563eb" name="Responses">
-                              {sortedResponses.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <PieChart>
-                            <Pie
-                              data={sortedResponses}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              outerRadius={100}
-                              fill="#8884d8"
-                              dataKey="count"
-                              nameKey="answer"
-                              label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            >
-                              {sortedResponses.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip 
-                              formatter={(value, name, entry) => {
-                                // Access the percentage directly from our data
-                                const dataEntry = entry && entry.payload ? entry.payload : {};
-                                const percentage = dataEntry.percentage || 0;
-                                return [`${value} (${percentage}%)`, name];
-                              }}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      )}
-                      
-                      <Table className="mt-4">
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Answer</TableHead>
-                            <TableHead>Count</TableHead>
-                            <TableHead>Percentage</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {sortedResponses.map((response) => (
-                            <TableRow key={response.answer}>
-                              <TableCell>{response.answer}</TableCell>
-                              <TableCell>{response.count}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                                  {response.percentage}%
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
+                  />
                 );
               })}
             </>

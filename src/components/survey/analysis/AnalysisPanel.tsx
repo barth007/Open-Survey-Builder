@@ -1,7 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database, Filter, Tag } from "lucide-react";
+import { Database, Filter, Tag, Scale, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { StatisticalInsights } from '@/components/survey/analysis/StatisticalInsights';
+import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
+import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
 
 interface ResponseData {
   answer: string;
@@ -25,6 +32,48 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   selectedResponseGroup,
   responseData
 }) => {
+  const [tags, setTags] = useState<Record<string, string[]>>({});
+  const [newTag, setNewTag] = useState("");
+  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers'>('tagging');
+
+  // Add a new tag to a response
+  const handleAddTag = (answer: string) => {
+    if (!newTag.trim() || !responseData) return;
+    
+    const questionId = responseData.questionId;
+    const key = `${questionId}-${answer}`;
+    
+    setTags(prev => ({
+      ...prev,
+      [key]: [...(prev[key] || []), newTag.trim()]
+    }));
+    
+    setNewTag("");
+  };
+
+  // Remove a tag from a response
+  const handleRemoveTag = (answer: string, tagToRemove: string) => {
+    if (!responseData) return;
+    
+    const questionId = responseData.questionId;
+    const key = `${questionId}-${answer}`;
+    
+    setTags(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  // Get tags for a specific answer
+  const getTagsForAnswer = (answer: string): string[] => {
+    if (!responseData) return [];
+    
+    const questionId = responseData.questionId;
+    const key = `${questionId}-${answer}`;
+    
+    return tags[key] || [];
+  };
+
   return (
     <Card className="h-full border-ice">
       <CardHeader className="border-b border-ice">
@@ -45,69 +94,114 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
               {responseData?.question}
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-50 p-4 rounded-md border border-ice">
-                <div className="flex items-center mb-2">
-                  <Filter className="h-4 w-4 mr-2 text-blue-600" />
-                  <h4 className="font-medium text-sm">Statistical Summary</h4>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p className="flex justify-between">
-                    <span className="text-gray-500">Total responses:</span>
-                    <span className="font-medium">{responseData?.responses.reduce((sum, r) => sum + r.count, 0) || 0}</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="text-gray-500">Unique answers:</span>
-                    <span className="font-medium">{responseData?.responses.length || 0}</span>
-                  </p>
-                  {responseData?.likert && (
-                    <>
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Median:</span>
-                        <span className="font-medium">Coming soon</span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Mode:</span>
-                        <span className="font-medium">Coming soon</span>
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-md border border-ice">
-                <div className="flex items-center mb-2">
-                  <Tag className="h-4 w-4 mr-2 text-blue-600" />
-                  <h4 className="font-medium text-sm">Tagging</h4>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Tag functionality will allow grouping and categorizing of responses for deeper analysis.
-                </p>
-              </div>
+            <div className="flex space-x-2 mb-4 border-b pb-4">
+              <Button 
+                variant={activeTab === 'tagging' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => setActiveTab('tagging')}
+              >
+                <Tag className="mr-1 h-4 w-4" /> Tagging
+              </Button>
+              <Button 
+                variant={activeTab === 'statistics' ? 'default' : 'outline'}
+                size="sm" 
+                onClick={() => setActiveTab('statistics')}
+              >
+                <Filter className="mr-1 h-4 w-4" /> Statistics
+              </Button>
+              {responseData?.likert && (
+                <>
+                  <Button 
+                    variant={activeTab === 'scale' ? 'default' : 'outline'}
+                    size="sm" 
+                    onClick={() => setActiveTab('scale')}
+                  >
+                    <Scale className="mr-1 h-4 w-4" /> Scale Mapping
+                  </Button>
+                  <Button 
+                    variant={activeTab === 'outliers' ? 'default' : 'outline'}
+                    size="sm" 
+                    onClick={() => setActiveTab('outliers')}
+                  >
+                    <AlertTriangle className="mr-1 h-4 w-4" /> Outliers
+                  </Button>
+                </>
+              )}
             </div>
 
-            {responseData?.likert && (
-              <div className="border-t border-ice pt-4">
-                <h4 className="font-medium mb-3">Likert Scale Insights</h4>
+            {activeTab === 'tagging' && (
+              <div className="space-y-6">
                 <div className="bg-gray-50 p-4 rounded-md border border-ice">
-                  <p className="text-sm text-gray-500 mb-3">
-                    Additional statistical analysis for Likert scale responses will be available in future updates:
+                  <h4 className="font-medium mb-3 flex items-center">
+                    <Tag className="h-4 w-4 mr-2 text-blue-600" /> Response Tagging
+                  </h4>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Add tags to categorize and group similar responses for easier analysis.
                   </p>
-                  <ul className="text-sm space-y-2 list-disc pl-4 text-gray-600">
-                    <li>Normality testing</li>
-                    <li>Interquartile range (IQR) analysis</li>
-                    <li>Correlation with other questions</li>
-                    <li>Outlier detection</li>
-                  </ul>
+                  
+                  <div className="space-y-4">
+                    {responseData?.responses.map(response => (
+                      <div key={response.answer} className="border-b border-gray-100 pb-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium">{response.answer}</span>
+                          <span className="text-sm text-gray-500">{response.count} responses</span>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {getTagsForAnswer(response.answer).map(tag => (
+                            <Badge 
+                              key={tag} 
+                              variant="secondary" 
+                              className="flex items-center gap-1 bg-blue-50"
+                            >
+                              {tag}
+                              <button 
+                                className="ml-1 text-gray-500 hover:text-red-500"
+                                onClick={() => handleRemoveTag(response.answer, tag)}
+                              >
+                                ×
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2 mt-2">
+                          <Input 
+                            placeholder="Add a tag..." 
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            className="text-sm h-8"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleAddTag(response.answer);
+                            }}
+                          />
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleAddTag(response.answer)}
+                            className="h-8"
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
-            <div className="pt-4 text-sm text-gray-500">
-              <p>
-                This analysis panel will be expanded with more tools in future updates.
-              </p>
-            </div>
+            {activeTab === 'statistics' && responseData && (
+              <StatisticalInsights responseData={responseData} />
+            )}
+
+            {activeTab === 'scale' && responseData?.likert && (
+              <ScaleMapping responseData={responseData} />
+            )}
+
+            {activeTab === 'outliers' && responseData?.likert && (
+              <OutlierDetection responseData={responseData} />
+            )}
           </div>
         )}
       </CardContent>

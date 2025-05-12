@@ -22,11 +22,15 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
         onValueChange={onChange}
         className="w-full"
       >
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {question.options.map((option) => (
             <div 
               key={option.id} 
-              className="flex flex-col items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              className={`flex flex-col items-center p-4 border rounded-md transition-colors
+                ${value === option.id 
+                  ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-300' 
+                  : 'border-gray-200 hover:bg-gray-50'}
+              `}
             >
               <RadioGroupItem
                 value={option.id}
@@ -35,7 +39,7 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
               />
               <label 
                 htmlFor={`likert-${option.id}`}
-                className="text-sm text-center text-gray-700 px-1"
+                className="text-sm text-center text-gray-700 px-1 cursor-pointer"
               >
                 {option.text}
               </label>
