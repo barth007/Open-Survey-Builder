@@ -1,4 +1,5 @@
 
+
 export interface SurveyFolder {
   id: string;
   name: string;
@@ -13,3 +14,12 @@ export interface Survey {
   folderId?: string;
   teamId?: string;
 }
+
+export interface ActiveUser {
+  id: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  last_active: Date;
+}
+
