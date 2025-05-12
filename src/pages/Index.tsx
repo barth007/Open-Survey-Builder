@@ -1,19 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import EditTab from '@/components/survey/EditTab';
-import PreviewTab from '@/components/survey/PreviewTab';
-import AnswersTab from '@/components/AnswersTab';
-import PagesTab from '@/components/survey/PagesTab';
-import { useSurveyState } from '@/hooks/useSurveyState';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
-import UserProfile from '@/components/UserProfile';
+import { useSurveyState } from '@/hooks/useSurveyState';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
-import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
+import { useAutoSave } from '@/hooks/survey/useAutoSave';
+import SurveyHeader from '@/components/survey/SurveyHeader';
+import SurveyTabs from '@/components/survey/SurveyTabs';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers" | "pages">("edit");
@@ -38,28 +32,13 @@ const Index = () => {
     error
   } = useSurveyState(surveyId);
 
-  const [pendingChanges, setPendingChanges] = useState(false);
+  const { pendingChanges, setPendingChanges } = useAutoSave({ onSave: handleSave });
 
   useEffect(() => {
     if (survey.title) {
       document.title = survey.title;
     }
   }, [survey.title]);
-
-  useEffect(() => {
-    let saveTimer: ReturnType<typeof setTimeout>;
-    
-    if (pendingChanges) {
-      saveTimer = setTimeout(() => {
-        handleSave();
-        setPendingChanges(false);
-      }, 2000); // Save after 2 seconds of inactivity
-    }
-    
-    return () => {
-      if (saveTimer) clearTimeout(saveTimer);
-    };
-  }, [pendingChanges, handleSave]);
 
   const handleSurveyTitleChange = (title: string) => {
     handleTitleChange(title);
@@ -97,7 +76,7 @@ const Index = () => {
     setPendingChanges(true);
   };
 
-  // New handlers for welcome and thank you pages
+  // Welcome and thank you pages handlers
   const handleWelcomeTitleChange = (welcomeTitle: string) => {
     updateSurvey({ welcomeTitle });
   };
@@ -175,67 +154,32 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-pebble py-8">
       <div className="container max-w-3xl">
-        <header className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-abyss">{survey.title}</h1>
-          <div className="flex items-center gap-2">
-            {pendingChanges && (
-              <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
-            )}
-            
-            <div className="flex -space-x-2 mr-2">
-              {activeUsers.map(user => (
-                <UserProfile key={user.id} compact />
-              ))}
-            </div>
-            
-            <ShareSurveyButton survey={survey} onPublishToggle={togglePublish} />
-          </div>
-        </header>
+        <SurveyHeader 
+          survey={survey}
+          pendingChanges={pendingChanges}
+          activeUsers={activeUsers}
+          onPublishToggle={togglePublish}
+        />
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 bg-ice">
-            <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
-            <TabsTrigger value="pages" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Pages</TabsTrigger>
-            <TabsTrigger value="preview" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Preview</TabsTrigger>
-            <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">
-              Answers
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="edit" className="space-y-4">
-            <EditTab
-              survey={survey}
-              onTitleChange={handleSurveyTitleChange}
-              onDescriptionChange={handleDescriptionChangeWithTracking}
-              onQuestionChange={handleQuestionChange}
-              onDeleteQuestion={handleDeleteQuestion}
-              onDuplicateQuestion={handleDuplicateQuestion}
-              onAddQuestion={handleAddQuestion}
-            />
-          </TabsContent>
-
-          <TabsContent value="pages" className="space-y-4">
-            <PagesTab
-              survey={survey}
-              onWelcomeTitleChange={handleWelcomeTitleChange}
-              onWelcomeMessageChange={handleWelcomeMessageChange}
-              onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
-              onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
-              onThankYouTitleChange={handleThankYouTitleChange}
-              onThankYouMessageChange={handleThankYouMessageChange}
-              onThankYouButtonTextChange={handleThankYouButtonTextChange}
-              onRedirectUrlChange={handleRedirectUrlChange}
-            />
-          </TabsContent>
-
-          <TabsContent value="preview" className="space-y-4">
-            <PreviewTab survey={survey} />
-          </TabsContent>
-
-          <TabsContent value="answers" className="space-y-4">
-            <AnswersTab survey={survey} />
-          </TabsContent>
-        </Tabs>
+        <SurveyTabs 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          survey={survey}
+          onTitleChange={handleSurveyTitleChange}
+          onDescriptionChange={handleDescriptionChangeWithTracking}
+          onQuestionChange={handleQuestionChange}
+          onDeleteQuestion={handleDeleteQuestion}
+          onDuplicateQuestion={handleDuplicateQuestion}
+          onAddQuestion={handleAddQuestion}
+          onWelcomeTitleChange={handleWelcomeTitleChange}
+          onWelcomeMessageChange={handleWelcomeMessageChange}
+          onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
+          onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
+          onThankYouTitleChange={handleThankYouTitleChange}
+          onThankYouMessageChange={handleThankYouMessageChange}
+          onThankYouButtonTextChange={handleThankYouButtonTextChange}
+          onRedirectUrlChange={handleRedirectUrlChange}
+        />
       </div>
     </div>
   );
