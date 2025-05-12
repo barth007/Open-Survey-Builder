@@ -10,7 +10,7 @@ import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyTabs from '@/components/survey/SurveyTabs';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"edit" | "preview" | "answers" | "pages">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -153,7 +153,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-pebble py-8">
-      <div className="container max-w-3xl">
+      <div className="container max-w-6xl"> {/* Increased width to accommodate side-by-side layout */}
         <SurveyHeader 
           survey={survey}
           pendingChanges={pendingChanges}
