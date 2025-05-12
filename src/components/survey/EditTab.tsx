@@ -1,17 +1,17 @@
 
 import React from 'react';
-import { Survey, Question } from '@/types/survey';
+import { Survey } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
-import QuestionCard from '@/components/QuestionCard';
 import AddQuestionButton from '@/components/AddQuestionButton';
+import QuestionsList from './QuestionsList';
 
 interface EditTabProps {
   survey: Survey;
   onTitleChange: (title: string) => void;
   onDescriptionChange: (description: string) => void;
-  onQuestionChange: (question: Question) => void;
+  onQuestionChange: (question: any) => void;
   onDeleteQuestion: (id: string) => void;
-  onDuplicateQuestion: (question: Question) => void;
+  onDuplicateQuestion: (question: any) => void;
   onAddQuestion: () => void;
 }
 
@@ -33,16 +33,12 @@ const EditTab: React.FC<EditTabProps> = ({
         onDescriptionChange={onDescriptionChange}
       />
 
-      {survey.questions.map((question) => (
-        <QuestionCard
-          key={question.id}
-          question={question}
-          questions={survey.questions}
-          onQuestionChange={onQuestionChange}
-          onDeleteQuestion={onDeleteQuestion}
-          onDuplicateQuestion={onDuplicateQuestion}
-        />
-      ))}
+      <QuestionsList 
+        questions={survey.questions}
+        onQuestionChange={onQuestionChange}
+        onDeleteQuestion={onDeleteQuestion}
+        onDuplicateQuestion={onDuplicateQuestion}
+      />
 
       <AddQuestionButton onClick={onAddQuestion} />
     </div>
