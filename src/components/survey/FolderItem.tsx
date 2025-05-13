@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Folder, FolderOpen, Plus, Trash2 } from 'lucide-react';
-import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SurveyFolder } from '@/types/survey-organization';
 import { DraggableSurveyList } from './DraggableSurveyList';
@@ -28,6 +28,15 @@ export function FolderItem({
   isCollapsed = false
 }: FolderItemProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { setOpen } = useSidebar();
+  
+  const handleFolderClick = () => {
+    // If sidebar is collapsed, open it first
+    if (isCollapsed) {
+      setOpen(true);
+    }
+    onToggle();
+  };
 
   return (
     <div className="mb-1">
@@ -37,7 +46,7 @@ export function FolderItem({
         onMouseLeave={() => setIsHovered(false)}
       >
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={onToggle} className="flex-1 justify-center md:justify-start gap-2">
+          <SidebarMenuButton onClick={handleFolderClick} className="flex-1 justify-center md:justify-start gap-2">
             {isOpen ? 
               <FolderOpen className="h-4 w-4 flex-shrink-0" /> : 
               <Folder className="h-4 w-4 flex-shrink-0" />

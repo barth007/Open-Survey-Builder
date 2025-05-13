@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Survey } from '@/types/survey';
 import { Card } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { ResponseCardItem } from '@/components/survey/analysis/ResponseCardItem';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -218,12 +218,12 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
       <div className="flex justify-center items-center h-64">
         <div className="flex gap-4">
           <Button onClick={toggleLeftPanel} variant="outline" className="flex gap-2">
-            <ChevronLeft size={18} />
+            <ChevronRight size={18} />
             Show Responses
           </Button>
           <Button onClick={toggleRightPanel} variant="outline" className="flex gap-2">
             Show Analysis
-            <ChevronRight size={18} />
+            <ChevronLeft size={18} />
           </Button>
         </div>
       </div>
@@ -231,7 +231,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="space-y-0">
+    <ResizablePanelGroup direction="horizontal" className="min-h-[calc(100vh-200px)]">
       {leftPanelCollapsed ? (
         <div className="w-12 border-r border-gray-200 flex items-center justify-center">
           <Button 
@@ -246,84 +246,94 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
       ) : (
         <>
           <ResizablePanel defaultSize={defaultLeftSize} minSize={30}>
-            <div className="space-y-8 pr-4">
-              <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
-                    <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
-                    <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
-                      <Download size={18} />
-                      Export CSV
-                    </Button>
-                    <Button onClick={toggleLeftPanel} variant="ghost" className="p-1 h-auto">
-                      <ChevronLeft size={18} />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {filteredResponses.length === 0 && totalResponses > 0 && (
-                <div className="text-center py-16 bg-white rounded-lg border border-ice">
-                  <p className="text-gray-500">No responses match your filter criteria.</p>
-                </div>
-              )}
-
-              {totalResponses === 0 && (
-                <div className="text-center py-16 bg-white rounded-lg border border-ice">
-                  <p className="text-gray-500">No responses have been collected for this survey yet.</p>
-                </div>
-              )}
-
-              {filteredResponses.length > 0 && (
-                <>
-                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                    <div className="w-full md:w-1/3">
-                      <Input
-                        placeholder="Filter questions..."
-                        value={filterText}
-                        onChange={(e) => setFilterText(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
+            <ScrollArea className="h-[calc(100vh-220px)]">
+              <div className="space-y-8 pr-4">
+                <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <div>
-                      <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sort by..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="default">Default order</SelectItem>
-                          <SelectItem value="count">By count (highest first)</SelectItem>
-                          <SelectItem value="alpha">Alphabetically</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
+                      <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
+                      <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
+                        <Download size={18} />
+                        Export CSV
+                      </Button>
                     </div>
                   </div>
+                </div>
 
-                  {filteredResponses.map((item) => {
-                    const sortedResponses = sortResponses(item.responses);
-                    const currentChartType = chartType[item.questionId] || "bar";
-                    const isSelected = selectedResponseGroup === item.questionId;
+                {filteredResponses.length === 0 && totalResponses > 0 && (
+                  <div className="text-center py-16 bg-white rounded-lg border border-ice">
+                    <p className="text-gray-500">No responses match your filter criteria.</p>
+                  </div>
+                )}
 
-                    return (
-                      <ResponseCardItem
-                        key={item.questionId}
-                        item={{
-                          ...item,
-                          responses: sortedResponses
-                        }}
-                        isSelected={isSelected}
-                        chartType={currentChartType}
-                        onChartTypeChange={handleChartTypeChange}
-                        onClick={() => handleCardClick(item.questionId)}
-                      />
-                    );
-                  })}
-                </>
-              )}
+                {totalResponses === 0 && (
+                  <div className="text-center py-16 bg-white rounded-lg border border-ice">
+                    <p className="text-gray-500">No responses have been collected for this survey yet.</p>
+                  </div>
+                )}
+
+                {filteredResponses.length > 0 && (
+                  <>
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                      <div className="w-full md:w-1/3">
+                        <Input
+                          placeholder="Filter questions..."
+                          value={filterText}
+                          onChange={(e) => setFilterText(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Sort by..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Default order</SelectItem>
+                            <SelectItem value="count">By count (highest first)</SelectItem>
+                            <SelectItem value="alpha">Alphabetically</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {filteredResponses.map((item) => {
+                      const sortedResponses = sortResponses(item.responses);
+                      const currentChartType = chartType[item.questionId] || "bar";
+                      const isSelected = selectedResponseGroup === item.questionId;
+
+                      return (
+                        <ResponseCardItem
+                          key={item.questionId}
+                          item={{
+                            ...item,
+                            responses: sortedResponses
+                          }}
+                          isSelected={isSelected}
+                          chartType={currentChartType}
+                          onChartTypeChange={handleChartTypeChange}
+                          onClick={() => handleCardClick(item.questionId)}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </div>
+            </ScrollArea>
+            
+            <div className="absolute right-[-16px] top-1/2 transform -translate-y-1/2 z-10">
+              <Button 
+                variant="ghost" 
+                onClick={toggleLeftPanel} 
+                className="p-2 h-auto rounded-full shadow-md bg-background border"
+                title="Hide responses panel"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
             </div>
           </ResizablePanel>
 
@@ -344,14 +354,27 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
         </div>
       ) : (
         <ResizablePanel defaultSize={defaultRightSize} minSize={30}>
-          <div className="pl-4 h-full">
-            <AnalysisPanel 
-              selectedResponseGroup={selectedResponseGroup}
-              responseData={selectedResponseGroup ? 
-                processedResponses.find(r => r.questionId === selectedResponseGroup) : null
-              }
-              onToggleVisibility={toggleRightPanel}
-            />
+          <ScrollArea className="h-[calc(100vh-220px)]">
+            <div className="pl-4 h-full">
+              <AnalysisPanel 
+                selectedResponseGroup={selectedResponseGroup}
+                responseData={selectedResponseGroup ? 
+                  processedResponses.find(r => r.questionId === selectedResponseGroup) : null
+                }
+                onToggleVisibility={toggleRightPanel}
+              />
+            </div>
+          </ScrollArea>
+          
+          <div className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 z-10">
+            <Button 
+              variant="ghost" 
+              onClick={toggleRightPanel} 
+              className="p-2 h-auto rounded-full shadow-md bg-background border"
+              title="Hide analysis panel"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
         </ResizablePanel>
       )}

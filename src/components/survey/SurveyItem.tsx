@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { Trash2, FileText } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
-import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,7 @@ export function DraggableSurveyItem({
   const navigate = useNavigate();
   const { updateSurvey } = useMutateSurvey();
   const queryClient = useQueryClient();
+  const { setOpen } = useSidebar();
   
   // Listen for updates to this survey in the cache
   useEffect(() => {
@@ -87,6 +88,16 @@ export function DraggableSurveyItem({
     }
   };
 
+  const handleSurveyClick = () => {
+    if (!isEditing) {
+      // If sidebar is collapsed, open it first
+      if (isCollapsed) {
+        setOpen(true);
+      }
+      navigate(`/survey/${survey.id}`);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -102,7 +113,7 @@ export function DraggableSurveyItem({
         <SidebarMenuButton
           asChild
           className="w-full"
-          onClick={() => !isEditing && navigate(`/survey/${survey.id}`)}
+          onClick={handleSurveyClick}
           onDoubleClick={() => setIsEditing(true)}
         >
           {isEditing ? (
