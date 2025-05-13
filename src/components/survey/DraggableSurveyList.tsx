@@ -9,13 +9,15 @@ interface DraggableSurveyListProps {
   onDeleteSurvey: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
   folderId?: string;
+  isCollapsed?: boolean;
 }
 
 export function DraggableSurveyList({
   surveys,
   onDeleteSurvey,
   onUpdateOrder,
-  folderId
+  folderId,
+  isCollapsed = false
 }: DraggableSurveyListProps) {
   return (
     <SortableContext items={surveys} strategy={verticalListSortingStrategy}>
@@ -27,6 +29,7 @@ export function DraggableSurveyList({
             onDelete={() => onDeleteSurvey(survey.id)}
             onUpdateOrder={onUpdateOrder}
             folderId={folderId}
+            isCollapsed={isCollapsed}
           />
         ))}
       </div>

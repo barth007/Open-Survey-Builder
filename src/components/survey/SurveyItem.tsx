@@ -16,9 +16,16 @@ interface DraggableSurveyItemProps {
   onDelete: () => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
   folderId?: string;
+  isCollapsed?: boolean;
 }
 
-export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId }: DraggableSurveyItemProps) {
+export function DraggableSurveyItem({ 
+  survey, 
+  onDelete, 
+  onUpdateOrder, 
+  folderId,
+  isCollapsed = false
+}: DraggableSurveyItemProps) {
   const { id: currentSurveyId } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(survey.name);
@@ -115,29 +122,31 @@ export function DraggableSurveyItem({ survey, onDelete, onUpdateOrder, folderId 
               autoFocus
             />
           ) : (
-            <span className="truncate">{name}</span>
+            <span className="truncate">{isCollapsed ? "" : name}</span>
           )}
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent rounded-md mr-1"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete Survey</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!isCollapsed && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent rounded-md mr-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Survey</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 }
