@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Survey } from '@/types/survey';
 import { Card } from "@/components/ui/card";
-import { Download } from "lucide-react";
+import { Download, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,12 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
   const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
   const [selectedResponseGroup, setSelectedResponseGroup] = useState<string | null>(null);
   const { data: responses, isLoading, error } = useQuerySurveyResponses(survey.id);
+  
+  // State for panel visibility
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [defaultLeftSize, setDefaultLeftSize] = useState(60);
+  const [defaultRightSize, setDefaultRightSize] = useState(40);
 
   // Add the missing handleChartTypeChange function
   const handleChartTypeChange = (questionId: string, type: "bar" | "pie") => {
@@ -171,6 +177,24 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
     setSelectedResponseGroup(questionId === selectedResponseGroup ? null : questionId);
   };
 
+  // Toggle left panel visibility
+  const toggleLeftPanel = () => {
+    if (!leftPanelCollapsed) {
+      // Store current size before collapsing
+      setDefaultLeftSize(60);
+    }
+    setLeftPanelCollapsed(!leftPanelCollapsed);
+  };
+
+  // Toggle right panel visibility
+  const toggleRightPanel = () => {
+    if (!rightPanelCollapsed) {
+      // Store current size before collapsing
+      setDefaultRightSize(40);
+    }
+    setRightPanelCollapsed(!rightPanelCollapsed);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -188,99 +212,149 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
     );
   }
 
+  // If both panels are collapsed, show controls to expand them
+  if (leftPanelCollapsed && rightPanelCollapsed) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="flex gap-4">
+          <Button onClick={toggleLeftPanel} variant="outline" className="flex gap-2">
+            <ChevronLeft size={18} />
+            Show Responses
+          </Button>
+          <Button onClick={toggleRightPanel} variant="outline" className="flex gap-2">
+            Show Analysis
+            <ChevronRight size={18} />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ResizablePanelGroup direction="horizontal" className="space-y-0">
-      <ResizablePanel defaultSize={60} minSize={40}>
-        <div className="space-y-8 pr-4">
-          <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-              <div>
-                <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
-                <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
-                <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
-                  <Download size={18} />
-                  Export CSV
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {filteredResponses.length === 0 && totalResponses > 0 && (
-            <div className="text-center py-16 bg-white rounded-lg border border-ice">
-              <p className="text-gray-500">No responses match your filter criteria.</p>
-            </div>
-          )}
-
-          {totalResponses === 0 && (
-            <div className="text-center py-16 bg-white rounded-lg border border-ice">
-              <p className="text-gray-500">No responses have been collected for this survey yet.</p>
-            </div>
-          )}
-
-          {filteredResponses.length > 0 && (
-            <>
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                <div className="w-full md:w-1/3">
-                  <Input
-                    placeholder="Filter questions..."
-                    value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Sort by..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="default">Default order</SelectItem>
-                      <SelectItem value="count">By count (highest first)</SelectItem>
-                      <SelectItem value="alpha">Alphabetically</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {filteredResponses.map((item) => {
-                const sortedResponses = sortResponses(item.responses);
-                const currentChartType = chartType[item.questionId] || "bar";
-                const isSelected = selectedResponseGroup === item.questionId;
-
-                return (
-                  <ResponseCardItem
-                    key={item.questionId}
-                    item={{
-                      ...item,
-                      responses: sortedResponses
-                    }}
-                    isSelected={isSelected}
-                    chartType={currentChartType}
-                    onChartTypeChange={handleChartTypeChange}
-                    onClick={() => handleCardClick(item.questionId)}
-                  />
-                );
-              })}
-            </>
-          )}
+      {leftPanelCollapsed ? (
+        <div className="w-12 border-r border-gray-200 flex items-center justify-center">
+          <Button 
+            variant="ghost" 
+            onClick={toggleLeftPanel} 
+            className="p-2 h-auto"
+            title="Show responses panel"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </Button>
         </div>
-      </ResizablePanel>
+      ) : (
+        <>
+          <ResizablePanel defaultSize={defaultLeftSize} minSize={30}>
+            <div className="space-y-8 pr-4">
+              <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
+                    <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
+                    <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
+                      <Download size={18} />
+                      Export CSV
+                    </Button>
+                    <Button onClick={toggleLeftPanel} variant="ghost" className="p-1 h-auto">
+                      <ChevronLeft size={18} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
-      <ResizableHandle withHandle />
+              {filteredResponses.length === 0 && totalResponses > 0 && (
+                <div className="text-center py-16 bg-white rounded-lg border border-ice">
+                  <p className="text-gray-500">No responses match your filter criteria.</p>
+                </div>
+              )}
+
+              {totalResponses === 0 && (
+                <div className="text-center py-16 bg-white rounded-lg border border-ice">
+                  <p className="text-gray-500">No responses have been collected for this survey yet.</p>
+                </div>
+              )}
+
+              {filteredResponses.length > 0 && (
+                <>
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                    <div className="w-full md:w-1/3">
+                      <Input
+                        placeholder="Filter questions..."
+                        value={filterText}
+                        onChange={(e) => setFilterText(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sort by..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="default">Default order</SelectItem>
+                          <SelectItem value="count">By count (highest first)</SelectItem>
+                          <SelectItem value="alpha">Alphabetically</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {filteredResponses.map((item) => {
+                    const sortedResponses = sortResponses(item.responses);
+                    const currentChartType = chartType[item.questionId] || "bar";
+                    const isSelected = selectedResponseGroup === item.questionId;
+
+                    return (
+                      <ResponseCardItem
+                        key={item.questionId}
+                        item={{
+                          ...item,
+                          responses: sortedResponses
+                        }}
+                        isSelected={isSelected}
+                        chartType={currentChartType}
+                        onChartTypeChange={handleChartTypeChange}
+                        onClick={() => handleCardClick(item.questionId)}
+                      />
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+        </>
+      )}
       
-      <ResizablePanel defaultSize={40} minSize={30}>
-        <div className="pl-4 h-full">
-          <AnalysisPanel 
-            selectedResponseGroup={selectedResponseGroup} 
-            responseData={selectedResponseGroup ? 
-              processedResponses.find(r => r.questionId === selectedResponseGroup) : null
-            } 
-          />
+      {rightPanelCollapsed ? (
+        <div className="w-12 border-l border-gray-200 flex items-center justify-center">
+          <Button 
+            variant="ghost" 
+            onClick={toggleRightPanel} 
+            className="p-2 h-auto"
+            title="Show analysis panel"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
         </div>
-      </ResizablePanel>
+      ) : (
+        <ResizablePanel defaultSize={defaultRightSize} minSize={30}>
+          <div className="pl-4 h-full">
+            <AnalysisPanel 
+              selectedResponseGroup={selectedResponseGroup}
+              responseData={selectedResponseGroup ? 
+                processedResponses.find(r => r.questionId === selectedResponseGroup) : null
+              }
+              onToggleVisibility={toggleRightPanel}
+            />
+          </div>
+        </ResizablePanel>
+      )}
     </ResizablePanelGroup>
   );
 };

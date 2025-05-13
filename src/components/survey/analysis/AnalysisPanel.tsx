@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database, Filter, Tag, Scale, AlertTriangle } from "lucide-react";
+import { Database, Filter, Tag, Scale, AlertTriangle, Minimize2, Maximize2, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -26,11 +26,15 @@ interface ResponseGroup {
 interface AnalysisPanelProps {
   selectedResponseGroup: string | null;
   responseData: ResponseGroup | null;
+  onToggleVisibility?: () => void;
+  isCollapsed?: boolean;
 }
 
 export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   selectedResponseGroup,
-  responseData
+  responseData,
+  onToggleVisibility,
+  isCollapsed = false
 }) => {
   const [tags, setTags] = useState<Record<string, string[]>>({});
   const [newTag, setNewTag] = useState("");
@@ -74,10 +78,37 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
     return tags[key] || [];
   };
 
+  if (isCollapsed) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <Button 
+          variant="ghost" 
+          onClick={onToggleVisibility}
+          className="p-2 h-auto"
+          title="Show analysis panel"
+        >
+          <ChevronLeft className="h-8 w-8" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <Card className="h-full border-ice">
       <CardHeader className="border-b border-ice">
-        <CardTitle className="text-lg">Analysis Panel</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">Analysis Panel</CardTitle>
+          {onToggleVisibility && (
+            <Button 
+              variant="ghost" 
+              onClick={onToggleVisibility}
+              className="p-1 h-auto"
+              title="Hide analysis panel"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="pt-6">
         {!selectedResponseGroup ? (
@@ -94,11 +125,12 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
               {responseData?.question}
             </h3>
 
-            <div className="flex space-x-2 mb-4 border-b pb-4">
+            <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
               <Button 
                 variant={activeTab === 'tagging' ? 'default' : 'outline'} 
                 size="sm"
                 onClick={() => setActiveTab('tagging')}
+                className="flex-grow md:flex-grow-0"
               >
                 <Tag className="mr-1 h-4 w-4" /> Tagging
               </Button>
@@ -106,6 +138,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                 variant={activeTab === 'statistics' ? 'default' : 'outline'}
                 size="sm" 
                 onClick={() => setActiveTab('statistics')}
+                className="flex-grow md:flex-grow-0"
               >
                 <Filter className="mr-1 h-4 w-4" /> Statistics
               </Button>
@@ -115,6 +148,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                     variant={activeTab === 'scale' ? 'default' : 'outline'}
                     size="sm" 
                     onClick={() => setActiveTab('scale')}
+                    className="flex-grow md:flex-grow-0"
                   >
                     <Scale className="mr-1 h-4 w-4" /> Scale Mapping
                   </Button>
@@ -122,6 +156,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                     variant={activeTab === 'outliers' ? 'default' : 'outline'}
                     size="sm" 
                     onClick={() => setActiveTab('outliers')}
+                    className="flex-grow md:flex-grow-0"
                   >
                     <AlertTriangle className="mr-1 h-4 w-4" /> Outliers
                   </Button>
