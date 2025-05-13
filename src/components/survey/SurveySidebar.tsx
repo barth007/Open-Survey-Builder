@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sidebar, SidebarGroup, SidebarContent } from "@/components/ui/sidebar";
+import { Sidebar, SidebarGroup, SidebarContent, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
 import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
 import { useSurveyData } from "@/hooks/useSurveyData";
@@ -16,6 +16,7 @@ export function SurveySidebar() {
   const { surveyData, isLoading, createFolder, createSurvey, error, deleteSurvey, deleteFolder, updateSurveyOrder } = useSurveyData();
   const { user } = useAuth();
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
+  const { open } = useSidebar();
 
   // If user is not authenticated, don't render the sidebar
   if (!user) {
@@ -58,14 +59,18 @@ export function SurveySidebar() {
 
   return (
     <>
-      <Sidebar className="border-r border-border flex flex-col h-screen">
+      <Sidebar 
+        className={`border-r border-border flex flex-col h-screen transition-all duration-300 ${!open ? "w-[3rem]" : ""}`} 
+        collapsible="icon"
+      >
+        <div className="flex items-center justify-between p-2">
+          {open && <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>}
+          <SidebarTrigger className="ml-auto" />
+        </div>
+
         <div className="flex-1 flex flex-col overflow-hidden">
           <SidebarContent className="flex-1 overflow-auto">
             <SidebarGroup>
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>
-              </div>
-
               {/* Survey Content */}
               {isLoading ? (
                 <div className="flex items-center justify-center h-[100px]">
@@ -97,6 +102,7 @@ export function SurveySidebar() {
                     onDeleteSurvey={deleteSurvey}
                     onDeleteFolder={deleteFolder}
                     onUpdateOrder={updateSurveyOrder}
+                    isCollapsed={!open}
                   />
 
                   {/* Unorganized Surveys */}
@@ -105,6 +111,7 @@ export function SurveySidebar() {
                     onCreateSurvey={handleCreateSurvey}
                     onDeleteSurvey={deleteSurvey}
                     onUpdateOrder={updateSurveyOrder}
+                    isCollapsed={!open}
                   />
                 </>
               )}
@@ -114,7 +121,7 @@ export function SurveySidebar() {
 
         {/* User Profile Section */}
         <div className="w-full">
-          <UserProfile />
+          <UserProfile compact={!open} />
         </div>
       </Sidebar>
 

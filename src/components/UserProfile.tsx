@@ -72,12 +72,42 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
 
   if (compact) {
     return (
-      <Avatar className="h-8 w-8 border-2 border-background">
-        <AvatarImage src={avatarUrl || undefined} />
-        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-          {getInitials()}
-        </AvatarFallback>
-      </Avatar>
+      <div className="w-full flex justify-center p-3 border-t">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+              <Avatar className="h-8 w-8 border-2 border-background">
+                <AvatarImage src={avatarUrl || undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleProfileClick} className="flex items-center gap-2 cursor-pointer">
+              <Settings className="h-4 w-4" />
+              <span>Profile Settings</span>
+            </DropdownMenuItem>
+            {isAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/admin')} className="flex items-center gap-2 cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /></svg>
+                  <span>Admin Panel</span>
+                </DropdownMenuItem>
+              </>
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-destructive">
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   }
 

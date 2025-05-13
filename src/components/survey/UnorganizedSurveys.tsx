@@ -11,24 +11,26 @@ interface UnorganizedSurveysProps {
   onCreateSurvey: () => void;
   onDeleteSurvey: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
+  isCollapsed?: boolean;
 }
 
 export function UnorganizedSurveys({
   surveys,
   onCreateSurvey,
   onDeleteSurvey,
-  onUpdateOrder
+  onUpdateOrder,
+  isCollapsed = false
 }: UnorganizedSurveysProps) {
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="flex justify-between items-center">
-        <span>Other Surveys {surveys.length > 0 && `(${surveys.length})`}</span>
+        {!isCollapsed && <span>Other Surveys {surveys.length > 0 && `(${surveys.length})`}</span>}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={onCreateSurvey}
-                className="hover:bg-sidebar-accent rounded-md p-1"
+                className="hover:bg-sidebar-accent rounded-md p-1 ml-auto"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -39,11 +41,12 @@ export function UnorganizedSurveys({
           </Tooltip>
         </TooltipProvider>
       </SidebarGroupLabel>
-      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
+      <SidebarGroupContent className="list-none">
         <DraggableSurveyList
           surveys={surveys}
           onDeleteSurvey={onDeleteSurvey}
           onUpdateOrder={onUpdateOrder}
+          isCollapsed={isCollapsed}
         />
       </SidebarGroupContent>
     </SidebarGroup>

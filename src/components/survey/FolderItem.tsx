@@ -14,6 +14,7 @@ interface FolderItemProps {
   onCreateSurvey: (name: string) => void;
   onDeleteSurvey: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
+  isCollapsed?: boolean;
 }
 
 export function FolderItem({
@@ -23,7 +24,8 @@ export function FolderItem({
   onDelete,
   onCreateSurvey,
   onDeleteSurvey,
-  onUpdateOrder
+  onUpdateOrder,
+  isCollapsed = false
 }: FolderItemProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -37,43 +39,45 @@ export function FolderItem({
         <SidebarMenuItem>
           <SidebarMenuButton onClick={onToggle} className="flex-1 gap-2">
             {isOpen ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />}
-            <span>{folder.name}</span>
+            {!isCollapsed && <span>{folder.name}</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
 
-        <div className={`flex gap-1 mr-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => onCreateSurvey("New Survey")}
-                  className="p-1 hover:bg-sidebar-accent rounded-md"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Create Survey</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        {!isCollapsed && (
+          <div className={`flex gap-1 mr-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onCreateSurvey("New Survey")}
+                    className="p-1 hover:bg-sidebar-accent rounded-md"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create Survey</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onDelete}
-                  className="p-1 hover:bg-sidebar-accent rounded-md"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Delete Folder</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onDelete}
+                    className="p-1 hover:bg-sidebar-accent rounded-md"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete Folder</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
 
       {isOpen && (
@@ -83,6 +87,7 @@ export function FolderItem({
             onDeleteSurvey={onDeleteSurvey}
             onUpdateOrder={onUpdateOrder}
             folderId={folder.id}
+            isCollapsed={isCollapsed}
           />
         </div>
       )}

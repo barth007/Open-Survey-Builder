@@ -17,6 +17,7 @@ interface SurveyFoldersProps {
   onDeleteSurvey: (id: string) => void;
   onDeleteFolder: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
+  isCollapsed?: boolean;
 }
 
 export function SurveyFolders({
@@ -27,20 +28,21 @@ export function SurveyFolders({
   onCreateSurvey,
   onDeleteSurvey,
   onDeleteFolder,
-  onUpdateOrder
+  onUpdateOrder,
+  isCollapsed = false
 }: SurveyFoldersProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="flex justify-between items-center">
-        <span>Folders</span>
+        {!isCollapsed && <span>Folders</span>}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="hover:bg-sidebar-accent rounded-md p-1"
+                className="hover:bg-sidebar-accent rounded-md p-1 ml-auto"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -51,7 +53,7 @@ export function SurveyFolders({
           </Tooltip>
         </TooltipProvider>
       </SidebarGroupLabel>
-      <SidebarGroupContent className="list-none"> {/* Add list-none to remove markers */}
+      <SidebarGroupContent className="list-none">
         {folders.map((folder) => (
           <FolderItem
             key={folder.id}
@@ -62,6 +64,7 @@ export function SurveyFolders({
             onCreateSurvey={(name) => onCreateSurvey({ name, folderId: folder.id })}
             onDeleteSurvey={onDeleteSurvey}
             onUpdateOrder={onUpdateOrder}
+            isCollapsed={isCollapsed}
           />
         ))}
       </SidebarGroupContent>
