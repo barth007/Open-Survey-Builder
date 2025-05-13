@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -98,8 +98,18 @@ const EditTab: React.FC<EditTabProps> = ({
       ) : (
         <>
           <ResizablePanel defaultSize={60} minSize={30}>
-            <ScrollArea className="h-[calc(100vh-220px)] pr-4">
-              <div className="space-y-6 pr-4">
+            <div className="flex justify-end px-4 py-2 border-b">
+              <Button 
+                variant="ghost" 
+                onClick={toggleLeftPanel} 
+                className="p-1 h-8 w-8"
+                title="Hide editor panel"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            <ScrollArea className="h-[calc(100vh-260px)]">
+              <div className="space-y-6 px-4">
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}
@@ -217,17 +227,6 @@ const EditTab: React.FC<EditTabProps> = ({
                 </Card>
               </div>
             </ScrollArea>
-            
-            <div className="absolute right-[-16px] top-1/2 transform -translate-y-1/2 z-10">
-              <Button 
-                variant="ghost" 
-                onClick={toggleLeftPanel} 
-                className="p-2 h-auto rounded-full shadow-md bg-background border"
-                title="Hide editor panel"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </div>
           </ResizablePanel>
 
           <ResizableHandle withHandle />
@@ -248,9 +247,19 @@ const EditTab: React.FC<EditTabProps> = ({
       ) : (
         <>
           <ResizablePanel defaultSize={40} minSize={30}>
-            <ScrollArea className="h-[calc(100vh-220px)]">
-              <div className="space-y-6 pl-4">
-                <h2 className="text-lg font-medium">Live Preview</h2>
+            <div className="flex justify-start px-4 py-2 border-b">
+              <Button 
+                variant="ghost" 
+                onClick={toggleRightPanel} 
+                className="p-1 h-8 w-8"
+                title="Hide preview panel"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <ScrollArea className="h-[calc(100vh-260px)]">
+              <div className="space-y-6 px-4">
+                <h2 className="text-lg font-medium mt-4">Live Preview</h2>
                 
                 <WelcomePage 
                   title={survey.welcomeTitle} 
@@ -270,17 +279,6 @@ const EditTab: React.FC<EditTabProps> = ({
                 />
               </div>
             </ScrollArea>
-            
-            <div className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 z-10">
-              <Button 
-                variant="ghost" 
-                onClick={toggleRightPanel} 
-                className="p-2 h-auto rounded-full shadow-md bg-background border"
-                title="Hide preview panel"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </div>
           </ResizablePanel>
         </>
       )}

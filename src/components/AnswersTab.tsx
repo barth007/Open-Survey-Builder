@@ -246,17 +246,36 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
       ) : (
         <>
           <ResizablePanel defaultSize={defaultLeftSize} minSize={30}>
-            <ScrollArea className="h-[calc(100vh-220px)]">
-              <div className="space-y-8 pr-4">
+            <div className="flex justify-end px-4 py-2 border-b">
+              <Button 
+                variant="ghost" 
+                onClick={toggleLeftPanel} 
+                className="p-1 h-8 w-8"
+                title="Hide responses panel"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            <ScrollArea className="h-[calc(100vh-260px)]">
+              <div className="space-y-8 px-4 py-4">
                 <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                     <div>
                       <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
-                      <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
-                      <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
+                      <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{responses?.length || 0}</span></p>
+                      <p className="text-gray-600">Last response: <span className="font-medium">
+                        {responses && responses.length > 0 
+                          ? new Date(responses[responses.length - 1].submittedAt).toLocaleString() 
+                          : 'No responses yet'}
+                      </span></p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
-                      <Button onClick={exportToCSV} variant="outline" className="flex gap-2">
+                      <Button 
+                        onClick={() => exportToCSV()} 
+                        variant="outline" 
+                        className="flex gap-2"
+                        disabled={!responses || responses.length === 0}
+                      >
                         <Download size={18} />
                         Export CSV
                       </Button>
@@ -275,8 +294,8 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
                     <p className="text-gray-500">No responses have been collected for this survey yet.</p>
                   </div>
                 )}
-
-                {filteredResponses.length > 0 && (
+                
+                {processedResponses && processedResponses.length > 0 && (
                   <>
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                       <div className="w-full md:w-1/3">
@@ -324,17 +343,6 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
                 )}
               </div>
             </ScrollArea>
-            
-            <div className="absolute right-[-16px] top-1/2 transform -translate-y-1/2 z-10">
-              <Button 
-                variant="ghost" 
-                onClick={toggleLeftPanel} 
-                className="p-2 h-auto rounded-full shadow-md bg-background border"
-                title="Hide responses panel"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </div>
           </ResizablePanel>
 
           <ResizableHandle withHandle />
@@ -354,8 +362,18 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
         </div>
       ) : (
         <ResizablePanel defaultSize={defaultRightSize} minSize={30}>
-          <ScrollArea className="h-[calc(100vh-220px)]">
-            <div className="pl-4 h-full">
+          <div className="flex justify-start px-4 py-2 border-b">
+            <Button 
+              variant="ghost" 
+              onClick={toggleRightPanel} 
+              className="p-1 h-8 w-8"
+              title="Hide analysis panel"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <ScrollArea className="h-[calc(100vh-260px)]">
+            <div className="px-4 py-4 h-full">
               <AnalysisPanel 
                 selectedResponseGroup={selectedResponseGroup}
                 responseData={selectedResponseGroup ? 
@@ -365,17 +383,6 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
               />
             </div>
           </ScrollArea>
-          
-          <div className="absolute left-[-16px] top-1/2 transform -translate-y-1/2 z-10">
-            <Button 
-              variant="ghost" 
-              onClick={toggleRightPanel} 
-              className="p-2 h-auto rounded-full shadow-md bg-background border"
-              title="Hide analysis panel"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
         </ResizablePanel>
       )}
     </ResizablePanelGroup>

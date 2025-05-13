@@ -8,6 +8,7 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyTabs from '@/components/survey/SurveyTabs';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -15,6 +16,7 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const { activeUsers } = useActiveUsers(surveyId);
   
@@ -152,8 +154,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-pebble py-8">
-      <div className="container max-w-6xl"> {/* Increased width to accommodate side-by-side layout */}
+    <div className="min-h-screen bg-pebble py-4 md:py-8 px-2 md:px-4">
+      <div className="container max-w-7xl mx-auto">
         <SurveyHeader 
           survey={survey}
           pendingChanges={pendingChanges}
@@ -161,25 +163,27 @@ const Index = () => {
           onPublishToggle={togglePublish}
         />
 
-        <SurveyTabs 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          survey={survey}
-          onTitleChange={handleSurveyTitleChange}
-          onDescriptionChange={handleDescriptionChangeWithTracking}
-          onQuestionChange={handleQuestionChange}
-          onDeleteQuestion={handleDeleteQuestion}
-          onDuplicateQuestion={handleDuplicateQuestion}
-          onAddQuestion={handleAddQuestion}
-          onWelcomeTitleChange={handleWelcomeTitleChange}
-          onWelcomeMessageChange={handleWelcomeMessageChange}
-          onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
-          onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
-          onThankYouTitleChange={handleThankYouTitleChange}
-          onThankYouMessageChange={handleThankYouMessageChange}
-          onThankYouButtonTextChange={handleThankYouButtonTextChange}
-          onRedirectUrlChange={handleRedirectUrlChange}
-        />
+        <div className={`mt-4 ${isMobile ? 'text-sm' : ''}`}>
+          <SurveyTabs 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            survey={survey}
+            onTitleChange={handleSurveyTitleChange}
+            onDescriptionChange={handleDescriptionChangeWithTracking}
+            onQuestionChange={handleQuestionChange}
+            onDeleteQuestion={handleDeleteQuestion}
+            onDuplicateQuestion={handleDuplicateQuestion}
+            onAddQuestion={handleAddQuestion}
+            onWelcomeTitleChange={handleWelcomeTitleChange}
+            onWelcomeMessageChange={handleWelcomeMessageChange}
+            onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
+            onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
+            onThankYouTitleChange={handleThankYouTitleChange}
+            onThankYouMessageChange={handleThankYouMessageChange}
+            onThankYouButtonTextChange={handleThankYouButtonTextChange}
+            onRedirectUrlChange={handleRedirectUrlChange}
+          />
+        </div>
       </div>
     </div>
   );
