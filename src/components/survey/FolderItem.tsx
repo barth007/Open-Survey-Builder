@@ -37,8 +37,11 @@ export function FolderItem({
         onMouseLeave={() => setIsHovered(false)}
       >
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={onToggle} className="flex-1 gap-2">
-            {isOpen ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />}
+          <SidebarMenuButton onClick={onToggle} className="flex-1 justify-center md:justify-start gap-2">
+            {isOpen ? 
+              <FolderOpen className="h-4 w-4 flex-shrink-0" /> : 
+              <Folder className="h-4 w-4 flex-shrink-0" />
+            }
             {!isCollapsed && <span>{folder.name}</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>

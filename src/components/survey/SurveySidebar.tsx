@@ -60,7 +60,7 @@ export function SurveySidebar() {
   return (
     <>
       <Sidebar 
-        className={`border-r border-border flex flex-col h-screen transition-all duration-300 ${!open ? "w-[3rem]" : ""}`} 
+        className="border-r border-border flex flex-col h-screen transition-all duration-300" 
         collapsible="icon"
       >
         <div className="flex items-center justify-between p-2">

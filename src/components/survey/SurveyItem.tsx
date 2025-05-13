@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
-import { Trash2 } from 'lucide-react';
+import { Trash2, FileText } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
@@ -122,7 +122,10 @@ export function DraggableSurveyItem({
               autoFocus
             />
           ) : (
-            <span className="truncate">{isCollapsed ? "" : name}</span>
+            <div className="flex items-center gap-2 truncate">
+              <FileText className="h-4 w-4 flex-shrink-0" />
+              {!isCollapsed && <span className="truncate">{name}</span>}
+            </div>
           )}
         </SidebarMenuButton>
       </SidebarMenuItem>
