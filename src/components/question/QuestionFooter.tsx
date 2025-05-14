@@ -40,9 +40,9 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
             variant="outline" 
             size="sm" 
             onClick={onDuplicateQuestion}
-            className={`text-abyss border-abyss hover:bg-abyss hover:text-white ${isMobile ? 'flex-1 px-1 sm:px-3' : 'px-3'}`}
+            className={`text-abyss border-abyss hover:bg-abyss hover:text-white ${isMobile ? 'flex-1 px-0 sm:px-2' : 'px-3'}`}
           >
-            <Copy size={16} className={isMobile ? '' : 'mr-2'} />
+            <Copy size={16} className={isMobile ? 'mx-auto' : 'mr-2'} />
             {!isMobile && <span>Duplicate</span>}
           </Button>
         )}
@@ -50,9 +50,9 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
           variant="ghost" 
           size="sm" 
           onClick={onDeleteQuestion}
-          className={`text-magma hover:text-magma hover:bg-red-50 ${isMobile ? 'flex-1 px-1 sm:px-3' : 'px-3'}`}
+          className={`text-magma hover:text-magma hover:bg-red-50 ${isMobile ? 'flex-1 px-0 sm:px-2' : 'px-3'}`}
         >
-          <Trash size={16} className={isMobile ? '' : 'mr-2'} />
+          <Trash size={16} className={isMobile ? 'mx-auto' : 'mr-2'} />
           {!isMobile && <span>Delete</span>}
         </Button>
       </div>

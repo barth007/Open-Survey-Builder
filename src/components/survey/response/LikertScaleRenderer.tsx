@@ -3,6 +3,7 @@ import React from 'react';
 import { Question } from '@/types/survey';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getGridColumns } from '@/lib/utils';
 
 interface LikertScaleRendererProps {
   question: Question;
@@ -27,11 +28,11 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
       >
         {isMobile ? (
           // Mobile vertical layout
-          <div className="flex flex-col space-y-3">
+          <div className="flex flex-col space-y-3 w-full">
             {question.options.map((option) => (
               <div 
                 key={option.id} 
-                className={`flex items-center p-3 border rounded-md transition-colors
+                className={`flex items-center p-3 border rounded-md transition-colors w-full
                   ${value === option.id 
                     ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-300' 
                     : 'border-gray-200 hover:bg-gray-50'}
