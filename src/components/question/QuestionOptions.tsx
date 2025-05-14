@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { Check, Trash } from 'lucide-react';
+import { Check, Trash, FileImage } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { QuestionOption, QuestionType } from '@/types/survey';
-import { FileImage } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface QuestionOptionsProps {
   type: QuestionType;
@@ -24,6 +24,7 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
   onDeleteOption,
 }) => {
   const [newOptionText, setNewOptionText] = useState('');
+  const isMobile = useIsMobile();
   
   const addOption = () => {
     if (newOptionText.trim() === '') return;
@@ -83,12 +84,12 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
       ))}
       
       {(isMultipleChoice || isCheckboxes) && (
-        <div className="flex items-center gap-2 mt-2">
+        <div className={`flex items-center gap-2 mt-2 ${isMobile ? 'flex-col sm:flex-row' : ''}`}>
           <Input
             value={newOptionText}
             onChange={(e) => setNewOptionText(e.target.value)}
             placeholder="Add option"
-            className="flex-1 border-ice"
+            className={`${isMobile ? 'w-full' : 'flex-1'} border-ice`}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 addOption();
@@ -99,7 +100,7 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
             onClick={addOption} 
             size="sm" 
             variant="outline"
-            className="border-abyss text-abyss hover:bg-abyss hover:text-white"
+            className={`border-abyss text-abyss hover:bg-abyss hover:text-white ${isMobile ? 'w-full sm:w-auto mt-2 sm:mt-0' : ''}`}
           >
             <Check size={16} className="mr-1" />
             Add

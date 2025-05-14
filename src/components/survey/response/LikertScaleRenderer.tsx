@@ -52,8 +52,8 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
             ))}
           </div>
         ) : (
-          // Desktop grid layout with responsive columns
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          // Desktop grid layout with responsive columns based on option count
+          <div className={`grid grid-cols-${Math.min(question.options.length, 5)} gap-2`}>
             {question.options.map((option) => (
               <div 
                 key={option.id} 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Trash, Copy } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface QuestionFooterProps {
   isRequired: boolean;
@@ -18,8 +19,10 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
   onDuplicateQuestion,
   onDeleteQuestion
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="flex justify-between border-t px-6 py-4 border-ice w-full">
+    <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between'} border-t px-3 sm:px-6 py-4 border-ice w-full`}>
       <div className="flex items-center gap-3">
         <div className="flex items-center space-x-2">
           <Switch
@@ -31,26 +34,26 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
         </div>
       </div>
       
-      <div className="flex gap-3">
+      <div className={`flex ${isMobile ? 'w-full justify-between' : 'gap-3'}`}>
         {onDuplicateQuestion && (
           <Button 
             variant="outline" 
             size="sm" 
             onClick={onDuplicateQuestion}
-            className="text-abyss border-abyss hover:bg-abyss hover:text-white px-3"
+            className={`text-abyss border-abyss hover:bg-abyss hover:text-white ${isMobile ? 'flex-1 px-1 sm:px-3' : 'px-3'}`}
           >
-            <Copy size={16} className="mr-2" />
-            Duplicate
+            <Copy size={16} className={isMobile ? '' : 'mr-2'} />
+            {!isMobile && <span>Duplicate</span>}
           </Button>
         )}
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onDeleteQuestion}
-          className="text-magma hover:text-magma hover:bg-red-50 px-3"
+          className={`text-magma hover:text-magma hover:bg-red-50 ${isMobile ? 'flex-1 px-1 sm:px-3' : 'px-3'}`}
         >
-          <Trash size={16} className="mr-2" />
-          Delete
+          <Trash size={16} className={isMobile ? '' : 'mr-2'} />
+          {!isMobile && <span>Delete</span>}
         </Button>
       </div>
     </div>

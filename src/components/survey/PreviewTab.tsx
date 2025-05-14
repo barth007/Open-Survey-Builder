@@ -1,9 +1,12 @@
+
 import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
+import { getGridColumns } from '@/lib/utils';
 
 interface PreviewTabProps {
   survey: Survey;
@@ -11,6 +14,7 @@ interface PreviewTabProps {
 
 const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const isMobile = useIsMobile();
 
   const isQuestionVisible = (question: Question): boolean => {
     if (!question.conditionalLogic || !question.conditionalLogic.dependsOn) return true;
@@ -174,29 +178,56 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       case 'likert7':
       case 'likert10':
         const labels = question.options.map(opt => opt.text);
-        const columns = labels.length;
-        const gridClass = `grid grid-cols-5 md:grid-cols-${columns} gap-1`;
+        const count = labels.length;
         
         return (
           <div className="mt-4">
             <RadioGroup name={`likert-${question.id}`}>
-              <div className={gridClass}>
-                {labels.map((label, i) => (
-                  <div key={i} className="flex flex-col items-center">
-                    <RadioGroupItem
-                      value={`${i}`}
-                      id={`likert-${question.id}-${i}`}
-                      className="mx-auto"
-                    />
-                    <label 
-                      htmlFor={`likert-${question.id}-${i}`} 
-                      className="text-xs text-center mt-1"
+              {isMobile ? (
+                // Mobile vertical layout
+                <div className="flex flex-col space-y-2">
+                  {labels.map((label, i) => (
+                    <div 
+                      key={i}
+                      className="flex items-center p-2 border rounded-md"
                     >
-                      {label}
-                    </label>
-                  </div>
-                ))}
-              </div>
+                      <RadioGroupItem
+                        value={`${i}`}
+                        id={`likert-${question.id}-${i}`}
+                        className="mr-2"
+                      />
+                      <label 
+                        htmlFor={`likert-${question.id}-${i}`} 
+                        className="text-sm"
+                      >
+                        {label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // Desktop grid layout
+                <div className={`grid ${getGridColumns(count)} gap-2`}>
+                  {labels.map((label, i) => (
+                    <div 
+                      key={i}
+                      className="flex flex-col items-center text-center p-2 border rounded-md"
+                    >
+                      <RadioGroupItem
+                        value={`${i}`}
+                        id={`likert-${question.id}-${i}`}
+                        className="mx-auto mb-1"
+                      />
+                      <label 
+                        htmlFor={`likert-${question.id}-${i}`} 
+                        className="text-xs text-center mt-1 px-1"
+                      >
+                        {label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </RadioGroup>
           </div>
         );
@@ -207,14 +238,14 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
-      <h2 className="text-2xl font-bold mb-2 text-carbon">{survey.title}</h2>
+    <div className="bg-white rounded-lg shadow-sm border border-ice p-4 md:p-6">
+      <h2 className="text-xl md:text-2xl font-bold mb-2 text-carbon">{survey.title}</h2>
       <p className="text-gray-600 mb-6">{survey.description}</p>
 
       {survey.questions.map((question, index) => (
         isQuestionVisible(question) && (
           <div key={question.id} className="mb-6 pb-6 border-b border-ice last:border-b-0">
-            <h3 className="font-medium mb-2 text-carbon">
+            <h3 className="font-medium mb-2 text-carbon text-base md:text-lg">
               {index + 1}. {question.text} 
               {question.isRequired && <span className="text-magma ml-1">*</span>}
             </h3>
@@ -266,7 +297,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       ))}
 
       {survey.questions.length > 0 && (
-        <Button className="mt-4 bg-sunset hover:opacity-90">Submit</Button>
+        <Button className="mt-4 bg-sunset hover:opacity-90 w-full sm:w-auto">Submit</Button>
       )}
 
       {survey.questions.length === 0 && (

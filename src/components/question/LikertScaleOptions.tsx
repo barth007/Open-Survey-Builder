@@ -32,10 +32,10 @@ const LikertScaleOptions: React.FC<LikertScaleOptionsProps> = ({
           variant="outline" 
           size="sm" 
           onClick={onEditOptions}
-          className="flex items-center gap-2 text-xs md:text-sm"
+          className="flex items-center gap-1 text-xs md:text-sm px-2 sm:px-3 py-1 h-8"
         >
           <Settings size={14} />
-          Customize Options
+          <span className="whitespace-nowrap">Customize</span>
         </Button>
       </div>
       <RadioGroup className="w-full">

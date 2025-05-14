@@ -5,6 +5,8 @@ import { TextQuestionRenderer } from './TextQuestionRenderer';
 import { MultipleChoiceRenderer } from './MultipleChoiceRenderer';
 import { CheckboxesRenderer } from './CheckboxesRenderer';
 import { LikertScaleRenderer } from './LikertScaleRenderer';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { getGridColumns } from '@/lib/utils';
 
 interface QuestionRendererProps {
   question: Question;
@@ -17,6 +19,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   answers,
   onAnswerChange
 }) => {
+  const isMobile = useIsMobile();
+  
   switch(question.type) {
     case 'text':
       return (
@@ -33,6 +37,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           question={question}
           value={(answers[question.id] as string) || ''}
           onChange={(value) => onAnswerChange(question.id, value)}
+          isMobile={isMobile}
         />
       );
     
@@ -42,6 +47,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           question={question}
           selectedValues={(answers[question.id] as string[]) || []}
           onChange={(values) => onAnswerChange(question.id, values)}
+          isMobile={isMobile}
         />
       );
       
