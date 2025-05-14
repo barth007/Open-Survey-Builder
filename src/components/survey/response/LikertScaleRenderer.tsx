@@ -44,7 +44,7 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
                 />
                 <label 
                   htmlFor={`likert-${option.id}`}
-                  className="text-sm text-gray-700 flex-1 cursor-pointer"
+                  className="text-sm text-gray-700 flex-1 cursor-pointer break-words"
                 >
                   {option.text}
                 </label>
@@ -52,12 +52,12 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
             ))}
           </div>
         ) : (
-          // Desktop grid layout
+          // Desktop grid layout - improved with better text handling
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {question.options.map((option) => (
               <div 
                 key={option.id} 
-                className={`flex flex-col items-center p-4 border rounded-md transition-colors
+                className={`flex flex-col items-center p-3 border rounded-md transition-colors
                   ${value === option.id 
                     ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-300' 
                     : 'border-gray-200 hover:bg-gray-50'}
@@ -66,11 +66,11 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
                 <RadioGroupItem
                   value={option.id}
                   id={`likert-${option.id}`}
-                  className="mx-auto mb-3"
+                  className="mx-auto mb-2"
                 />
                 <label 
                   htmlFor={`likert-${option.id}`}
-                  className="text-sm text-center text-gray-700 px-1 cursor-pointer"
+                  className="text-sm text-center text-gray-700 px-1 cursor-pointer break-words w-full"
                 >
                   {option.text}
                 </label>

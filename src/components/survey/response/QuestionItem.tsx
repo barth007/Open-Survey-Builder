@@ -19,13 +19,13 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
 }) => {
   return (
     <div className="mb-6 pb-6 border-b border-ice last:border-b-0">
-      <h3 className="font-medium mb-2 text-carbon">
+      <h3 className="font-medium mb-2 text-carbon break-words">
         {index + 1}. {question.text} 
         {question.isRequired && <span className="text-magma ml-1">*</span>}
       </h3>
       
       {question.description && (
-        <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+        <p className="text-sm text-gray-600 mb-3 break-words">{question.description}</p>
       )}
 
       {question.maxSelections && (
@@ -37,8 +37,9 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
       <QuestionMedia media={question.media} />
 
       {question.figmaPrototypeUrl && (
-        <p className="text-sm text-blue-600 mt-2 mb-4">
-          <a href={question.figmaPrototypeUrl} target="_blank" rel="noopener noreferrer">
+        <p className="text-sm text-blue-600 mt-2 mb-4 break-words">
+          <a href={question.figmaPrototypeUrl} target="_blank" rel="noopener noreferrer" 
+             className="inline-block max-w-full overflow-hidden text-ellipsis">
             View Figma Prototype
           </a>
         </p>
