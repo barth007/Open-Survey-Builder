@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Question } from '@/types/survey';
 import { TextQuestionRenderer } from './TextQuestionRenderer';
@@ -19,6 +18,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   answers,
   onAnswerChange
 }) => {
+  // We'll keep this for other components that might need it
   const isMobile = useIsMobile();
   
   switch(question.type) {
@@ -37,7 +37,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           question={question}
           value={(answers[question.id] as string) || ''}
           onChange={(value) => onAnswerChange(question.id, value)}
-          isMobile={isMobile}
         />
       );
     
@@ -47,7 +46,6 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           question={question}
           selectedValues={(answers[question.id] as string[]) || []}
           onChange={(values) => onAnswerChange(question.id, values)}
-          isMobile={isMobile}
         />
       );
       
