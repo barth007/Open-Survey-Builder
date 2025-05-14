@@ -3,6 +3,7 @@ import React from 'react';
 import { Question } from '@/types/survey';
 import { QuestionRenderer } from './QuestionRenderer';
 import { QuestionMedia } from './QuestionMedia';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface QuestionItemProps {
   question: Question;
@@ -17,9 +18,11 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
   answers,
   onAnswerChange
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="mb-6 pb-6 border-b border-ice last:border-b-0">
-      <h3 className="font-medium mb-2 text-carbon break-words">
+    <div className={`mb-6 pb-6 border-b border-ice last:border-b-0 ${isMobile ? 'px-2' : ''}`}>
+      <h3 className={`font-medium mb-2 text-carbon break-words ${isMobile ? 'text-base' : ''}`}>
         {index + 1}. {question.text} 
         {question.isRequired && <span className="text-magma ml-1">*</span>}
       </h3>

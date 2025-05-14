@@ -52,7 +52,7 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
             ))}
           </div>
         ) : (
-          // Desktop grid layout - improved with better text handling
+          // Desktop grid layout with responsive columns
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {question.options.map((option) => (
               <div 
