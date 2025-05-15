@@ -292,8 +292,6 @@ const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
       rightPanel={analysisPanel}
       leftPanelTitle="Responses"
       rightPanelTitle="Analysis"
-      defaultLeftPanelSize={60}
-      minLeftPanelSize={40}
     />
   );
 };
