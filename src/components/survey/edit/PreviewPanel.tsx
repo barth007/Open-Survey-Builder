@@ -11,8 +11,8 @@ interface PreviewPanelProps {
 
 export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-medium">Live Preview</h2>
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium mb-2">Live Preview</h2>
       
       <WelcomePage 
         title={survey.welcomeTitle} 

@@ -66,7 +66,7 @@ export function SplitPanelLayout({
 
   // Navigation buttons when one panel is collapsed
   const navigationButtons = (
-    <div className="flex items-center justify-between w-full sticky top-0 z-10 bg-white border-b">
+    <div className="flex items-center justify-between w-full sticky top-0 z-20 bg-white border-b">
       {leftPanelCollapsed && (
         <Button 
           variant="ghost" 
@@ -118,7 +118,7 @@ export function SplitPanelLayout({
       ) : (
         <div className="w-[520px] min-w-[520px] max-w-[520px] border-r border-gray-200">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-10 bg-white">
+            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-20 bg-white">
               <div className="font-medium">{leftPanelTitle}</div>
               <Button 
                 variant="ghost" 
@@ -141,9 +141,9 @@ export function SplitPanelLayout({
           {navigationButtons}
         </div>
       ) : (
-        <div className="flex-1 bg-white/50">
+        <div className="flex-1 bg-white">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-10 bg-white">
+            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-20 bg-white">
               <div className="font-medium">{rightPanelTitle}</div>
               <Button 
                 variant="ghost" 
@@ -155,9 +155,7 @@ export function SplitPanelLayout({
               </Button>
             </div>
             <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] bg-pebble/30">
-              <div className="p-4">
-                {rightPanel}
-              </div>
+              {rightPanel}
             </div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { GripVertical } from "lucide-react"
 import * as ResizablePrimitive from "react-resizable-panels"
 
@@ -17,8 +16,10 @@ const ResizablePanelGroup = ({
   />
 )
 
+// Keep the panel export but make it non-resizable in our implementation
 const ResizablePanel = ResizablePrimitive.Panel
 
+// Keep the handle component but it won't be used in our implementation
 const ResizableHandle = ({
   withHandle,
   className,
