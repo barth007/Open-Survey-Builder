@@ -1,5 +1,6 @@
 import * as ResizablePrimitive from "react-resizable-panels"
 import { cn } from "@/lib/utils"
+import React from "react"
 
 // We're keeping the panel group but making it non-resizable
 const ResizablePanelGroup = ({
@@ -18,20 +19,24 @@ const ResizablePanelGroup = ({
 // Keep the panel component but remove resize functionality
 const ResizablePanel = ResizablePrimitive.Panel
 
-// We'll keep this component for backwards compatibility, but it won't be used
+// Fix the ResizableHandle component to properly handle props
 const ResizableHandle = ({
   className,
+  withHandle,
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean
-}) => (
-  <div
-    className={cn(
-      "relative flex w-px items-center justify-center bg-border",
-      className
-    )}
-    {...props}
-  />
-)
+}) => {
+  // Instead of spreading all props from ResizablePrimitive.PanelResizeHandle,
+  // we'll create a div with just the className
+  return (
+    <div
+      className={cn(
+        "relative flex w-px items-center justify-center bg-border",
+        className
+      )}
+    />
+  );
+}
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
