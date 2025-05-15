@@ -64,33 +64,6 @@ export function SplitPanelLayout({
     }
   };
 
-  // Navigation buttons when one panel is collapsed
-  const navigationButtons = (
-    <div className="flex items-center justify-between w-full sticky top-0 z-20 bg-white border-b">
-      {leftPanelCollapsed && (
-        <Button 
-          variant="ghost" 
-          onClick={toggleLeftPanel} 
-          className="p-1 h-8 w-8"
-          title={leftPanelTitle || "Show left panel"}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      )}
-      <div className="flex-grow"></div>
-      {rightPanelCollapsed && (
-        <Button 
-          variant="ghost" 
-          onClick={toggleRightPanel} 
-          className="p-1 h-8 w-8"
-          title={rightPanelTitle || "Show right panel"}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  );
-
   // If both panels are collapsed, show controls to expand them
   if (leftPanelCollapsed && rightPanelCollapsed) {
     return (
@@ -109,27 +82,54 @@ export function SplitPanelLayout({
     );
   }
 
+  // Navigation buttons that remain at consistent height when panel is collapsed
+  const NavigationButton = ({ 
+    collapsed, 
+    onClick, 
+    direction, 
+    title 
+  }: { 
+    collapsed: boolean, 
+    onClick: () => void, 
+    direction: "left" | "right", 
+    title?: string 
+  }) => (
+    <Button 
+      variant="ghost" 
+      onClick={onClick} 
+      className="p-1 h-10 w-10 flex items-center justify-center"
+      title={title || `Show ${direction === "left" ? "right" : "left"} panel`}
+    >
+      {direction === "left" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+    </Button>
+  );
+
   return (
     <div className="flex min-h-[calc(100vh-200px)] w-full overflow-hidden">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start">
-          {navigationButtons}
+          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center border-b">
+            <NavigationButton 
+              collapsed={leftPanelCollapsed} 
+              onClick={toggleLeftPanel} 
+              direction="right" 
+              title={`Show ${leftPanelTitle || "left panel"}`} 
+            />
+          </div>
         </div>
       ) : (
         <div className="w-[520px] min-w-[520px] max-w-[520px] border-r border-gray-200">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-20 bg-white">
+            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10">
               <div className="font-medium">{leftPanelTitle}</div>
-              <Button 
-                variant="ghost" 
+              <NavigationButton 
+                collapsed={leftPanelCollapsed} 
                 onClick={toggleLeftPanel} 
-                className="p-1 h-6 w-6"
-                title={`Hide ${leftPanelTitle || "left panel"}`}
-              >
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
+                direction="left" 
+                title={`Hide ${leftPanelTitle || "left panel"}`} 
+              />
             </div>
-            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)]">
+            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] px-4 py-4">
               {leftPanel}
             </div>
           </div>
@@ -138,23 +138,28 @@ export function SplitPanelLayout({
       
       {rightPanelCollapsed ? (
         <div className="w-10 border-l border-gray-200 flex items-start">
-          {navigationButtons}
+          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center border-b">
+            <NavigationButton 
+              collapsed={rightPanelCollapsed} 
+              onClick={toggleRightPanel} 
+              direction="left" 
+              title={`Show ${rightPanelTitle || "right panel"}`} 
+            />
+          </div>
         </div>
       ) : (
         <div className="flex-1 bg-white">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-20 bg-white">
+            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10">
               <div className="font-medium">{rightPanelTitle}</div>
-              <Button 
-                variant="ghost" 
+              <NavigationButton 
+                collapsed={rightPanelCollapsed} 
                 onClick={toggleRightPanel} 
-                className="p-1 h-6 w-6"
-                title={`Hide ${rightPanelTitle || "right panel"}`}
-              >
-                <ChevronRight className="h-3 w-3" />
-              </Button>
+                direction="right" 
+                title={`Hide ${rightPanelTitle || "right panel"}`} 
+              />
             </div>
-            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] bg-pebble/30">
+            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
               {rightPanel}
             </div>
           </div>
