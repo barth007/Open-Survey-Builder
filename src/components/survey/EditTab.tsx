@@ -42,23 +42,25 @@ const EditTab: React.FC<EditTabProps> = ({
 }) => {
   // Editor panel content
   const editorPanel = (
-    <EditorPanel 
-      survey={survey}
-      onTitleChange={onTitleChange}
-      onDescriptionChange={onDescriptionChange}
-      onQuestionChange={onQuestionChange}
-      onDeleteQuestion={onDeleteQuestion}
-      onDuplicateQuestion={onDuplicateQuestion}
-      onAddQuestion={onAddQuestion}
-      onWelcomeTitleChange={onWelcomeTitleChange}
-      onWelcomeMessageChange={onWelcomeMessageChange}
-      onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-      onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-      onThankYouTitleChange={onThankYouTitleChange}
-      onThankYouMessageChange={onThankYouMessageChange}
-      onThankYouButtonTextChange={onThankYouButtonTextChange}
-      onRedirectUrlChange={onRedirectUrlChange}
-    />
+    <div className="p-4">
+      <EditorPanel 
+        survey={survey}
+        onTitleChange={onTitleChange}
+        onDescriptionChange={onDescriptionChange}
+        onQuestionChange={onQuestionChange}
+        onDeleteQuestion={onDeleteQuestion}
+        onDuplicateQuestion={onDuplicateQuestion}
+        onAddQuestion={onAddQuestion}
+        onWelcomeTitleChange={onWelcomeTitleChange}
+        onWelcomeMessageChange={onWelcomeMessageChange}
+        onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+        onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+        onThankYouTitleChange={onThankYouTitleChange}
+        onThankYouMessageChange={onThankYouMessageChange}
+        onThankYouButtonTextChange={onThankYouButtonTextChange}
+        onRedirectUrlChange={onRedirectUrlChange}
+      />
+    </div>
   );
 
   // Preview panel content
@@ -72,8 +74,6 @@ const EditTab: React.FC<EditTabProps> = ({
       rightPanel={previewPanel}
       leftPanelTitle="Editor"
       rightPanelTitle="Preview"
-      defaultLeftPanelSize={50}
-      minLeftPanelSize={30}
     />
   );
 };

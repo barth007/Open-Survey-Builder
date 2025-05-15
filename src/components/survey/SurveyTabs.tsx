@@ -45,13 +45,20 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-4 w-full">
-      <TabsList className="grid grid-cols-2 bg-ice w-full">
-        <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
-        <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Answers</TabsTrigger>
-      </TabsList>
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+      <div className="flex w-full">
+        <div className="w-[520px] min-w-[520px] max-w-[520px]">
+          <TabsList className="grid grid-cols-2 bg-ice w-full rounded-none">
+            <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white rounded-none">Edit</TabsTrigger>
+            <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white rounded-none">Answers</TabsTrigger>
+          </TabsList>
+        </div>
+        <div className="flex-1 bg-ice">
+          &nbsp;
+        </div>
+      </div>
 
-      <TabsContent value="edit" className="space-y-4">
+      <TabsContent value="edit" className="mt-0">
         <EditTab
           survey={survey}
           onTitleChange={onTitleChange}
@@ -71,7 +78,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="answers" className="space-y-4">
+      <TabsContent value="answers" className="mt-0">
         <AnswersTab survey={survey} />
       </TabsContent>
     </Tabs>

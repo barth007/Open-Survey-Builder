@@ -1,8 +1,6 @@
 
 import React, { useState } from 'react';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -11,8 +9,6 @@ interface SplitPanelLayoutProps {
   rightPanel: React.ReactNode;
   leftPanelTitle?: string;
   rightPanelTitle?: string;
-  defaultLeftPanelSize?: number;
-  minLeftPanelSize?: number;
 }
 
 export function SplitPanelLayout({
@@ -20,8 +16,6 @@ export function SplitPanelLayout({
   rightPanel,
   leftPanelTitle,
   rightPanelTitle,
-  defaultLeftPanelSize = 40,
-  minLeftPanelSize = 30,
 }: SplitPanelLayoutProps) {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
@@ -72,7 +66,7 @@ export function SplitPanelLayout({
 
   // Navigation buttons when one panel is collapsed
   const navigationButtons = (
-    <div className="flex items-center justify-between w-full p-2 bg-gray-100 border-b">
+    <div className="flex items-center justify-between w-full sticky top-0 z-10 bg-white border-b">
       {leftPanelCollapsed && (
         <Button 
           variant="ghost" 
@@ -100,7 +94,7 @@ export function SplitPanelLayout({
   // If both panels are collapsed, show controls to expand them
   if (leftPanelCollapsed && rightPanelCollapsed) {
     return (
-      <div className="flex justify-center items-center h-64 bg-pebble p-4">
+      <div className="flex justify-center items-center h-64 bg-pebble">
         <div className="flex gap-4">
           <Button onClick={toggleLeftPanel} variant="outline" className="flex gap-2">
             <ChevronRight size={18} />
@@ -116,43 +110,30 @@ export function SplitPanelLayout({
   }
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="min-h-[calc(100vh-200px)] max-w-full overflow-hidden"
-    >
+    <div className="flex min-h-[calc(100vh-200px)] w-full overflow-hidden">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start">
           {navigationButtons}
         </div>
       ) : (
-        <>
-          <ResizablePanel
-            defaultSize={defaultLeftPanelSize}
-            minSize={minLeftPanelSize}
-            maxSize={isMobile ? 100 : 60}
-            className="min-w-[300px] md:max-w-[520px]"
-          >
-            <div className="h-full flex flex-col">
-              <div className="flex justify-between px-2 py-2 border-b">
-                <div className="font-medium">{leftPanelTitle}</div>
-                <Button 
-                  variant="ghost" 
-                  onClick={toggleLeftPanel} 
-                  className="p-1 h-6 w-6"
-                  title={`Hide ${leftPanelTitle || "left panel"}`}
-                >
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
-              </div>
-              <ScrollArea className="flex-grow h-[calc(100vh-260px)]">
-                <div className="p-4">
-                  {leftPanel}
-                </div>
-              </ScrollArea>
+        <div className="w-[520px] min-w-[520px] max-w-[520px] border-r border-gray-200">
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-10 bg-white">
+              <div className="font-medium">{leftPanelTitle}</div>
+              <Button 
+                variant="ghost" 
+                onClick={toggleLeftPanel} 
+                className="p-1 h-6 w-6"
+                title={`Hide ${leftPanelTitle || "left panel"}`}
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
             </div>
-          </ResizablePanel>
-          {!isMobile && <ResizableHandle withHandle />}
-        </>
+            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)]">
+              {leftPanel}
+            </div>
+          </div>
+        </div>
       )}
       
       {rightPanelCollapsed ? (
@@ -160,9 +141,9 @@ export function SplitPanelLayout({
           {navigationButtons}
         </div>
       ) : (
-        <ResizablePanel defaultSize={100 - defaultLeftPanelSize} minSize={minLeftPanelSize} className="bg-white/50">
+        <div className="flex-1 bg-white/50">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-2 py-2 border-b">
+            <div className="flex justify-between px-2 py-2 border-b sticky top-0 z-10 bg-white">
               <div className="font-medium">{rightPanelTitle}</div>
               <Button 
                 variant="ghost" 
@@ -173,14 +154,14 @@ export function SplitPanelLayout({
                 <ChevronRight className="h-3 w-3" />
               </Button>
             </div>
-            <ScrollArea className="flex-grow h-[calc(100vh-260px)]">
-              <div className="p-4 bg-pebble/30">
+            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] bg-pebble/30">
+              <div className="p-4">
                 {rightPanel}
               </div>
-            </ScrollArea>
+            </div>
           </div>
-        </ResizablePanel>
+        </div>
       )}
-    </ResizablePanelGroup>
+    </div>
   );
 }
