@@ -45,8 +45,8 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-4">
-      <TabsList className="grid w-full grid-cols-2 bg-ice">
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-4 w-full">
+      <TabsList className="grid grid-cols-2 bg-ice w-full">
         <TabsTrigger value="edit" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Edit</TabsTrigger>
         <TabsTrigger value="answers" className="data-[state=active]:bg-abyss data-[state=active]:text-white">Answers</TabsTrigger>
       </TabsList>

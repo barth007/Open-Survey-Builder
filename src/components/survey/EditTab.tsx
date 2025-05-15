@@ -59,7 +59,7 @@ const EditTab: React.FC<EditTabProps> = ({
       />
 
       {/* Welcome Page Settings */}
-      <Card>
+      <Card className="border border-ice">
         <CardHeader className="pb-2">
           <h3 className="text-lg font-medium">Welcome Page</h3>
         </CardHeader>
@@ -120,7 +120,7 @@ const EditTab: React.FC<EditTabProps> = ({
       </div>
 
       {/* Thank You Page Settings */}
-      <Card>
+      <Card className="border border-ice">
         <CardHeader className="pb-2">
           <h3 className="text-lg font-medium">Thank You Page</h3>
         </CardHeader>
@@ -199,8 +199,8 @@ const EditTab: React.FC<EditTabProps> = ({
       rightPanel={previewPanel}
       leftPanelTitle="Editor"
       rightPanelTitle="Preview"
-      defaultLeftPanelSize={60}
-      minLeftPanelSize={40}
+      defaultLeftPanelSize={50}
+      minLeftPanelSize={30}
     />
   );
 };

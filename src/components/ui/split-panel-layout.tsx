@@ -70,6 +70,33 @@ export function SplitPanelLayout({
     }
   };
 
+  // Navigation buttons when one panel is collapsed
+  const navigationButtons = (
+    <div className="flex items-center justify-between w-full p-2 bg-gray-100 border-b">
+      {leftPanelCollapsed && (
+        <Button 
+          variant="ghost" 
+          onClick={toggleLeftPanel} 
+          className="p-1 h-8 w-8"
+          title={leftPanelTitle || "Show left panel"}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      )}
+      <div className="flex-grow"></div>
+      {rightPanelCollapsed && (
+        <Button 
+          variant="ghost" 
+          onClick={toggleRightPanel} 
+          className="p-1 h-8 w-8"
+          title={rightPanelTitle || "Show right panel"}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+
   // If both panels are collapsed, show controls to expand them
   if (leftPanelCollapsed && rightPanelCollapsed) {
     return (
@@ -94,15 +121,8 @@ export function SplitPanelLayout({
       className="min-h-[calc(100vh-200px)] max-w-full overflow-hidden"
     >
       {leftPanelCollapsed ? (
-        <div className="w-12 border-r border-gray-200 flex items-center justify-center">
-          <Button 
-            variant="ghost" 
-            onClick={toggleLeftPanel} 
-            className="p-2 h-auto"
-            title={leftPanelTitle || "Show left panel"}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
+        <div className="w-10 border-r border-gray-200 flex items-start">
+          {navigationButtons}
         </div>
       ) : (
         <>
@@ -110,17 +130,18 @@ export function SplitPanelLayout({
             defaultSize={defaultLeftPanelSize}
             minSize={minLeftPanelSize}
             maxSize={isMobile ? 100 : 60}
-            className="min-w-[300px] md:min-w-[520px] md:max-w-[520px]"
+            className="min-w-[300px] md:max-w-[520px]"
           >
             <div className="h-full flex flex-col">
-              <div className="flex justify-end px-4 py-2 border-b">
+              <div className="flex justify-between px-2 py-2 border-b">
+                <div className="font-medium">{leftPanelTitle}</div>
                 <Button 
                   variant="ghost" 
                   onClick={toggleLeftPanel} 
-                  className="p-1 h-8 w-8"
+                  className="p-1 h-6 w-6"
                   title={`Hide ${leftPanelTitle || "left panel"}`}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-3 w-3" />
                 </Button>
               </div>
               <ScrollArea className="flex-grow h-[calc(100vh-260px)]">
@@ -135,38 +156,21 @@ export function SplitPanelLayout({
       )}
       
       {rightPanelCollapsed ? (
-        <div className="w-12 border-l border-gray-200 flex items-center justify-center">
-          <Button 
-            variant="ghost" 
-            onClick={toggleRightPanel} 
-            className="p-2 h-auto"
-            title={rightPanelTitle || "Show right panel"}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
+        <div className="w-10 border-l border-gray-200 flex items-start">
+          {navigationButtons}
         </div>
       ) : (
         <ResizablePanel defaultSize={100 - defaultLeftPanelSize} minSize={minLeftPanelSize} className="bg-white/50">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-4 py-2 border-b">
-              {isMobile && (
-                <Button 
-                  variant="ghost" 
-                  onClick={toggleLeftPanel} 
-                  className="p-1 h-8 w-8"
-                  title={leftPanelTitle || "Show left panel"}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              )}
-              <div className="flex-grow"></div>
+            <div className="flex justify-between px-2 py-2 border-b">
+              <div className="font-medium">{rightPanelTitle}</div>
               <Button 
                 variant="ghost" 
                 onClick={toggleRightPanel} 
-                className="p-1 h-8 w-8"
+                className="p-1 h-6 w-6"
                 title={`Hide ${rightPanelTitle || "right panel"}`}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3" />
               </Button>
             </div>
             <ScrollArea className="flex-grow h-[calc(100vh-260px)]">
