@@ -25,6 +25,7 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     isLoading,
     error,
     filteredResponses,
+    processedResponses,
     totalResponses,
     exportToCSV,
     handleChartTypeChange,
