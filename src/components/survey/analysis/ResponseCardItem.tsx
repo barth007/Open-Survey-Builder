@@ -42,7 +42,9 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
     >
       <CardHeader className="border-b border-ice">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg">{item.question}</CardTitle>
+          <CardTitle className="text-lg break-words pr-2" style={{ maxWidth: 'calc(100% - 100px)', overflowWrap: 'break-word' }}>
+            {item.question}
+          </CardTitle>
           <ToggleGroup 
             type="single" 
             value={chartType} 
@@ -59,35 +61,41 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
           </ToggleGroup>
         </div>
       </CardHeader>
-      <CardContent className="pt-6">
-        <ResponseChartRenderer 
-          chartType={chartType} 
-          data={item.responses} 
-          isLikert={item.likert} 
-        />
+      <CardContent className="pt-6 overflow-x-hidden">
+        <div className="overflow-x-hidden">
+          <ResponseChartRenderer 
+            chartType={chartType} 
+            data={item.responses} 
+            isLikert={item.likert} 
+          />
+        </div>
         
-        <Table className="mt-4">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Answer</TableHead>
-              <TableHead>Count</TableHead>
-              <TableHead>Percentage</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {item.responses.map((response) => (
-              <TableRow key={response.answer}>
-                <TableCell>{response.answer}</TableCell>
-                <TableCell>{response.count}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                    {response.percentage}%
-                  </Badge>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table className="mt-4">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-1/2">Answer</TableHead>
+                <TableHead>Count</TableHead>
+                <TableHead>Percentage</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {item.responses.map((response) => (
+                <TableRow key={response.answer}>
+                  <TableCell className="break-words" style={{ maxWidth: '200px', overflowWrap: 'break-word' }}>
+                    {response.answer}
+                  </TableCell>
+                  <TableCell>{response.count}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                      {response.percentage}%
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

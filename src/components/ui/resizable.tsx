@@ -21,14 +21,12 @@ const ResizablePanel = ResizablePrimitive.Panel
 
 // Fix the ResizableHandle component to properly handle props
 const ResizableHandle = ({
-  className,
-  withHandle,
-  ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
+  className
+}: {
+  className?: string
   withHandle?: boolean
 }) => {
-  // Instead of spreading all props from ResizablePrimitive.PanelResizeHandle,
-  // we'll create a div with just the className
+  // Create a simple div with the right styling instead of using ResizablePrimitive component
   return (
     <div
       className={cn(
@@ -36,7 +34,7 @@ const ResizableHandle = ({
         className
       )}
     />
-  );
+  )
 }
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle }

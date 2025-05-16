@@ -94,7 +94,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   }
 
   return (
-    <Card className="h-full border-ice">
+    <Card className="h-full border-ice overflow-hidden">
       <CardHeader className="border-b border-ice">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg">Analysis Panel</CardTitle>
@@ -110,7 +110,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent className="pt-6 overflow-x-hidden">
         {!selectedResponseGroup ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <Database className="h-12 w-12 text-gray-300 mb-4" />
@@ -121,7 +121,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
           </div>
         ) : (
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-carbon">
+            <h3 className="text-lg font-semibold text-carbon break-words">
               {responseData?.question}
             </h3>
 
@@ -178,8 +178,10 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                     {responseData?.responses.map(response => (
                       <div key={response.answer} className="border-b border-gray-100 pb-3">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium">{response.answer}</span>
-                          <span className="text-sm text-gray-500">{response.count} responses</span>
+                          <span className="font-medium break-words pr-2" style={{ maxWidth: '70%', overflowWrap: 'break-word' }}>
+                            {response.answer}
+                          </span>
+                          <span className="text-sm text-gray-500 whitespace-nowrap">{response.count} responses</span>
                         </div>
                         
                         <div className="flex flex-wrap gap-2 mb-2">
@@ -189,7 +191,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                               variant="secondary" 
                               className="flex items-center gap-1 bg-blue-50"
                             >
-                              {tag}
+                              <span className="break-all max-w-[150px]">{tag}</span>
                               <button 
                                 className="ml-1 text-gray-500 hover:text-red-500"
                                 onClick={() => handleRemoveTag(response.answer, tag)}

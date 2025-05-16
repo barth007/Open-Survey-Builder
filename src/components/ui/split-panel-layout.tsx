@@ -108,7 +108,7 @@ export function SplitPanelLayout({
     <div className="flex min-h-[calc(100vh-200px)] w-full overflow-hidden">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center border-b">
+          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center">
             <NavigationButton 
               collapsed={leftPanelCollapsed} 
               onClick={toggleLeftPanel} 
@@ -138,7 +138,7 @@ export function SplitPanelLayout({
       
       {rightPanelCollapsed ? (
         <div className="w-10 border-l border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center border-b">
+          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center">
             <NavigationButton 
               collapsed={rightPanelCollapsed} 
               onClick={toggleRightPanel} 
@@ -159,7 +159,7 @@ export function SplitPanelLayout({
                 title={`Hide ${rightPanelTitle || "right panel"}`} 
               />
             </div>
-            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
+            <div className="overflow-y-auto overflow-x-hidden flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
               {rightPanel}
             </div>
           </div>

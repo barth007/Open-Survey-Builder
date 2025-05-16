@@ -54,11 +54,11 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
           </div>
         ) : (
           // Desktop grid layout with responsive columns based on option count
-          <div className={`grid grid-cols-${Math.min(question.options.length, 5)} gap-2`}>
+          <div className={`grid ${getGridColumns(question.options.length)} gap-2`}>
             {question.options.map((option) => (
               <div 
                 key={option.id} 
-                className={`flex flex-col items-center p-3 border rounded-md transition-colors
+                className={`flex flex-col items-center p-2 border rounded-md transition-colors
                   ${value === option.id 
                     ? 'border-blue-400 bg-blue-50 ring-1 ring-blue-300' 
                     : 'border-gray-200 hover:bg-gray-50'}
@@ -71,7 +71,8 @@ export const LikertScaleRenderer: React.FC<LikertScaleRendererProps> = ({
                 />
                 <label 
                   htmlFor={`likert-${option.id}`}
-                  className="text-sm text-center text-gray-700 px-1 cursor-pointer break-words w-full"
+                  className="text-xs text-center text-gray-700 px-1 cursor-pointer break-words w-full overflow-hidden"
+                  style={{ overflowWrap: 'break-word', wordBreak: 'break-word', hyphens: 'auto', maxWidth: '100%' }}
                 >
                   {option.text}
                 </label>

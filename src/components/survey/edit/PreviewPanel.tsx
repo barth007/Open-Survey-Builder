@@ -11,7 +11,7 @@ interface PreviewPanelProps {
 
 export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-1">
       <div className="bg-white p-4 rounded-md shadow-sm">
         <WelcomePage 
           title={survey.welcomeTitle} 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
@@ -128,7 +127,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                     id={`preview-${option.id}`}
                     className="mt-1 mr-2"
                   />
-                  <div>
+                  <div className="break-words" style={{ maxWidth: 'calc(100% - 30px)' }}>
                     <label htmlFor={`preview-${option.id}`}>{option.text}</label>
                     {option.media && (
                       <div className="mt-2">
@@ -166,7 +165,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                   checked={currentSelections.includes(option.id)}
                   onCheckedChange={() => handleCheckboxChange(question.id, option.id)}
                 />
-                <div>
+                <div className="break-words" style={{ maxWidth: 'calc(100% - 30px)' }}>
                   <label htmlFor={`preview-${option.id}`}>{option.text}</label>
                 </div>
               </div>
@@ -181,7 +180,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
         const count = labels.length;
         
         return (
-          <div className="mt-4">
+          <div className="mt-4 overflow-x-hidden">
             <RadioGroup name={`likert-${question.id}`}>
               {isMobile ? (
                 // Mobile vertical layout
@@ -198,7 +197,8 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                       />
                       <label 
                         htmlFor={`likert-${question.id}-${i}`} 
-                        className="text-sm"
+                        className="text-sm break-words"
+                        style={{ maxWidth: 'calc(100% - 30px)', overflowWrap: 'break-word' }}
                       >
                         {label}
                       </label>
@@ -220,7 +220,14 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
                       />
                       <label 
                         htmlFor={`likert-${question.id}-${i}`} 
-                        className="text-xs text-center mt-1 px-1"
+                        className="text-xs text-center mt-1 px-1 break-words w-full"
+                        style={{ 
+                          maxWidth: '100%', 
+                          overflowWrap: 'break-word', 
+                          wordBreak: 'break-word', 
+                          hyphens: 'auto',
+                          fontSize: count > 5 ? '0.65rem' : '0.75rem'
+                        }}
                       >
                         {label}
                       </label>
@@ -239,19 +246,19 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-ice p-4 md:p-6">
-      <h2 className="text-xl md:text-2xl font-bold mb-2 text-carbon">{survey.title}</h2>
-      <p className="text-gray-600 mb-6">{survey.description}</p>
+      <h2 className="text-xl md:text-2xl font-bold mb-2 text-carbon break-words">{survey.title}</h2>
+      <p className="text-gray-600 mb-6 break-words">{survey.description}</p>
 
       {survey.questions.map((question, index) => (
         isQuestionVisible(question) && (
           <div key={question.id} className="mb-6 pb-6 border-b border-ice last:border-b-0">
-            <h3 className="font-medium mb-2 text-carbon text-base md:text-lg">
+            <h3 className="font-medium mb-2 text-carbon text-base md:text-lg break-words">
               {index + 1}. {question.text} 
               {question.isRequired && <span className="text-magma ml-1">*</span>}
             </h3>
             
             {question.description && (
-              <p className="text-sm text-gray-600 mb-3">{question.description}</p>
+              <p className="text-sm text-gray-600 mb-3 break-words">{question.description}</p>
             )}
 
             {question.maxSelections && (

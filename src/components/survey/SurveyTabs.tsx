@@ -47,11 +47,11 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
       <div className="flex w-full">
-        <TabsList className="grid grid-cols-2 w-full rounded-none">
+        <TabsList className="grid grid-cols-2 w-full rounded-none border-b">
           <TabsTrigger 
             value="edit" 
             className="data-[state=active]:bg-abyss data-[state=active]:text-white rounded-none data-[state=active]:rounded-t-md"
-            style={{ width: '520px' }}
+            style={{ width: '520px', minWidth: '520px', maxWidth: '520px' }}
           >
             Edit
           </TabsTrigger>
@@ -64,7 +64,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
         </TabsList>
       </div>
 
-      <TabsContent value="edit" className="mt-0">
+      <TabsContent value="edit" className="mt-0 p-0">
         <EditTab
           survey={survey}
           onTitleChange={onTitleChange}
@@ -84,7 +84,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="answers" className="mt-0">
+      <TabsContent value="answers" className="mt-0 p-0">
         <AnswersTab survey={survey} />
       </TabsContent>
     </Tabs>
