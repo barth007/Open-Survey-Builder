@@ -109,7 +109,7 @@ export function SplitPanelLayout({
     <div className="flex min-h-[calc(100vh-200px)] w-full overflow-hidden">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center">
+          <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
             <NavigationButton 
               collapsed={leftPanelCollapsed} 
               onClick={toggleLeftPanel} 
@@ -121,7 +121,7 @@ export function SplitPanelLayout({
       ) : (
         <div className="w-[520px] min-w-[520px] max-w-[520px] border-r border-gray-200">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10">
+            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
               <div className="font-medium">{leftPanelTitle}</div>
               <NavigationButton 
                 collapsed={leftPanelCollapsed} 
@@ -130,9 +130,11 @@ export function SplitPanelLayout({
                 title={`Hide ${leftPanelTitle || "left panel"}`} 
               />
             </div>
-            <div className="flex-grow h-[calc(100vh-260px)] px-4 py-4">
+            <div className="flex-grow h-[calc(100vh-260px)] overflow-auto">
               <ScrollArea className="h-full">
-                {leftPanel}
+                <div className="px-4 py-4">
+                  {leftPanel}
+                </div>
               </ScrollArea>
             </div>
           </div>
@@ -141,7 +143,7 @@ export function SplitPanelLayout({
       
       {rightPanelCollapsed ? (
         <div className="w-10 border-l border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-10 w-10 flex items-center justify-center">
+          <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
             <NavigationButton 
               collapsed={rightPanelCollapsed} 
               onClick={toggleRightPanel} 
@@ -153,7 +155,7 @@ export function SplitPanelLayout({
       ) : (
         <div className="flex-1 bg-white">
           <div className="h-full flex flex-col">
-            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10">
+            <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
               <div className="font-medium">{rightPanelTitle}</div>
               <NavigationButton 
                 collapsed={rightPanelCollapsed} 
@@ -162,8 +164,12 @@ export function SplitPanelLayout({
                 title={`Hide ${rightPanelTitle || "right panel"}`} 
               />
             </div>
-            <div className="flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
-              {rightPanel}
+            <div className="flex-grow h-[calc(100vh-260px)] bg-pebble/30 overflow-auto">
+              <ScrollArea className="h-full">
+                <div className="px-4 py-4">
+                  {rightPanel}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         </div>
