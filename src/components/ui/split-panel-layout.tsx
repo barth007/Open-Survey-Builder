@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SplitPanelLayoutProps {
   leftPanel: React.ReactNode;
@@ -129,8 +130,10 @@ export function SplitPanelLayout({
                 title={`Hide ${leftPanelTitle || "left panel"}`} 
               />
             </div>
-            <div className="overflow-y-auto flex-grow h-[calc(100vh-260px)] px-4 py-4">
-              {leftPanel}
+            <div className="flex-grow h-[calc(100vh-260px)] px-4 py-4">
+              <ScrollArea className="h-full">
+                {leftPanel}
+              </ScrollArea>
             </div>
           </div>
         </div>
@@ -159,7 +162,7 @@ export function SplitPanelLayout({
                 title={`Hide ${rightPanelTitle || "right panel"}`} 
               />
             </div>
-            <div className="overflow-y-auto overflow-x-hidden flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
+            <div className="flex-grow h-[calc(100vh-260px)] bg-pebble/30 px-4 py-4">
               {rightPanel}
             </div>
           </div>
