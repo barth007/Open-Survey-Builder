@@ -48,10 +48,10 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
       <div className="flex w-full">
-        <TabsList className="grid grid-cols-2 w-full rounded-none border-b bg-transparent">
+        <TabsList className="flex w-full rounded-none border-b bg-transparent">
           <TabsTrigger 
             value="edit" 
-            className="flex-none w-[520px] rounded-none data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:rounded-t-md"
+            className="w-[520px] min-w-[520px] max-w-[520px] rounded-none data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:rounded-t-md"
           >
             Edit
           </TabsTrigger>
