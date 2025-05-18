@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Survey, Question } from '@/types/survey';
 import AnswersTab from '@/components/AnswersTab';
 import EditTab from '@/components/survey/EditTab';
-import { useSidebar } from "@/components/ui/sidebar";
 
 interface SurveyTabsProps {
   activeTab: "edit" | "answers";
@@ -45,55 +44,57 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
-  // Use a fixed container to maintain consistent layout regardless of tab state
+  // Use a fixed container to maintain consistent layout
   return (
-    <div className="w-full">
-      <Tabs 
-        value={activeTab} 
-        onValueChange={(v) => setActiveTab(v as any)}
-        className="w-full"
-      >
-        <div className="flex w-full border-b">
-          <TabsList className="flex w-full rounded-none bg-transparent">
-            <TabsTrigger 
-              value="edit" 
-              className="w-[520px] min-w-[520px] max-w-[520px] rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
-            >
-              Edit
-            </TabsTrigger>
-            <TabsTrigger 
-              value="answers" 
-              className="flex-1 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
-            >
-              Answers
-            </TabsTrigger>
-          </TabsList>
-        </div>
+    <div className="w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(v) => setActiveTab(v as any)}
+          className="w-full"
+        >
+          <div className="flex w-full border-b">
+            <TabsList className="flex w-full rounded-none bg-transparent">
+              <TabsTrigger 
+                value="edit" 
+                className="w-[520px] min-w-[520px] max-w-[520px] rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
+              >
+                Edit
+              </TabsTrigger>
+              <TabsTrigger 
+                value="answers" 
+                className="flex-1 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
+              >
+                Answers
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsContent value="edit" className="mt-0 p-0">
-          <EditTab
-            survey={survey}
-            onTitleChange={onTitleChange}
-            onDescriptionChange={onDescriptionChange}
-            onQuestionChange={onQuestionChange}
-            onDeleteQuestion={onDeleteQuestion}
-            onDuplicateQuestion={onDuplicateQuestion}
-            onAddQuestion={onAddQuestion}
-            onWelcomeTitleChange={onWelcomeTitleChange}
-            onWelcomeMessageChange={onWelcomeMessageChange}
-            onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-            onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-            onThankYouTitleChange={onThankYouTitleChange}
-            onThankYouMessageChange={onThankYouMessageChange}
-            onThankYouButtonTextChange={onThankYouButtonTextChange}
-            onRedirectUrlChange={onRedirectUrlChange}
-          />
-        </TabsContent>
+          <TabsContent value="edit" className="mt-0 p-0">
+            <EditTab
+              survey={survey}
+              onTitleChange={onTitleChange}
+              onDescriptionChange={onDescriptionChange}
+              onQuestionChange={onQuestionChange}
+              onDeleteQuestion={onDeleteQuestion}
+              onDuplicateQuestion={onDuplicateQuestion}
+              onAddQuestion={onAddQuestion}
+              onWelcomeTitleChange={onWelcomeTitleChange}
+              onWelcomeMessageChange={onWelcomeMessageChange}
+              onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+              onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+              onThankYouTitleChange={onThankYouTitleChange}
+              onThankYouMessageChange={onThankYouMessageChange}
+              onThankYouButtonTextChange={onThankYouButtonTextChange}
+              onRedirectUrlChange={onRedirectUrlChange}
+            />
+          </TabsContent>
 
-        <TabsContent value="answers" className="mt-0 p-0">
-          <AnswersTab survey={survey} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="answers" className="mt-0 p-0">
+            <AnswersTab survey={survey} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
