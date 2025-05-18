@@ -8,7 +8,11 @@ interface AnswersTabProps {
 }
 
 const AnswersTab: React.FC<AnswersTabProps> = ({ survey }) => {
-  return <AnswersTabContent survey={survey} />;
+  return (
+    <div className="w-full">
+      <AnswersTabContent survey={survey} />
+    </div>
+  );
 };
 
 export default AnswersTab;

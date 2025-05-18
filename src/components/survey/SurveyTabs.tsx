@@ -44,9 +44,8 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
-  // Use a fixed container to maintain consistent layout
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full bg-pebble">
       <div className="max-w-7xl mx-auto">
         <Tabs 
           value={activeTab} 
@@ -57,13 +56,13 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
             <TabsList className="flex w-full rounded-none bg-transparent">
               <TabsTrigger 
                 value="edit" 
-                className="w-[520px] min-w-[520px] max-w-[520px] rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
+                className="flex-1 min-h-12 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
               >
                 Edit
               </TabsTrigger>
               <TabsTrigger 
                 value="answers" 
-                className="flex-1 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
+                className="flex-1 min-h-12 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white"
               >
                 Answers
               </TabsTrigger>
