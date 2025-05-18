@@ -45,53 +45,56 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
+  // Use a fixed container to maintain consistent layout regardless of tab state
   return (
-    <Tabs 
-      value={activeTab} 
-      onValueChange={(v) => setActiveTab(v as any)} 
-      className="w-full"
-    >
-      <div className="flex w-full">
-        <TabsList className="flex w-full rounded-none border-b bg-transparent">
-          <TabsTrigger 
-            value="edit" 
-            className="w-[520px] min-w-[520px] max-w-[520px] rounded-none data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
-          >
-            Edit
-          </TabsTrigger>
-          <TabsTrigger 
-            value="answers" 
-            className="flex-1 rounded-none data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
-          >
-            Answers
-          </TabsTrigger>
-        </TabsList>
-      </div>
+    <div className="w-full">
+      <Tabs 
+        value={activeTab} 
+        onValueChange={(v) => setActiveTab(v as any)}
+        className="w-full"
+      >
+        <div className="flex w-full border-b">
+          <TabsList className="flex w-full rounded-none bg-transparent">
+            <TabsTrigger 
+              value="edit" 
+              className="w-[520px] min-w-[520px] max-w-[520px] rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
+            >
+              Edit
+            </TabsTrigger>
+            <TabsTrigger 
+              value="answers" 
+              className="flex-1 rounded-none border-0 data-[state=active]:bg-abyss data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:rounded-t-md"
+            >
+              Answers
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-      <TabsContent value="edit" className="mt-0 p-0">
-        <EditTab
-          survey={survey}
-          onTitleChange={onTitleChange}
-          onDescriptionChange={onDescriptionChange}
-          onQuestionChange={onQuestionChange}
-          onDeleteQuestion={onDeleteQuestion}
-          onDuplicateQuestion={onDuplicateQuestion}
-          onAddQuestion={onAddQuestion}
-          onWelcomeTitleChange={onWelcomeTitleChange}
-          onWelcomeMessageChange={onWelcomeMessageChange}
-          onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-          onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-          onThankYouTitleChange={onThankYouTitleChange}
-          onThankYouMessageChange={onThankYouMessageChange}
-          onThankYouButtonTextChange={onThankYouButtonTextChange}
-          onRedirectUrlChange={onRedirectUrlChange}
-        />
-      </TabsContent>
+        <TabsContent value="edit" className="mt-0 p-0">
+          <EditTab
+            survey={survey}
+            onTitleChange={onTitleChange}
+            onDescriptionChange={onDescriptionChange}
+            onQuestionChange={onQuestionChange}
+            onDeleteQuestion={onDeleteQuestion}
+            onDuplicateQuestion={onDuplicateQuestion}
+            onAddQuestion={onAddQuestion}
+            onWelcomeTitleChange={onWelcomeTitleChange}
+            onWelcomeMessageChange={onWelcomeMessageChange}
+            onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+            onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+            onThankYouTitleChange={onThankYouTitleChange}
+            onThankYouMessageChange={onThankYouMessageChange}
+            onThankYouButtonTextChange={onThankYouButtonTextChange}
+            onRedirectUrlChange={onRedirectUrlChange}
+          />
+        </TabsContent>
 
-      <TabsContent value="answers" className="mt-0 p-0">
-        <AnswersTab survey={survey} />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="answers" className="mt-0 p-0">
+          <AnswersTab survey={survey} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
