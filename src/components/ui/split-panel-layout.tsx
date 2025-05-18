@@ -119,7 +119,7 @@ export function SplitPanelLayout({
           </div>
         </div>
       ) : (
-        <div className="w-[520px] min-w-[520px] max-w-[520px] border-r border-gray-200">
+        <div className="w-2/5 border-r border-gray-200">
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
               <div className="font-medium">{leftPanelTitle}</div>
