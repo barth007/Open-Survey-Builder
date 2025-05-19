@@ -45,7 +45,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <div className="w-full bg-pebble">
+    <div className="w-full bg-pebble overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <Tabs 
           value={activeTab} 
@@ -69,29 +69,31 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
             </TabsList>
           </div>
 
-          <TabsContent value="edit" className="mt-0 p-0">
-            <EditTab
-              survey={survey}
-              onTitleChange={onTitleChange}
-              onDescriptionChange={onDescriptionChange}
-              onQuestionChange={onQuestionChange}
-              onDeleteQuestion={onDeleteQuestion}
-              onDuplicateQuestion={onDuplicateQuestion}
-              onAddQuestion={onAddQuestion}
-              onWelcomeTitleChange={onWelcomeTitleChange}
-              onWelcomeMessageChange={onWelcomeMessageChange}
-              onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-              onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-              onThankYouTitleChange={onThankYouTitleChange}
-              onThankYouMessageChange={onThankYouMessageChange}
-              onThankYouButtonTextChange={onThankYouButtonTextChange}
-              onRedirectUrlChange={onRedirectUrlChange}
-            />
-          </TabsContent>
+          <div className="relative w-full overflow-hidden">
+            <TabsContent value="edit" className="mt-0 p-0 w-full absolute inset-0">
+              <EditTab
+                survey={survey}
+                onTitleChange={onTitleChange}
+                onDescriptionChange={onDescriptionChange}
+                onQuestionChange={onQuestionChange}
+                onDeleteQuestion={onDeleteQuestion}
+                onDuplicateQuestion={onDuplicateQuestion}
+                onAddQuestion={onAddQuestion}
+                onWelcomeTitleChange={onWelcomeTitleChange}
+                onWelcomeMessageChange={onWelcomeMessageChange}
+                onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+                onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+                onThankYouTitleChange={onThankYouTitleChange}
+                onThankYouMessageChange={onThankYouMessageChange}
+                onThankYouButtonTextChange={onThankYouButtonTextChange}
+                onRedirectUrlChange={onRedirectUrlChange}
+              />
+            </TabsContent>
 
-          <TabsContent value="answers" className="mt-0 p-0">
-            <AnswersTab survey={survey} />
-          </TabsContent>
+            <TabsContent value="answers" className="mt-0 p-0 w-full absolute inset-0">
+              <AnswersTab survey={survey} />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>

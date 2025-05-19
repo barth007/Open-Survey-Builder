@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -112,7 +111,7 @@ const Index = () => {
   };
 
   // Helper function to update survey properties
-  const updateSurvey = (updates: Partial<typeof survey>) => {
+  function updateSurvey(updates: Partial<typeof survey>) {
     if (!surveyId) return;
 
     queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
@@ -121,7 +120,7 @@ const Index = () => {
     });
     
     setPendingChanges(true);
-  };
+  }
 
   if (isLoading) {
     return (
@@ -155,7 +154,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-pebble py-4 md:py-8 px-2 md:px-4">
-      <div className="container max-w-7xl mx-auto">
+      <div className="container max-w-7xl mx-auto w-full">
         <SurveyHeader 
           survey={survey}
           pendingChanges={pendingChanges}
@@ -163,25 +162,25 @@ const Index = () => {
           onPublishToggle={togglePublish}
         />
 
-        <div className={`mt-4 ${isMobile ? 'text-sm' : ''}`}>
+        <div className="mt-4 w-full">
           <SurveyTabs 
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             survey={survey}
-            onTitleChange={handleSurveyTitleChange}
-            onDescriptionChange={handleDescriptionChangeWithTracking}
-            onQuestionChange={handleQuestionChange}
-            onDeleteQuestion={handleDeleteQuestion}
-            onDuplicateQuestion={handleDuplicateQuestion}
-            onAddQuestion={handleAddQuestion}
-            onWelcomeTitleChange={handleWelcomeTitleChange}
-            onWelcomeMessageChange={handleWelcomeMessageChange}
-            onWelcomeInstructionsChange={handleWelcomeInstructionsChange}
-            onWelcomeButtonTextChange={handleWelcomeButtonTextChange}
-            onThankYouTitleChange={handleThankYouTitleChange}
-            onThankYouMessageChange={handleThankYouMessageChange}
-            onThankYouButtonTextChange={handleThankYouButtonTextChange}
-            onRedirectUrlChange={handleRedirectUrlChange}
+            onTitleChange={handleTitleChange}
+            onDescriptionChange={handleDescriptionChange}
+            onQuestionChange={updateQuestion}
+            onDeleteQuestion={deleteQuestion}
+            onDuplicateQuestion={duplicateQuestion}
+            onAddQuestion={addQuestion}
+            onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
+            onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
+            onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
+            onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
+            onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
+            onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
+            onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
+            onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
           />
         </div>
       </div>

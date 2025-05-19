@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Survey } from '@/types/survey';
+import { Survey, Question } from '@/types/survey';
 import { SplitPanelLayout } from '@/components/ui/split-panel-layout';
 import { EditorPanel } from './edit/EditorPanel';
 import { PreviewPanel } from './edit/PreviewPanel';
