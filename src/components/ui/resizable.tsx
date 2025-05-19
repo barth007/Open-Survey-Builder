@@ -1,8 +1,8 @@
+
 import * as ResizablePrimitive from "react-resizable-panels"
 import { cn } from "@/lib/utils"
 import React from "react"
 
-// We're keeping the panel group but making it non-resizable
 const ResizablePanelGroup = ({
   className,
   ...props
@@ -16,25 +16,40 @@ const ResizablePanelGroup = ({
   />
 )
 
-// Keep the panel component but remove resize functionality
-const ResizablePanel = ResizablePrimitive.Panel
+const ResizablePanel = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof ResizablePrimitive.Panel>) => (
+  <ResizablePrimitive.Panel
+    className={cn(
+      "flex h-full",
+      className
+    )}
+    {...props}
+  />
+)
 
-// Fix the ResizableHandle component to properly handle props
 const ResizableHandle = ({
-  className
-}: {
-  className?: string
+  className,
+  withHandle = false,
+  ...props
+}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
   withHandle?: boolean
-}) => {
-  // Create a simple div with the right styling instead of using ResizablePrimitive component
-  return (
-    <div
-      className={cn(
-        "relative flex w-px items-center justify-center bg-border",
-        className
-      )}
-    />
-  )
-}
+}) => (
+  <ResizablePrimitive.PanelResizeHandle
+    className={cn(
+      "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&:hover]:bg-accent cursor-col-resize",
+      className
+    )}
+    {...props}
+  >
+    {withHandle && (
+      <div className="z-10 flex h-4 w-3 flex-col justify-center gap-1">
+        <div className="h-0.5 w-full bg-border" />
+        <div className="h-0.5 w-full bg-border" />
+      </div>
+    )}
+  </ResizablePrimitive.PanelResizeHandle>
+)
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle }

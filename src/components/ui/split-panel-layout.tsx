@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface SplitPanelLayoutProps {
   leftPanel: React.ReactNode;
   rightPanel: React.ReactNode;
   leftPanelTitle?: string;
   rightPanelTitle?: string;
+  defaultLayout?: number[]; // Default size distribution [left, right] in percentage
+  minSizes?: number[]; // Minimum sizes for panels [left, right] in percentage
 }
 
 export function SplitPanelLayout({
@@ -17,6 +20,8 @@ export function SplitPanelLayout({
   rightPanel,
   leftPanelTitle,
   rightPanelTitle,
+  defaultLayout = [50, 50], // Default to 50/50 split
+  minSizes = [30, 30], // Minimum 30% for each panel
 }: SplitPanelLayoutProps) {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
@@ -105,32 +110,101 @@ export function SplitPanelLayout({
     </Button>
   );
 
-  return (
-    <div className="flex h-[calc(100vh-200px)] w-full">
-      {leftPanelCollapsed ? (
-        <div className="w-10 border-r border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
-            <NavigationButton 
-              collapsed={leftPanelCollapsed} 
-              onClick={toggleLeftPanel} 
-              direction="right" 
-              title={`Show ${leftPanelTitle || "left panel"}`} 
-            />
+  // If one panel is collapsed, render a simplified layout
+  if (leftPanelCollapsed || rightPanelCollapsed) {
+    return (
+      <div className="flex h-[calc(100vh-200px)] w-full">
+        {leftPanelCollapsed ? (
+          <div className="w-10 border-r border-gray-200 flex items-start">
+            <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
+              <NavigationButton 
+                collapsed={leftPanelCollapsed} 
+                onClick={toggleLeftPanel} 
+                direction="right" 
+                title={`Show ${leftPanelTitle || "left panel"}`} 
+              />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="w-[400px] min-w-[300px] max-w-[40%] border-r border-gray-200 flex-shrink-0">
+        ) : (
+          <div className="w-full border-r border-gray-200 flex-shrink-0">
+            <div className="h-full flex flex-col">
+              <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
+                <div className="font-medium">{leftPanelTitle}</div>
+                <NavigationButton 
+                  collapsed={leftPanelCollapsed} 
+                  onClick={toggleLeftPanel} 
+                  direction="left" 
+                  title={`Hide ${leftPanelTitle || "left panel"}`} 
+                />
+              </div>
+              <div className="flex-grow h-[calc(100vh-260px)] overflow-auto">
+                <ScrollArea className="h-full">
+                  <div className="px-4 py-4">
+                    {leftPanel}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {rightPanelCollapsed ? (
+          <div className="w-10 border-l border-gray-200 flex items-start">
+            <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
+              <NavigationButton 
+                collapsed={rightPanelCollapsed} 
+                onClick={toggleRightPanel} 
+                direction="left" 
+                title={`Show ${rightPanelTitle || "right panel"}`} 
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0 bg-white">
+            <div className="h-full flex flex-col">
+              <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
+                <div className="font-medium">{rightPanelTitle}</div>
+                <NavigationButton 
+                  collapsed={rightPanelCollapsed} 
+                  onClick={toggleRightPanel} 
+                  direction="right" 
+                  title={`Hide ${rightPanelTitle || "right panel"}`} 
+                />
+              </div>
+              <div className="flex-grow h-[calc(100vh-260px)] bg-pebble/30 overflow-auto">
+                <ScrollArea className="h-full">
+                  <div className="px-4 py-4">
+                    {rightPanel}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default: both panels visible with resizing capability
+  return (
+    <div className="h-[calc(100vh-200px)] w-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel
+          defaultSize={defaultLayout[0]}
+          minSize={minSizes[0]}
+          className="border-r border-gray-200"
+        >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
               <div className="font-medium">{leftPanelTitle}</div>
               <NavigationButton 
-                collapsed={leftPanelCollapsed} 
+                collapsed={false} 
                 onClick={toggleLeftPanel} 
                 direction="left" 
                 title={`Hide ${leftPanelTitle || "left panel"}`} 
               />
             </div>
-            <div className="flex-grow h-[calc(100vh-260px)] overflow-auto">
+            <div className="flex-grow overflow-auto">
               <ScrollArea className="h-full">
                 <div className="px-4 py-4">
                   {leftPanel}
@@ -138,33 +212,26 @@ export function SplitPanelLayout({
               </ScrollArea>
             </div>
           </div>
-        </div>
-      )}
-      
-      {rightPanelCollapsed ? (
-        <div className="w-10 border-l border-gray-200 flex items-start">
-          <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
-            <NavigationButton 
-              collapsed={rightPanelCollapsed} 
-              onClick={toggleRightPanel} 
-              direction="left" 
-              title={`Show ${rightPanelTitle || "right panel"}`} 
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 min-w-0 bg-white">
+        </ResizablePanel>
+        
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel
+          defaultSize={defaultLayout[1]}
+          minSize={minSizes[1]}
+          className="bg-white"
+        >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
               <div className="font-medium">{rightPanelTitle}</div>
               <NavigationButton 
-                collapsed={rightPanelCollapsed} 
+                collapsed={false} 
                 onClick={toggleRightPanel} 
                 direction="right" 
                 title={`Hide ${rightPanelTitle || "right panel"}`} 
               />
             </div>
-            <div className="flex-grow h-[calc(100vh-260px)] bg-pebble/30 overflow-auto">
+            <div className="flex-grow bg-pebble/30 overflow-auto">
               <ScrollArea className="h-full">
                 <div className="px-4 py-4">
                   {rightPanel}
@@ -172,8 +239,8 @@ export function SplitPanelLayout({
               </ScrollArea>
             </div>
           </div>
-        </div>
-      )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
