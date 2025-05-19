@@ -45,7 +45,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <div className="w-full bg-pebble overflow-hidden">
+    <div className="w-full bg-pebble">
       <div className="max-w-7xl mx-auto">
         <Tabs 
           value={activeTab} 
@@ -69,8 +69,8 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
             </TabsList>
           </div>
 
-          <div className="relative w-full overflow-hidden">
-            <TabsContent value="edit" className="mt-0 p-0 w-full absolute inset-0">
+          <div className="relative w-full">
+            <TabsContent value="edit" className="mt-0 p-0 w-full">
               <EditTab
                 survey={survey}
                 onTitleChange={onTitleChange}
@@ -90,7 +90,7 @@ const SurveyTabs: React.FC<SurveyTabsProps> = ({
               />
             </TabsContent>
 
-            <TabsContent value="answers" className="mt-0 p-0 w-full absolute inset-0">
+            <TabsContent value="answers" className="mt-0 p-0 w-full">
               <AnswersTab survey={survey} />
             </TabsContent>
           </div>

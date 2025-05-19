@@ -106,7 +106,7 @@ export function SplitPanelLayout({
   );
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)] w-full overflow-hidden">
+    <div className="flex h-[calc(100vh-200px)] w-full">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start">
           <div className="sticky top-0 z-30 bg-white h-12 w-10 flex items-center justify-center">
