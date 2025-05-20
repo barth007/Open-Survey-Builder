@@ -73,7 +73,7 @@ const EditTab: React.FC<EditTabProps> = ({
       leftPanelTitle="Editor"
       rightPanelTitle="Preview"
       defaultLayout={[50, 50]}
-      minSizes={["512px", "512px"]}
+      minSizes={["30%", "30%"]}
     />
   );
 };

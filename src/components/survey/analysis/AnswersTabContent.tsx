@@ -8,6 +8,7 @@ import { FilterControls } from './FilterControls';
 import { NoResponsesView } from './NoResponsesView';
 import { ResponsesList } from './ResponsesList';
 import { useAnswersTab } from './useAnswersTab';
+import { EmptyAnalysisState } from './panel/EmptyAnalysisState';
 
 interface AnswersTabContentProps {
   survey: Survey;
@@ -55,12 +56,17 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     <div className="space-y-8">
       <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
-      <NoResponsesView 
-        totalResponses={totalResponses} 
-        hasFilteredResponses={filteredResponses.length > 0} 
-      />
-      
-      {processedResponses && processedResponses.length > 0 && (
+      {totalResponses === 0 ? (
+        <NoResponsesView 
+          totalResponses={totalResponses} 
+          hasFilteredResponses={false} 
+        />
+      ) : filteredResponses.length === 0 ? (
+        <NoResponsesView 
+          totalResponses={totalResponses} 
+          hasFilteredResponses={false} 
+        />
+      ) : (
         <>
           <FilterControls 
             filterText={filterText}
@@ -82,13 +88,15 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     </div>
   );
 
-  // Analysis panel content
-  const analysisPanel = (
+  // Analysis panel content with empty state handling
+  const analysisPanel = selectedResponseGroup ? (
     <AnalysisPanel 
       selectedResponseGroup={selectedResponseGroup}
       responseData={selectedResponseData}
       onToggleVisibility={() => {}}
     />
+  ) : (
+    <EmptyAnalysisState />
   );
 
   // Use a 60/40 layout distribution for the answers tab (left panel wider than right)
@@ -99,7 +107,7 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
       leftPanelTitle="Responses"
       rightPanelTitle="Analysis"
       defaultLayout={[60, 40]} 
-      minSizes={["512px", "512px"]}
+      minSizes={["40%", "30%"]}
     />
   );
 };

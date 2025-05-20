@@ -21,11 +21,30 @@ export function SplitPanelLayout({
   leftPanelTitle,
   rightPanelTitle,
   defaultLayout = [50, 50], // Default to 50/50 split
-  minSizes = ["512px", "512px"], // Default min width of 512px for each panel
+  minSizes = ["30%", "30%"], // Use percentage-based minimums for better responsiveness
 }: SplitPanelLayoutProps) {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const isMobile = useIsMobile();
+  
+  // Calculate dynamic height based on viewport
+  const calculateHeight = () => {
+    const viewportHeight = window.innerHeight;
+    // Use a percentage of viewport height instead of fixed pixel value
+    return `calc(${Math.max(60, Math.min(90, viewportHeight * 0.7))}vh - 4rem)`;
+  };
+  
+  const [panelHeight, setPanelHeight] = useState(calculateHeight());
+
+  // Update height on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setPanelHeight(calculateHeight());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // On mobile, we only show one panel at a time, defaulting to the left panel
   useEffect(() => {
@@ -88,13 +107,12 @@ export function SplitPanelLayout({
 
   // Default: both panels visible with resizing capability
   return (
-    <div className="h-[calc(100vh-200px)] w-full">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
+    <div className="w-full" style={{ height: panelHeight, minHeight: "400px" }}>
+      <ResizablePanelGroup direction="horizontal" className="h-full min-h-[400px] w-full">
         <ResizablePanel
           defaultSize={defaultLayout[0]}
-          minSize={10}
+          minSize={15}
           className="border-r border-gray-200"
-          style={{ minWidth: typeof minSizes[0] === 'string' ? minSizes[0] : undefined }}
         >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
@@ -109,7 +127,11 @@ export function SplitPanelLayout({
             <div className="flex-grow overflow-auto">
               <ScrollArea className="h-full">
                 <div className="px-4 py-4">
-                  {leftPanel}
+                  {leftPanel || (
+                    <div className="flex items-center justify-center h-40 text-gray-400">
+                      No content available
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
             </div>
@@ -120,9 +142,8 @@ export function SplitPanelLayout({
         
         <ResizablePanel
           defaultSize={defaultLayout[1]}
-          minSize={10}
+          minSize={15}
           className="bg-white"
-          style={{ minWidth: typeof minSizes[1] === 'string' ? minSizes[1] : undefined }}
         >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
@@ -137,7 +158,11 @@ export function SplitPanelLayout({
             <div className="flex-grow bg-pebble/30 overflow-auto">
               <ScrollArea className="h-full">
                 <div className="px-4 py-4">
-                  {rightPanel}
+                  {rightPanel || (
+                    <div className="flex items-center justify-center h-40 text-gray-400">
+                      No content available
+                    </div>
+                  )}
                 </div>
               </ScrollArea>
             </div>
