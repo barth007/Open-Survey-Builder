@@ -91,7 +91,7 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     />
   );
 
-  // Use a different layout distribution for the answers tab (left panel wider than right)
+  // Use a 60/40 layout distribution for the answers tab (left panel wider than right)
   return (
     <SplitPanelLayout
       leftPanel={responsesPanel}
@@ -99,7 +99,7 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
       leftPanelTitle="Responses"
       rightPanelTitle="Analysis"
       defaultLayout={[60, 40]} 
-      minSizes={[40, 30]}
+      minSizes={["512px", "512px"]}
     />
   );
 };

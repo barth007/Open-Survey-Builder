@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,7 +12,7 @@ interface SplitPanelLayoutProps {
   leftPanelTitle?: string;
   rightPanelTitle?: string;
   defaultLayout?: number[]; // Default size distribution [left, right] in percentage
-  minSizes?: number[]; // Minimum sizes for panels [left, right] in percentage
+  minSizes?: number[] | string[]; // Minimum sizes for panels [left, right] in pixels or percentage
 }
 
 export function SplitPanelLayout({
@@ -21,14 +21,14 @@ export function SplitPanelLayout({
   leftPanelTitle,
   rightPanelTitle,
   defaultLayout = [50, 50], // Default to 50/50 split
-  minSizes = [30, 30], // Minimum 30% for each panel
+  minSizes = ["512px", "512px"], // Default min width of 512px for each panel
 }: SplitPanelLayoutProps) {
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const isMobile = useIsMobile();
 
   // On mobile, we only show one panel at a time, defaulting to the left panel
-  React.useEffect(() => {
+  useEffect(() => {
     if (isMobile) {
       // On mobile, default to showing just the left panel
       setRightPanelCollapsed(true);
@@ -191,8 +191,9 @@ export function SplitPanelLayout({
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel
           defaultSize={defaultLayout[0]}
-          minSize={minSizes[0]}
+          minSize={10}
           className="border-r border-gray-200"
+          style={{ minWidth: typeof minSizes[0] === 'string' ? minSizes[0] : undefined }}
         >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">
@@ -218,8 +219,9 @@ export function SplitPanelLayout({
         
         <ResizablePanel
           defaultSize={defaultLayout[1]}
-          minSize={minSizes[1]}
+          minSize={10}
           className="bg-white"
+          style={{ minWidth: typeof minSizes[1] === 'string' ? minSizes[1] : undefined }}
         >
           <div className="h-full flex flex-col">
             <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-12 items-center">

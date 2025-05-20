@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Survey, Question } from '@/types/survey';
+import { Survey } from '@/types/survey';
 import { SplitPanelLayout } from '@/components/ui/split-panel-layout';
 import { EditorPanel } from './edit/EditorPanel';
 import { PreviewPanel } from './edit/PreviewPanel';
@@ -73,7 +73,7 @@ const EditTab: React.FC<EditTabProps> = ({
       leftPanelTitle="Editor"
       rightPanelTitle="Preview"
       defaultLayout={[50, 50]}
-      minSizes={[30, 30]}
+      minSizes={["512px", "512px"]}
     />
   );
 };
