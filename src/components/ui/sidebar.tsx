@@ -1,4 +1,3 @@
-// [Same imports and context setup as before]
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +61,6 @@ export default function Sidebar() {
       );
     }
   };
-
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -77,8 +75,7 @@ export default function Sidebar() {
 
   const handleRename = async (id: string, type: "folder" | "survey", newName: string) => {
     const table = type === "folder" ? "folders" : "surveys";
-    const key = "name";
-    await supabase.from(table).update({ [key]: newName }).eq("id", id);
+    await supabase.from(table).update({ name: newName }).eq("id", id);
     setEditingId(null);
     setNewTitle("");
     fetchSidebarData();
@@ -86,18 +83,10 @@ export default function Sidebar() {
 
   const handleNewFolder = async () => {
     const { data, error } = await supabase.from("folders").insert([{ name: "Untitled Folder" }]).select().single();
-    if (error) {
-      toast({ variant: "destructive", title: "Error creating folder", description: error.message });
-    } else if (data) {
+    if (!error && data) {
       toast({ title: "Folder created", description: "A new folder has been added." });
       fetchSidebarData();
     }
-  };
-
-  const handleMoveSurvey = async (survey: Survey, newFolderId: string | null) => {
-    await supabase.from("surveys").update({ folder_id: newFolderId }).eq("id", survey.id);
-    fetchSidebarData();
-    toast({ title: "Survey moved" });
   };
 
   const handleNewSurvey = async () => {
@@ -110,31 +99,10 @@ export default function Sidebar() {
     }
   };
 
-  const handleDelete = async (item: Folder | Survey, type: "folder" | "survey") => {
-    if (type === "folder") {
-      const count = surveys.filter((s) => s.folder_id === item.id).length;
-      if (count > 0) {
-        toast({ variant: "destructive", title: "Folder not empty", description: "Please delete surveys first." });
-        return;
-      }
-    }
-
-    const table = type === "folder" ? "folders" : "surveys";
-    const label = type === "folder" ? "folder" : "survey";
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${label} "${
-        type === "folder" ? (item as Folder).name : (item as Survey).title
-      }"?`
-    );
-    if (!confirmed) return;
-
-    await supabase.from(table).delete().eq("id", item.id);
+  const handleMoveSurvey = async (survey: Survey, newFolderId: string | null) => {
+    await supabase.from("surveys").update({ folder_id: newFolderId }).eq("id", survey.id);
     fetchSidebarData();
-    navigate("/dashboard");
-    toast({ 
-      title: `${label} deleted`, 
-      description: `"${type === "folder" ? (item as Folder).name : (item as Survey).title}" removed.` 
-    });
+    toast({ title: "Survey moved" });
   };
 
   const renderEditableLabel = (
@@ -169,12 +137,14 @@ export default function Sidebar() {
       </span>
     );
   };
-
   return (
     <div className="flex flex-col h-full justify-between border-r bg-white p-4 text-sm">
       <div className="space-y-6 overflow-auto">
-        <div className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
-             onClick={() => navigate("/dashboard")}>
+        {/* Dashboard Link */}
+        <div
+          className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
+          onClick={() => navigate("/dashboard")}
+        >
           <Home size={16} />
           <span className="text-xs uppercase">Dashboard</span>
         </div>
@@ -194,25 +164,65 @@ export default function Sidebar() {
                   {renderEditableLabel(folder, "folder")}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                     <button title="Rename"><Pencil size={14} /></button>
-                    <button onClick={() => handleDelete(folder, "folder")} title="Delete">
+                    <button
+                      onClick={async () => {
+                        const confirmed = window.confirm(`Are you sure you want to delete folder "${folder.name}"?`);
+                        if (!confirmed) return;
+                        const dependent = surveys.filter((s) => s.folder_id === folder.id);
+                        if (dependent.length > 0) {
+                          toast({
+                            variant: "destructive",
+                            title: "Folder not empty",
+                            description: "Please delete surveys first.",
+                          });
+                          return;
+                        }
+                        await supabase.from("folders").delete().eq("id", folder.id);
+                        setFolders(prev => prev.filter(f => f.id !== folder.id));
+                        navigate("/dashboard");
+                        toast({ title: "Folder deleted", description: `"${folder.name}" removed.` });
+                      }}
+                      title="Delete"
+                    >
                       <Trash2 size={14} className="hover:text-red-500" />
                     </button>
                   </div>
                 </div>
+
+                {/* Foldered Surveys */}
                 <ul className="ml-2 mt-1 space-y-1">
                   {surveys.filter(s => s.folder_id === folder.id).map((survey) => (
                     <li key={survey.id} className="flex items-center justify-between group">
-                      <a href={`/survey/${survey.id}`} className={cn(
-                        "flex-1 block px-2 py-1 rounded truncate transition",
-                        survey.id === activeSurveyId ? "bg-blue-100 text-blue-800 font-semibold" : "hover:bg-muted text-muted-foreground"
-                      )}>
+                      <div
+                        onClick={() => {
+                          if (editingId !== survey.id) navigate(`/survey/${survey.id}`);
+                        }}
+                        className={cn(
+                          "flex-1 block px-2 py-1 rounded truncate transition cursor-pointer",
+                          survey.id === activeSurveyId
+                            ? "bg-blue-100 text-blue-800 font-semibold"
+                            : "hover:bg-muted text-muted-foreground"
+                        )}
+                      >
                         {renderEditableLabel(survey, "survey", survey.id === activeSurveyId)}
-                      </a>
+                      </div>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                         <button onClick={() => handleMoveSurvey(survey, null)} title="Move to ungrouped">
                           <FolderDown size={14} />
                         </button>
-                        <button onClick={() => handleDelete(survey, "survey")} title="Delete">
+                        <button
+                          onClick={async () => {
+                            const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
+                            if (!confirmed) return;
+                            const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
+                            if (!error) {
+                              setSurveys(prev => prev.filter(s => s.id !== survey.id));
+                              toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
+                              navigate("/dashboard");
+                            }
+                          }}
+                          title="Delete"
+                        >
                           <Trash2 size={14} className="hover:text-red-500" />
                         </button>
                       </div>
@@ -235,14 +245,33 @@ export default function Sidebar() {
           <ul className="space-y-1">
             {surveys.filter(s => !s.folder_id).map((survey) => (
               <li key={survey.id} className="flex items-center justify-between group">
-                <a href={`/survey/${survey.id}`} className={cn(
-                  "flex-1 block px-2 py-1 rounded truncate transition",
-                  survey.id === activeSurveyId ? "bg-blue-100 text-blue-800 font-semibold" : "hover:bg-muted text-muted-foreground"
-                )}>
+                <div
+                  onClick={() => {
+                    if (editingId !== survey.id) navigate(`/survey/${survey.id}`);
+                  }}
+                  className={cn(
+                    "flex-1 block px-2 py-1 rounded truncate transition cursor-pointer",
+                    survey.id === activeSurveyId
+                      ? "bg-blue-100 text-blue-800 font-semibold"
+                      : "hover:bg-muted text-muted-foreground"
+                  )}
+                >
                   {renderEditableLabel(survey, "survey", survey.id === activeSurveyId)}
-                </a>
+                </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button onClick={() => handleDelete(survey, "survey")} title="Delete">
+                  <button
+                    onClick={async () => {
+                      const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
+                      if (!confirmed) return;
+                      const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
+                      if (!error) {
+                        setSurveys(prev => prev.filter(s => s.id !== survey.id));
+                        toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
+                        navigate("/dashboard");
+                      }
+                    }}
+                    title="Delete"
+                  >
                     <Trash2 size={14} className="hover:text-red-500" />
                   </button>
                 </div>
@@ -255,7 +284,10 @@ export default function Sidebar() {
       {/* User Info */}
       {user && (
         <div className="mt-6 pt-4 border-t group relative">
-          <button onClick={() => navigate("/profile")} className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded transition w-full">
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded transition w-full"
+          >
             <div className="w-8 h-8 rounded-full bg-muted text-center font-bold text-sm flex items-center justify-center">
               {user.email?.substring(0, 2).toUpperCase() || "U"}
             </div>
