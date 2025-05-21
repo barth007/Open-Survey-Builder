@@ -16,6 +16,7 @@ import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import AdminPanel from './pages/AdminPanel';
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,24 +34,26 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          
+
           {/* Routes for public surveys and landing pages */}
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/p/:publicCode" element={<PublicSurvey />} />
             <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
             <Route path="/pending" element={<PendingApproval />} />
-            
+
             {/* Auth routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
-            
+
             {/* Dashboard and protected routes */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <SidebarProvider>
+                    <Index />
+                  </SidebarProvider>
                 </ProtectedRoute>
               }
             />
