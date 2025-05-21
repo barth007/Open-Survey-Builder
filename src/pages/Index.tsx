@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -6,9 +5,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyTabs from '@/components/survey/SurveyTabs';
-import { useIsMobile } from '@/hooks/use-mobile';
+import EditTab from '@/components/survey/EditTab';
+import AnswersTab from '@/components/AnswersTab';
+import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
+import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
+import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
+import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -17,9 +23,9 @@ const Index = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
+
   const { activeUsers } = useActiveUsers(surveyId);
-  
+
   const {
     survey,
     handleTitleChange,
@@ -78,17 +84,30 @@ const Index = () => {
     setPendingChanges(true);
   };
 
-  // Helper function to update survey properties
   function updateSurvey(updates: Partial<typeof survey>) {
     if (!surveyId) return;
-
     queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
       if (!oldData) return oldData;
       return { ...oldData, ...updates };
     });
-    
     setPendingChanges(true);
   }
+
+  const {
+    chartType,
+    filterText,
+    setFilterText,
+    sortBy,
+    setSortBy,
+    selectedResponseGroup,
+    responses,
+    filteredResponses,
+    totalResponses,
+    exportToCSV,
+    handleChartTypeChange,
+    handleCardClick,
+    selectedResponseData
+  } = useAnswersTab(survey);
 
   if (isLoading) {
     return (
@@ -109,32 +128,6 @@ const Index = () => {
     );
   }
 
-  if (!surveyId) {
-    return (
-      <div className="h-screen overflow-hidden">
-        <SurveyTabs 
-          activeTab="edit"
-          setActiveTab={setActiveTab}
-          survey={{ id: "", title: "", description: "", questions: [], isPublished: false }}
-          onTitleChange={() => {}}
-          onDescriptionChange={() => {}}
-          onQuestionChange={() => {}}
-          onDeleteQuestion={() => {}}
-          onDuplicateQuestion={() => {}}
-          onAddQuestion={() => {}}
-          onWelcomeTitleChange={() => {}}
-          onWelcomeMessageChange={() => {}}
-          onWelcomeInstructionsChange={() => {}}
-          onWelcomeButtonTextChange={() => {}}
-          onThankYouTitleChange={() => {}}
-          onThankYouMessageChange={() => {}}
-          onThankYouButtonTextChange={() => {}}
-          onRedirectUrlChange={() => {}}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="p-4 border-b">
@@ -146,26 +139,76 @@ const Index = () => {
         />
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <SurveyTabs 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          survey={survey}
-          onTitleChange={handleSurveyTitleChange}
-          onDescriptionChange={handleDescriptionChangeWithTracking}
-          onQuestionChange={handleQuestionChange}
-          onDeleteQuestion={handleDeleteQuestion}
-          onDuplicateQuestion={handleDuplicateQuestion}
-          onAddQuestion={handleAddQuestion}
-          onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
-          onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
-          onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
-          onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
-          onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
-          onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
-          onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
-          onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
-        />
+      <SurveyTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      <div className="flex-1 overflow-hidden w-full max-w-screen-2xl mx-auto">
+        {activeTab === "edit" && (
+          <SplitPanelLayout
+            middlePanel={
+              <EditTab
+                survey={survey}
+                onTitleChange={handleSurveyTitleChange}
+                onDescriptionChange={handleDescriptionChangeWithTracking}
+                onQuestionChange={handleQuestionChange}
+                onDeleteQuestion={handleDeleteQuestion}
+                onDuplicateQuestion={handleDuplicateQuestion}
+                onAddQuestion={handleAddQuestion}
+                onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
+                onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
+                onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
+                onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
+                onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
+                onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
+                onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
+                onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
+              />
+            }
+            rightPanelTitle="Preview"
+            middlePanelTitle="Editor"
+            rightPanel={<PreviewPanel survey={survey} />}
+          />
+        )}
+
+        {activeTab === "answers" && (
+          <SplitPanelLayout
+            middlePanel={
+              <AnswersTab
+                survey={survey}
+                responses={responses}
+                filteredResponses={filteredResponses}
+                totalResponses={totalResponses}
+                filterText={filterText}
+                setFilterText={setFilterText}
+                sortBy={sortBy}
+                setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
+                chartType={chartType[selectedResponseGroup] || "bar"}
+                handleChartTypeChange={(value: string) => {
+                  const [questionId, type] = value.split(':');
+                  handleChartTypeChange(questionId, type as "bar" | "pie");
+                }}
+                onCardClick={handleCardClick}
+                exportToCSV={exportToCSV}
+                selectedResponseGroup={selectedResponseGroup}
+              />
+            }
+            middlePanelTitle="Responses"
+            rightPanelTitle="Analysis"
+            rightPanel={
+              selectedResponseGroup ? (
+                <AnalysisPanel
+                  selectedResponseGroup={selectedResponseGroup}
+                  responseData={selectedResponseData}
+                  onToggleVisibility={() => {}}
+                />
+              ) : (
+                <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
+              )
+            }
+          />
+        )}
       </div>
     </div>
   );
