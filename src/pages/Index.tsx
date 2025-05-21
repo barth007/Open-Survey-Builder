@@ -115,7 +115,7 @@ const Index = () => {
         <SurveyTabs 
           activeTab="edit"
           setActiveTab={setActiveTab}
-          survey={{ id: "", title: "", description: "", questions: [] }}
+          survey={{ id: "", title: "", description: "", questions: [], isPublished: false }}
           onTitleChange={() => {}}
           onDescriptionChange={() => {}}
           onQuestionChange={() => {}}
