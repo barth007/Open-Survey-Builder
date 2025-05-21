@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, LogOut, Home, Pencil, FolderDown } from "lucide-react";
+import { Trash2, Plus, LogOut, Home, Pencil, FolderDown, Folder as FolderIcon } from "lucide-react";
 
 const SidebarContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | undefined>(undefined);
 
@@ -61,6 +61,7 @@ export default function Sidebar() {
       );
     }
   };
+
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -75,7 +76,17 @@ export default function Sidebar() {
 
   const handleRename = async (id: string, type: "folder" | "survey", newName: string) => {
     const table = type === "folder" ? "folders" : "surveys";
+    const current = (type === "folder" ? folders : surveys).find((item) => item.id === id);
+    if (
+      !current ||
+      (type === "folder" && (current as Folder).name === newName) ||
+      (type === "survey" && (current as Survey).title === newName)
+    ) {
+      setEditingId(null);
+      return;
+    }
     await supabase.from(table).update({ name: newName }).eq("id", id);
+    toast({ title: `${type} renamed`, description: `"${newName}" saved.` });
     setEditingId(null);
     setNewTitle("");
     fetchSidebarData();
@@ -90,7 +101,7 @@ export default function Sidebar() {
   };
 
   const handleNewSurvey = async () => {
-    const { data, error } = await supabase.from("surveys").insert([{ name: "Untitled Survey", folder_id: null }]);
+    const { error } = await supabase.from("surveys").insert([{ name: "Untitled Survey", folder_id: null }]);
     if (error) {
       toast({ variant: "destructive", title: "Error creating survey", description: error.message });
     } else {
@@ -103,6 +114,17 @@ export default function Sidebar() {
     await supabase.from("surveys").update({ folder_id: newFolderId }).eq("id", survey.id);
     fetchSidebarData();
     toast({ title: "Survey moved" });
+  };
+
+  const handleDeleteSurvey = async (survey: Survey) => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
+    if (!confirmed) return;
+    const { error } = await supabase.from("surveys").delete().eq("id", survey.id).select().single();
+    if (!error) {
+      setSurveys(prev => prev.filter(s => s.id !== survey.id));
+      toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
+      navigate("/dashboard");
+    }
   };
 
   const renderEditableLabel = (
@@ -137,19 +159,15 @@ export default function Sidebar() {
       </span>
     );
   };
+
   return (
     <div className="flex flex-col h-full justify-between border-r bg-white p-4 text-sm">
       <div className="space-y-6 overflow-auto">
-        {/* Dashboard Link */}
-        <div
-          className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
-          onClick={() => navigate("/dashboard")}
-        >
+        <div className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
+             onClick={() => navigate("/dashboard")}>
           <Home size={16} />
           <span className="text-xs uppercase">Dashboard</span>
         </div>
-
-        {/* Folders */}
         <div>
           <div className="flex items-center justify-between mb-2 group">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Folders</h2>
@@ -161,7 +179,10 @@ export default function Sidebar() {
             {folders.map((folder) => (
               <li key={folder.id}>
                 <div className="flex items-center justify-between group">
-                  {renderEditableLabel(folder, "folder")}
+                  <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                    <FolderIcon size={14} />
+                    {renderEditableLabel(folder, "folder")}
+                  </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                     <button title="Rename"><Pencil size={14} /></button>
                     <button
@@ -188,8 +209,6 @@ export default function Sidebar() {
                     </button>
                   </div>
                 </div>
-
-                {/* Foldered Surveys */}
                 <ul className="ml-2 mt-1 space-y-1">
                   {surveys.filter(s => s.folder_id === folder.id).map((survey) => (
                     <li key={survey.id} className="flex items-center justify-between group">
@@ -210,19 +229,7 @@ export default function Sidebar() {
                         <button onClick={() => handleMoveSurvey(survey, null)} title="Move to ungrouped">
                           <FolderDown size={14} />
                         </button>
-                        <button
-                          onClick={async () => {
-                            const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
-                            if (!confirmed) return;
-                            const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
-                            if (!error) {
-                              setSurveys(prev => prev.filter(s => s.id !== survey.id));
-                              toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
-                              navigate("/dashboard");
-                            }
-                          }}
-                          title="Delete"
-                        >
+                        <button onClick={() => handleDeleteSurvey(survey)} title="Delete">
                           <Trash2 size={14} className="hover:text-red-500" />
                         </button>
                       </div>
@@ -233,8 +240,6 @@ export default function Sidebar() {
             ))}
           </ul>
         </div>
-
-        {/* Unfoldered Surveys */}
         <div>
           <div className="flex items-center justify-between mb-2 group">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Surveys</h2>
@@ -259,19 +264,7 @@ export default function Sidebar() {
                   {renderEditableLabel(survey, "survey", survey.id === activeSurveyId)}
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button
-                    onClick={async () => {
-                      const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
-                      if (!confirmed) return;
-                      const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
-                      if (!error) {
-                        setSurveys(prev => prev.filter(s => s.id !== survey.id));
-                        toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
-                        navigate("/dashboard");
-                      }
-                    }}
-                    title="Delete"
-                  >
+                  <button onClick={() => handleDeleteSurvey(survey)} title="Delete">
                     <Trash2 size={14} className="hover:text-red-500" />
                   </button>
                 </div>
@@ -280,8 +273,6 @@ export default function Sidebar() {
           </ul>
         </div>
       </div>
-
-      {/* User Info */}
       {user && (
         <div className="mt-6 pt-4 border-t group relative">
           <button
