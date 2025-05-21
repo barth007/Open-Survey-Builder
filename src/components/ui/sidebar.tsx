@@ -34,6 +34,7 @@ export default function Sidebar() {
   const { id: activeSurveyId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [surveys, setSurveys] = useState<Survey[]>([]);
@@ -89,7 +90,7 @@ export default function Sidebar() {
       return;
     }
     await supabase.from(table).update({ name: newName }).eq("id", id);
-    const queryClient = useQueryClient();
+   
 
     if (type === "survey") {
       queryClient.setQueryData(["survey", id], (old: any) => ({ ...old, name: newName }));
