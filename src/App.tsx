@@ -16,7 +16,7 @@ import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import AdminPanel from './pages/AdminPanel';
-import SurveyLayout from './components/ui/SurveyLayout'; 
+import SurveyLayout from './components/ui/SurveyLayout';
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient({
@@ -70,9 +70,11 @@ const App = () => (
               path="/survey/:id"
               element={
                 <ProtectedRoute>
-                  <SurveyLayout>
-                    <Index />
-                  </SurveyLayout>
+                  <SidebarProvider>
+                    <SurveyLayout>
+                      <Index />
+                    </SurveyLayout>
+                  </SidebarProvider>
                 </ProtectedRoute>
               }
             />
