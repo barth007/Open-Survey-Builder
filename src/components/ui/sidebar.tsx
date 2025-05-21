@@ -51,13 +51,13 @@ export default function Sidebar() {
     const { data: folderData } = await supabase.from("folders").select("*");
     const { data: surveyData } = await supabase
       .from("surveys")
-      .select("id, name, folderId, order, created_at");
+      .select("id, name, folder_id, order, created_at");
+
     if (folderData) setFolders(folderData);
     if (surveyData) {
       setSurveys(
         surveyData.map((s: any) => ({
           ...s,
-          title: s.name || "Untitled Survey",
           folderId: s.folder_id,
           order: s.order ?? 0
         }))
@@ -90,7 +90,7 @@ export default function Sidebar() {
       return;
     }
     await supabase.from(table).update({ name: newName }).eq("id", id);
-   
+
 
     if (type === "survey") {
       queryClient.setQueryData(["survey", id], (old: any) => ({ ...old, name: newName }));
