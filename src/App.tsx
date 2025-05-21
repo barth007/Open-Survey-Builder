@@ -69,10 +69,13 @@ const App = () => (
               path="/survey/:id"
               element={
                 <ProtectedRoute>
-                  <Index />
+                  <SidebarProvider>
+                    <Index />
+                  </SidebarProvider>
                 </ProtectedRoute>
               }
             />
+
             <Route path="/survey-response/:id" element={<SurveyResponse />} />
             <Route
               path="/profile"
