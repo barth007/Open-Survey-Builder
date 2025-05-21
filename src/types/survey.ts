@@ -51,6 +51,7 @@ export interface Survey {
   responseLimit?: number;
   responses?: SurveyResponse[];
   publicCode?: string;
+  order?: number;
   // Welcome page fields
   welcomeTitle?: string;
   welcomeMessage?: string;
