@@ -156,19 +156,19 @@ const Index = () => {
                 onDeleteQuestion={handleDeleteQuestion}
                 onDuplicateQuestion={handleDuplicateQuestion}
                 onAddQuestion={handleAddQuestion}
-                onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
-                onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
-                onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
-                onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
-                onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
-                onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
-                onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
-                onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
+                onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
+                onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
+                onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
+                onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
+                onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
+                onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
+                onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
+                onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
               />
             }
-            rightPanelTitle="Preview"
-            middlePanelTitle="Editor"
             rightPanel={<PreviewPanel survey={survey} />}
+            middlePanelTitle="Editor"
+            rightPanelTitle="Preview"
           />
         )}
 
@@ -194,8 +194,6 @@ const Index = () => {
                 selectedResponseGroup={selectedResponseGroup}
               />
             }
-            middlePanelTitle="Responses"
-            rightPanelTitle="Analysis"
             rightPanel={
               selectedResponseGroup ? (
                 <AnalysisPanel
@@ -207,6 +205,8 @@ const Index = () => {
                 <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
               )
             }
+            middlePanelTitle="Responses"
+            rightPanelTitle="Analysis"
           />
         )}
       </div>
