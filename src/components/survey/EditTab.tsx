@@ -4,6 +4,8 @@ import { Survey } from '@/types/survey';
 import { SplitPanelLayout } from '@/components/ui/split-panel-layout';
 import { EditorPanel } from './edit/EditorPanel';
 import { PreviewPanel } from './edit/PreviewPanel';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { HomeIcon } from 'lucide-react';
 
 interface EditTabProps {
   survey: Survey;
@@ -42,23 +44,44 @@ const EditTab: React.FC<EditTabProps> = ({
 }) => {
   // Editor panel content
   const editorPanel = (
-    <EditorPanel 
-      survey={survey}
-      onTitleChange={onTitleChange}
-      onDescriptionChange={onDescriptionChange}
-      onQuestionChange={onQuestionChange}
-      onDeleteQuestion={onDeleteQuestion}
-      onDuplicateQuestion={onDuplicateQuestion}
-      onAddQuestion={onAddQuestion}
-      onWelcomeTitleChange={onWelcomeTitleChange}
-      onWelcomeMessageChange={onWelcomeMessageChange}
-      onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-      onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-      onThankYouTitleChange={onThankYouTitleChange}
-      onThankYouMessageChange={onThankYouMessageChange}
-      onThankYouButtonTextChange={onThankYouButtonTextChange}
-      onRedirectUrlChange={onRedirectUrlChange}
-    />
+    <div className="space-y-1">
+      <Breadcrumb className="mb-4">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard" className="text-sm flex items-center">
+              <HomeIcon className="h-3.5 w-3.5 mr-1" />
+              <span>Dashboard</span>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="#" className="text-sm">Surveys</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <span className="text-sm font-medium">{survey.title || "Untitled Survey"}</span>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      
+      <EditorPanel 
+        survey={survey}
+        onTitleChange={onTitleChange}
+        onDescriptionChange={onDescriptionChange}
+        onQuestionChange={onQuestionChange}
+        onDeleteQuestion={onDeleteQuestion}
+        onDuplicateQuestion={onDuplicateQuestion}
+        onAddQuestion={onAddQuestion}
+        onWelcomeTitleChange={onWelcomeTitleChange}
+        onWelcomeMessageChange={onWelcomeMessageChange}
+        onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+        onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+        onThankYouTitleChange={onThankYouTitleChange}
+        onThankYouMessageChange={onThankYouMessageChange}
+        onThankYouButtonTextChange={onThankYouButtonTextChange}
+        onRedirectUrlChange={onRedirectUrlChange}
+      />
+    </div>
   );
 
   // Preview panel content
@@ -67,14 +90,16 @@ const EditTab: React.FC<EditTabProps> = ({
   );
 
   return (
-    <SplitPanelLayout
-      leftPanel={editorPanel}
-      rightPanel={previewPanel}
-      leftPanelTitle="Editor"
-      rightPanelTitle="Preview"
-      defaultLayout={[50, 50]}
-      minSizes={["30%", "30%"]}
-    />
+    <div className="pt-4">
+      <SplitPanelLayout
+        leftPanel={editorPanel}
+        rightPanel={previewPanel}
+        leftPanelTitle="Editor"
+        rightPanelTitle="Preview"
+        defaultLayout={[50, 50]}
+        minSizes={["30%", "30%"]}
+      />
+    </div>
   );
 };
 

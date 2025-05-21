@@ -20,7 +20,7 @@ export function PanelNavigationButton({
     <Button 
       variant="ghost" 
       onClick={onClick} 
-      className="p-1 h-10 w-10 flex items-center justify-center hover:bg-muted/80"
+      className="p-1.5 h-8 w-8 flex items-center justify-center hover:bg-muted rounded-full transition-all duration-200"
       title={title || `Show ${direction === "left" ? "right" : "left"} panel`}
     >
       {direction === "left" ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
