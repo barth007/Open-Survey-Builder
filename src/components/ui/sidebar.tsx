@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react"; // or any other trash icon you prefer
+import { Trash2, Plus } from "lucide-react";
 
 type SidebarContextType = { open: boolean; setOpen: (open: boolean) => void };
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -28,7 +28,7 @@ interface Folder {
 interface Survey {
   id: string;
   title: string;
-  folder_id: string;
+  folder_id: string | null;
 }
 
 export default function Sidebar() {
@@ -42,45 +42,27 @@ export default function Sidebar() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ full_name?: string; email?: string } | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("selectedFolderId");
-    if (saved) setSelectedFolderId(saved);
-  }, []);
-
-  useEffect(() => {
-    if (selectedFolderId) localStorage.setItem("selectedFolderId", selectedFolderId);
-  }, [selectedFolderId]);
-
+  // ─── Fetch Folders ───
   useEffect(() => {
     supabase.from("folders").select("*").then(({ data }) => {
+      if (data) setFolders(data);
+    });
+  }, []);
+
+  // ─── Fetch All Surveys ───
+  useEffect(() => {
+    supabase.from("surveys").select("*").then(({ data }) => {
       if (data) {
-        setFolders(data);
-        if (!selectedFolderId && data.length > 0) {
-          setSelectedFolderId(data[0].id);
-        }
+        setSurveys(data.map(s => ({
+          id: s.id,
+          title: s.name || "Untitled Survey",
+          folder_id: s.folder_id,
+        })));
       }
     });
   }, []);
 
-  useEffect(() => {
-    if (!selectedFolderId) return;
-    supabase
-      .from("surveys")
-      .select("*")
-      .eq("folder_id", selectedFolderId)
-      .then(({ data }) => {
-        if (data) {
-          setSurveys(
-            data.map((survey) => ({
-              id: survey.id,
-              title: survey.name,
-              folder_id: survey.folder_id,
-            }))
-          );
-        }
-      });
-  }, [selectedFolderId]);
-
+  // ─── Fetch User Profile ───
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -93,31 +75,23 @@ export default function Sidebar() {
       });
   }, [user]);
 
+  // ─── Actions ───
   const handleNewFolder = async () => {
     const { data, error } = await supabase.from("folders").insert({ name: "Untitled Folder" }).select().single();
     if (!error && data) {
-      setFolders((prev) => [...prev, data]);
-      setSelectedFolderId(data.id);
+      setFolders(prev => [...prev, data]);
       toast({ title: "Folder created", description: `Created "${data.name}"` });
     }
   };
 
   const handleNewSurvey = async () => {
-    if (!selectedFolderId) return;
     const { data, error } = await supabase
       .from("surveys")
-      .insert({ name: "Untitled Survey", folder_id: selectedFolderId })
+      .insert({ name: "Untitled Survey", folder_id: null })
       .select()
       .single();
     if (!error && data) {
-      setSurveys((prev) => [
-        ...prev,
-        {
-          id: data.id,
-          title: data.name || "Untitled Survey",
-          folder_id: data.folder_id,
-        },
-      ]);
+      setSurveys(prev => [...prev, { id: data.id, title: data.name, folder_id: data.folder_id }]);
       navigate(`/survey/${data.id}`);
       toast({ title: "Survey created", description: `Created "${data.name}"` });
     }
@@ -140,9 +114,6 @@ export default function Sidebar() {
     const { error } = await supabase.from("folders").delete().eq("id", folder.id);
     if (!error) {
       setFolders(prev => prev.filter(f => f.id !== folder.id));
-      if (selectedFolderId === folder.id && folders.length > 0) {
-        setSelectedFolderId(folders[0]?.id ?? null);
-      }
       toast({ title: "Folder deleted", description: `"${folder.name}" was removed.` });
     } else {
       toast({ variant: "destructive", title: "Error", description: "Failed to delete folder." });
@@ -169,61 +140,87 @@ export default function Sidebar() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Folders</h2>
-            <button onClick={handleNewFolder} className="text-xs text-blue-600 hover:underline">+ New</button>
+            <button onClick={handleNewFolder} title="New Folder">
+              <Plus size={14} className="text-muted-foreground hover:text-blue-600" />
+            </button>
           </div>
           <ul className="space-y-1">
             {folders.map((folder) => (
-              <li key={folder.id} className="flex items-center justify-between">
-                <button
-                  className={cn(
-                    "flex-1 text-left px-2 py-1 rounded hover:bg-muted transition",
-                    selectedFolderId === folder.id ? "bg-muted font-semibold" : "text-muted-foreground"
-                  )}
-                  onClick={() => setSelectedFolderId(folder.id)}
-                >
-                  {folder.name}
-                </button>
-                <button
-                  onClick={() => handleDeleteFolder(folder)}
-                  className="text-muted-foreground hover:text-red-500 p-1"
-                  title={`Delete folder ${folder.name}`}
-                >
-                  <Trash2 size={14} />
-                </button>
+              <li key={folder.id}>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground font-semibold">{folder.name}</span>
+                  <button
+                    onClick={() => handleDeleteFolder(folder)}
+                    className="text-muted-foreground hover:text-red-500 p-1"
+                    title={`Delete folder ${folder.name}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <ul className="ml-2 mt-1 space-y-1">
+                  {surveys
+                    .filter(s => s.folder_id === folder.id)
+                    .map(survey => (
+                      <li key={survey.id} className="flex items-center justify-between">
+                        <a
+                          href={`/survey/${survey.id}`}
+                          className={cn(
+                            "flex-1 block px-2 py-1 rounded truncate transition",
+                            survey.id === activeSurveyId
+                              ? "bg-blue-100 text-blue-800 font-semibold"
+                              : "hover:bg-muted text-blue-600"
+                          )}
+                        >
+                          {survey.title}
+                        </a>
+                        <button
+                          onClick={() => handleDeleteSurvey(survey)}
+                          className="text-muted-foreground hover:text-red-500 p-1"
+                          title={`Delete survey ${survey.title}`}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </li>
+                    ))}
+                </ul>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Surveys */}
+        {/* Unfoldered Surveys */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Surveys</h2>
-            <button onClick={handleNewSurvey} className="text-xs text-blue-600 hover:underline">+ New</button>
+            <button onClick={handleNewSurvey} title="New Survey">
+              <Plus size={14} className="text-muted-foreground hover:text-blue-600" />
+            </button>
           </div>
           <ul className="space-y-1">
-            {surveys.map((survey) => (
-              <li key={survey.id} className="flex items-center justify-between">
-                <a
-                  href={`/survey/${survey.id}`}
-                  className={cn(
-                    "flex-1 block px-2 py-1 rounded truncate transition",
-                    survey.id === activeSurveyId
-                      ? "bg-blue-100 text-blue-800 font-semibold"
-                      : "hover:bg-muted text-blue-600"
-                  )}
-                >
-                  {survey.title || "Untitled Survey"}
-                </a>
-                <button
-                  onClick={() => handleDeleteSurvey(survey)}
-                  className="text-muted-foreground hover:text-red-500 p-1"
-                  title={`Delete survey ${survey.title}`}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            ))}
+            {surveys
+              .filter(s => !s.folder_id)
+              .map(survey => (
+                <li key={survey.id} className="flex items-center justify-between">
+                  <a
+                    href={`/survey/${survey.id}`}
+                    className={cn(
+                      "flex-1 block px-2 py-1 rounded truncate transition",
+                      survey.id === activeSurveyId
+                        ? "bg-blue-100 text-blue-800 font-semibold"
+                        : "hover:bg-muted text-blue-600"
+                    )}
+                  >
+                    {survey.title}
+                  </a>
+                  <button
+                    onClick={() => handleDeleteSurvey(survey)}
+                    className="text-muted-foreground hover:text-red-500 p-1"
+                    title={`Delete survey ${survey.title}`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
           </ul>
         </div>
       </div>
