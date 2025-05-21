@@ -78,39 +78,6 @@ const Index = () => {
     setPendingChanges(true);
   };
 
-  // Welcome and thank you pages handlers
-  const handleWelcomeTitleChange = (welcomeTitle: string) => {
-    updateSurvey({ welcomeTitle });
-  };
-
-  const handleWelcomeMessageChange = (welcomeMessage: string) => {
-    updateSurvey({ welcomeMessage });
-  };
-
-  const handleWelcomeInstructionsChange = (welcomeInstructions: string) => {
-    updateSurvey({ welcomeInstructions });
-  };
-
-  const handleWelcomeButtonTextChange = (welcomeButtonText: string) => {
-    updateSurvey({ welcomeButtonText });
-  };
-
-  const handleThankYouTitleChange = (thankYouTitle: string) => {
-    updateSurvey({ thankYouTitle });
-  };
-
-  const handleThankYouMessageChange = (thankYouMessage: string) => {
-    updateSurvey({ thankYouMessage });
-  };
-
-  const handleThankYouButtonTextChange = (thankYouButtonText: string) => {
-    updateSurvey({ thankYouButtonText });
-  };
-
-  const handleRedirectUrlChange = (redirectUrl: string) => {
-    updateSurvey({ redirectUrl });
-  };
-
   // Helper function to update survey properties
   function updateSurvey(updates: Partial<typeof survey>) {
     if (!surveyId) return;
@@ -144,17 +111,32 @@ const Index = () => {
 
   if (!surveyId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-8 max-w-md">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Survey Builder</h2>
-          <p className="text-gray-600">Select a survey or create a new one to get started.</p>
-        </div>
+      <div className="h-screen overflow-hidden">
+        <SurveyTabs 
+          activeTab="edit"
+          setActiveTab={setActiveTab}
+          survey={{ id: "", title: "", description: "", questions: [] }}
+          onTitleChange={() => {}}
+          onDescriptionChange={() => {}}
+          onQuestionChange={() => {}}
+          onDeleteQuestion={() => {}}
+          onDuplicateQuestion={() => {}}
+          onAddQuestion={() => {}}
+          onWelcomeTitleChange={() => {}}
+          onWelcomeMessageChange={() => {}}
+          onWelcomeInstructionsChange={() => {}}
+          onWelcomeButtonTextChange={() => {}}
+          onThankYouTitleChange={() => {}}
+          onThankYouMessageChange={() => {}}
+          onThankYouButtonTextChange={() => {}}
+          onRedirectUrlChange={() => {}}
+        />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <div className="p-4 border-b">
         <SurveyHeader 
           survey={survey}
@@ -169,12 +151,12 @@ const Index = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           survey={survey}
-          onTitleChange={handleTitleChange}
-          onDescriptionChange={handleDescriptionChange}
-          onQuestionChange={updateQuestion}
-          onDeleteQuestion={deleteQuestion}
-          onDuplicateQuestion={duplicateQuestion}
-          onAddQuestion={addQuestion}
+          onTitleChange={handleSurveyTitleChange}
+          onDescriptionChange={handleDescriptionChangeWithTracking}
+          onQuestionChange={handleQuestionChange}
+          onDeleteQuestion={handleDeleteQuestion}
+          onDuplicateQuestion={handleDuplicateQuestion}
+          onAddQuestion={handleAddQuestion}
           onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
           onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
           onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}

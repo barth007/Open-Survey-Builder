@@ -19,7 +19,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
 
   if (!hasContent) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
+      <div className="flex flex-col items-center justify-center h-full py-12 text-center">
         <div className="mb-6">
           <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-300">
             <path d="M8 10h8m-8 4h4m8-7v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -34,11 +34,11 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
   }
 
   return (
-    <div className="space-y-6 px-1">
+    <div className="space-y-6">
       {/* Welcome Page Preview */}
       {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <div className="mb-2 pb-2 border-b border-gray-100">
+          <div className="mb-3 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Welcome Page</span>
           </div>
           <WelcomePage 
@@ -54,7 +54,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
       {/* Questions Preview */}
       {survey.questions && survey.questions.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <div className="mb-2 pb-2 border-b border-gray-100">
+          <div className="mb-3 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Survey Questions</span>
           </div>
           <PreviewTab survey={survey} />
@@ -64,7 +64,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
       {/* Thank You Page Preview */}
       {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <div className="mb-2 pb-2 border-b border-gray-100">
+          <div className="mb-3 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Thank You Page</span>
           </div>
           <ThankYouPage 
