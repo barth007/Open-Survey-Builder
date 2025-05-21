@@ -51,7 +51,7 @@ export default function Sidebar() {
     const { data: folderData } = await supabase.from("folders").select("*");
     const { data: surveyData } = await supabase
       .from("surveys")
-      .select("id, name, folder_id, order, created_at");
+      .select("id, name, folderId, order, created_at");
 
     if (folderData) setFolders(folderData);
     if (surveyData) {
@@ -196,7 +196,6 @@ export default function Sidebar() {
                     {renderEditableLabel(folder, "folder")}
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button title="Rename"><Pencil size={14} /></button>
                     <button
                       onClick={async () => {
                         const confirmed = window.confirm(`Are you sure you want to delete folder "${folder.name}"?`);
