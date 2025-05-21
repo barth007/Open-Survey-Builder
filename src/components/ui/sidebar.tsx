@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, LogOut, Home } from "lucide-react";
 
 type SidebarContextType = { open: boolean; setOpen: (open: boolean) => void };
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -39,18 +39,12 @@ export default function Sidebar() {
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [surveys, setSurveys] = useState<Survey[]>([]);
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ full_name?: string; email?: string } | null>(null);
 
-  // ─── Fetch Folders ───
   useEffect(() => {
     supabase.from("folders").select("*").then(({ data }) => {
       if (data) setFolders(data);
     });
-  }, []);
-
-  // ─── Fetch All Surveys ───
-  useEffect(() => {
     supabase.from("surveys").select("*").then(({ data }) => {
       if (data) {
         setSurveys(data.map(s => ({
@@ -62,7 +56,6 @@ export default function Sidebar() {
     });
   }, []);
 
-  // ─── Fetch User Profile ───
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -75,7 +68,6 @@ export default function Sidebar() {
       });
   }, [user]);
 
-  // ─── Actions ───
   const handleNewFolder = async () => {
     const { data, error } = await supabase.from("folders").insert({ name: "Untitled Folder" }).select().single();
     if (!error && data) {
@@ -136,22 +128,29 @@ export default function Sidebar() {
   return (
     <div className="flex flex-col h-full justify-between border-r bg-white p-4 text-sm">
       <div className="space-y-6 overflow-auto">
+        {/* Dashboard top label */}
+        <div className="flex items-center justify-start gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
+             onClick={() => navigate("/dashboard")}>
+          <Home size={16} />
+          <span className="text-xs uppercase">Dashboard</span>
+        </div>
+
         {/* Folders */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 group">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Folders</h2>
-            <button onClick={handleNewFolder} title="New Folder">
+            <button onClick={handleNewFolder} className="opacity-0 group-hover:opacity-100 transition" title="New Folder">
               <Plus size={14} className="text-muted-foreground hover:text-blue-600" />
             </button>
           </div>
           <ul className="space-y-1">
             {folders.map((folder) => (
               <li key={folder.id}>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between group">
                   <span className="text-muted-foreground font-semibold">{folder.name}</span>
                   <button
                     onClick={() => handleDeleteFolder(folder)}
-                    className="text-muted-foreground hover:text-red-500 p-1"
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 p-1 transition"
                     title={`Delete folder ${folder.name}`}
                   >
                     <Trash2 size={14} />
@@ -161,21 +160,21 @@ export default function Sidebar() {
                   {surveys
                     .filter(s => s.folder_id === folder.id)
                     .map(survey => (
-                      <li key={survey.id} className="flex items-center justify-between">
+                      <li key={survey.id} className="flex items-center justify-between group">
                         <a
                           href={`/survey/${survey.id}`}
                           className={cn(
                             "flex-1 block px-2 py-1 rounded truncate transition",
                             survey.id === activeSurveyId
                               ? "bg-blue-100 text-blue-800 font-semibold"
-                              : "hover:bg-muted text-blue-600"
+                              : "hover:bg-muted text-muted-foreground"
                           )}
                         >
                           {survey.title}
                         </a>
                         <button
                           onClick={() => handleDeleteSurvey(survey)}
-                          className="text-muted-foreground hover:text-red-500 p-1"
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 p-1 transition"
                           title={`Delete survey ${survey.title}`}
                         >
                           <Trash2 size={14} />
@@ -190,9 +189,9 @@ export default function Sidebar() {
 
         {/* Unfoldered Surveys */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 group">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Surveys</h2>
-            <button onClick={handleNewSurvey} title="New Survey">
+            <button onClick={handleNewSurvey} className="opacity-0 group-hover:opacity-100 transition" title="New Survey">
               <Plus size={14} className="text-muted-foreground hover:text-blue-600" />
             </button>
           </div>
@@ -200,21 +199,21 @@ export default function Sidebar() {
             {surveys
               .filter(s => !s.folder_id)
               .map(survey => (
-                <li key={survey.id} className="flex items-center justify-between">
+                <li key={survey.id} className="flex items-center justify-between group">
                   <a
                     href={`/survey/${survey.id}`}
                     className={cn(
                       "flex-1 block px-2 py-1 rounded truncate transition",
                       survey.id === activeSurveyId
                         ? "bg-blue-100 text-blue-800 font-semibold"
-                        : "hover:bg-muted text-blue-600"
+                        : "hover:bg-muted text-muted-foreground"
                     )}
                   >
                     {survey.title}
                   </a>
                   <button
                     onClick={() => handleDeleteSurvey(survey)}
-                    className="text-muted-foreground hover:text-red-500 p-1"
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 p-1 transition"
                     title={`Delete survey ${survey.title}`}
                   >
                     <Trash2 size={14} />
@@ -227,24 +226,25 @@ export default function Sidebar() {
 
       {/* User Info */}
       {user && (
-        <div className="mt-6 pt-4 border-t flex flex-col gap-3">
+        <div className="mt-6 pt-4 border-t group relative">
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded transition"
+            className="w-full flex items-center gap-2 px-2 py-1 hover:bg-muted rounded transition"
           >
             <div className="w-8 h-8 rounded-full bg-muted text-center font-bold text-sm flex items-center justify-center">
               {user.email?.substring(0, 2).toUpperCase() || "U"}
             </div>
-            <div className="truncate text-left">
+            <div className="truncate text-left flex-1">
               <p className="font-medium truncate">{profile?.full_name || user.email?.split("@")[0]}</p>
               <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
             </div>
-          </button>
-          <button
-            onClick={signOut}
-            className="text-xs text-muted-foreground hover:underline text-left pl-2"
-          >
-            Sign out
+            <button
+              onClick={signOut}
+              className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition"
+              title="Sign out"
+            >
+              <LogOut size={16} />
+            </button>
           </button>
         </div>
       )}
