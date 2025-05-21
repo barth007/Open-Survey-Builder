@@ -1,312 +1,253 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/providers/AuthProvider";
-import { useToast } from "@/components/ui/use-toast";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import { Trash2, Plus, LogOut, Home, Pencil, FolderDown, Folder as FolderIcon } from "lucide-react";
-import type { Survey } from "@/types/survey";
-import { arrayMove } from "@dnd-kit/sortable";
-import { useQueryClient } from "@tanstack/react-query";
+import { Folder as FolderIcon, Plus, Trash2, Pencil, LogOut, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/providers/AuthProvider";
+import type { Database } from "@/types/database";
 
-const SidebarContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | undefined>(undefined);
-
-export const SidebarProvider = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = useState(true);
-  return <SidebarContext.Provider value={{ open, setOpen }}>{children}</SidebarContext.Provider>;
-};
-
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
-  if (!context) throw new Error("useSidebar must be used within a SidebarProvider.");
-  return context;
-};
-
-interface Folder {
-  id: string;
-  name: string;
-}
-
-
+type Survey = Database["public"]["Tables"]["surveys"]["Row"];
+type Folder = Database["public"]["Tables"]["folders"]["Row"];
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default function Sidebar() {
-  const { user, signOut } = useAuth();
-  const { id: activeSurveyId } = useParams();
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [surveysByFolder, setSurveysByFolder] = useState<Record<string, Survey[]>>({});
+  const [newFolderName, setNewFolderName] = useState("");
+  const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [surveys, setSurveys] = useState<Survey[]>([]);
-  const [profile, setProfile] = useState<{ full_name?: string; email?: string } | null>(null);
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState("");
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    fetchSidebarData();
+    fetchData();
+    fetchProfile();
   }, []);
 
-  const fetchSidebarData = async () => {
-    const { data: folderData } = await supabase.from("folders").select("*");
-    const { data: surveyData } = await supabase
+  const fetchData = async () => {
+    const { data: foldersData } = await supabase.from("folders").select("*");
+    const { data: surveysData } = await supabase
       .from("surveys")
-      .select("id, name, folder_id, order, created_at");
+      .select("*")
+      .order("order", { ascending: true });
 
-    if (folderData) setFolders(folderData);
-    if (surveyData) {
-      setSurveys(
-        surveyData.map((s: any) => ({
-          ...s,
-          title: s.name || "Untitled Survey",
-          folderId: s.folder_id,
-          order: s.order ?? 0
-        }))
-      );
+    const grouped: Record<string, Survey[]> = {};
+    surveysData?.forEach((s) => {
+      const key = s.folder_id || "null";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ ...s, order: s.order ?? 0 });
+    });
 
-    }
+    setFolders(foldersData || []);
+    setSurveysByFolder(grouped);
   };
 
-  useEffect(() => {
+  const fetchProfile = async () => {
     if (!user?.id) return;
-    supabase
+    const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, email")
+      .select("id, full_name, email, avatar_url, updated_at")
       .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) setProfile(data);
-      });
-  }, [user]);
-
-  const handleRename = async (id: string, type: "folder" | "survey", newName: string) => {
-    const table = type === "folder" ? "folders" : "surveys";
-    const current = (type === "folder" ? folders : surveys).find((item) => item.id === id);
-    if (
-      !current ||
-      (type === "folder" && (current as Folder).name === newName) ||
-      (type === "survey" && (current as Survey).title === newName)
-    ) {
-      setEditingId(null);
-      return;
-    }
-    await supabase.from(table).update({ name: newName }).eq("id", id);
-
-
-    if (type === "survey") {
-      queryClient.setQueryData(["survey", id], (old: any) => ({ ...old, name: newName }));
-    }
-    toast({ title: `${type} renamed`, description: `"${newName}" saved.` });
-    setEditingId(null);
-    setNewTitle("");
-    fetchSidebarData();
+      .single();
+    if (!error && data) setProfile(data);
   };
 
-  const handleNewFolder = async () => {
-    const { data, error } = await supabase.from("folders").insert([{ name: "Untitled Folder" }]).select().single();
-    if (!error && data) {
-      toast({ title: "Folder created", description: "A new folder has been added." });
-      fetchSidebarData();
-    }
-  };
-
-  const handleNewSurvey = async () => {
-    const { error } = await supabase.from("surveys").insert([{ name: "Untitled Survey", folder_id: null }]);
-    if (error) {
-      toast({ variant: "destructive", title: "Error creating survey", description: error.message });
-    } else {
-      fetchSidebarData();
-      toast({ title: "Survey created", description: "A new survey has been added." });
-    }
-  };
-
-  const handleMoveSurvey = async (survey: Survey, newFolderId: string | null) => {
-    await supabase.from("surveys").update({ folder_id: newFolderId }).eq("id", survey.id);
-
-    fetchSidebarData();
-    toast({ title: "Survey moved" });
-  };
-
-  const handleDeleteSurvey = async (survey: Survey) => {
-    const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
+  const handleDeleteFolder = async (id: string) => {
+    const confirmed = confirm("Vuoi davvero eliminare questa cartella?");
     if (!confirmed) return;
-    const { error } = await supabase.from("surveys").delete().eq("id", survey.id).select().single();
-    if (!error) {
-      setSurveys(prev => prev.filter(s => s.id !== survey.id));
-      toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
-      navigate("/dashboard");
+    await supabase.from("folders").delete().eq("id", id);
+    fetchData();
+  };
+  // sidebar.tsx - parte 2: drag & drop, modifica sondaggi e cartelle
+
+  const findFolderIdForSurvey = (surveyId: string) => {
+    return Object.entries(surveysByFolder).find(([_, surveys]) => surveys.find((s) => s.id === surveyId))?.[0];
+  };
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    let fromFolder = findFolderIdForSurvey(active.id);
+    let toFolder = findFolderIdForSurvey(over.id);
+    if (!toFolder) toFolder = "null";
+
+    let fromList = [...(surveysByFolder[fromFolder] || [])];
+    const oldIndex = fromList.findIndex((s) => s.id === active.id);
+
+    if (fromFolder === toFolder) {
+      const newIndex = fromList.findIndex((s) => s.id === over.id);
+      const reordered = arrayMove(fromList, oldIndex, newIndex);
+      setSurveysByFolder({
+        ...surveysByFolder,
+        [fromFolder]: reordered,
+      });
+
+      for (let i = 0; i < reordered.length; i++) {
+        await supabase.from("surveys").update({ order: Number(i) }).eq("id", reordered[i].id);
+      }
+    } else {
+      const survey = fromList.splice(oldIndex, 1)[0];
+      survey.folder_id = toFolder === "null" ? null : toFolder;
+
+      const toList = [...(surveysByFolder[toFolder] || []), survey];
+      setSurveysByFolder({
+        ...surveysByFolder,
+        [fromFolder]: fromList,
+        [toFolder]: toList,
+      });
+
+      await supabase.from("surveys").update({ folder_id: survey.folder_id }).eq("id", survey.id);
     }
   };
 
-  const renderEditableLabel = (
-    item: Folder | Survey,
-    type: "folder" | "survey",
-    selected: boolean = false
-  ) => {
-    const isEditing = editingId === item.id;
-    return isEditing ? (
-      <input
-        autoFocus
-        value={newTitle}
-        onChange={(e) => setNewTitle(e.target.value)}
-        onBlur={() => handleRename(item.id, type, newTitle)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleRename(item.id, type, newTitle);
-        }}
-        className="px-1 py-0.5 rounded text-sm border border-gray-300 w-full"
-      />
-    ) : (
-      <span
-        onClick={() => {
-          setEditingId(item.id);
-          setNewTitle(type === "folder" ? (item as Folder).name : (item as Survey).title);
-        }}
-        className={cn(
-          "truncate cursor-pointer",
-          selected ? "font-semibold text-blue-800" : "text-muted-foreground hover:text-blue-600"
-        )}
+  const handleAddSurvey = async () => {
+    const { data, error } = await supabase.from("surveys").insert({ name: "Nuovo sondaggio", order: 0 }).select();
+    if (!error && data?.[0]) {
+      toast({ title: "Sondaggio creato" });
+      fetchData();
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return;
+    const { error } = await supabase.from("folders").insert({ name: newFolderName });
+    if (!error) {
+      toast({ title: "Cartella creata" });
+      setNewFolderName("");
+      fetchData();
+    }
+  };
+
+  const handleRenameFolder = async (id: string, currentName: string) => {
+    const newName = prompt("Nuovo nome della cartella:", currentName);
+    if (newName && newName !== currentName) {
+      await supabase.from("folders").update({ name: newName }).eq("id", id);
+      fetchData();
+    }
+  };
+
+  const SortableItem = ({ survey }: { survey: Survey }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: survey.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    const handleRename = async () => {
+      const newName = prompt("Nuovo nome del sondaggio:", survey.name);
+      if (newName && newName !== survey.name) {
+        await supabase.from("surveys").update({ name: newName }).eq("id", survey.id);
+        fetchData();
+      }
+    };
+
+    const handleDelete = async () => {
+      await supabase.from("surveys").delete().eq("id", survey.id);
+      fetchData();
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className="pl-4 py-1 cursor-move hover:bg-accent rounded flex justify-between items-center"
       >
-        {type === "folder" ? (item as Folder).name : (item as Survey).title}
-      </span>
+        <span>📄 {survey.name}</span>
+        <span className="flex gap-1 pr-2">
+          <Pencil size={14} onClick={handleRename} className="cursor-pointer" />
+          <Trash2 size={14} onClick={handleDelete} className="cursor-pointer text-red-500" />
+        </span>
+      </div>
     );
   };
+  // sidebar.tsx - parte 3: rendering completo
 
   return (
-    <div className="flex flex-col h-full justify-between border-r bg-white p-4 text-sm">
-      <div className="space-y-6 overflow-auto">
-        <div className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
-          onClick={() => navigate("/dashboard")}>
-          <Home size={16} />
-          <span className="text-xs uppercase">Dashboard</span>
-        </div>
-        <hr className="my-2 border-gray-200" />
-        <div>
-          <div className="flex items-center justify-between mb-2 group">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase">Folders</h2>
-            <button onClick={handleNewFolder}>
-              <Plus size={14} className="text-muted-foreground group-hover:opacity-100 opacity-0" />
-            </button>
-          </div>
-          <ul className="space-y-1">
-            {folders.map((folder) => (
-              <li key={folder.id}>
-                <div className="flex items-center justify-between group">
-                  <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                    <FolderIcon size={14} />
-                    {renderEditableLabel(folder, "folder")}
-                  </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button
-                      onClick={async () => {
-                        const confirmed = window.confirm(`Are you sure you want to delete folder "${folder.name}"?`);
-                        if (!confirmed) return;
-                        const dependent = surveys.filter((s) => s.folderId === folder.id);
-                        if (dependent.length > 0) {
-                          toast({
-                            variant: "destructive",
-                            title: "Folder not empty",
-                            description: "Please delete surveys first.",
-                          });
-                          return;
-                        }
-                        await supabase.from("folders").delete().eq("id", folder.id);
-                        setFolders(prev => prev.filter(f => f.id !== folder.id));
-                        navigate("/dashboard");
-                        toast({ title: "Folder deleted", description: `"${folder.name}" removed.` });
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 size={14} className="hover:text-red-500" />
-                    </button>
-                  </div>
-                </div>
-                <ul className="ml-2 mt-1 space-y-1">
-                  {surveys.filter(s => s.folderId === folder.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((survey) => (
-                    <li key={survey.id} className="flex items-center justify-between group">
-                      <div
-                        onClick={() => {
-                          if (editingId !== survey.id) navigate(`/survey/${survey.id}`);
-                        }}
-                        className={cn(
-                          "flex-1 block px-2 py-1 rounded truncate transition cursor-pointer",
-                          survey.id === activeSurveyId
-                            ? "bg-blue-100 text-blue-800 font-semibold"
-                            : "hover:bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {renderEditableLabel(survey, "survey", survey.id === activeSurveyId)}
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                        <button onClick={() => handleMoveSurvey(survey, null)} title="Move to ungrouped">
-                          <FolderDown size={14} />
-                        </button>
-                        <button onClick={() => handleDeleteSurvey(survey)} title="Delete">
-                          <Trash2 size={14} className="hover:text-red-500" />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <div className="flex items-center justify-between mb-2 group">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase">Surveys</h2>
-            <button onClick={handleNewSurvey} title="New Survey">
-              <Plus size={14} className="text-muted-foreground group-hover:opacity-100 opacity-0" />
-            </button>
-          </div>
-          <ul className="space-y-1">
-            {surveys.filter(s => !s.folderId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((survey) => (
-              <li key={survey.id} className="flex items-center justify-between group">
-                <div
-                  onClick={() => {
-                    if (editingId !== survey.id) navigate(`/survey/${survey.id}`);
-                  }}
-                  className={cn(
-                    "flex-1 block px-2 py-1 rounded truncate transition cursor-pointer",
-                    survey.id === activeSurveyId
-                      ? "bg-blue-100 text-blue-800 font-semibold"
-                      : "hover:bg-muted text-muted-foreground"
-                  )}
-                >
-                  {renderEditableLabel(survey, "survey", survey.id === activeSurveyId)}
-                </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button onClick={() => handleDeleteSurvey(survey)} title="Delete">
-                    <Trash2 size={14} className="hover:text-red-500" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <aside className="w-64 border-r h-full flex flex-col overflow-y-auto p-2">
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="text-sm font-semibold text-blue-600 flex items-center gap-1"
+        >
+          <Home size={16} /> Dashboard
+        </button>
       </div>
-      {user && (
-        <div className="mt-6 pt-4 border-t group relative">
-          <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-2 py-1 hover:bg-muted rounded transition w-full"
+
+      <div className="mb-4 flex gap-2">
+        <Button onClick={handleAddSurvey} size="sm">
+          <Plus size={16} className="mr-1" /> Nuovo
+        </Button>
+        <Input
+          placeholder="Nome cartella"
+          value={newFolderName}
+          onChange={(e) => setNewFolderName(e.target.value)}
+          className="text-sm"
+        />
+        <Button onClick={handleCreateFolder} size="sm">📁</Button>
+      </div>
+
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="mb-4">
+          <h2 className="font-semibold text-sm mb-1">Senza cartella</h2>
+          <SortableContext
+            items={(surveysByFolder["null"] || []).map((s) => s.id)}
+            strategy={verticalListSortingStrategy}
           >
-            <div className="w-8 h-8 rounded-full bg-muted text-center font-bold text-sm flex items-center justify-center">
-              {user.email?.substring(0, 2).toUpperCase() || "U"}
-            </div>
-            <div className="truncate text-left flex-1">
-              <p className="font-medium truncate">{profile?.full_name || user.email?.split("@")[0]}</p>
-              <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
-            </div>
-            <button
-              onClick={signOut}
-              className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition"
-              title="Sign out"
-            >
-              <LogOut size={16} />
-            </button>
-          </button>
+            {(surveysByFolder["null"] || []).map((survey, index) => (
+              <SortableItem key={survey.id} survey={{ ...survey, order: Number(survey.order ?? index) }} />
+            ))}
+          </SortableContext>
         </div>
-      )}
-    </div>
+
+        {folders.map((folder) => (
+          <div key={folder.id} className="mb-4">
+            <div className="flex items-center justify-between">
+              <h2 className="flex items-center gap-1 text-sm font-semibold">
+                <FolderIcon className="w-4 h-4" /> {folder.name}
+              </h2>
+              <div className="flex gap-1">
+                <Pencil size={14} onClick={() => handleRenameFolder(folder.id, folder.name)} className="cursor-pointer" />
+                <Trash2 size={14} onClick={() => handleDeleteFolder(folder.id)} className="cursor-pointer text-red-500" />
+              </div>
+            </div>
+            <SortableContext
+              items={(surveysByFolder[folder.id] || []).map((s) => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {(surveysByFolder[folder.id] || []).map((survey, index) => (
+                <SortableItem key={survey.id} survey={{ ...survey, order: Number(survey.order ?? index) }} />
+              ))}
+            </SortableContext>
+          </div>
+        ))}
+      </DndContext>
+
+      <div className="mt-auto pt-4 border-t">
+        {profile && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground justify-between">
+            <button onClick={() => navigate("/profile")} className="flex items-center gap-2">
+              <img
+                src={profile.avatar_url || undefined}
+                alt="avatar"
+                className="w-6 h-6 rounded-full border"
+              />
+              <div className="flex flex-col text-left">
+                <span className="font-medium text-sm text-foreground">{profile.full_name ?? ""}</span>
+                <span className="text-muted-foreground text-xs">{profile.email ?? ""}</span>
+              </div>
+            </button>
+            <button onClick={signOut} className="text-red-500 text-xs flex items-center gap-1">
+              <LogOut size={12} /> Esci
+            </button>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }
