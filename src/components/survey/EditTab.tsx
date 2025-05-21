@@ -1,12 +1,8 @@
-
 import React from 'react';
 import { Survey } from '@/types/survey';
-import { SplitPanelLayout } from '@/components/ui/split-panel-layout';
-import { EditorPanel } from './edit/EditorPanel';
-import { PreviewPanel } from './edit/PreviewPanel';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { HomeIcon } from 'lucide-react';
-import { SurveySidebar } from './SurveySidebar';
+import { EditorPanel } from './edit/EditorPanel';
 
 interface EditTabProps {
   survey: Survey;
@@ -43,15 +39,7 @@ const EditTab: React.FC<EditTabProps> = ({
   onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
-  // Navigation panel content
-  const navigationPanel = (
-    <div className="h-full flex flex-col">
-      <SurveySidebar />
-    </div>
-  );
-  
-  // Editor panel content
-  const editorPanel = (
+  return (
     <div className="space-y-4">
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
@@ -71,7 +59,7 @@ const EditTab: React.FC<EditTabProps> = ({
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      
+
       <EditorPanel 
         survey={survey}
         onTitleChange={onTitleChange}
@@ -88,26 +76,6 @@ const EditTab: React.FC<EditTabProps> = ({
         onThankYouMessageChange={onThankYouMessageChange}
         onThankYouButtonTextChange={onThankYouButtonTextChange}
         onRedirectUrlChange={onRedirectUrlChange}
-      />
-    </div>
-  );
-
-  // Preview panel content
-  const previewPanel = (
-    <PreviewPanel survey={survey} />
-  );
-
-  return (
-    <div className="h-[calc(100vh-4.5rem)]">
-      <SplitPanelLayout
-        leftPanel={navigationPanel}
-        middlePanel={editorPanel}
-        rightPanel={previewPanel}
-        leftPanelTitle="Navigation"
-        middlePanelTitle="Editor"
-        rightPanelTitle="Preview"
-        defaultLayout={[20, 45, 35]}
-        minSizes={["15%", "30%", "25%"]}
       />
     </div>
   );
