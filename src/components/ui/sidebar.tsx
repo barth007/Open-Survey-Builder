@@ -58,6 +58,7 @@ export default function Sidebar() {
       setSurveys(
         surveyData.map((s: any) => ({
           ...s,
+          title: s.name || "Untitled Survey",
           folderId: s.folder_id,
           order: s.order ?? 0
         }))
