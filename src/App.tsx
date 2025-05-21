@@ -17,7 +17,7 @@ import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import AdminPanel from './pages/AdminPanel';
 import SurveyLayout from './components/ui/SurveyLayout';
-import { SidebarProvider } from "@/components/ui/sidebar";
+import SidebarProvider from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,9 +52,20 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <SidebarProvider>
+                  <SurveyLayout>
                     <Index />
-                  </SidebarProvider>
+                  </SurveyLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/survey/:id"
+              element={
+                <ProtectedRoute>
+                  <SurveyLayout>
+                    <Index />
+                  </SurveyLayout>
                 </ProtectedRoute>
               }
             />
@@ -66,19 +77,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/survey/:id"
-              element={
-                <ProtectedRoute>
-                  <SidebarProvider>
-                    <SurveyLayout>
-                      <Index />
-                    </SurveyLayout>
-                  </SidebarProvider>
-                </ProtectedRoute>
-              }
-            />
-
             <Route path="/survey-response/:id" element={<SurveyResponse />} />
             <Route
               path="/profile"
