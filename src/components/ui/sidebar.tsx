@@ -5,6 +5,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { Trash2, Plus, LogOut, Home, Pencil, FolderDown, Folder as FolderIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SidebarContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | undefined>(undefined);
 
@@ -35,6 +36,7 @@ export default function Sidebar() {
   const { id: activeSurveyId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [surveys, setSurveys] = useState<Survey[]>([]);
@@ -86,6 +88,11 @@ export default function Sidebar() {
       return;
     }
     await supabase.from(table).update({ name: newName }).eq("id", id);
+    if (type === "survey") {
+      queryClient.setQueryData(["survey", id], (old: any) => ({ ...old, name: newName }));
+    } else if (type === "folder") {
+      queryClient.setQueryData(["folder", id], (old: any) => ({ ...old, name: newName }));
+    }
     toast({ title: `${type} renamed`, description: `"${newName}" saved.` });
     setEditingId(null);
     setNewTitle("");
@@ -176,8 +183,8 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
           onClick={() => navigate("/dashboard")}>
           <Home size={16} />
-          <span className="text-xs uppercase">Dashboard</span>
-        </div>
+          <span className="text-xs uppercase">Dashboard</span></div>
+        <hr className="my-2 border-gray-200" />
         <div>
           <div className="flex items-center justify-between mb-2 group">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase">Folders</h2>
