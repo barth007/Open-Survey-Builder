@@ -51,7 +51,7 @@ export default function Sidebar() {
     const { data: folderData } = await supabase.from("folders").select("*");
     const { data: surveyData } = await supabase
       .from("surveys")
-      .select("id, name, folderId, order, created_at");
+      .select("id, name, folder_id, order, created_at");
 
     if (folderData) setFolders(folderData);
     if (surveyData) {
@@ -111,7 +111,7 @@ export default function Sidebar() {
   };
 
   const handleNewSurvey = async () => {
-    const { error } = await supabase.from("surveys").insert([{ name: "Untitled Survey", folderId: null }]);
+    const { error } = await supabase.from("surveys").insert([{ name: "Untitled Survey", folder_id: null }]);
     if (error) {
       toast({ variant: "destructive", title: "Error creating survey", description: error.message });
     } else {
