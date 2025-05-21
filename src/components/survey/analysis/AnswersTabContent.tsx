@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Survey } from '@/types/survey';
 import { SplitPanelLayout } from '@/components/ui/split-panel-layout';
@@ -50,32 +49,26 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
       </div>
     );
   }
-  
-  // Responses panel content
+
+  // Main content panel: Summary + Filters + Responses List
   const responsesPanel = (
-    <div className="space-y-8">
+    <div className="px-6 py-4 space-y-8">
       <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
       {totalResponses === 0 ? (
-        <NoResponsesView 
-          totalResponses={totalResponses} 
-          hasFilteredResponses={false} 
-        />
+        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
       ) : filteredResponses.length === 0 ? (
-        <NoResponsesView 
-          totalResponses={totalResponses} 
-          hasFilteredResponses={false} 
-        />
+        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
       ) : (
         <>
-          <FilterControls 
+          <FilterControls
             filterText={filterText}
             setFilterText={setFilterText}
             sortBy={sortBy}
             setSortBy={setSortBy}
           />
 
-          <ResponsesList 
+          <ResponsesList
             responseGroups={filteredResponses}
             sortBy={sortBy}
             selectedResponseGroup={selectedResponseGroup}
@@ -88,9 +81,9 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     </div>
   );
 
-  // Analysis panel content with empty state handling
+  // Analysis panel
   const analysisPanel = selectedResponseGroup ? (
-    <AnalysisPanel 
+    <AnalysisPanel
       selectedResponseGroup={selectedResponseGroup}
       responseData={selectedResponseData}
       onToggleVisibility={() => {}}
@@ -99,15 +92,15 @@ export const AnswersTabContent: React.FC<AnswersTabContentProps> = ({ survey }) 
     <EmptyAnalysisState />
   );
 
-  // Use a 60/40 layout distribution for the answers tab (left panel wider than right)
   return (
     <SplitPanelLayout
-      leftPanel={responsesPanel}
+      leftPanel={null} // reserved for future use (e.g. nav, tabs)
+      middlePanel={responsesPanel}
       rightPanel={analysisPanel}
-      leftPanelTitle="Responses"
+      leftPanelTitle={null}
       rightPanelTitle="Analysis"
-      defaultLayout={[60, 40]} 
-      minSizes={["40%", "30%"]}
+      defaultLayout={[20, 60, 20]}
+      minSizes={["10%", "40%", "30%"]}
     />
   );
 };
