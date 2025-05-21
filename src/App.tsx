@@ -46,9 +46,9 @@ const App = () => (
             {/* All other routes with standard layout */}
             <Route path="*" element={
               <SidebarProvider>
-                <div className="flex min-h-screen w-full">
+                <div className="h-screen w-full flex overflow-hidden">
                   <SurveySidebar />
-                  <main className="flex-1">
+                  <main className="flex-1 overflow-hidden">
                     <Routes>
                       <Route path="/login" element={<Login />} />
                       {/* Update register route to point to Login component for now */}

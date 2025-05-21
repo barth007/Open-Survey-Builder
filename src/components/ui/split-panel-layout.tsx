@@ -5,7 +5,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { CollapsedPanelLayout } from "@/components/ui/collapsed-panel-layout";
 import { PanelNavigationButton } from "@/components/ui/panel-navigation-button";
-import { Card } from "@/components/ui/card";
 
 interface SplitPanelLayoutProps {
   leftPanel: React.ReactNode;
@@ -28,9 +27,6 @@ export function SplitPanelLayout({
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const isMobile = useIsMobile();
   
-  // Calculate dynamic height based on viewport - more responsive
-  const panelHeight = "calc(100vh - 12rem)";
-
   // On mobile, we only show one panel at a time, defaulting to the left panel
   useEffect(() => {
     if (isMobile) {
@@ -92,8 +88,8 @@ export function SplitPanelLayout({
 
   // Default: both panels visible with resizing capability
   return (
-    <Card className="w-full border rounded-lg shadow-sm overflow-hidden" style={{ height: panelHeight, minHeight: "400px" }}>
-      <ResizablePanelGroup direction="horizontal" className="h-full min-h-[400px] w-full">
+    <div className="h-full w-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
         <ResizablePanel
           defaultSize={defaultLayout[0]}
           minSize={15}
@@ -160,6 +156,6 @@ export function SplitPanelLayout({
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
-    </Card>
+    </div>
   );
 }

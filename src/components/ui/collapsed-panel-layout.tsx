@@ -4,7 +4,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PanelNavigationButton } from "@/components/ui/panel-navigation-button";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
 
 interface CollapsedPanelLayoutProps {
   leftPanelCollapsed: boolean;
@@ -30,7 +29,7 @@ export function CollapsedPanelLayout({
   // If both panels are collapsed, show controls to expand them
   if (leftPanelCollapsed && rightPanelCollapsed) {
     return (
-      <Card className="flex justify-center items-center bg-pebble rounded-lg shadow-sm p-8 h-[400px]">
+      <div className="flex justify-center items-center bg-pebble/20 h-full w-full">
         <div className="flex gap-4 flex-col sm:flex-row">
           <Button onClick={onToggleLeftPanel} variant="outline" className="flex gap-2">
             <ChevronRight size={18} />
@@ -45,15 +44,12 @@ export function CollapsedPanelLayout({
             <ChevronLeft size={18} />
           </Button>
         </div>
-      </Card>
+      </div>
     );
   }
 
-  // Calculate a dynamic height based on viewport
-  const panelHeight = "calc(100vh - 12rem)";
-
   return (
-    <Card className="flex w-full rounded-lg shadow-sm overflow-hidden" style={{ height: panelHeight, minHeight: "400px" }}>
+    <div className="flex w-full h-full">
       {leftPanelCollapsed ? (
         <div className="w-10 border-r border-gray-200 flex items-start bg-white">
           <div className="sticky top-0 z-30 bg-white h-11 w-10 flex items-center justify-center border-b">
@@ -139,6 +135,6 @@ export function CollapsedPanelLayout({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

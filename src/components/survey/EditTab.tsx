@@ -90,7 +90,7 @@ const EditTab: React.FC<EditTabProps> = ({
   );
 
   return (
-    <div className="pt-4">
+    <div className="h-[calc(100vh-6.5rem)]">
       <SplitPanelLayout
         leftPanel={editorPanel}
         rightPanel={previewPanel}

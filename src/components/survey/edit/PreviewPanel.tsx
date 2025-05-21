@@ -4,7 +4,6 @@ import { Survey } from '@/types/survey';
 import PreviewTab from '../PreviewTab';
 import { WelcomePage } from '../WelcomePage';
 import { ThankYouPage } from '../ThankYouPage';
-import { Card } from '@/components/ui/card';
 
 interface PreviewPanelProps {
   survey: Survey;
@@ -38,7 +37,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
     <div className="space-y-6 px-1">
       {/* Welcome Page Preview */}
       {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
-        <Card className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div className="mb-2 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Welcome Page</span>
           </div>
@@ -49,22 +48,22 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
             buttonText={survey.welcomeButtonText}
             onStart={() => {}}
           />
-        </Card>
+        </div>
       )}
       
       {/* Questions Preview */}
       {survey.questions && survey.questions.length > 0 && (
-        <Card className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div className="mb-2 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Survey Questions</span>
           </div>
           <PreviewTab survey={survey} />
-        </Card>
+        </div>
       )}
       
       {/* Thank You Page Preview */}
       {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
-        <Card className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div className="mb-2 pb-2 border-b border-gray-100">
             <span className="text-xs font-medium text-gray-500 uppercase">Thank You Page</span>
           </div>
@@ -74,7 +73,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
             buttonText={survey.thankYouButtonText}
             redirectUrl={survey.redirectUrl}
           />
-        </Card>
+        </div>
       )}
     </div>
   );

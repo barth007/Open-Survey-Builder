@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -124,7 +125,7 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
       </div>
     );
@@ -132,7 +133,7 @@ const Index = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8 max-w-md text-magma">
           <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
           <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
@@ -143,7 +144,7 @@ const Index = () => {
 
   if (!surveyId) {
     return (
-      <div className="min-h-screen bg-pebble flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8 max-w-md">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">Welcome to Survey Builder</h2>
           <p className="text-gray-600">Select a survey or create a new one to get started.</p>
@@ -153,36 +154,36 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-pebble py-4 md:py-8 px-2 md:px-4">
-      <div className="container max-w-7xl mx-auto w-full">
+    <div className="h-screen flex flex-col">
+      <div className="p-4 border-b">
         <SurveyHeader 
           survey={survey}
           pendingChanges={pendingChanges}
           activeUsers={activeUsers}
           onPublishToggle={togglePublish}
         />
+      </div>
 
-        <div className="mt-4 w-full">
-          <SurveyTabs 
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            survey={survey}
-            onTitleChange={handleTitleChange}
-            onDescriptionChange={handleDescriptionChange}
-            onQuestionChange={updateQuestion}
-            onDeleteQuestion={deleteQuestion}
-            onDuplicateQuestion={duplicateQuestion}
-            onAddQuestion={addQuestion}
-            onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
-            onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
-            onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
-            onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
-            onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
-            onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
-            onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
-            onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
-          />
-        </div>
+      <div className="flex-1 overflow-hidden">
+        <SurveyTabs 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          survey={survey}
+          onTitleChange={handleTitleChange}
+          onDescriptionChange={handleDescriptionChange}
+          onQuestionChange={updateQuestion}
+          onDeleteQuestion={deleteQuestion}
+          onDuplicateQuestion={duplicateQuestion}
+          onAddQuestion={addQuestion}
+          onWelcomeTitleChange={(welcomeTitle) => updateSurvey({ welcomeTitle })}
+          onWelcomeMessageChange={(welcomeMessage) => updateSurvey({ welcomeMessage })}
+          onWelcomeInstructionsChange={(welcomeInstructions) => updateSurvey({ welcomeInstructions })}
+          onWelcomeButtonTextChange={(welcomeButtonText) => updateSurvey({ welcomeButtonText })}
+          onThankYouTitleChange={(thankYouTitle) => updateSurvey({ thankYouTitle })}
+          onThankYouMessageChange={(thankYouMessage) => updateSurvey({ thankYouMessage })}
+          onThankYouButtonTextChange={(thankYouButtonText) => updateSurvey({ thankYouButtonText })}
+          onRedirectUrlChange={(redirectUrl) => updateSurvey({ redirectUrl })}
+        />
       </div>
     </div>
   );
