@@ -119,13 +119,23 @@ export default function Sidebar() {
   const handleDeleteSurvey = async (survey: Survey) => {
     const confirmed = window.confirm(`Are you sure you want to delete "${survey.title}"?`);
     if (!confirmed) return;
-    const { error } = await supabase.from("surveys").delete().eq("id", survey.id).select().single();
+
+    const { error } = await supabase
+      .from("surveys")
+      .delete()
+      .eq("id", survey.id)
+      .select()
+      .single();
+
     if (!error) {
       setSurveys(prev => prev.filter(s => s.id !== survey.id));
       toast({ title: "Survey deleted", description: `"${survey.title}" removed.` });
       navigate("/dashboard");
+    } else {
+      toast({ variant: "destructive", title: "Error", description: error.message });
     }
   };
+
 
   const renderEditableLabel = (
     item: Folder | Survey,
@@ -164,7 +174,7 @@ export default function Sidebar() {
     <div className="flex flex-col h-full justify-between border-r bg-white p-4 text-sm">
       <div className="space-y-6 overflow-auto">
         <div className="flex items-center gap-2 text-muted-foreground font-semibold mb-4 cursor-pointer hover:text-blue-600 transition"
-             onClick={() => navigate("/dashboard")}>
+          onClick={() => navigate("/dashboard")}>
           <Home size={16} />
           <span className="text-xs uppercase">Dashboard</span>
         </div>
@@ -184,7 +194,6 @@ export default function Sidebar() {
                     {renderEditableLabel(folder, "folder")}
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button title="Rename"><Pencil size={14} /></button>
                     <button
                       onClick={async () => {
                         const confirmed = window.confirm(`Are you sure you want to delete folder "${folder.name}"?`);
