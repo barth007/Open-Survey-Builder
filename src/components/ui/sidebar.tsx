@@ -659,41 +659,6 @@ export default function SidebarComponent() {
         </button>
       </div>
 
-      <div className="mb-4 flex gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button onClick={handleAddSurvey} size="sm">
-                <Plus size={16} className="mr-1" /> Nuovo
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Nuovo sondaggio</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <div className="flex flex-1">
-          <Input
-            placeholder="Nome cartella"
-            value={newFolderName}
-            onChange={(e) => setNewFolderName(e.target.value)}
-            className="text-sm"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCreateFolder();
-            }}
-          />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleCreateFolder} size="sm">
-                  <FolderIcon size={16} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Crea cartella</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
-
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
         {/* Header + controlli */}
         <div className="flex items-center justify-between mb-2">
