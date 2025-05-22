@@ -90,7 +90,10 @@ export function DraggableSurveyItem({
     }
   };
 
-  const handleSurveyClick = () => {
+  const handleSurveyClick = (e: React.MouseEvent) => {
+    // Stop propagation so the click doesn't trigger drag
+    e.stopPropagation();
+    
     if (!isEditing) {
       // If sidebar is collapsed, open it first
       if (isCollapsed) {
@@ -100,23 +103,36 @@ export function DraggableSurveyItem({
     }
   };
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onDelete();
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
       className={cn(
         "flex items-center w-full group cursor-pointer",
         currentSurveyId === survey.id && "bg-accent text-accent-foreground rounded-md"
       )}
     >
       <SidebarMenuItem className="flex-1">
+        <div
+          {...listeners}
+          className="absolute inset-0 z-10 cursor-move opacity-0"
+          aria-label="Drag handle"
+        />
         <SidebarMenuButton
           asChild
-          className="w-full"
+          className="w-full relative z-20"
           onClick={handleSurveyClick}
-          onDoubleClick={() => setIsEditing(true)}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            setIsEditing(true);
+          }}
         >
           <div className="flex items-center justify-between w-full">
             {isEditing ? (
@@ -124,6 +140,7 @@ export function DraggableSurveyItem({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleEdit}
+                onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleEdit();
                   if (e.key === 'Escape') {
@@ -131,7 +148,6 @@ export function DraggableSurveyItem({
                     setIsEditing(false);
                   }
                 }}
-                onClick={(e) => e.stopPropagation()}
                 className="h-8"
                 autoFocus
               />
@@ -149,11 +165,8 @@ export function DraggableSurveyItem({
         <Button
           variant="ghost"
           size="icon"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 mr-1"
+          onClick={handleDeleteClick}
+          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 mr-1 z-30 relative"
         >
           <Trash2 className="h-4 w-4 text-red-500" />
         </Button>

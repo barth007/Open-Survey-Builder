@@ -31,12 +31,27 @@ export function FolderItem({
   const [isHovered, setIsHovered] = useState(false);
   const { setOpen } = useSidebar();
   
-  const handleFolderClick = () => {
+  const handleFolderClick = (e: React.MouseEvent) => {
+    // Prevent propagation to stop drag handlers from capturing the click
+    e.stopPropagation();
+    
     // If sidebar is collapsed, open it first
     if (isCollapsed) {
       setOpen(true);
     }
     onToggle();
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onDelete();
+  };
+
+  const handleCreateSurveyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onCreateSurvey("New Survey");
   };
 
   return (
@@ -50,7 +65,10 @@ export function FolderItem({
         onMouseLeave={() => setIsHovered(false)}
       >
         <SidebarMenuItem className="flex-1">
-          <SidebarMenuButton onClick={handleFolderClick} className="flex-1 justify-center md:justify-start gap-2">
+          <SidebarMenuButton 
+            onClick={handleFolderClick} 
+            className="flex-1 justify-center md:justify-start gap-2"
+          >
             {isOpen ? 
               <FolderOpen className="h-4 w-4 flex-shrink-0" /> : 
               <Folder className="h-4 w-4 flex-shrink-0" />
@@ -67,10 +85,7 @@ export function FolderItem({
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onCreateSurvey("New Survey");
-                    }}
+                    onClick={handleCreateSurveyClick}
                     className="p-1 h-6 w-6 hover:bg-accent rounded-md"
                   >
                     <Plus className="h-4 w-4" />
@@ -88,10 +103,7 @@ export function FolderItem({
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete();
-                    }}
+                    onClick={handleDeleteClick}
                     className="p-1 h-6 w-6 hover:bg-accent rounded-md"
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />

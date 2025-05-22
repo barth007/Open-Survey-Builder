@@ -22,6 +22,12 @@ export function UnorganizedSurveys({
   onUpdateOrder,
   isCollapsed = false
 }: UnorganizedSurveysProps) {
+  const handleCreateSurveyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onCreateSurvey();
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="flex justify-between items-center">
@@ -32,7 +38,7 @@ export function UnorganizedSurveys({
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={onCreateSurvey}
+                onClick={handleCreateSurveyClick}
                 className="hover:bg-accent rounded-md p-1 h-6 w-6"
               >
                 <Plus className="h-4 w-4" />
