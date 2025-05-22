@@ -16,24 +16,24 @@ export function useQuerySurvey(surveyId: string | undefined) {
       if (!surveyId) {
         throw new Error('Survey ID is required');
       }
-      
+
       const { data, error } = await supabase
         .from('surveys')
         .select('*')
         .eq('id', surveyId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw new Error(`Error fetching survey: ${error.message}`);
       }
 
       if (!data) {
-        throw new Error('Survey not found');
+        throw new Error(`Survey with ID "${surveyId}" not found`);
       }
-      
+
       // Convert the database survey to the Survey type using our utility function
       const survey: Survey = dbSurveyToSurvey(data as DbSurvey);
-      
+
       return survey;
     },
     enabled: !!surveyId,
@@ -52,13 +52,13 @@ export function useQuerySurvey(surveyId: string | undefined) {
 
   useEffect(() => {
     if (query.error) {
-      toast.error('Failed to load survey', { 
+      toast.error('Failed to load survey', {
         description: query.error instanceof Error ? query.error.message : 'An unexpected error occurred'
       });
     }
   }, [query.error]);
 
-  return { 
+  return {
     survey: query.data,
     isLoading: isLoading || query.isPending,
     error: query.error
