@@ -13,6 +13,7 @@ export type SurveyFolder = {
   id: string;
   name: string;
   surveys: Survey[];
+  order?: number;
 }
 
 export type SurveyOrganization = {
@@ -22,7 +23,7 @@ export type SurveyOrganization = {
 
 export type ActiveUser = {
   id: string;
-  name: string;  // This is required according to the error
+  name: string;  // Required name property
   avatarUrl?: string;
   lastActive?: Date;
 }

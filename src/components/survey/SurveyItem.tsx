@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
 
 interface DraggableSurveyItemProps {
   survey: Survey;
@@ -116,50 +117,45 @@ export function DraggableSurveyItem({
           onClick={handleSurveyClick}
           onDoubleClick={() => setIsEditing(true)}
         >
-          {isEditing ? (
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={handleEdit}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleEdit();
-                if (e.key === 'Escape') {
-                  setName(survey.name);
-                  setIsEditing(false);
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="h-8"
-              autoFocus
-            />
-          ) : (
-            <div className="flex items-center gap-2 truncate">
-              <FileText className="h-4 w-4 flex-shrink-0" />
-              {!isCollapsed && <span className="truncate">{name}</span>}
-            </div>
-          )}
+          <div className="flex items-center justify-between w-full">
+            {isEditing ? (
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={handleEdit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleEdit();
+                  if (e.key === 'Escape') {
+                    setName(survey.name);
+                    setIsEditing(false);
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="h-8"
+                autoFocus
+              />
+            ) : (
+              <div className="flex items-center gap-2 truncate">
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                {!isCollapsed && <span className="truncate">{name}</span>}
+              </div>
+            )}
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      {!isCollapsed && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-sidebar-accent rounded-md mr-1"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Delete Survey</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      {!isCollapsed && !isEditing && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 mr-1"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
       )}
     </div>
   );

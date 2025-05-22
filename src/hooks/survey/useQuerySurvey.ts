@@ -1,16 +1,20 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { dbSurveyToSurvey } from '@/utils/type-mappers';
+import { useState, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import { DbSurvey } from '@/types/database';
-import { Survey } from '@/types/survey';
+import { toast } from '@/components/ui/sonner';
 
 export function useQuerySurvey(surveyId: string | undefined) {
-  return useQuery({
+  const [isLoading, setIsLoading] = useState(true);
+
+  const query = useQuery({
     queryKey: ['survey', surveyId],
     queryFn: async () => {
-      if (!surveyId) return null;
-
+      if (!surveyId) {
+        throw new Error('Survey ID is required');
+      }
+      
       const { data, error } = await supabase
         .from('surveys')
         .select('*')
@@ -18,29 +22,49 @@ export function useQuerySurvey(surveyId: string | undefined) {
         .single();
 
       if (error) {
-        if (error.message?.includes("relation \"public.surveys\" does not exist")) {
-          throw new Error("The surveys table doesn't exist in the Supabase database");
-        }
-        throw error;
+        throw new Error(`Error fetching survey: ${error.message}`);
       }
 
-      // Convert the database survey to our frontend survey format
-      // We need to safely cast the data to DbSurvey with default values for missing properties
-      if (data) {
-        // Create a DbSurvey object with default values for required properties
-        const dbSurvey = {
-          ...data,
-          // Add the properties that might be missing from the database response
-          welcome_instructions: "",
-          welcome_button_text: "Start",
-          thank_you_button_text: "Finish"
-        } as unknown as DbSurvey;
-        
-        return dbSurveyToSurvey(dbSurvey);
+      if (!data) {
+        throw new Error('Survey not found');
       }
       
-      return null;
+      // Convert the database survey to the DbSurvey type and ensure all fields are present
+      const surveyWithDefaults: DbSurvey = {
+        ...data as unknown as DbSurvey,
+        welcome_instructions: data.welcome_instructions || null,
+        welcome_button_text: data.welcome_button_text || null,
+        thank_you_button_text: data.thank_you_button_text || null,
+        user_id: data.user_id || null
+      };
+      
+      return surveyWithDefaults;
     },
-    enabled: !!surveyId
+    enabled: !!surveyId,
+    retry: 1,
+    staleTime: 10000,
+    gcTime: 600000,
   });
+
+  useEffect(() => {
+    if (query.isPending) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [query.isPending]);
+
+  useEffect(() => {
+    if (query.error) {
+      toast.error('Failed to load survey', { 
+        description: query.error instanceof Error ? query.error.message : 'An unexpected error occurred'
+      });
+    }
+  }, [query.error]);
+
+  return { 
+    survey: query.data,
+    isLoading: isLoading || query.isPending,
+    error: query.error
+  };
 }

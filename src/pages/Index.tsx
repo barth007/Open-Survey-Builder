@@ -6,6 +6,7 @@ import { useSurveyState } from '@/hooks/useSurveyState';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ActiveUser } from '@/types/survey-organization';
 
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyTabs from '@/components/survey/SurveyTabs';
@@ -15,7 +16,6 @@ import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
 import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
-import { ActiveUser } from '@/types/survey-organization';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -140,7 +140,10 @@ const Index = () => {
             isPublished: survey.isPublished ?? false 
           }}
           pendingChanges={pendingChanges}
-          activeUsers={activeUsers}
+          activeUsers={activeUsers.map(user => ({
+            ...user,
+            name: user.name || "Anonymous" // Ensure name is always present
+          }))}
           onPublishToggle={togglePublish}
         />
       </div>
