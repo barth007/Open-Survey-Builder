@@ -1,5 +1,5 @@
-
-import type { Database } from "./database";
+// Remove the Database import since we're not using it
+import type { Survey } from "./survey";
 
 export type Survey = {
   id: string;

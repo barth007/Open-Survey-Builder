@@ -1,4 +1,5 @@
 
+// Import Json type from supabase types
 import { Json } from "@/integrations/supabase/types";
 
 /**
@@ -39,3 +40,6 @@ export interface DbSurveyResponse {
   participant_id: string | null;
   metadata: Json | null;
 }
+
+// Export Json type so it can be used by other files
+export type { Json };

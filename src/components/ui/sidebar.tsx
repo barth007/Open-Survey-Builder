@@ -19,12 +19,29 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import type { Database } from "@/types/database";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./alert-dialog";
 
-// Define proper types using the Database type definitions
-type Survey = Database["public"]["Tables"]["surveys"]["Row"];
-type Folder = Database["public"]["Tables"]["folders"]["Row"];
+// Define proper types directly without importing from Database
+type Survey = {
+  id: string;
+  name: string;
+  description: string | null;
+  is_published: boolean | null;
+  folder_id: string | null;
+  order: number | null;
+  public_code: string | null;
+  created_at: string | null;
+  user_id: string | null;
+  team_id: string | null;
+};
+
+type Folder = {
+  id: string;
+  name: string;
+  order: number | null;
+  user_id: string | null;
+  created_at: string | null;
+};
 
 // Define a simple Profile type with only the fields we need
 type Profile = {

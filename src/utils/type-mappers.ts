@@ -1,6 +1,14 @@
-
-import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
+import { DbSurvey, DbSurveyResponse } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
+
+// Define Json type locally since it's not being exported from types/database
+type Json = 
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 /**
  * Convert a database survey to a frontend survey
