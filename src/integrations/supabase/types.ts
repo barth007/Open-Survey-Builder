@@ -103,6 +103,7 @@ export type Database = {
           id: string
           is_published: boolean | null
           name: string
+          order: number | null
           public_code: string | null
           questions: Json | null
           redirect_url: string | null
@@ -120,6 +121,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           name: string
+          order?: number | null
           public_code?: string | null
           questions?: Json | null
           redirect_url?: string | null
@@ -137,6 +139,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           name?: string
+          order?: number | null
           public_code?: string | null
           questions?: Json | null
           redirect_url?: string | null

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -132,7 +133,11 @@ const Index = () => {
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="p-4 border-b">
         <SurveyHeader 
-          survey={survey}
+          survey={{ 
+            ...survey,
+            // Ensure isPublished is always defined
+            isPublished: survey.isPublished ?? false 
+          }}
           pendingChanges={pendingChanges}
           activeUsers={activeUsers}
           onPublishToggle={togglePublish}

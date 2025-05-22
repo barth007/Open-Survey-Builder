@@ -1,25 +1,20 @@
 
+import type { Database } from "./database";
 
-export interface SurveyFolder {
+export type Survey = {
+  id: string;
+  name: string;
+  createdAt: string | Date;
+  folderId?: string | null;
+}
+
+export type SurveyFolder = {
   id: string;
   name: string;
   surveys: Survey[];
-  createdAt: Date;
 }
 
-export interface Survey {
-  id: string;
-  name: string;
-  createdAt: Date;
-  folderId?: string;
-  teamId?: string;
+export type SurveyOrganization = {
+  folders: SurveyFolder[];
+  unorganizedSurveys: Survey[];
 }
-
-export interface ActiveUser {
-  id: string;
-  name?: string;
-  email?: string;
-  avatar_url?: string;
-  last_active: Date;
-}
-
