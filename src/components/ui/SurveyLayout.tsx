@@ -1,4 +1,7 @@
-import Sidebar, { SidebarProvider } from "@/components/ui/sidebar";
+
+import React from 'react';
+import Sidebar from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const SurveyLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (

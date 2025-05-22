@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { css } from "@emotion/react";
 import { cn } from "@/lib/utils";
 import { Folder as FolderIcon, Plus, Trash2, Pencil, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,248 @@ type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 type Folder = Database["public"]["Tables"]["folders"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
+// Create a context for the sidebar state
+type SidebarContextType = {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  collapsed: boolean;
+  collapsedWidth: number;
+};
+
+const SidebarContext = createContext<SidebarContextType>({
+  open: true,
+  setOpen: () => {},
+  collapsed: false,
+  collapsedWidth: 64
+});
+
+// Custom hook to access sidebar state
+export function useSidebar() {
+  return useContext(SidebarContext);
+}
+
+// Provider component for sidebar state
+export function SidebarProvider({
+  children,
+  collapsible = false,
+  collapsedWidth = 64,
+  defaultOpen = true
+}: {
+  children: React.ReactNode;
+  collapsible?: boolean | "icon";
+  collapsedWidth?: number;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <SidebarContext.Provider value={{ 
+      open, 
+      setOpen, 
+      collapsed: collapsible ? !open : false,
+      collapsedWidth
+    }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
+// Main sidebar component
+export function Sidebar({ 
+  className,
+  collapsible,
+  children
+}: {
+  className?: string;
+  collapsible?: boolean | "icon";
+  children: React.ReactNode;
+}) {
+  const { open, setOpen, collapsed } = useSidebar();
+
+  return (
+    <aside className={cn(
+      "flex flex-col h-full border-r transition-all",
+      collapsed ? "w-14" : "w-64",
+      className
+    )}>
+      {children}
+    </aside>
+  );
+}
+
+// Sidebar content component
+export function SidebarContent({ 
+  className,
+  children 
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={cn("flex-1 overflow-y-auto", className)}>
+      {children}
+    </div>
+  );
+}
+
+// Sidebar group component
+export function SidebarGroup({
+  children,
+  className,
+  defaultOpen,
+  open,
+  onOpenChange
+}: {
+  children: React.ReactNode;
+  className?: string;
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen ?? true);
+  const openState = open !== undefined ? open : isOpen;
+
+  const handleToggle = () => {
+    const newState = !openState;
+    if (onOpenChange) {
+      onOpenChange(newState);
+    } else {
+      setIsOpen(newState);
+    }
+  };
+
+  return (
+    <div className={cn("mb-4", className)}>
+      {children}
+    </div>
+  );
+}
+
+// Sidebar group label component
+export function SidebarGroupLabel({ 
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h3 className={cn("text-sm font-medium px-2 py-1.5", className)}>
+      {children}
+    </h3>
+  );
+}
+
+// Sidebar group content component
+export function SidebarGroupContent({
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-1", className)}>
+      {children}
+    </div>
+  );
+}
+
+// Sidebar menu component
+export function SidebarMenu({
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <nav className={cn("", className)}>
+      {children}
+    </nav>
+  );
+}
+
+// Sidebar menu item component
+export function SidebarMenuItem({
+  children,
+  className
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("px-1", className)}>
+      {children}
+    </div>
+  );
+}
+
+// Sidebar menu button component
+export function SidebarMenuButton({
+  children,
+  className,
+  asChild = false,
+  onClick
+}: {
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
+  onClick?: () => void;
+}) {
+  if (asChild) {
+    return (
+      <div onClick={onClick} className={cn(
+        "flex items-center px-2 py-1.5 text-sm rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer",
+        className
+      )}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center w-full px-2 py-1.5 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Sidebar trigger button component
+export function SidebarTrigger({
+  className
+}: {
+  className?: string;
+}) {
+  const { open, setOpen } = useSidebar();
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setOpen(!open)}
+      className={cn("p-2 h-8 w-8", className)}
+    >
+      {open ? (
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8.84182 3.13514C9.04327 3.32401 9.05348 3.64042 8.86462 3.84188L5.43521 7.49991L8.86462 11.1579C9.05348 11.3594 9.04327 11.6758 8.84182 11.8647C8.64036 12.0535 8.32394 12.0433 8.13508 11.8419L4.38508 7.84188C4.20477 7.64955 4.20477 7.35027 4.38508 7.15794L8.13508 3.15794C8.32394 2.95648 8.64036 2.94628 8.84182 3.13514Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+        </svg>
+      ) : (
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.1584 3.13508C6.35985 2.94621 6.67627 2.95642 6.86514 3.15788L10.6151 7.15788C10.7954 7.3502 10.7954 7.64949 10.6151 7.84182L6.86514 11.8418C6.67627 12.0433 6.35985 12.0535 6.1584 11.8646C5.95694 11.6757 5.94673 11.3593 6.1356 11.1579L9.565 7.49985L6.1356 3.84182C5.94673 3.64036 5.95694 3.32394 6.1584 3.13508Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+        </svg>
+      )}
+    </Button>
+  );
+}
+
+// Default export for backward compatibility
 export default function Sidebar() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [surveysByFolder, setSurveysByFolder] = useState<Record<string, Survey[]>>({});
@@ -59,7 +301,22 @@ export default function Sidebar() {
       .eq("id", user.id)
       .maybeSingle();
     
-    if (!error && data) setProfile(data);
+    if (!error && data) {
+      // Create a profile object with default values for missing properties
+      const profileWithDefaults = {
+        id: data.id,
+        avatar_url: data.avatar_url || "",
+        full_name: data.full_name || "",
+        bio: "", // Default value
+        website: "", // Default value
+        updated_at: data.updated_at,
+        email: data.email || "",
+        role: data.role || "user",
+        status: data.status || "pending"
+      };
+
+      setProfile(profileWithDefaults as any);
+    }
   };
 
   const handleDeleteFolder = async (id: string) => {
@@ -157,7 +414,12 @@ export default function Sidebar() {
 
   const SortableItem = ({ survey }: { survey: Survey }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: survey.id });
-    const style = { transform: CSS.Transform.toString(transform), transition };
+    
+    // Create our own style object for transform
+    const style = { 
+      transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+      transition 
+    };
 
     const handleRename = async () => {
       const newName = prompt("Nuovo nome del sondaggio:", survey.name);

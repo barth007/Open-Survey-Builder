@@ -6,6 +6,7 @@ export type Survey = {
   name: string;
   createdAt: string | Date;
   folderId?: string | null;
+  isPublished?: boolean;
 }
 
 export type SurveyFolder = {
@@ -17,4 +18,11 @@ export type SurveyFolder = {
 export type SurveyOrganization = {
   folders: SurveyFolder[];
   unorganizedSurveys: Survey[];
+}
+
+export type ActiveUser = {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  lastActive?: Date;
 }

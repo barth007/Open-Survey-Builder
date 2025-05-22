@@ -25,7 +25,19 @@ export function useQuerySurvey(surveyId: string | undefined) {
       }
 
       // Convert the database survey to our frontend survey format
-      return data ? dbSurveyToSurvey(data as DbSurvey) : null;
+      // We need to safely cast the data to DbSurvey with default values for missing properties
+      if (data) {
+        const dbSurvey = {
+          ...data,
+          welcome_instructions: data.welcome_instructions || "",
+          welcome_button_text: data.welcome_button_text || "Start",
+          thank_you_button_text: data.thank_you_button_text || "Finish"
+        } as DbSurvey;
+        
+        return dbSurveyToSurvey(dbSurvey);
+      }
+      
+      return null;
     },
     enabled: !!surveyId
   });
