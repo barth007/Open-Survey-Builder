@@ -373,17 +373,17 @@ export default function SidebarComponent() {
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
-    
+
     if (itemToDelete.type === 'folder') {
       await supabase.from("folders").delete().eq("id", itemToDelete.id);
     } else {
       await supabase.from("surveys").delete().eq("id", itemToDelete.id);
     }
-    
+
     fetchData();
     setDeleteDialogOpen(false);
     setItemToDelete(null);
-    
+
     toast({
       title: `${itemToDelete.type === 'folder' ? 'Folder' : 'Survey'} deleted`,
       variant: "default"
@@ -405,16 +405,16 @@ export default function SidebarComponent() {
 
     let fromFolder = findFolderIdForSurvey(active.id);
     let toFolder = findFolderIdForSurvey(over.id);
-    
+
     // Handle folder reordering
     if (fromFolder === undefined && toFolder === undefined) {
       const oldIndex = folders.findIndex(f => f.id === active.id);
       const newIndex = folders.findIndex(f => f.id === over.id);
-      
+
       if (oldIndex !== -1 && newIndex !== -1) {
         const reordered = arrayMove(folders, oldIndex, newIndex);
         setFolders(reordered);
-        
+
         // Update order in database
         for (let i = 0; i < reordered.length; i++) {
           await supabase.from("folders").update({ order: i }).eq("id", reordered[i].id);
@@ -422,7 +422,7 @@ export default function SidebarComponent() {
         return;
       }
     }
-    
+
     if (!toFolder) toFolder = "null";
 
     let fromList = [...(surveysByFolder[fromFolder] || [])];
@@ -462,13 +462,13 @@ export default function SidebarComponent() {
 
   const handleSaveEdit = async () => {
     if (!editingItemId || !editingItemType) return;
-    
+
     if (editingItemType === 'folder') {
       await supabase.from("folders").update({ name: editingItemName }).eq("id", editingItemId);
     } else {
       await supabase.from("surveys").update({ name: editingItemName }).eq("id", editingItemId);
     }
-    
+
     setEditingItemId(null);
     setEditingItemName("");
     setEditingItemType(null);
@@ -523,7 +523,7 @@ export default function SidebarComponent() {
   };
 
   const handleAddFolder = async () => {
-    const { error } = await supabase.from("folders").insert({ 
+    const { error } = await supabase.from("folders").insert({
       name: "Untitled folder",
       order: folders.length // Set order to end of list
     });
@@ -553,10 +553,13 @@ export default function SidebarComponent() {
       <div key={folder.id} className="mb-2" ref={setNodeRef} style={style} {...attributes} {...listeners}>
         <div
           className="flex items-center justify-between group cursor-pointer"
-          onClick={() => setOpenFolders(prev => ({
-            ...prev,
-            [folder.id]: !prev[folder.id]
-          }))}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenFolders(prev => ({
+              ...prev,
+              [folder.id]: !prev[folder.id]
+            }));
+          }}
         >
           {isEditing ? (
             <form
@@ -593,14 +596,15 @@ export default function SidebarComponent() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-6 w-6"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteRequest(folder.id, 'folder');
                     }}
+
                   >
                     <Trash2 size={14} className="text-red-500" />
                   </Button>
@@ -620,9 +624,9 @@ export default function SidebarComponent() {
           >
             <div className="pl-4 mt-1 space-y-1">
               {(surveysByFolder[folder.id] || []).map((survey) => (
-                <SortableSurveyItem 
-                  key={survey.id} 
-                  survey={survey} 
+                <SortableSurveyItem
+                  key={survey.id}
+                  survey={survey}
                   onDelete={() => handleDeleteRequest(survey.id, 'survey')}
                   onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
                   isEditing={editingItemId === survey.id}
@@ -648,9 +652,9 @@ export default function SidebarComponent() {
     onSaveEdit: () => void;
   }
 
-  const SortableSurveyItem = ({ 
-    survey, 
-    onDelete, 
+  const SortableSurveyItem = ({
+    survey,
+    onDelete,
     onEdit,
     isEditing,
     editingName,
@@ -672,9 +676,14 @@ export default function SidebarComponent() {
         style={style}
         {...attributes}
         {...listeners}
-        className="pl-1 py-1 cursor-move hover:bg-accent rounded flex justify-between items-center group"
-        onClick={() => navigate(`/survey/${survey.id}`)}
+        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group"
+        onClick={(e) => {
+          if (!isEditing) {
+            navigate(`/survey/${survey.id}`);
+          }
+        }}
       >
+
         {isEditing ? (
           <form
             onSubmit={(e) => {
@@ -701,7 +710,7 @@ export default function SidebarComponent() {
               onEdit();
             }}
           >
-            <File className="h-3.5 w-3.5 flex-shrink-0" /> 
+            <File className="h-3.5 w-3.5 flex-shrink-0" />
             {survey.name}
           </span>
         )}
@@ -709,14 +718,15 @@ export default function SidebarComponent() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-6 w-6 opacity-0 group-hover:opacity-100 transition"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete();
                 }}
+
               >
                 <Trash2 size={14} className="text-red-500" />
               </Button>
@@ -759,7 +769,7 @@ export default function SidebarComponent() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          
+
           <SortableContext
             items={folders.map(f => f.id)}
             strategy={verticalListSortingStrategy}
@@ -793,7 +803,7 @@ export default function SidebarComponent() {
           >
             <div className="space-y-1">
               {(surveysByFolder["null"] || []).map((survey) => (
-                <SortableSurveyItem 
+                <SortableSurveyItem
                   key={survey.id}
                   survey={survey}
                   onDelete={() => handleDeleteRequest(survey.id, 'survey')}
@@ -827,8 +837,8 @@ export default function SidebarComponent() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
-                    onClick={signOut} 
+                  <button
+                    onClick={signOut}
                     className="opacity-0 group-hover:opacity-100 transition"
                   >
                     <LogOut size={16} className="text-red-500" />
