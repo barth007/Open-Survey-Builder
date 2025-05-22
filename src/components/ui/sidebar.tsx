@@ -600,6 +600,7 @@ export default function SidebarComponent() {
             }));
           }}
         >
+          {/* Drag handle */}
           <span
             {...attributes}
             {...listeners}
@@ -609,14 +610,15 @@ export default function SidebarComponent() {
             <GripVertical size={14} />
           </span>
 
+          {/* Editable or static label */}
           {isEditing ? (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSaveEdit();
               }}
-              onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1 flex-1"
+              onClick={(e) => e.stopPropagation()}
             >
               <FolderIcon className="w-4 h-4" />
               <Input
@@ -624,13 +626,12 @@ export default function SidebarComponent() {
                 onChange={(e) => setEditingItemName(e.target.value)}
                 onBlur={handleSaveEdit}
                 autoFocus
-                onClick={(e) => e.stopPropagation()}
                 className="bg-transparent h-7 text-sm w-full"
               />
             </form>
           ) : (
-            <h2
-              className="flex items-center gap-1 text-sm font-medium"
+            <div
+              className="flex items-center gap-1 text-sm font-medium flex-1 truncate"
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 handleEditItem(folder.id, folder.name, "folder");
@@ -638,9 +639,10 @@ export default function SidebarComponent() {
             >
               <FolderIcon className="w-4 h-4" />
               {folder.name}
-            </h2>
+            </div>
           )}
 
+          {/* Delete button */}
           <div className="opacity-0 group-hover:opacity-100 transition">
             <TooltipProvider>
               <Tooltip>
@@ -690,6 +692,7 @@ export default function SidebarComponent() {
     );
   };
 
+
   interface SortableSurveyItemProps {
     survey: Survey;
     onDelete: () => void;
@@ -721,11 +724,12 @@ export default function SidebarComponent() {
       <div
         ref={setNodeRef}
         style={style}
-        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group"
+        className="py-1 hover:bg-accent rounded flex items-center group pl-1"
         onClick={(e) => {
           if (!isEditing) navigate(`/survey/${survey.id}`);
         }}
       >
+        {/* Drag handle */}
         <span
           {...attributes}
           {...listeners}
@@ -735,28 +739,28 @@ export default function SidebarComponent() {
           <GripVertical size={14} />
         </span>
 
+        {/* Editable label or input */}
         {isEditing ? (
           <form
             onSubmit={(e) => {
               e.preventDefault();
               onSaveEdit();
             }}
+            className="flex items-center gap-1 flex-1"
             onClick={(e) => e.stopPropagation()}
-            className="flex-1 flex items-center gap-1"
           >
             <File className="h-3.5 w-3.5 flex-shrink-0" />
             <Input
               value={editingName}
-              onChange={(e) => setEditingItemName(e.target.value)}
+              onChange={(e) => setEditingName(e.target.value)}
               onBlur={onSaveEdit}
               autoFocus
-              onClick={(e) => e.stopPropagation()}
               className="bg-transparent h-7 text-xs w-full"
             />
           </form>
         ) : (
-          <span
-            className="truncate flex items-center gap-1.5 text-sm"
+          <div
+            className="truncate flex items-center gap-1.5 text-sm flex-1"
             onDoubleClick={(e) => {
               e.stopPropagation();
               onEdit();
@@ -764,9 +768,10 @@ export default function SidebarComponent() {
           >
             <File className="h-3.5 w-3.5 flex-shrink-0" />
             {survey.name}
-          </span>
+          </div>
         )}
 
+        {/* Delete button */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -790,6 +795,7 @@ export default function SidebarComponent() {
       </div>
     );
   };
+
 
 
   return (
