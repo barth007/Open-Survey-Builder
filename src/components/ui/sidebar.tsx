@@ -376,11 +376,27 @@ export default function SidebarComponent() {
 
     if (itemToDelete.type === 'folder') {
       await supabase.from("folders").delete().eq("id", itemToDelete.id);
+      // Aggiorna le cartelle rimuovendo quella eliminata
+      setFolders((prev) => prev.filter((f) => f.id !== itemToDelete.id));
+      // Rimuove anche l'entry delle survey associate alla cartella
+      setSurveysByFolder((prev) => {
+        const updated = { ...prev };
+        delete updated[itemToDelete.id];
+        return updated;
+      });
     } else {
       await supabase.from("surveys").delete().eq("id", itemToDelete.id);
+
+      // Trova la cartella della survey eliminata
+      const folderKey = findFolderIdForSurvey(itemToDelete.id) ?? "null";
+
+      // Rimuovi la survey localmente
+      setSurveysByFolder((prev) => ({
+        ...prev,
+        [folderKey]: (prev[folderKey] || []).filter((s) => s.id !== itemToDelete.id)
+      }));
     }
 
-    fetchData();
     setDeleteDialogOpen(false);
     setItemToDelete(null);
 
@@ -389,6 +405,7 @@ export default function SidebarComponent() {
       variant: "default"
     });
   };
+
 
   const handleDeleteRequest = (id: string, type: 'folder' | 'survey') => {
     setItemToDelete({ id, type });
@@ -406,53 +423,57 @@ export default function SidebarComponent() {
     let fromFolder = findFolderIdForSurvey(active.id);
     let toFolder = findFolderIdForSurvey(over.id);
 
-    // Handle folder reordering
+    // Drag tra cartelle (spostamento cartelle stesse)
     if (fromFolder === undefined && toFolder === undefined) {
-      const oldIndex = folders.findIndex(f => f.id === active.id);
-      const newIndex = folders.findIndex(f => f.id === over.id);
+      const oldIndex = folders.findIndex((f) => f.id === active.id);
+      const newIndex = folders.findIndex((f) => f.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const reordered = arrayMove(folders, oldIndex, newIndex);
         setFolders(reordered);
 
-        // Update order in database
         for (let i = 0; i < reordered.length; i++) {
           await supabase.from("folders").update({ order: i }).eq("id", reordered[i].id);
         }
-        return;
       }
+
+      return;
     }
 
     if (!toFolder) toFolder = "null";
 
-    let fromList = [...(surveysByFolder[fromFolder] || [])];
+    const fromList = [...(surveysByFolder[fromFolder] || [])];
     const oldIndex = fromList.findIndex((s) => s.id === active.id);
 
     if (fromFolder === toFolder) {
+      // Riordino all’interno della stessa cartella
       const newIndex = fromList.findIndex((s) => s.id === over.id);
       const reordered = arrayMove(fromList, oldIndex, newIndex);
-      setSurveysByFolder({
-        ...surveysByFolder,
+
+      setSurveysByFolder((prev) => ({
+        ...prev,
         [fromFolder]: reordered,
-      });
+      }));
 
       for (let i = 0; i < reordered.length; i++) {
-        await supabase.from("surveys").update({ order: Number(i) }).eq("id", reordered[i].id);
+        await supabase.from("surveys").update({ order: i }).eq("id", reordered[i].id);
       }
     } else {
-      const survey = fromList.splice(oldIndex, 1)[0];
-      survey.folder_id = toFolder === "null" ? null : toFolder;
+      // Spostamento tra cartelle
+      const movedSurvey = { ...fromList[oldIndex], folder_id: toFolder === "null" ? null : toFolder };
+      const newFromList = fromList.filter((s) => s.id !== active.id);
+      const newToList = [...(surveysByFolder[toFolder] || []), movedSurvey];
 
-      const toList = [...(surveysByFolder[toFolder] || []), survey];
-      setSurveysByFolder({
-        ...surveysByFolder,
-        [fromFolder]: fromList,
-        [toFolder]: toList,
-      });
+      setSurveysByFolder((prev) => ({
+        ...prev,
+        [fromFolder]: newFromList,
+        [toFolder]: newToList,
+      }));
 
-      await supabase.from("surveys").update({ folder_id: survey.folder_id }).eq("id", survey.id);
+      await supabase.from("surveys").update({ folder_id: movedSurvey.folder_id }).eq("id", movedSurvey.id);
     }
   };
+
 
   const handleEditItem = (id: string, name: string, type: 'folder' | 'survey') => {
     setEditingItemId(id);
@@ -464,16 +485,33 @@ export default function SidebarComponent() {
     if (!editingItemId || !editingItemType) return;
 
     if (editingItemType === 'folder') {
-      await supabase.from("folders").update({ name: editingItemName }).eq("id", editingItemId);
+      const { error } = await supabase.from("folders").update({ name: editingItemName }).eq("id", editingItemId);
+      if (!error) {
+        setFolders((prev) =>
+          prev.map((f) =>
+            f.id === editingItemId ? { ...f, name: editingItemName } : f
+          )
+        );
+      }
     } else {
-      await supabase.from("surveys").update({ name: editingItemName }).eq("id", editingItemId);
+      const { error } = await supabase.from("surveys").update({ name: editingItemName }).eq("id", editingItemId);
+      if (!error) {
+        const folderKey = findFolderIdForSurvey(editingItemId) ?? "null";
+
+        setSurveysByFolder((prev) => ({
+          ...prev,
+          [folderKey]: (prev[folderKey] || []).map((s) =>
+            s.id === editingItemId ? { ...s, name: editingItemName } : s
+          )
+        }));
+      }
     }
 
     setEditingItemId(null);
     setEditingItemName("");
     setEditingItemType(null);
-    fetchData();
   };
+
 
   const handleCancelEdit = () => {
     setEditingItemId(null);
