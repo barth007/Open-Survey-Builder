@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -9,7 +8,7 @@ import { QuestionItem } from '@/components/survey/response/QuestionItem';
 
 const SurveyResponse = () => {
   const { id: surveyId } = useParams();
-  const { data: surveyData, isLoading, error } = useQuerySurvey(surveyId);
+  const { survey: surveyData, isLoading, error } = useQuerySurvey(surveyId);
   const { 
     answers, 
     isSubmitting, 
@@ -73,7 +72,7 @@ const SurveyResponse = () => {
       <div className="container max-w-3xl">
         <div className="bg-white rounded-lg shadow-sm border border-ice p-6">
           <h2 className="text-2xl font-bold mb-2 text-carbon">{getSurveyTitle()}</h2>
-          <p className="text-gray-600 mb-6">{surveyData.description}</p>
+          <p className="text-gray-600 mb-6">{surveyData?.description}</p>
 
           {!isPublished && (
             <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">

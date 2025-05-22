@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { DbSurvey } from '@/types/database';
 import { toast } from '@/components/ui/sonner';
+import { dbSurveyToSurvey } from '@/utils/type-mappers';
+import { Survey } from '@/types/survey';
 
 export function useQuerySurvey(surveyId: string | undefined) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,16 +31,10 @@ export function useQuerySurvey(surveyId: string | undefined) {
         throw new Error('Survey not found');
       }
       
-      // Convert the database survey to the DbSurvey type and ensure all fields are present
-      const surveyWithDefaults: DbSurvey = {
-        ...data as unknown as DbSurvey,
-        welcome_instructions: data.welcome_instructions || null,
-        welcome_button_text: data.welcome_button_text || null,
-        thank_you_button_text: data.thank_you_button_text || null,
-        user_id: data.user_id || null
-      };
+      // Convert the database survey to the Survey type using our utility function
+      const survey: Survey = dbSurveyToSurvey(data as DbSurvey);
       
-      return surveyWithDefaults;
+      return survey;
     },
     enabled: !!surveyId,
     retry: 1,
