@@ -5,7 +5,7 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import type { DragOverEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
-import { Folder as FolderIcon, Plus, Trash2, LogOut, Home, File } from "lucide-react";
+import { Folder as FolderIcon, Plus, Trash2, LogOut, Home, File, GripVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -580,63 +580,66 @@ export default function SidebarComponent() {
 
   const SortableFolder = ({ folder }: { folder: Folder }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: folder.id });
+
     const style = {
       transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-      transition,
+      transition
     };
 
     const isEditing = editingItemId === folder.id;
 
     return (
-      <div key={folder.id} className="mb-2" ref={setNodeRef} style={style}>
+      <div ref={setNodeRef} style={style} className="mb-2">
         <div
           className="flex items-center justify-between group cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
-            setOpenFolders(prev => ({
+            setOpenFolders((prev) => ({
               ...prev,
               [folder.id]: !prev[folder.id]
             }));
           }}
         >
-          <div className="flex items-center gap-1 flex-1">
-            {/* DRAG HANDLE */}
-            <span {...attributes} {...listeners} className="cursor-move">
+          <span
+            {...attributes}
+            {...listeners}
+            className="cursor-grab p-1 text-muted-foreground hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical size={14} />
+          </span>
+
+          {isEditing ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveEdit();
+              }}
+              className="flex items-center gap-1 flex-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               <FolderIcon className="w-4 h-4" />
-            </span>
+              <Input
+                value={editingItemName}
+                onChange={(e) => setEditingItemName(e.target.value)}
+                onBlur={handleSaveEdit}
+                autoFocus
+                className="bg-transparent h-7 text-sm w-full"
+              />
+            </form>
+          ) : (
+            <h2
+              className="flex items-center gap-1 text-sm font-medium"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                handleEditItem(folder.id, folder.name, "folder");
+              }}
+            >
+              <FolderIcon className="w-4 h-4" />
+              {folder.name}
+            </h2>
+          )}
 
-            {/* NAME OR EDIT FIELD */}
-            {isEditing ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSaveEdit();
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full"
-              >
-                <Input
-                  value={editingItemName}
-                  onChange={(e) => setEditingItemName(e.target.value)}
-                  onBlur={handleSaveEdit}
-                  autoFocus
-                  className="bg-transparent h-7 text-sm w-full"
-                />
-              </form>
-            ) : (
-              <h2
-                className="text-sm font-medium truncate"
-                onDoubleClick={(e) => {
-                  e.stopPropagation();
-                  handleEditItem(folder.id, folder.name, 'folder');
-                }}
-              >
-                {folder.name}
-              </h2>
-            )}
-          </div>
-
-          {/* DELETE BUTTON */}
           <div className="opacity-0 group-hover:opacity-100 transition">
             <TooltipProvider>
               <Tooltip>
@@ -647,7 +650,7 @@ export default function SidebarComponent() {
                     className="h-6 w-6"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeleteRequest(folder.id, 'folder');
+                      handleDeleteRequest(folder.id, "folder");
                     }}
                   >
                     <Trash2 size={14} className="text-red-500" />
@@ -671,8 +674,8 @@ export default function SidebarComponent() {
                 <SortableSurveyItem
                   key={survey.id}
                   survey={survey}
-                  onDelete={() => handleDeleteRequest(survey.id, 'survey')}
-                  onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
+                  onDelete={() => handleDeleteRequest(survey.id, "survey")}
+                  onEdit={() => handleEditItem(survey.id, survey.name, "survey")}
                   isEditing={editingItemId === survey.id}
                   editingName={editingItemName}
                   setEditingName={setEditingItemName}
@@ -718,51 +721,51 @@ export default function SidebarComponent() {
       <div
         ref={setNodeRef}
         style={style}
-        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group cursor-pointer"
+        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group"
         onClick={(e) => {
-          if (!isEditing) {
-            navigate(`/survey/${survey.id}`);
-          }
+          if (!isEditing) navigate(`/survey/${survey.id}`);
         }}
       >
-        <div className="flex items-center gap-1.5 flex-1">
-          {/* DRAG ICON */}
-          <span {...attributes} {...listeners} className="cursor-move">
+        <span
+          {...attributes}
+          {...listeners}
+          className="cursor-grab p-1 text-muted-foreground hover:text-foreground"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical size={14} />
+        </span>
+
+        {isEditing ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSaveEdit();
+            }}
+            className="flex-1 flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             <File className="h-3.5 w-3.5 flex-shrink-0" />
+            <Input
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              onBlur={onSaveEdit}
+              autoFocus
+              className="bg-transparent h-7 text-xs w-full"
+            />
+          </form>
+        ) : (
+          <span
+            className="truncate flex items-center gap-1.5 text-sm"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+          >
+            <File className="h-3.5 w-3.5 flex-shrink-0" />
+            {survey.name}
           </span>
+        )}
 
-          {/* EDITABLE NAME */}
-          {isEditing ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSaveEdit();
-              }}
-              className="flex-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Input
-                value={editingName}
-                onChange={(e) => setEditingName(e.target.value)}
-                onBlur={onSaveEdit}
-                autoFocus
-                className="bg-transparent h-7 text-xs w-full"
-              />
-            </form>
-          ) : (
-            <span
-              className="truncate text-sm"
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
-              {survey.name}
-            </span>
-          )}
-        </div>
-
-        {/* DELETE BUTTON */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
