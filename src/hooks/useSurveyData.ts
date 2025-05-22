@@ -5,13 +5,10 @@ import { useMutateFolder } from './survey/useMutateFolder';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
 import { Survey } from '@/types/survey';
+import { Survey as OrganizationSurvey } from '@/types/survey-organization';
+import { dbSurveyToOrganizationSurvey, surveyToOrganizationSurvey } from '@/utils/type-mappers';
 
-export interface SurveyItem {
-  id: string;
-  name: string;
-  createdAt: Date;
-  folderId?: string | null;
-}
+export type SurveyItem = OrganizationSurvey;
 
 export function useSurveyData() {
   const queryClient = useQueryClient();

@@ -1,80 +1,77 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { SurveyFolder } from '@/types/survey-organization';
 import { useAuth } from '@/providers/AuthProvider';
+import { SurveyOrganization, Survey } from '@/types/survey-organization';
+import { dbSurveyToOrganizationSurvey } from '@/utils/type-mappers';
 
 export function useQuerySurveys() {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['surveys', user?.id],
-    queryFn: async () => {
+    queryKey: ['surveys'],
+    queryFn: async (): Promise<SurveyOrganization> => {
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       try {
-        if (!user) {
-          return { folders: [], unorganizedSurveys: [] };
+        // Fetch folders
+        const { data: folders, error: foldersError } = await supabase
+          .from('folders')
+          .select('*')
+          .order('name');
+
+        if (foldersError) {
+          throw new Error(`Error fetching folders: ${foldersError.message}`);
         }
 
-        // Enhanced logging to debug folder retrieval issues
-        console.log('Fetching folders and surveys for user:', user.id);
+        // Fetch surveys
+        const { data: surveys, error: surveysError } = await supabase
+          .from('surveys')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        const [foldersResult, surveysResult] = await Promise.all([
-          supabase
-            .from('folders')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: true }),
-          
-          supabase
-            .from('surveys')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: true })
-        ]);
-        
-        // Better error handling with specific logging
-        if (foldersResult.error) {
-          console.error("Error fetching folders:", foldersResult.error);
-          throw foldersResult.error;
+        if (surveysError) {
+          throw new Error(`Error fetching surveys: ${surveysError.message}`);
         }
-        
-        if (surveysResult.error) {
-          console.error("Error fetching surveys:", surveysResult.error);
-          throw surveysResult.error;
-        }
-        
-        // Debug log the results to see what's coming back from the database
-        console.log('Folders data:', foldersResult.data);
-        console.log('Surveys data:', surveysResult.data);
-        
-        const folders: SurveyFolder[] = foldersResult.data.map(folder => ({
-          id: folder.id,
-          name: folder.name,
-          createdAt: new Date(folder.created_at),
-          surveys: []
-        }));
 
-        const surveys = surveysResult.data.map(survey => ({
-          id: survey.id,
-          name: survey.name,
-          createdAt: new Date(survey.created_at),
-          folderId: survey.folder_id
-        }));
+        // Convert surveys to the organization format
+        const formattedSurveys: Survey[] = surveys.map(dbSurveyToOrganizationSurvey);
 
-        const organizedFolders = folders.map(folder => ({
-          ...folder,
-          surveys: surveys.filter(survey => survey.folderId === folder.id)
-        }));
+        // Organize surveys into folders
+        const folderSurveys: { [key: string]: Survey[] } = {};
+        const unorganizedSurveys: Survey[] = [];
 
-        const unorganizedSurveys = surveys.filter(survey => !survey.folderId);
+        // Initialize empty arrays for each folder
+        folders.forEach(folder => {
+          folderSurveys[folder.id] = [];
+        });
 
-        return {
-          folders: organizedFolders,
+        // Distribute surveys to their folders
+        formattedSurveys.forEach(survey => {
+          if (survey.folderId && folderSurveys[survey.folderId]) {
+            folderSurveys[survey.folderId].push(survey);
+          } else {
+            unorganizedSurveys.push(survey);
+          }
+        });
+
+        // Create final result
+        const result: SurveyOrganization = {
+          folders: folders.map(folder => ({
+            id: folder.id,
+            name: folder.name,
+            order: folder.order,
+            surveys: folderSurveys[folder.id] || []
+          })),
           unorganizedSurveys
         };
-      } catch (err) {
-        console.error("Error fetching survey data:", err);
-        throw err;
+
+        return result;
+      } catch (error: any) {
+        console.error("Error querying surveys:", error);
+        throw error;
       }
     },
     enabled: !!user

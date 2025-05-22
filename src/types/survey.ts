@@ -1,3 +1,4 @@
+
 export type QuestionType = 'text' | 'multipleChoice' | 'checkboxes' | 'likert5' | 'likert7' | 'likert10';
 
 export type MediaType = 'image' | 'video' | 'gif';
@@ -52,6 +53,7 @@ export interface Survey {
   responses?: SurveyResponse[];
   publicCode?: string;
   order?: number;
+  createdAt?: string | Date; // Added createdAt field for compatibility
   // Welcome page fields
   welcomeTitle?: string;
   welcomeMessage?: string;

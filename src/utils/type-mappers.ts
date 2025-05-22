@@ -1,14 +1,7 @@
-import { DbSurvey, DbSurveyResponse } from '@/types/database';
-import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
 
-// Define Json type locally since it's not being exported from types/database
-type Json = 
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
+import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
+import { Survey as OrganizationSurvey, convertToOrganizationSurvey } from '@/types/survey-organization';
 
 /**
  * Convert a database survey to a frontend survey
@@ -42,6 +35,7 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     folderId: dbSurvey.folder_id || undefined,
     teamId: dbSurvey.team_id || undefined,
     publicCode: dbSurvey.public_code || undefined,
+    createdAt: dbSurvey.created_at || new Date().toISOString(),
     // Welcome page fields
     welcomeTitle: dbSurvey.welcome_title || undefined,
     welcomeMessage: dbSurvey.welcome_message || undefined,
@@ -108,4 +102,24 @@ export function surveyResponseToDbSurveyResponse(response: SurveyResponse): Part
     answers: response.answers as unknown as Json,
     submitted_at: response.submittedAt
   };
+}
+
+/**
+ * Convert a database survey to an organization survey format (simplified)
+ */
+export function dbSurveyToOrganizationSurvey(dbSurvey: DbSurvey): OrganizationSurvey {
+  return {
+    id: dbSurvey.id,
+    name: dbSurvey.name,
+    createdAt: dbSurvey.created_at || new Date().toISOString(),
+    folderId: dbSurvey.folder_id,
+    isPublished: dbSurvey.is_published || false
+  };
+}
+
+/**
+ * Convert a frontend survey to an organization survey format (simplified)
+ */
+export function surveyToOrganizationSurvey(survey: Survey): OrganizationSurvey {
+  return convertToOrganizationSurvey(survey);
 }
