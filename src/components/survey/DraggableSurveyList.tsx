@@ -20,8 +20,8 @@ export function DraggableSurveyList({
   isCollapsed = false
 }: DraggableSurveyListProps) {
   return (
-    <SortableContext items={surveys} strategy={verticalListSortingStrategy}>
-      <div className="space-y-1" data-folder-id={folderId || null}>
+    <SortableContext items={surveys.map(survey => survey.id)} strategy={verticalListSortingStrategy}>
+      <div className="space-y-1" data-folder-id={folderId || "unorganized"}>
         {surveys.map((survey) => (
           <DraggableSurveyItem
             key={survey.id}

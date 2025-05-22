@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2, FileText } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
@@ -52,9 +53,9 @@ export function DraggableSurveyItem({
     data: { survey, folderId }
   });
 
-  // Create our own style object without relying on CSS.Transform
+  // Use CSS.Transform instead of creating our own style
   const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
@@ -106,7 +107,7 @@ export function DraggableSurveyItem({
       {...attributes}
       {...listeners}
       className={cn(
-        "flex items-center w-full group",
+        "flex items-center w-full group cursor-pointer",
         currentSurveyId === survey.id && "bg-accent text-accent-foreground rounded-md"
       )}
     >

@@ -14,8 +14,8 @@ export function useSurveyData() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { data: surveyData, isLoading, error: queryError } = useQuerySurveys();
-  const { createSurvey, deleteSurvey, updateSurvey } = useMutateSurvey();
-  const { createFolder, deleteFolder } = useMutateFolder();
+  const { createSurvey, deleteSurvey: deleteApiSurvey, updateSurvey } = useMutateSurvey();
+  const { createFolder, deleteFolder: deleteApiFolder } = useMutateFolder();
 
   const updateSurveyOrder = async (activeId: string, overId: string) => {
     console.log(`Moving survey ${activeId} to position of ${overId}`);
@@ -65,6 +65,32 @@ export function useSurveyData() {
     }
     
     return null;
+  };
+
+  // Properly handle survey deletion with error handling
+  const deleteSurvey = async (id: string) => {
+    try {
+      await deleteApiSurvey(id);
+      // After successful deletion, invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      return true;
+    } catch (error) {
+      console.error("Error deleting survey:", error);
+      throw error;
+    }
+  };
+
+  // Properly handle folder deletion with error handling
+  const deleteFolder = async (id: string) => {
+    try {
+      await deleteApiFolder(id);
+      // After successful deletion, invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      return true;
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      throw error;
+    }
   };
 
   return {

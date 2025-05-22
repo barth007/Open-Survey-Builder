@@ -5,6 +5,7 @@ import { SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from "@/componen
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Survey } from '@/types/survey-organization';
 import { DraggableSurveyList } from './DraggableSurveyList';
+import { Button } from '@/components/ui/button';
 
 interface UnorganizedSurveysProps {
   surveys: Survey[];
@@ -28,12 +29,14 @@ export function UnorganizedSurveys({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                size="icon"
+                variant="ghost"
                 onClick={onCreateSurvey}
-                className="hover:bg-sidebar-accent rounded-md p-1 ml-auto"
+                className="hover:bg-accent rounded-md p-1 h-6 w-6"
               >
                 <Plus className="h-4 w-4" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Create Survey</p>

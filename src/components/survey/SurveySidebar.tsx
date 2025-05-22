@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { DndContext, DragOverEvent, DragEndEvent, closestCenter, pointerWithin } from '@dnd-kit/core';
 import { Sidebar, SidebarGroup, SidebarContent, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { SurveyFolders } from "@/components/survey/SurveyFolders";
 import { UnorganizedSurveys } from "@/components/survey/UnorganizedSurveys";
@@ -17,6 +18,9 @@ export function SurveySidebar() {
   const { user } = useAuth();
   const [openFolders, setOpenFolders] = React.useState<Set<string>>(new Set());
   const { open } = useSidebar();
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [activeData, setActiveData] = React.useState<any>(null);
+  const [overFolderId, setOverFolderId] = React.useState<string | null>(null);
 
   // If user is not authenticated, don't render the sidebar
   if (!user) {
@@ -57,73 +61,149 @@ export function SurveySidebar() {
     });
   };
 
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+    setActiveData(event.active.data.current);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    
+    if (!active || !over) return;
+    
+    // Find what we're dragging over
+    const overId = over.id.toString();
+    
+    // Find elements by their data attributes
+    const folderElements = document.querySelectorAll('[data-folder-id]');
+    
+    for (const element of folderElements) {
+      const folderId = element.getAttribute('data-folder-id');
+      if (folderId && element.getBoundingClientRect().contains(event.over?.rect?.current.translated)) {
+        // If it's a folder and not already open, open it
+        if (folderId !== 'unorganized' && !openFolders.has(folderId)) {
+          setOpenFolders(prev => new Set([...prev, folderId]));
+        }
+        setOverFolderId(folderId === 'unorganized' ? null : folderId);
+        break;
+      }
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    setActiveId(null);
+    setActiveData(null);
+    setOverFolderId(null);
+    
+    if (!over) return;
+    
+    // Handle the update based on where it was dropped
+    if (overFolderId !== undefined) {
+      updateSurveyOrder(active.id.toString(), over.id.toString());
+    }
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setActiveData(null);
+    setOverFolderId(null);
+  };
+
+  const handleDeleteSurvey = async (id: string) => {
+    try {
+      await deleteSurvey(id);
+      toast("Survey deleted successfully");
+    } catch (error: any) {
+      toast("Failed to delete survey: " + (error.message || "Unknown error"));
+    }
+  };
+
+  const handleDeleteFolder = async (id: string) => {
+    try {
+      await deleteFolder(id);
+      toast("Folder deleted successfully");
+    } catch (error: any) {
+      toast("Failed to delete folder: " + (error.message || "Unknown error"));
+    }
+  };
+
   return (
     <>
-      <Sidebar 
-        className="border-r border-border flex flex-col h-screen transition-all duration-300" 
-        collapsible="icon"
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
-        <div className="flex items-center justify-between p-2">
-          {open && <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>}
-          <SidebarTrigger className="ml-auto" />
-        </div>
+        <Sidebar 
+          className="border-r border-border flex flex-col h-screen transition-all duration-300" 
+          collapsible="icon"
+        >
+          <div className="flex items-center justify-between p-2">
+            {open && <h2 className="text-lg font-semibold tracking-tight">Survey Builder</h2>}
+            <SidebarTrigger className="ml-auto" />
+          </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <SidebarContent className="flex-1 overflow-auto">
-            <SidebarGroup>
-              {/* Survey Content */}
-              {isLoading ? (
-                <div className="flex items-center justify-center h-[100px]">
-                  <Loader className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center text-destructive text-center p-4 border border-destructive/20 rounded-md bg-destructive/10">
-                  <AlertCircle className="h-5 w-5 mb-2" />
-                  <p className="text-sm font-medium">Error loading surveys</p>
-                  <p className="text-xs mt-1">{error.message}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-2"
-                    onClick={() => window.location.reload()}
-                  >
-                    Retry
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {/* Folders Section - Always show even if empty */}
-                  <SurveyFolders
-                    folders={surveyData?.folders || []}
-                    openFolders={openFolders}
-                    onToggleFolder={toggleFolder}
-                    onCreateFolder={handleCreateFolder}
-                    onCreateSurvey={createSurvey}
-                    onDeleteSurvey={deleteSurvey}
-                    onDeleteFolder={deleteFolder}
-                    onUpdateOrder={updateSurveyOrder}
-                    isCollapsed={!open}
-                  />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <SidebarContent className="flex-1 overflow-auto">
+              <SidebarGroup>
+                {/* Survey Content */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-[100px]">
+                    <Loader className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center text-destructive text-center p-4 border border-destructive/20 rounded-md bg-destructive/10">
+                    <AlertCircle className="h-5 w-5 mb-2" />
+                    <p className="text-sm font-medium">Error loading surveys</p>
+                    <p className="text-xs mt-1">{error.message}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => window.location.reload()}
+                    >
+                      Retry
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Folders Section - Always show even if empty */}
+                    <SurveyFolders
+                      folders={surveyData?.folders || []}
+                      openFolders={openFolders}
+                      onToggleFolder={toggleFolder}
+                      onCreateFolder={handleCreateFolder}
+                      onCreateSurvey={createSurvey}
+                      onDeleteSurvey={handleDeleteSurvey}
+                      onDeleteFolder={handleDeleteFolder}
+                      onUpdateOrder={updateSurveyOrder}
+                      isCollapsed={!open}
+                    />
 
-                  {/* Unorganized Surveys */}
-                  <UnorganizedSurveys
-                    surveys={surveyData?.unorganizedSurveys || []}
-                    onCreateSurvey={handleCreateSurvey}
-                    onDeleteSurvey={deleteSurvey}
-                    onUpdateOrder={updateSurveyOrder}
-                    isCollapsed={!open}
-                  />
-                </>
-              )}
-            </SidebarGroup>
-          </SidebarContent>
-        </div>
+                    {/* Unorganized Surveys */}
+                    <UnorganizedSurveys
+                      surveys={surveyData?.unorganizedSurveys || []}
+                      onCreateSurvey={handleCreateSurvey}
+                      onDeleteSurvey={handleDeleteSurvey}
+                      onUpdateOrder={updateSurveyOrder}
+                      isCollapsed={!open}
+                    />
+                  </>
+                )}
+              </SidebarGroup>
+            </SidebarContent>
+          </div>
 
-        {/* User Profile Section */}
-        <div className="w-full">
-          <UserProfile compact={!open} />
-        </div>
-      </Sidebar>
+          {/* User Profile Section */}
+          <div className="w-full">
+            <UserProfile compact={!open} />
+          </div>
+        </Sidebar>
+      </DndContext>
 
       {/* Create Folder Dialog */}
       <CreateFolderDialog
