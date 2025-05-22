@@ -697,7 +697,7 @@ export default function SidebarComponent() {
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
         {/* Header + controlli */}
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold">Sondaggi</h2>
+          <h2 className="text-sm font-semibold">Folders</h2>
           <div className="flex items-center gap-1">
             <Button onClick={handleAddSurvey} size="sm" variant="outline">
               <Plus size={16} />
@@ -730,7 +730,7 @@ export default function SidebarComponent() {
         {/* 🗂️ Sondaggi senza cartella dopo */}
         <div className="mb-4">
           <div className="flex items-center justify-between group">
-            <h2 className="text-sm font-semibold">Senza cartella</h2>
+            <h2 className="text-sm font-semibold">Surveys</h2>
           </div>
           <SortableContext
             items={(surveysByFolder["null"] || []).map((s) => s.id)}
