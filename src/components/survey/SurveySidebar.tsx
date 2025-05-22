@@ -87,7 +87,8 @@ export function SurveySidebar() {
           event.over && 
           overRect && 
           isPointInRect(
-            { x: overRect.x, y: overRect.y },
+            // Use the client coordinates (left, top) instead of x, y
+            { x: overRect.left, y: overRect.top },
             { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
           )) {
         // If it's a folder and not already open, open it
