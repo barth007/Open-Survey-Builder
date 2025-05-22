@@ -602,48 +602,50 @@ export default function SidebarComponent() {
       <div
         ref={setNodeRef}
         style={style}
-        className="group pl-1 py-1 hover:bg-accent rounded flex justify-between items-center"
-        onClick={() => {
+        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group"
+        onClick={(e) => {
           if (!isEditing) navigate(`/survey/${survey.id}`);
         }}
       >
-        <div className="flex items-center gap-1 flex-1">
-          <span
-            {...attributes}
-            {...listeners}
-            className="cursor-grab text-muted-foreground group-hover:visible invisible"
+        <span
+          {...attributes}
+          {...listeners}
+          className="cursor-grab text-muted-foreground hover:text-foreground group-hover:visible invisible"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical size={14} />
+        </span>
+
+        {isEditing ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSaveEdit();
+            }}
+            className="flex-1 flex items-center gap-1"
             onClick={(e) => e.stopPropagation()}
           >
-            <GripVertical size={14} />
+            <File className="h-3.5 w-3.5 flex-shrink-0" />
+            <Input
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              onBlur={onSaveEdit}
+              autoFocus
+              className="bg-transparent h-7 text-xs w-full"
+            />
+          </form>
+        ) : (
+          <span
+            className="truncate flex items-center gap-1.5 text-sm"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+          >
+            <File className="h-3.5 w-3.5 flex-shrink-0" />
+            {survey.name}
           </span>
-
-          {isEditing ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSaveEdit();
-              }}
-              className="flex-1 flex items-center gap-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <File className="h-3.5 w-3.5 flex-shrink-0" />
-              <Input
-                value={editingName}
-                onChange={(e) => setEditingName(e.target.value)}
-                onBlur={onSaveEdit}
-                autoFocus
-                className="bg-transparent h-7 text-xs w-full"
-              />
-            </form>
-          ) : (
-            <span
-              className="truncate flex items-center gap-1.5 text-sm"
-            >
-              <File className="h-3.5 w-3.5 flex-shrink-0" />
-              {survey.name}
-            </span>
-          )}
-        </div>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -656,7 +658,7 @@ export default function SidebarComponent() {
               •••
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
@@ -675,46 +677,48 @@ export default function SidebarComponent() {
             >
               Rename
             </DropdownMenuItem>
-            <DropdownMenuItem disabled className="opacity-50">
-              Move to
-            </DropdownMenuItem>
-            {folders.map((folder) => (
-              <DropdownMenuItem
-                key={folder.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveToFolder(folder.id);
-                }}
-                className="pl-6"
-              >
-                {folder.name}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onMoveToFolder(null);
-              }}
-              className="pl-6"
-            >
-              No folder
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onCreateNewFolder();
-              }}
-              className="pl-6"
-            >
-              ➕ Create folder
-            </DropdownMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <DropdownMenuItem className="relative">
+                  Move to →
+                </DropdownMenuItem>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start">
+                {folders.map((folder) => (
+                  <DropdownMenuItem
+                    key={folder.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMoveToFolder(folder.id);
+                    }}
+                  >
+                    {folder.name}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveToFolder(null);
+                  }}
+                >
+                  No folder
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCreateNewFolder();
+                  }}
+                >
+                  ➕ Create folder
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     );
   };
-
   const SortableFolder = ({
     folder,
     onDelete,
@@ -723,7 +727,7 @@ export default function SidebarComponent() {
     editingName,
     setEditingName,
     onSaveEdit,
-    onCreateSurveyInFolder,
+    handleCreateSurveyInFolder
   }: {
     folder: Folder;
     onDelete: () => void;
@@ -732,7 +736,7 @@ export default function SidebarComponent() {
     editingName: string;
     setEditingName: (name: string) => void;
     onSaveEdit: () => void;
-    onCreateSurveyInFolder: () => void;
+    handleCreateSurveyInFolder: (folderId: string | null) => Promise<void>;
   }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: folder.id });
 
@@ -756,7 +760,7 @@ export default function SidebarComponent() {
           <span
             {...attributes}
             {...listeners}
-            className="cursor-grab p-1 text-muted-foreground group-hover:visible invisible"
+            className="cursor-grab text-muted-foreground hover:text-foreground group-hover:visible invisible"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical size={14} />
@@ -782,7 +786,11 @@ export default function SidebarComponent() {
             </form>
           ) : (
             <h2
-              className="flex items-center gap-1 text-sm font-medium"
+              className="flex items-center gap-1 text-sm font-medium flex-1"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
             >
               <FolderIcon className="w-4 h-4" />
               {folder.name}
@@ -800,7 +808,7 @@ export default function SidebarComponent() {
                 •••
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -818,14 +826,6 @@ export default function SidebarComponent() {
                 }}
               >
                 Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreateSurveyInFolder();
-                }}
-              >
-                ➕ Create survey
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -848,9 +848,8 @@ export default function SidebarComponent() {
                   setEditingName={setEditingItemName}
                   onSaveEdit={handleSaveEdit}
                   folders={folders}
-                  onMoveToFolder={(folderId) => {
-                    supabase.from("surveys").update({ folder_id: folderId }).eq("id", survey.id);
-                    fetchData();
+                  onMoveToFolder={(targetFolderId) => {
+                    handleMoveSurveyToFolder(survey.id, targetFolderId);
                   }}
                   onCreateNewFolder={handleAddFolder}
                 />
@@ -862,6 +861,54 @@ export default function SidebarComponent() {
     );
   };
 
+  const handleMoveSurveyToFolder = async (surveyId: string, targetFolderId: string | null) => {
+    // Update survey in database
+    const { error } = await supabase
+      .from("surveys")
+      .update({ folder_id: targetFolderId })
+      .eq("id", surveyId);
+
+    if (!error) {
+      // Update local state
+      setSurveysByFolder(prev => {
+        const fromFolderId = findFolderIdForSurvey(surveyId) ?? "null";
+        const surveyToMove = (prev[fromFolderId] || []).find(s => s.id === surveyId);
+        if (!surveyToMove) return prev;
+
+        const updatedFrom = (prev[fromFolderId] || []).filter(s => s.id !== surveyId);
+        const updatedTo = [...(prev[targetFolderId ?? "null"] || []), { ...surveyToMove, folder_id: targetFolderId }];
+
+        return {
+          ...prev,
+          [fromFolderId]: updatedFrom,
+          [targetFolderId ?? "null"]: updatedTo
+        };
+      });
+    }
+  };
+
+  const handleCreateSurveyInFolder = async (folderId: string | null) => {
+    const { data, error } = await supabase.from("surveys").insert({
+      name: "Untitled survey",
+      order: 0,
+      folder_id: folderId,
+      description: "",
+      is_published: false,
+      questions: []
+    }).select();
+  
+    if (!error && data?.[0]) {
+      toast({ title: "Survey created" });
+      fetchData();
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not create survey",
+        variant: "destructive"
+      });
+    }
+  };
+  
 
   interface SortableSurveyItemProps {
     survey: Survey;
@@ -917,7 +964,8 @@ export default function SidebarComponent() {
                 editingName={editingItemName}
                 setEditingName={setEditingItemName}
                 onSaveEdit={handleSaveEdit}
-                onCreateSurveyInFolder={handleAddSurvey}
+                handleCreateSurveyInFolder={handleCreateSurveyInFolder}
+
               />
             ))}
           </SortableContext>
