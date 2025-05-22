@@ -22,7 +22,7 @@ export type SurveyOrganization = {
 
 export type ActiveUser = {
   id: string;
-  name: string;
+  name: string;  // This is required according to the error
   avatarUrl?: string;
   lastActive?: Date;
 }

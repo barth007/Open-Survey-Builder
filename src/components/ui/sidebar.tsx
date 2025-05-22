@@ -1,9 +1,7 @@
-
 import React, { useEffect, useState, createContext, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { css } from "@emotion/react";
 import { cn } from "@/lib/utils";
 import { Folder as FolderIcon, Plus, Trash2, Pencil, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +15,19 @@ import type { Database } from "@/types/database";
 // Define proper types using the Database type definitions
 type Survey = Database["public"]["Tables"]["surveys"]["Row"];
 type Folder = Database["public"]["Tables"]["folders"]["Row"];
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+// Define a simple Profile type with only the fields we need
+type Profile = {
+  id: string;
+  avatar_url: string;
+  full_name: string;
+  bio: string;
+  website: string;
+  updated_at: string;
+  email?: string;
+  role?: string;
+  status?: string;
+};
 
 // Create a context for the sidebar state
 type SidebarContextType = {
@@ -201,19 +211,25 @@ export function SidebarMenuButton({
   children,
   className,
   asChild = false,
-  onClick
+  onClick,
+  onDoubleClick
 }: {
   children: React.ReactNode;
   className?: string;
   asChild?: boolean;
   onClick?: () => void;
+  onDoubleClick?: () => void;
 }) {
   if (asChild) {
     return (
-      <div onClick={onClick} className={cn(
-        "flex items-center px-2 py-1.5 text-sm rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer",
-        className
-      )}>
+      <div 
+        onClick={onClick} 
+        onDoubleClick={onDoubleClick}
+        className={cn(
+          "flex items-center px-2 py-1.5 text-sm rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer",
+          className
+        )}
+      >
         {children}
       </div>
     );
@@ -222,6 +238,7 @@ export function SidebarMenuButton({
   return (
     <button
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       className={cn(
         "flex items-center w-full px-2 py-1.5 text-sm rounded-md hover:bg-accent hover:text-accent-foreground",
         className
@@ -260,8 +277,8 @@ export function SidebarTrigger({
   );
 }
 
-// Default export for backward compatibility
-export default function Sidebar() {
+// Default export as a function - remove the duplicate implementation by using the named export instead
+export default function SidebarComponent() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [surveysByFolder, setSurveysByFolder] = useState<Record<string, Survey[]>>({});
   const [newFolderName, setNewFolderName] = useState("");
@@ -302,8 +319,8 @@ export default function Sidebar() {
       .maybeSingle();
     
     if (!error && data) {
-      // Create a profile object with default values for missing properties
-      const profileWithDefaults = {
+      // Create a profile object with the expected properties
+      const profileWithDefaults: Profile = {
         id: data.id,
         avatar_url: data.avatar_url || "",
         full_name: data.full_name || "",
@@ -315,7 +332,7 @@ export default function Sidebar() {
         status: data.status || "pending"
       };
 
-      setProfile(profileWithDefaults as any);
+      setProfile(profileWithDefaults);
     }
   };
 

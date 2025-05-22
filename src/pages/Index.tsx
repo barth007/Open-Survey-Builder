@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,6 +15,7 @@ import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
 import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
+import { ActiveUser } from '@/types/survey-organization';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -25,7 +25,8 @@ const Index = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const { activeUsers } = useActiveUsers(surveyId);
+  // Make sure activeUsers are the correct type
+  const { activeUsers } = useActiveUsers(surveyId) as { activeUsers: ActiveUser[] };
 
   const {
     survey,
