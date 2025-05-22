@@ -79,7 +79,17 @@ export function SurveySidebar() {
     
     for (const element of folderElements) {
       const folderId = element.getAttribute('data-folder-id');
-      if (folderId && element.getBoundingClientRect().contains(event.over?.rect?.current.translated)) {
+      const rect = element.getBoundingClientRect();
+      const overRect = over.rect;
+      
+      // Check if the pointer position is inside this element's rectangle
+      if (folderId && 
+          event.over && 
+          overRect && 
+          isPointInRect(
+            { x: overRect.x, y: overRect.y },
+            { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+          )) {
         // If it's a folder and not already open, open it
         if (folderId !== 'unorganized' && !openFolders.has(folderId)) {
           setOpenFolders(prev => new Set([...prev, folderId]));
@@ -88,6 +98,19 @@ export function SurveySidebar() {
         break;
       }
     }
+  };
+
+  // Helper function to check if a point is inside a rectangle
+  const isPointInRect = (
+    point: { x: number; y: number }, 
+    rect: { left: number; top: number; right: number; bottom: number }
+  ) => {
+    return (
+      point.x >= rect.left &&
+      point.x <= rect.right &&
+      point.y >= rect.top &&
+      point.y <= rect.bottom
+    );
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
