@@ -588,7 +588,7 @@ export default function SidebarComponent() {
     const isEditing = editingItemId === folder.id;
 
     return (
-      <div key={folder.id} className="mb-2" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div key={folder.id} className="mb-2" ref={setNodeRef} style={style}>
         <div
           className="flex items-center justify-between group cursor-pointer"
           onClick={(e) => {
@@ -599,37 +599,44 @@ export default function SidebarComponent() {
             }));
           }}
         >
-          {isEditing ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSaveEdit();
-              }}
-              className="flex items-center gap-1 flex-1"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className="flex items-center gap-1 flex-1">
+            {/* DRAG HANDLE */}
+            <span {...attributes} {...listeners} className="cursor-move">
               <FolderIcon className="w-4 h-4" />
-              <Input
-                value={editingItemName}
-                onChange={(e) => setEditingItemName(e.target.value)}
-                onBlur={handleSaveEdit}
-                autoFocus
-                className="bg-transparent h-7 text-sm w-full"
-              />
-            </form>
-          ) : (
-            <h2
-              className="flex items-center gap-1 text-sm font-medium"
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                handleEditItem(folder.id, folder.name, 'folder');
-              }}
-            >
-              <FolderIcon className="w-4 h-4" />
-              {folder.name}
-            </h2>
-          )}
+            </span>
 
+            {/* NAME OR EDIT FIELD */}
+            {isEditing ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveEdit();
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full"
+              >
+                <Input
+                  value={editingItemName}
+                  onChange={(e) => setEditingItemName(e.target.value)}
+                  onBlur={handleSaveEdit}
+                  autoFocus
+                  className="bg-transparent h-7 text-sm w-full"
+                />
+              </form>
+            ) : (
+              <h2
+                className="text-sm font-medium truncate"
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  handleEditItem(folder.id, folder.name, 'folder');
+                }}
+              >
+                {folder.name}
+              </h2>
+            )}
+          </div>
+
+          {/* DELETE BUTTON */}
           <div className="opacity-0 group-hover:opacity-100 transition">
             <TooltipProvider>
               <Tooltip>
@@ -642,7 +649,6 @@ export default function SidebarComponent() {
                       e.stopPropagation();
                       handleDeleteRequest(folder.id, 'folder');
                     }}
-
                   >
                     <Trash2 size={14} className="text-red-500" />
                   </Button>
@@ -680,6 +686,7 @@ export default function SidebarComponent() {
     );
   };
 
+
   interface SortableSurveyItemProps {
     survey: Survey;
     onDelete: () => void;
@@ -702,7 +709,6 @@ export default function SidebarComponent() {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: survey.id });
     const navigate = useNavigate();
 
-    // Create our own style object for transform
     const style = {
       transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
       transition
@@ -712,47 +718,51 @@ export default function SidebarComponent() {
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
-        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group"
+        className="pl-1 py-1 hover:bg-accent rounded flex justify-between items-center group cursor-pointer"
         onClick={(e) => {
           if (!isEditing) {
             navigate(`/survey/${survey.id}`);
           }
         }}
       >
-
-        {isEditing ? (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              onSaveEdit();
-            }}
-            className="flex-1 flex items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="flex items-center gap-1.5 flex-1">
+          {/* DRAG ICON */}
+          <span {...attributes} {...listeners} className="cursor-move">
             <File className="h-3.5 w-3.5 flex-shrink-0" />
-            <Input
-              value={editingName}
-              onChange={(e) => setEditingName(e.target.value)}
-              onBlur={onSaveEdit}
-              autoFocus
-              className="bg-transparent h-7 text-xs w-full"
-            />
-          </form>
-        ) : (
-          <span
-            className="truncate flex items-center gap-1.5 text-sm"
-            onDoubleClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          >
-            <File className="h-3.5 w-3.5 flex-shrink-0" />
-            {survey.name}
           </span>
-        )}
 
+          {/* EDITABLE NAME */}
+          {isEditing ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                onSaveEdit();
+              }}
+              className="flex-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Input
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                onBlur={onSaveEdit}
+                autoFocus
+                className="bg-transparent h-7 text-xs w-full"
+              />
+            </form>
+          ) : (
+            <span
+              className="truncate text-sm"
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              {survey.name}
+            </span>
+          )}
+        </div>
+
+        {/* DELETE BUTTON */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -764,7 +774,6 @@ export default function SidebarComponent() {
                   e.stopPropagation();
                   onDelete();
                 }}
-
               >
                 <Trash2 size={14} className="text-red-500" />
               </Button>
@@ -777,6 +786,7 @@ export default function SidebarComponent() {
       </div>
     );
   };
+
 
   return (
     <aside className="w-64 border-r h-full flex flex-col overflow-y-auto p-2">
