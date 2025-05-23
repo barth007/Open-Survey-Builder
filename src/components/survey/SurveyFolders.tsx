@@ -16,8 +16,10 @@ interface SurveyFoldersProps {
   onCreateSurvey: (params: { name: string; folderId?: string }) => Promise<any>;
   onDeleteSurvey: (id: string) => void;
   onDeleteFolder: (id: string) => void;
+  onRenameFolder?: (id: string, name: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
   isCollapsed?: boolean;
+  folders?: { id: string; name: string }[];
 }
 
 export function SurveyFolders({
@@ -28,8 +30,10 @@ export function SurveyFolders({
   onCreateSurvey,
   onDeleteSurvey,
   onDeleteFolder,
+  onRenameFolder,
   onUpdateOrder,
-  isCollapsed = false
+  isCollapsed = false,
+  folders: foldersList = []
 }: SurveyFoldersProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
@@ -61,10 +65,12 @@ export function SurveyFolders({
             isOpen={openFolders.has(folder.id)}
             onToggle={() => onToggleFolder(folder.id)}
             onDelete={() => onDeleteFolder(folder.id)}
+            onRenameFolder={onRenameFolder}
             onCreateSurvey={(name) => onCreateSurvey({ name, folderId: folder.id })}
             onDeleteSurvey={onDeleteSurvey}
             onUpdateOrder={onUpdateOrder}
             isCollapsed={isCollapsed}
+            folders={foldersList}
           />
         ))}
       </SidebarGroupContent>

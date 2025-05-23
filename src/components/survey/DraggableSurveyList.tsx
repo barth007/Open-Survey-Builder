@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Survey } from '@/types/survey-organization';
 import { DraggableSurveyItem } from './SurveyItem';
+import { Survey } from '@/types/survey-organization';
 
 interface DraggableSurveyListProps {
   surveys: Survey[];
@@ -10,19 +9,25 @@ interface DraggableSurveyListProps {
   onUpdateOrder: (activeId: string, overId: string) => void;
   folderId?: string;
   isCollapsed?: boolean;
+  folders?: { id: string; name: string }[];
 }
 
-export function DraggableSurveyList({
-  surveys,
-  onDeleteSurvey,
-  onUpdateOrder,
+export function DraggableSurveyList({ 
+  surveys, 
+  onDeleteSurvey, 
+  onUpdateOrder, 
   folderId,
-  isCollapsed = false
+  isCollapsed,
+  folders = []
 }: DraggableSurveyListProps) {
   return (
-    <SortableContext items={surveys.map(survey => survey.id)} strategy={verticalListSortingStrategy}>
-      <div className="space-y-1" data-folder-id={folderId || "unorganized"}>
-        {surveys.map((survey) => (
+    <div className="space-y-1">
+      {surveys.length === 0 ? (
+        <div className="text-sm text-muted-foreground px-2 py-1 italic">
+          {!isCollapsed && 'No surveys'}
+        </div>
+      ) : (
+        surveys.map((survey) => (
           <DraggableSurveyItem
             key={survey.id}
             survey={survey}
@@ -30,9 +35,10 @@ export function DraggableSurveyList({
             onUpdateOrder={onUpdateOrder}
             folderId={folderId}
             isCollapsed={isCollapsed}
+            folders={folders}
           />
-        ))}
-      </div>
-    </SortableContext>
+        ))
+      )}
+    </div>
   );
 }

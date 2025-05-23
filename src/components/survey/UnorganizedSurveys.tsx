@@ -13,6 +13,7 @@ interface UnorganizedSurveysProps {
   onDeleteSurvey: (id: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
   isCollapsed?: boolean;
+  folders?: { id: string; name: string }[];
 }
 
 export function UnorganizedSurveys({
@@ -20,7 +21,8 @@ export function UnorganizedSurveys({
   onCreateSurvey,
   onDeleteSurvey,
   onUpdateOrder,
-  isCollapsed = false
+  isCollapsed = false,
+  folders = []
 }: UnorganizedSurveysProps) {
   const handleCreateSurveyClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,6 +58,7 @@ export function UnorganizedSurveys({
           onDeleteSurvey={onDeleteSurvey}
           onUpdateOrder={onUpdateOrder}
           isCollapsed={isCollapsed}
+          folders={folders}
         />
       </SidebarGroupContent>
     </SidebarGroup>
