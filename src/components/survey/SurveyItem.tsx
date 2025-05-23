@@ -105,8 +105,8 @@ export function DraggableSurveyItem({
     onDelete();
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Modified to match the expected signature: () => void
+  const handleDoubleClick = () => {
     setIsEditing(true);
   };
 
