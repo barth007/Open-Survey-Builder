@@ -69,14 +69,16 @@ export function SurveyNavigationHeader() {
       </div>
 
       {/* Right: Active user avatars */}
-      <div className="flex items-center gap-2 -space-x-2">
+      <div className="flex items-center gap-2 pr-2 z-50 relative bg-red-100">
+      <p className="text-xs text-green-500">Avatars expected: {activeUsers.length}</p>
+
         {activeUsers.map(user => (
           <img
             key={user.id}
             src={user.avatar_url || "/placeholder.svg"}
             alt={user.name || user.email || "User"}
             title={user.name || user.email || "User"}
-            className="w-8 h-8 rounded-full border"
+            className="w-8 h-8 rounded-full border bg-white"
           />
         ))}
       </div>
