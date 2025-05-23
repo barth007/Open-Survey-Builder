@@ -60,6 +60,7 @@ export function DraggableSurveyItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Make sure these handlers match the expected parameter types
   const handleEdit = async () => {
     setIsEditing(false);
     if (name !== survey.name) {
@@ -90,23 +91,23 @@ export function DraggableSurveyItem({
     }
   };
 
-  const handleSurveyClick = (e: React.MouseEvent) => {
-    // Stop propagation so the click doesn't trigger drag
-    e.stopPropagation();
-    
-    if (!isEditing) {
-      // If sidebar is collapsed, open it first
-      if (isCollapsed) {
-        setOpen(true);
-      }
-      navigate(`/survey/${survey.id}`);
+  const handleSurveyClick = () => {
+    // If sidebar is collapsed, open it first
+    if (isCollapsed) {
+      setOpen(true);
     }
+    navigate(`/survey/${survey.id}`);
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     onDelete();
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
   };
 
   return (
@@ -128,10 +129,7 @@ export function DraggableSurveyItem({
         <SidebarMenuButton
           className="w-full relative z-20"
           onClick={handleSurveyClick}
-          onDoubleClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
+          onDoubleClick={handleDoubleClick}
         >
           <div className="flex items-center justify-between w-full">
             {isEditing ? (

@@ -31,10 +31,8 @@ export function FolderItem({
   const [isHovered, setIsHovered] = useState(false);
   const { setOpen } = useSidebar();
   
-  const handleFolderClick = (e: React.MouseEvent) => {
-    // Prevent propagation to stop drag handlers from capturing the click
-    e.stopPropagation();
-    
+  // Type-safe event handler
+  const handleFolderClick = () => {
     // If sidebar is collapsed, open it first
     if (isCollapsed) {
       setOpen(true);
