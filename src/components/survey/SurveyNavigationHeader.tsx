@@ -60,7 +60,8 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   const current = getCurrentSurveyContext();
 
   return (
-    <header className="w-full h-14 border-b bg-background px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
+
       {/* Left: Navigation path */}
       <div className="flex items-center gap-4">
         <Button

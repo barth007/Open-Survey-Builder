@@ -6,26 +6,26 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 
 interface SurveyLayoutProps {
-  children: ReactNode;
+    children: ReactNode;
 }
 
 const SurveyLayout = ({ children }: SurveyLayoutProps) => {
-  const { id: surveyId } = useParams();
-  const { activeUsers } = useActiveUsers(surveyId || '');
+    const { id: surveyId } = useParams();
+    const { activeUsers } = useActiveUsers(surveyId || '');
 
-  return (
-    <div className="flex h-screen w-full bg-background">
-      <SidebarProvider collapsedWidth={60}>
-        <SurveySidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <SurveyNavigationHeader activeUsers={activeUsers} />
-          <div className="flex-1 overflow-auto">
-            {children}
-          </div>
-        </div>
-      </SidebarProvider>
-    </div>
-  );
+    return (
+        <>
+            <SurveyNavigationHeader activeUsers={activeUsers} />
+            <div className="flex h-[calc(100vh-3.5rem)] pt-14 w-full bg-background">
+                <SidebarProvider collapsedWidth={60}>
+                    <SurveySidebar />
+                    <div className="flex-1 overflow-auto">
+                        {children}
+                    </div>
+                </SidebarProvider>
+            </div>
+        </>
+    );
 };
 
 export default SurveyLayout;
