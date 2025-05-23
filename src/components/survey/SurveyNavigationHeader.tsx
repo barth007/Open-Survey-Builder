@@ -1,37 +1,42 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Home, User, FileText } from 'lucide-react';
+import { Home, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
+import { useActiveUsers } from '@/hooks/useActiveUsers';
+import UserProfile from '@/components/UserProfile';
 
 export function SurveyNavigationHeader() {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
+  const { activeUsers } = useActiveUsers(surveyId || '');
 
-  // Find current survey name if we're viewing a specific survey
-  const getCurrentSurveyName = () => {
+  const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
-    
-    // Check unorganized surveys
-    const unorganizedSurvey = surveyData.unorganizedSurveys.find(s => s.id === surveyId);
-    if (unorganizedSurvey) return unorganizedSurvey.name;
-    
-    // Check folders
+
+    const unorganized = surveyData.unorganizedSurveys.find(s => s.id === surveyId);
+    if (unorganized) return { name: unorganized.name };
+
     for (const folder of surveyData.folders) {
       const survey = folder.surveys.find(s => s.id === surveyId);
-      if (survey) return survey.name;
+      if (survey) {
+        return {
+          name: survey.name,
+          folder: folder.name,
+        };
+      }
     }
-    
+
     return null;
   };
 
-  const currentSurveyName = getCurrentSurveyName();
+  const current = getCurrentSurveyContext();
 
   return (
-    <header className="h-14 border-b bg-background px-4 flex items-center justify-between">
+    <header className="w-full h-14 border-b bg-background px-4 flex items-center justify-between">
+      {/* Left: Navigation path */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -42,27 +47,30 @@ export function SurveyNavigationHeader() {
           <Home className="h-4 w-4" />
           Dashboard
         </Button>
-        
-        {currentSurveyName && (
+
+        {current && (
           <>
             <Separator orientation="vertical" className="h-4" />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              {current.folder && (
+                <>
+                  <span>{current.folder}</span>
+                  <span className="mx-1">/</span>
+                </>
+              )}
               <FileText className="h-4 w-4" />
-              <span>{currentSurveyName}</span>
+              <span className="truncate">{current.name}</span>
             </div>
           </>
         )}
       </div>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate('/profile')}
-        className="flex items-center gap-2"
-      >
-        <User className="h-4 w-4" />
-        Profile
-      </Button>
+      {/* Right: Active user avatars */}
+      <div className="flex items-center gap-2 -space-x-2">
+        {activeUsers.map(user => (
+          <UserProfile key={user.id} compact />
+        ))}
+      </div>
     </header>
   );
 }
