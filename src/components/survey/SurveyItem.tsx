@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, FileText, Pencil, FolderClosed } from 'lucide-react';
+import { Trash2, FileText, Pencil, FolderClosed, GripVertical } from 'lucide-react';
 import { Survey } from '@/types/survey-organization';
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
@@ -64,7 +64,6 @@ export function DraggableSurveyItem({
     data: { survey, folderId }
   });
 
-  // Use CSS.Transform instead of creating our own style
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -108,7 +107,6 @@ export function DraggableSurveyItem({
     navigate(`/survey/${survey.id}`);
   };
 
-  // Fix: Changed to match the expected signature () => void
   const handleDoubleClick = () => {
     setIsEditing(true);
   };
@@ -128,20 +126,23 @@ export function DraggableSurveyItem({
           <div
             ref={setNodeRef}
             style={style}
-            {...attributes}
             className={cn(
-              "flex items-center w-full group cursor-pointer",
+              "flex items-center w-full group cursor-pointer relative",
               currentSurveyId === survey.id && "bg-accent text-accent-foreground rounded-md"
             )}
           >
-            <SidebarMenuItem className="flex-1">
-              <div
-                {...listeners}
-                className="absolute inset-0 z-10 cursor-move opacity-0"
-                aria-label="Drag handle"
-              />
+            {/* Drag Handle */}
+            <div
+              {...attributes}
+              {...listeners}
+              className="absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-50 hover:opacity-100 z-20"
+            >
+              <GripVertical className="h-3 w-3" />
+            </div>
+
+            <SidebarMenuItem className="flex-1 ml-4">
               <SidebarMenuButton
-                className="w-full relative z-20"
+                className="w-full"
                 onClick={handleSurveyClick}
                 onDoubleClick={handleDoubleClick}
               >

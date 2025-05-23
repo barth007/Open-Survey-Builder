@@ -116,7 +116,7 @@ export function SurveySidebar() {
     >
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
         <SidebarTrigger className="absolute right-2 top-2" />
-        <SidebarContent className="pt-6">
+        <SidebarContent className="pt-6 flex-1">
           {!collapsed && (
             <div className="flex items-center mb-4 mx-2">
               <Input
@@ -138,7 +138,7 @@ export function SurveySidebar() {
             </div>
           )}
 
-          <SidebarGroup defaultOpen>
+          <SidebarGroup defaultOpen className="flex-1">
             <SortableContext items={[]} strategy={verticalListSortingStrategy}>
               <SurveyFolders
                 folders={surveyData?.folders || []}
