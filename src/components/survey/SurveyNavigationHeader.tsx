@@ -4,6 +4,23 @@ import { Home, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider
+} from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/providers/AuthProvider';
+import { cn } from '@/lib/utils';
+
+const { user: currentUser } = useAuth();
+
 
 interface ActiveUser {
   id: string;
@@ -75,17 +92,79 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
       </div>
 
       {/* Right: Active user avatars */}
-      <div className="flex items-center gap-2 pr-2 z-50 relative">
-        {activeUsers.map(user => (
-          <img
-            key={user.id}
-            src={user.avatar_url || "/placeholder.svg"}
-            alt={user.name || user.email || "User"}
-            title={user.name || user.email || "User"}
-            className="w-8 h-8 rounded-full border bg-white"
-          />
-        ))}
-      </div>
+      <TooltipProvider>
+        <div className="flex items-center gap-2 pr-2 z-50 relative">
+          {activeUsers
+            .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
+            .slice(0, 4)
+            .map(user => {
+              const isYou = user.id === currentUser?.id;
+              return (
+                <Tooltip key={user.id}>
+                  <TooltipTrigger asChild>
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name || user.email || "User"}
+                        className={cn(
+                          "w-8 h-8 rounded-full border bg-white",
+                          isYou && "ring-2 ring-primary"
+                        )}
+                      />
+                    ) : (
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full border bg-muted text-xs flex items-center justify-center font-medium",
+                          isYou && "ring-2 ring-primary"
+                        )}
+                      >
+                        {user.name?.charAt(0).toUpperCase() || "?"}
+                      </div>
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+
+          {activeUsers
+            .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
+            .slice(4)
+            .map(user => {
+              const isYou = user.id === currentUser?.id;
+              return (
+                <DropdownMenuItem key={user.id}>
+                  <div className="flex items-center gap-2">
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name || user.email}
+                        className={cn(
+                          "w-5 h-5 rounded-full",
+                          isYou && "ring-2 ring-primary"
+                        )}
+                      />
+                    ) : (
+                      <div
+                        className={cn(
+                          "w-5 h-5 rounded-full bg-muted text-xs flex items-center justify-center font-medium",
+                          isYou && "ring-2 ring-primary"
+                        )}
+                      >
+                        {user.name?.charAt(0).toUpperCase() || "?"}
+                      </div>
+                    )}
+                    <span className="text-sm">
+                      {user.name || user.email}{isYou ? " (you)" : ""}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              );
+            })}
+        </div>
+      </TooltipProvider>
     </header>
   );
 }
