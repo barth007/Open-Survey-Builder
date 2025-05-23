@@ -896,7 +896,7 @@ export default function SidebarComponent() {
       is_published: false,
       questions: []
     }).select();
-  
+
     if (!error && data?.[0]) {
       toast({ title: "Survey created" });
       fetchData();
@@ -908,7 +908,7 @@ export default function SidebarComponent() {
       });
     }
   };
-  
+
 
   interface SortableSurveyItemProps {
     survey: Survey;
@@ -921,105 +921,96 @@ export default function SidebarComponent() {
   }
 
   return (
-    <aside className="w-64 border-r h-full flex flex-col overflow-y-auto p-2">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="text-sm font-semibold text-blue-600 flex items-center gap-1"
-        >
-          <Home size={16} /> Dashboard
-        </button>
-      </div>
-
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
-        {/* Folders section */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-medium">Folders</h2>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={handleAddFolder} size="icon" variant="ghost" className="h-6 w-6">
-                    <Plus size={14} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Create folder</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-
-          <SortableContext
-            items={folders.map(f => f.id)}
-            strategy={verticalListSortingStrategy}
+    <aside className="w-64 border-r h-full flex flex-col">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="text-sm font-semibold text-blue-600 flex items-center gap-1"
           >
-            {folders.map((folder) => (
-              <SortableFolder
-                key={folder.id}
-                folder={folder}
-                onDelete={() => handleDeleteRequest(folder.id, "folder")}
-                onEdit={() => handleEditItem(folder.id, folder.name, "folder")}
-                isEditing={editingItemId === folder.id}
-                editingName={editingItemName}
-                setEditingName={setEditingItemName}
-                onSaveEdit={handleSaveEdit}
-                handleCreateSurveyInFolder={handleCreateSurveyInFolder}
-
-              />
-            ))}
-          </SortableContext>
+            <Home size={16} /> Dashboard
+          </button>
         </div>
 
-        {/* Surveys section */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-medium">Surveys</h2>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={handleAddSurvey} size="icon" variant="ghost" className="h-6 w-6">
-                    <Plus size={14} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Create survey</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <SortableContext
-            items={(surveysByFolder["null"] || []).map((s) => s.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-1">
-              {(surveysByFolder["null"] || []).map((survey) => (
-                <SortableSurveyItem
-                  key={survey.id}
-                  survey={survey}
-                  onDelete={() => handleDeleteRequest(survey.id, 'survey')}
-                  onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
-                  isEditing={editingItemId === survey.id}
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
+          {/* Folders section */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-medium">Folders</h2>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleAddFolder} size="icon" variant="ghost" className="h-6 w-6">
+                      <Plus size={14} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Create folder</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <SortableContext items={folders.map(f => f.id)} strategy={verticalListSortingStrategy}>
+              {folders.map((folder) => (
+                <SortableFolder
+                  key={folder.id}
+                  folder={folder}
+                  onDelete={() => handleDeleteRequest(folder.id, "folder")}
+                  onEdit={() => handleEditItem(folder.id, folder.name, "folder")}
+                  isEditing={editingItemId === folder.id}
                   editingName={editingItemName}
                   setEditingName={setEditingItemName}
                   onSaveEdit={handleSaveEdit}
-                  folders={folders}
-                  onMoveToFolder={async (folderId) => {
-                    if (editingItemId) {
-                      await supabase.from("surveys").update({ folder_id: folderId }).eq("id", editingItemId);
-                      fetchData();
-                    }
-                  }}
-                  onCreateNewFolder={handleAddFolder}
+                  handleCreateSurveyInFolder={handleCreateSurveyInFolder}
                 />
               ))}
-            </div>
-          </SortableContext>
-        </div>
-      </DndContext>
+            </SortableContext>
+          </div>
 
-      {/* User profile section */}
-      <div className="mt-auto pt-4 border-t">
+          {/* Surveys section */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-medium">Surveys</h2>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleAddSurvey} size="icon" variant="ghost" className="h-6 w-6">
+                      <Plus size={14} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Create survey</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <SortableContext items={(surveysByFolder["null"] || []).map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-1">
+                {(surveysByFolder["null"] || []).map((survey) => (
+                  <SortableSurveyItem
+                    key={survey.id}
+                    survey={survey}
+                    onDelete={() => handleDeleteRequest(survey.id, 'survey')}
+                    onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
+                    isEditing={editingItemId === survey.id}
+                    editingName={editingItemName}
+                    setEditingName={setEditingItemName}
+                    onSaveEdit={handleSaveEdit}
+                    folders={folders}
+                    onMoveToFolder={(folderId) => handleMoveSurveyToFolder(survey.id, folderId)}
+                    onCreateNewFolder={handleAddFolder}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </div>
+        </DndContext>
+      </div>
+
+      {/* Fixed user profile */}
+      <div className="p-2 border-t">
         {profile && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground justify-between group">
             <button onClick={() => navigate("/profile")} className="flex items-center gap-2">
@@ -1052,24 +1043,23 @@ export default function SidebarComponent() {
         )}
       </div>
 
-      {/* Confirmation dialog for delete */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this {itemToDelete?.type}. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </aside>
+  {/* Confirmation dialog for delete */ }
+  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This will permanently delete this {itemToDelete?.type}. This action cannot be undone.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600">
+          Delete
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+    </aside >
   );
 }
-
