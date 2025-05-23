@@ -132,22 +132,6 @@ const Index = () => {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="p-4 border-b">
-        <SurveyHeader 
-          survey={{ 
-            ...survey,
-            // Ensure isPublished is always defined
-            isPublished: survey.isPublished ?? false 
-          }}
-          pendingChanges={pendingChanges}
-          activeUsers={activeUsers.map(user => ({
-            ...user,
-            name: user.name || "Anonymous" // Ensure name is always present
-          }))}
-          onPublishToggle={togglePublish}
-        />
-      </div>
-
       <SurveyTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
