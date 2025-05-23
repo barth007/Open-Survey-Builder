@@ -21,26 +21,24 @@ export const useActiveUsers = (surveyId: string | undefined) => {
 
     // Function to update user presence
     const updatePresence = async () => {
-      await channel.track({
+      const result = await channel.track({
         user_id: user.id,
         email: user.email,
         name: user.user_metadata?.full_name || user.email,
         avatar_url: user.user_metadata?.avatar_url,
         online_at: new Date().toISOString(),
       });
+      console.log("[DEBUG] track result:", result);
     };
 
-    // Update presence immediately
-    updatePresence();
-
     // Subscribe to presence changes
-    const presenceInterval = setInterval(updatePresence, 30000); // refresh every 30s
+    let presenceInterval: ReturnType<typeof setInterval>;
 
     channel
       .on('presence', { event: 'sync' }, () => {
         const newState = channel.presenceState();
         const usersArray: ActiveUser[] = Object.values(newState).map((users: any) => {
-          const userInfo = users[0]; // Take first presence
+          const userInfo = users[0]; // Taking first presence
           return {
             id: userInfo.user_id,
             name: userInfo.name,
@@ -50,7 +48,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
           };
         });
 
-        // Add yourself if not already present
+        // Also show yourself
         const self: ActiveUser = {
           id: user.id,
           name: user.user_metadata?.full_name || user.email,
@@ -62,15 +60,18 @@ export const useActiveUsers = (surveyId: string | undefined) => {
         const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
         setActiveUsers(uniqueUsers);
       })
-      .subscribe((status) => {
+      .subscribe(async (status) => {
         console.log("[DEBUG] channel status:", status);
+        if (status === 'SUBSCRIBED') {
+          await updatePresence(); // ✅ now it’s safe to push
+          presenceInterval = setInterval(updatePresence, 30000);
+        }
       });
 
-    // Update presence on window focus
+    // Update presence on focus
     const handleFocus = () => {
       updatePresence();
     };
-
     window.addEventListener('focus', handleFocus);
 
     return () => {
