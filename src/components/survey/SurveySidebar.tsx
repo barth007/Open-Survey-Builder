@@ -70,7 +70,6 @@ export function SurveySidebar() {
   if (isLoading) {
     return (
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
-        const {collapsed} = useSidebar();
         <SidebarContent className="pt-6">
           <div className="space-y-4 px-2">
             {!collapsed && <Skeleton className="h-9 w-full" />}
@@ -93,7 +92,6 @@ export function SurveySidebar() {
       onDragEnd={handleDragEnd}
     >
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
-        const {collapsed} = useSidebar();
         <SidebarContent className="pt-6 flex-1">
           {!collapsed && (
             <div className="flex items-center mb-4 mx-2">
