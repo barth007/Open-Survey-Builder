@@ -7,8 +7,6 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
-
-import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyTabs from '@/components/survey/SurveyTabs';
 import EditTab from '@/components/survey/EditTab';
 import AnswersTab from '@/components/AnswersTab';
