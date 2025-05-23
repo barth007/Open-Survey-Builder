@@ -25,13 +25,9 @@ const SurveyHeader: React.FC<SurveyHeaderProps> = ({
         {pendingChanges && (
           <span className="text-sm text-gray-500 italic mr-2">Saving...</span>
         )}
-        
-        <div className="flex -space-x-2 mr-2">
-          {activeUsers.map(user => (
-            <UserProfile key={user.id} compact />
-          ))}
-        </div>
-        
+
+        {/* Avatars now shown in SurveyNavigationHeader */}
+
         <ShareSurveyButton survey={survey} onPublishToggle={onPublishToggle} />
       </div>
     </header>
