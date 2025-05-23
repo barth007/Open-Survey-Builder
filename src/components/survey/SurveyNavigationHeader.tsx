@@ -4,17 +4,23 @@ import { Home, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
-import { useActiveUsers } from '@/hooks/useActiveUsers';
-import UserProfile from '@/components/UserProfile';
 
-export function SurveyNavigationHeader() {
+interface ActiveUser {
+  id: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  last_active: Date;
+}
+
+interface SurveyNavigationHeaderProps {
+  activeUsers: ActiveUser[];
+}
+
+export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderProps) {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
-  const { activeUsers } = useActiveUsers(surveyId || '');
-  console.log("[DEBUG] surveyId:", surveyId);
-
-  console.log("[DEBUG] activeUsers in nav:", activeUsers);
 
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
@@ -69,9 +75,7 @@ export function SurveyNavigationHeader() {
       </div>
 
       {/* Right: Active user avatars */}
-      <div className="flex items-center gap-2 pr-2 z-50 relative bg-red-100">
-      <p className="text-xs text-green-500">Avatars expected: {activeUsers.length}</p>
-
+      <div className="flex items-center gap-2 pr-2 z-50 relative">
         {activeUsers.map(user => (
           <img
             key={user.id}
