@@ -19,7 +19,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
 
     // Setup a channel for real-time presence
     const channel = supabase.channel(`survey:${surveyId}`);
-    
+
     // Function to update user presence
     const updatePresence = async () => {
       await channel.track({
@@ -46,16 +46,27 @@ export const useActiveUsers = (surveyId: string | undefined) => {
             last_active: new Date(userInfo.online_at),
           };
         });
-        setActiveUsers(usersArray);
+        const self: ActiveUser = {
+          id: user.id,
+          name: user.user_metadata?.full_name || user.email,
+          email: user.email,
+          avatar_url: user.user_metadata?.avatar_url,
+          last_active: new Date()
+        };
+
+        const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
+        setActiveUsers(uniqueUsers);
+
+
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           // Initial presence update
           await updatePresence();
-          
+
           // Setup interval to periodically update presence while the user is active
           const presenceInterval = setInterval(updatePresence, 30000); // Every 30 seconds
-          
+
           return () => {
             clearInterval(presenceInterval);
             channel.unsubscribe();
@@ -69,7 +80,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
     };
 
     window.addEventListener('focus', handleFocus);
-    
+
     return () => {
       window.removeEventListener('focus', handleFocus);
       channel.unsubscribe();

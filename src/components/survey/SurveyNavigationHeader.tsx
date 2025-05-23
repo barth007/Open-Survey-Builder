@@ -12,6 +12,8 @@ export function SurveyNavigationHeader() {
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
   const { activeUsers } = useActiveUsers(surveyId || '');
+  console.log("[DEBUG] surveyId:", surveyId);
+
   console.log("[DEBUG] activeUsers in nav:", activeUsers);
 
   const getCurrentSurveyContext = () => {
