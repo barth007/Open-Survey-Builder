@@ -70,15 +70,9 @@ export function SurveyNavigationHeader() {
 
       {/* Right: Active user avatars */}
       <div className="flex items-center gap-2 -space-x-2">
-        {activeUsers.map(user => (
-          <img
-            key={user.id}
-            src={user.avatar_url || "/placeholder.svg"}
-            alt={user.name || user.email || "User"}
-            title={user.name || user.email || "User"}
-            className="w-8 h-8 rounded-full border"
-          />
-        ))}
+        {activeUsers.length === 0 && (
+          <div className="text-xs text-red-500">No active users</div>
+        )}
       </div>
     </header>
   );

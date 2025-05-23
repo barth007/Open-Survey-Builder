@@ -37,6 +37,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
     channel
       .on('presence', { event: 'sync' }, () => {
         const newState = channel.presenceState();
+        console.log("[DEBUG] presenceState raw:", newState);
         const usersArray: ActiveUser[] = Object.values(newState).map((users: any) => {
           const userInfo = users[0]; // Taking first presence
           return {
@@ -58,6 +59,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
         };
 
         const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
+        console.log("[DEBUG] activeUsers parsed:", uniqueUsers);
         setActiveUsers(uniqueUsers);
       })
       .subscribe(async (status) => {
