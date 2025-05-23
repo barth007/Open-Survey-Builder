@@ -17,7 +17,6 @@ export const useActiveUsers = (surveyId: string | undefined) => {
   useEffect(() => {
     if (!surveyId || !user) return;
 
-    // Setup a channel for real-time presence
     const channel = supabase.channel(`survey:${surveyId}`);
 
     // Function to update user presence
@@ -31,13 +30,17 @@ export const useActiveUsers = (surveyId: string | undefined) => {
       });
     };
 
+    // Update presence immediately
+    updatePresence();
+
     // Subscribe to presence changes
+    const presenceInterval = setInterval(updatePresence, 30000); // refresh every 30s
+
     channel
       .on('presence', { event: 'sync' }, () => {
         const newState = channel.presenceState();
         const usersArray: ActiveUser[] = Object.values(newState).map((users: any) => {
-          // Each key has an array of presences
-          const userInfo = users[0]; // Taking first presence
+          const userInfo = users[0]; // Take first presence
           return {
             id: userInfo.user_id,
             name: userInfo.name,
@@ -46,32 +49,21 @@ export const useActiveUsers = (surveyId: string | undefined) => {
             last_active: new Date(userInfo.online_at),
           };
         });
+
+        // Add yourself if not already present
         const self: ActiveUser = {
           id: user.id,
           name: user.user_metadata?.full_name || user.email,
           email: user.email,
           avatar_url: user.user_metadata?.avatar_url,
-          last_active: new Date()
+          last_active: new Date(),
         };
 
         const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
         setActiveUsers(uniqueUsers);
-
-
       })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          // Initial presence update
-          await updatePresence();
-
-          // Setup interval to periodically update presence while the user is active
-          const presenceInterval = setInterval(updatePresence, 30000); // Every 30 seconds
-
-          return () => {
-            clearInterval(presenceInterval);
-            channel.unsubscribe();
-          };
-        }
+      .subscribe((status) => {
+        console.log("[DEBUG] channel status:", status);
       });
 
     // Update presence on window focus
@@ -83,6 +75,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
 
     return () => {
       window.removeEventListener('focus', handleFocus);
+      clearInterval(presenceInterval);
       channel.unsubscribe();
     };
   }, [surveyId, user]);
