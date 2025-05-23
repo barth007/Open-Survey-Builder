@@ -1,10 +1,7 @@
-
-import React, { useState, useEffect } from 'react';
-import { DndContext, DragEndEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Search } from 'lucide-react';
-import { Survey } from '@/types/survey-organization';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { SurveyFolders } from './SurveyFolders';
 import { UnorganizedSurveys } from './UnorganizedSurveys';
@@ -15,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import UserProfile from '@/components/UserProfile'; // ✅ Imported
 
 export function SurveySidebar() {
   const { surveyData, isLoading, createFolder, createSurvey, deleteFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
@@ -23,7 +21,6 @@ export function SurveySidebar() {
   const { collapsed } = useSidebar();
   const queryClient = useQueryClient();
 
-  // Extract all folders into a format that can be passed to children components
   const foldersList = surveyData?.folders?.map(folder => ({
     id: folder.id,
     name: folder.name
@@ -31,20 +28,14 @@ export function SurveySidebar() {
 
   const toggleFolder = (id: string) => {
     const newOpenFolders = new Set(openFolders);
-    if (newOpenFolders.has(id)) {
-      newOpenFolders.delete(id);
-    } else {
-      newOpenFolders.add(id);
-    }
+    newOpenFolders.has(id) ? newOpenFolders.delete(id) : newOpenFolders.add(id);
     setOpenFolders(newOpenFolders);
   };
 
   const handleCreateFolder = async (name: string) => {
     try {
       const folder = await createFolder(name);
-      if (folder) {
-        setOpenFolders(prev => new Set([...prev, folder.id]));
-      }
+      if (folder) setOpenFolders(prev => new Set([...prev, folder.id]));
     } catch (error) {
       console.error('Error creating folder:', error);
     }
@@ -53,10 +44,7 @@ export function SurveySidebar() {
   const handleCreateSurvey = async (params: { name: string; folderId?: string }) => {
     try {
       await createSurvey(params);
-      // If this is for a folder, make sure that folder is open
-      if (params.folderId) {
-        setOpenFolders(prev => new Set([...prev, params.folderId!]));
-      }
+      if (params.folderId) setOpenFolders(prev => new Set([...prev, params.folderId!]));
     } catch (error) {
       console.error('Error creating survey:', error);
     }
@@ -64,14 +52,6 @@ export function SurveySidebar() {
 
   const handleRenameFolder = async (folderId: string, newName: string) => {
     try {
-      // Add this function to useMutateFolder if needed
-      // For now, we'll simulate by invalidating the queries
-      // In a real implementation, you would call a backend method
-      
-      // In a real implementation:
-      // await updateFolder({ folderId, updates: { name: newName } });
-      
-      // For now, just invalidate to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       toast.success("Folder renamed successfully");
     } catch (error) {
@@ -82,21 +62,18 @@ export function SurveySidebar() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
     if (over && active.id !== over.id) {
       updateSurveyOrder(String(active.id), String(over.id));
     }
   };
-  
+
   if (isLoading) {
     return (
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
         <SidebarTrigger className="absolute right-2 top-2" />
         <SidebarContent className="pt-6">
           <div className="space-y-4 px-2">
-            {!collapsed && (
-              <Skeleton className="h-9 w-full" />
-            )}
+            {!collapsed && <Skeleton className="h-9 w-full" />}
             <div className="space-y-2">
               {Array(3).fill(0).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-full" />
@@ -104,6 +81,7 @@ export function SurveySidebar() {
             </div>
           </div>
         </SidebarContent>
+        <UserProfile compact={collapsed} />
       </Sidebar>
     );
   }
@@ -137,7 +115,6 @@ export function SurveySidebar() {
               )}
             </div>
           )}
-
           <SidebarGroup defaultOpen className="flex-1">
             <SortableContext items={[]} strategy={verticalListSortingStrategy}>
               <SurveyFolders
@@ -164,6 +141,9 @@ export function SurveySidebar() {
             </SortableContext>
           </SidebarGroup>
         </SidebarContent>
+
+        {/* ✅ Always-visible profile block */}
+        <UserProfile compact={collapsed} />
       </Sidebar>
     </DndContext>
   );
