@@ -19,7 +19,7 @@ interface SurveyFoldersProps {
   onRenameFolder?: (id: string, name: string) => void;
   onUpdateOrder: (activeId: string, overId: string) => void;
   isCollapsed?: boolean;
-  folders?: { id: string; name: string }[];
+  foldersList?: { id: string; name: string }[];
 }
 
 export function SurveyFolders({
@@ -33,7 +33,7 @@ export function SurveyFolders({
   onRenameFolder,
   onUpdateOrder,
   isCollapsed = false,
-  folders: foldersList = []
+  foldersList = []
 }: SurveyFoldersProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 

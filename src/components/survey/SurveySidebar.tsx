@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { BiSearch } from 'react-icons/bi';
-import { SurveyItem } from '@/types/survey-organization';
+import { Search } from 'lucide-react';
+import { Survey } from '@/types/survey-organization';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { SurveyFolders } from './SurveyFolders';
 import { UnorganizedSurveys } from './UnorganizedSurveys';
@@ -124,7 +124,6 @@ export function SurveySidebar() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-9"
-                containerClassName="flex-1"
               />
               {searchTerm && (
                 <Button
@@ -152,7 +151,7 @@ export function SurveySidebar() {
                 onUpdateOrder={updateSurveyOrder}
                 onRenameFolder={handleRenameFolder}
                 isCollapsed={collapsed}
-                folders={foldersList}
+                foldersList={foldersList}
               />
               <UnorganizedSurveys
                 surveys={surveyData?.unorganizedSurveys || []}

@@ -8,8 +8,6 @@ import { Survey } from '@/types/survey';
 import { Survey as OrganizationSurvey } from '@/types/survey-organization';
 import { dbSurveyToOrganizationSurvey, surveyToOrganizationSurvey } from '@/utils/type-mappers';
 
-export type SurveyItem = OrganizationSurvey;
-
 export function useSurveyData() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -51,7 +49,7 @@ export function useSurveyData() {
   };
 
   // Helper function to find a survey by ID across all folders and unorganized surveys
-  const findSurveyById = (id: string): SurveyItem | null => {
+  const findSurveyById = (id: string): OrganizationSurvey | null => {
     if (!surveyData) return null;
     
     // Check unorganized surveys first

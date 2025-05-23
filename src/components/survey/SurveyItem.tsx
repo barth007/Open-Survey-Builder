@@ -108,7 +108,7 @@ export function DraggableSurveyItem({
     navigate(`/survey/${survey.id}`);
   };
 
-  // Modified to match the expected signature: () => void
+  // Fix: Changed to match the expected signature () => void
   const handleDoubleClick = () => {
     setIsEditing(true);
   };
