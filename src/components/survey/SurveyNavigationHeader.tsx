@@ -19,8 +19,6 @@ import {
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 
-const { user: currentUser } = useAuth();
-
 
 interface ActiveUser {
   id: string;
@@ -38,6 +36,7 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
+  const { user: currentUser } = useAuth();
 
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
