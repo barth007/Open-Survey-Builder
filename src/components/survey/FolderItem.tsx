@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Folder, FolderOpen, Plus, Trash2, Pencil } from 'lucide-react';
+import { Folder, FolderOpen, Plus, Trash2, Pencil, GripVertical } from 'lucide-react';
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SurveyFolder } from '@/types/survey-organization';
 import { DraggableSurveyList } from './DraggableSurveyList';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -46,7 +47,6 @@ export function FolderItem({
   const { setOpen } = useSidebar();
   
   const handleFolderClick = () => {
-    // If sidebar is collapsed, open it first
     if (isCollapsed) {
       setOpen(true);
     }
@@ -78,11 +78,22 @@ export function FolderItem({
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div 
-            className="flex items-center w-full"
+            className="flex items-center w-full relative"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            <SidebarMenuItem className="flex-1">
+            {/* Drag Handle - only visible on hover and positioned properly */}
+            <div
+              className={cn(
+                "absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 transition-opacity",
+                isHovered ? "opacity-50 hover:opacity-100" : "opacity-0"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="h-3 w-3" />
+            </div>
+
+            <SidebarMenuItem className="flex-1 ml-4">
               <SidebarMenuButton 
                 onClick={handleFolderClick} 
                 className="flex-1 justify-center md:justify-start gap-2"
@@ -116,7 +127,10 @@ export function FolderItem({
             </SidebarMenuItem>
 
             {!isCollapsed && !isEditing && (
-              <div className={`flex gap-1 mr-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+              <div className={cn(
+                "flex gap-1 mr-1 transition-opacity z-10",
+                isHovered ? "opacity-100" : "opacity-0"
+              )}>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>

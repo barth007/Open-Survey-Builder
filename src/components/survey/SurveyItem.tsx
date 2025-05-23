@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
@@ -42,6 +41,7 @@ export function DraggableSurveyItem({
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(survey.name);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const { updateSurvey } = useMutateSurvey();
   const queryClient = useQueryClient();
@@ -130,12 +130,18 @@ export function DraggableSurveyItem({
               "flex items-center w-full group cursor-pointer relative",
               currentSurveyId === survey.id && "bg-accent text-accent-foreground rounded-md"
             )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
-            {/* Drag Handle */}
+            {/* Drag Handle - only visible on hover and positioned properly */}
             <div
               {...attributes}
               {...listeners}
-              className="absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-50 hover:opacity-100 z-20"
+              className={cn(
+                "absolute left-0 top-0 bottom-0 w-4 flex items-center justify-center cursor-grab active:cursor-grabbing z-10 transition-opacity",
+                isHovered ? "opacity-50 hover:opacity-100" : "opacity-0"
+              )}
+              onClick={(e) => e.stopPropagation()}
             >
               <GripVertical className="h-3 w-3" />
             </div>
