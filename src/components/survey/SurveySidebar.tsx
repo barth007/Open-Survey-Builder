@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Sidebar, SidebarContent, SidebarGroup, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
 import { SurveyFolders } from './SurveyFolders';
 import { UnorganizedSurveys } from './UnorganizedSurveys';
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import UserProfile from '@/components/UserProfile'; // ✅ Imported
+import UserProfile from '@/components/UserProfile'; 
 
 export function SurveySidebar() {
   const { surveyData, isLoading, createFolder, createSurvey, deleteFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
@@ -71,11 +71,6 @@ export function SurveySidebar() {
     return (
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
         const {collapsed} = useSidebar();
-
-        {collapsed && (
-          <SidebarTrigger className="absolute right-2 top-2" />
-        )}
-
         <SidebarContent className="pt-6">
           <div className="space-y-4 px-2">
             {!collapsed && <Skeleton className="h-9 w-full" />}
@@ -99,11 +94,6 @@ export function SurveySidebar() {
     >
       <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
         const {collapsed} = useSidebar();
-
-        {collapsed && (
-          <SidebarTrigger className="absolute right-2 top-2" />
-        )}
-
         <SidebarContent className="pt-6 flex-1">
           {!collapsed && (
             <div className="flex items-center mb-4 mx-2">
