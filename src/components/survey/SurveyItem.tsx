@@ -126,7 +126,6 @@ export function DraggableSurveyItem({
           aria-label="Drag handle"
         />
         <SidebarMenuButton
-          asChild
           className="w-full relative z-20"
           onClick={handleSurveyClick}
           onDoubleClick={(e) => {
