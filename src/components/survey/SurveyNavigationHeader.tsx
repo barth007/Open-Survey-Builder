@@ -107,7 +107,6 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
       {/* Right: Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-2 pr-2 z-50 relative">
-          {console.log("[DEBUG] About to render users, displayUsers.length:", displayUsers.length)}
           {displayUsers.length > 0 ? (
             displayUsers
               .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
