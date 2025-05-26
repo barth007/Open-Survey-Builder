@@ -38,20 +38,21 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   };
 
   return (
-    <Card className="w-full border-t-4 border-t-indigo-500">
-      <CardContent className="pt-6">
+    <Card className="w-full border-t-4 border-t-indigo-500 min-h-[120px]">
+      <CardContent className="pt-6 pb-6 min-h-[120px]">
         <Input
           ref={titleInputRef}
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Survey Title"
-          className="text-2xl font-bold border-none px-0 focus-visible:ring-0 mb-2 w-full"
+          className="text-2xl font-bold border-none px-0 focus-visible:ring-0 mb-2 w-full h-auto min-h-[40px]"
         />
         <Textarea
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           placeholder="Survey Description"
-          className="border-none resize-none px-0 focus-visible:ring-0 w-full"
+          className="border-none resize-none px-0 focus-visible:ring-0 w-full min-h-[60px]"
+          rows={3}
         />
       </CardContent>
     </Card>

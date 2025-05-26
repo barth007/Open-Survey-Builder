@@ -27,11 +27,11 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
   onWelcomeButtonTextChange
 }) => {
   return (
-    <Card className="w-full border border-ice">
-      <CardHeader className="pb-2">
+    <Card className="w-full border border-ice min-h-[300px]">
+      <CardHeader className="pb-2 min-h-[60px]">
         <h3 className="text-lg font-medium">Welcome Page</h3>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-[240px]">
         <div className="space-y-4 w-full">
           <div className="space-y-2 w-full">
             <Label htmlFor="welcomeTitle">Welcome Title</Label>
@@ -40,7 +40,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
               placeholder="Welcome to our survey"
               value={welcomeTitle || ''}
               onChange={(e) => onWelcomeTitleChange(e.target.value)}
-              className="w-full"
+              className="w-full min-h-[40px]"
             />
           </div>
           <div className="space-y-2 w-full">
@@ -50,8 +50,8 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
               placeholder="Thank you for taking the time to participate in our survey..."
               value={welcomeMessage || ''}
               onChange={(e) => onWelcomeMessageChange(e.target.value)}
-              rows={2}
-              className="w-full"
+              rows={3}
+              className="w-full min-h-[80px]"
             />
           </div>
           <div className="space-y-2 w-full">
@@ -61,7 +61,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
               placeholder="Click the button below to begin the survey."
               value={welcomeInstructions || ''}
               onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
-              className="w-full"
+              className="w-full min-h-[40px]"
             />
           </div>
           <div className="space-y-2 w-full">
@@ -71,7 +71,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
               placeholder="Start Survey"
               value={welcomeButtonText || ''}
               onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
-              className="w-full"
+              className="w-full min-h-[40px]"
             />
           </div>
         </div>
