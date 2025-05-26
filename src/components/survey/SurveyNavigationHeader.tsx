@@ -65,20 +65,18 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Navigation path */}
-      <div className="flex items-center gap-4" style={{ width: sidebarWidth }}>
-        <div style={{ width: '100%' }}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center gap-2 justify-start"
-          >
-            <Home className="h-4 w-4" />
-            {!collapsed && <span>Dashboard</span>}
-          </Button>
-        </div>
+      <div className="flex items-center gap-4" style={{ width: '16rem' }}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/dashboard')}
+          className="w-full flex items-center gap-2 justify-start"
+        >
+          <Home className="h-4 w-4" />
+          <span>Dashboard</span>
+        </Button>
 
-        {!collapsed && current && (
+        {current && (
           <>
             <Separator orientation="vertical" className="h-4" />
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -94,6 +92,7 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
           </>
         )}
       </div>
+
 
 
       {/* Right: Active user avatars */}
