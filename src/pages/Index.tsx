@@ -143,8 +143,8 @@ const Index = () => {
         {activeTab === "edit" && (
           <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
             {/* Middle Panel */}
-            <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
-    <div className="flex flex-col h-full w-full overflow-y-auto px-6 py-4 space-y-6">
+            <ResizablePanel defaultSize={50} minSize={30} className="overflow-y-auto min-w-0 min-h-0 bg-white px-6 py-4">
+  <div className="w-full max-w-3xl mx-auto flex flex-col space-y-6">
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}
@@ -187,8 +187,8 @@ const Index = () => {
             <ResizableHandle withHandle />
   
             {/* Right Panel */}
-            <ResizablePanel defaultSize={50} minSize={25} className="min-w-0 min-h-0 bg-gray-50">
-    <div className="flex flex-col h-full w-full overflow-y-auto px-6 py-4">
+            <ResizablePanel defaultSize={50} minSize={30} className="overflow-y-auto min-w-0 min-h-0 bg-white px-6 py-4">
+  <div className="w-full max-w-3xl mx-auto flex flex-col space-y-6">
                 <h2 className="text-sm font-semibold text-gray-500 mb-2">Preview</h2>
                 <PreviewPanel survey={survey} />
               </div>
