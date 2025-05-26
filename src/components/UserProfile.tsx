@@ -127,7 +127,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
                 <p className="text-sm font-medium truncate">
                   {profile?.full_name || user.email?.split('@')[0] || user.email}
                 </p>
-                {isAdmin && <Badge variant="success" className="text-xs">Admin</Badge>}
+                {isAdmin && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Admin</Badge>}
               </div>
               <p className="text-xs text-muted-foreground truncate">{profile?.email || user.email}</p>
             </div>
