@@ -1,4 +1,3 @@
-
 import { useQuerySurveys } from './survey/useQuerySurveys';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useMutateFolder } from './survey/useMutateFolder';
@@ -13,7 +12,7 @@ export function useSurveyData() {
   const { user } = useAuth();
   const { data: surveyData, isLoading, error: queryError } = useQuerySurveys();
   const { createSurvey, deleteSurvey: deleteApiSurvey, updateSurvey } = useMutateSurvey();
-  const { createFolder, deleteFolder: deleteApiFolder } = useMutateFolder();
+  const { createFolder, deleteFolder: deleteApiFolder, updateFolder } = useMutateFolder();
 
   const updateSurveyOrder = async (activeId: string, overId: string) => {
     console.log(`Moving survey ${activeId} to position of ${overId}`);
@@ -99,6 +98,7 @@ export function useSurveyData() {
     createSurvey,
     deleteSurvey,
     deleteFolder,
+    updateFolder,
     updateSurveyOrder,
     userId: user?.id
   };

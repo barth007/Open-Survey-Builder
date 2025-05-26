@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -16,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UserProfile from '@/components/UserProfile'; 
 
 export function SurveySidebar() {
-  const { surveyData, isLoading, createFolder, createSurvey, deleteFolder, deleteSurvey, updateSurveyOrder } = useSurveyData();
+  const { surveyData, isLoading, createFolder, createSurvey, deleteFolder, deleteSurvey, updateSurveyOrder, updateFolder } = useSurveyData();
   const [searchTerm, setSearchTerm] = useState('');
   const [openFolders, setOpenFolders] = useState(new Set<string>());
   const { collapsed } = useSidebar();
@@ -53,10 +52,8 @@ export function SurveySidebar() {
 
   const handleRenameFolder = async (folderId: string, newName: string) => {
     try {
-      queryClient.invalidateQueries({ queryKey: ['surveys'] });
-      toast.success("Folder renamed successfully");
+      await updateFolder({ folderId, name: newName });
     } catch (error) {
-      toast.error("Failed to rename folder");
       console.error("Error renaming folder:", error);
     }
   };

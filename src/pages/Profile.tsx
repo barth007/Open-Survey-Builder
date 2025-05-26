@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useProfile } from '@/hooks/useProfile';
@@ -55,8 +54,8 @@ const Profile = () => {
         <div className="p-6 max-w-md mx-auto rounded-md shadow-md bg-destructive/10">
           <h2 className="text-xl font-bold mb-2 text-destructive">Error Loading Profile</h2>
           <p className="text-destructive-foreground mb-4">{error.message}</p>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            Return to Home
+          <Button variant="outline" onClick={() => navigate('/dashboard')}>
+            Return to Dashboard
           </Button>
         </div>
       </div>
@@ -71,7 +70,7 @@ const Profile = () => {
             <Button 
               variant="ghost" 
               className="mb-2 -ml-4 p-2 flex items-center text-muted-foreground hover:text-foreground"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
