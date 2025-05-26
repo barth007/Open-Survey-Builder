@@ -40,27 +40,8 @@ const EditTab: React.FC<EditTabProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <div className="space-y-4">
-      <Breadcrumb className="mb-4">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard" className="text-sm flex items-center">
-              <HomeIcon className="h-3.5 w-3.5 mr-1" />
-              <span>Dashboard</span>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#" className="text-sm">Surveys</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <span className="text-sm font-medium">{survey.title || "Untitled Survey"}</span>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <EditorPanel 
+    <div className="p-4 space-y-4 overflow-y-auto h-full">
+      <EditorPanel
         survey={survey}
         onTitleChange={onTitleChange}
         onDescriptionChange={onDescriptionChange}
