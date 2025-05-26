@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Home, FileText } from 'lucide-react';
@@ -10,12 +11,6 @@ import {
   TooltipContent,
   TooltipProvider
 } from '@/components/ui/tooltip';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem
-} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -39,8 +34,6 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   const { user: currentUser } = useAuth();
   const { collapsed } = useSidebar();
 
-  const sidebarWidth = collapsed ? '3.5rem' : '16rem'; // Tailwind: w-14 vs w-64
-
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
 
@@ -61,6 +54,15 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   };
 
   const current = getCurrentSurveyContext();
+
+  // Show current user if no active users are available but we have a current user
+  const displayUsers = activeUsers.length > 0 ? activeUsers : (currentUser ? [{
+    id: currentUser.id,
+    name: currentUser.user_metadata?.full_name || currentUser.email,
+    email: currentUser.email,
+    avatar_url: currentUser.user_metadata?.avatar_url,
+    last_active: new Date(),
+  }] : []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
@@ -97,7 +99,7 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
       {/* Right: Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-2 pr-2 z-50 relative">
-          {activeUsers
+          {displayUsers
             .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
             .slice(0, 4)
             .map(user => {
@@ -129,41 +131,6 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
                     <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
                   </TooltipContent>
                 </Tooltip>
-              );
-            })}
-
-          {activeUsers
-            .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
-            .slice(4)
-            .map(user => {
-              const isYou = user.id === currentUser?.id;
-              return (
-                <DropdownMenuItem key={user.id}>
-                  <div className="flex items-center gap-2">
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name || user.email}
-                        className={cn(
-                          "w-5 h-5 rounded-full",
-                          isYou && "ring-2 ring-primary"
-                        )}
-                      />
-                    ) : (
-                      <div
-                        className={cn(
-                          "w-5 h-5 rounded-full bg-muted text-xs flex items-center justify-center font-medium",
-                          isYou && "ring-2 ring-primary"
-                        )}
-                      >
-                        {user.name?.charAt(0).toUpperCase() || "?"}
-                      </div>
-                    )}
-                    <span className="text-sm">
-                      {user.name || user.email}{isYou ? " (you)" : ""}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
               );
             })}
         </div>
