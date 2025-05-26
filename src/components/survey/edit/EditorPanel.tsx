@@ -42,7 +42,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SurveyTitle
         title={survey.title}
         description={survey.description}

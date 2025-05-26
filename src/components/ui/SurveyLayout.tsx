@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
@@ -16,10 +17,10 @@ const SurveyLayout = ({ children }: SurveyLayoutProps) => {
     return (
         <>
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="flex h-[calc(100vh-3.5rem)] pt-14 w-full bg-background">
+            <div className="flex min-h-[calc(100vh-3.5rem)] pt-14 w-full bg-background">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1">
                         {children}
                     </div>
                 </SidebarProvider>

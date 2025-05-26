@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -129,13 +130,13 @@ const Index = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="min-h-screen flex flex-col">
       <SurveyTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      <div className="flex-1 overflow-hidden w-full max-w-screen-2xl mx-auto">
+      <div className="flex-1 w-full max-w-screen-2xl mx-auto">
         {activeTab === "edit" && (
           <SplitPanelLayout
             middlePanel={
