@@ -40,6 +40,7 @@ const EditTab: React.FC<EditTabProps> = ({
   onRedirectUrlChange
 }) => {
   return (
+    <div className="bg-red-100 border border-red-500 w-full">
       <EditorPanel
         survey={survey}
         onTitleChange={onTitleChange}
@@ -57,6 +58,7 @@ const EditTab: React.FC<EditTabProps> = ({
         onThankYouButtonTextChange={onThankYouButtonTextChange}
         onRedirectUrlChange={onRedirectUrlChange}
       />
+    </div>
   );
 };
 
