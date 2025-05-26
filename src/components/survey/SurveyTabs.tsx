@@ -9,7 +9,7 @@ interface SurveyTabsProps {
 
 const SurveyTabs: React.FC<SurveyTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="w-full bg-pebble border-b h-12 flex-shrink-0">
+    <div className="w-full bg-pebble border-b z-40 h-12 flex-shrink-0">
       <div className="max-w-7xl mx-auto h-full">
         <Tabs
           value={activeTab}
