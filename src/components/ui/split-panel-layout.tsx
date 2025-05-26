@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
@@ -64,10 +63,10 @@ const PanelContainer: React.FC<{
   bg?: string;
 }> = ({ title, children, bg = "bg-white" }) => (
   <div className={`h-full flex flex-col ${bg} overflow-hidden`}>
-    <div className={`flex justify-between px-2 py-2 border-b sticky top-0 z-30 ${bg} h-10 items-center flex-shrink-0`}>
+    <div className={`flex justify-between px-4 py-2 border-b sticky top-0 z-30 ${bg} h-10 items-center flex-shrink-0`}>
       <div className="font-medium text-sm">{title}</div>
     </div>
-    <div className={`flex-1 overflow-auto px-1 py-2 ${bg} w-full min-w-0`}>
+    <div className={`flex-1 overflow-auto px-4 py-2 ${bg} w-full min-w-0`}>
       {children}
     </div>
   </div>
