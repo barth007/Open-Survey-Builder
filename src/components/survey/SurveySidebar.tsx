@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dld-kit/sortable';
 import { Sidebar, SidebarContent, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
 import { SurveyFolders } from './SurveyFolders';
 import { UnorganizedSurveys } from './UnorganizedSurveys';
@@ -126,11 +126,11 @@ export function SurveySidebar() {
           </div>
         )}
         
-        {/* Content - Scrollable area */}
+        {/* Content - Scrollable area with hidden scrollbar */}
         <div className="flex-1 overflow-hidden">
           <SidebarContent className="h-full">
             <SidebarGroup defaultOpen className="h-full">
-              <div className="h-full overflow-y-auto">
+              <div className="h-full overflow-y-auto scrollbar-hide hover:scrollbar-default">
                 <SortableContext items={[]} strategy={verticalListSortingStrategy}>
                   <SurveyFolders
                     folders={surveyData?.folders || []}
