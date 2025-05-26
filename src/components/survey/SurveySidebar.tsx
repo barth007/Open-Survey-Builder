@@ -126,11 +126,11 @@ export function SurveySidebar() {
           </div>
         )}
         
-        {/* Content - Scrollable area with hidden scrollbar */}
+        {/* Content - Scrollable area with improved scrollbar hiding */}
         <div className="flex-1 overflow-hidden">
           <SidebarContent className="h-full">
             <SidebarGroup defaultOpen className="h-full">
-              <div className="h-full overflow-y-auto scrollbar-hide hover:scrollbar-default">
+              <div className="h-full overflow-y-auto scrollbar-hover">
                 <SortableContext items={[]} strategy={verticalListSortingStrategy}>
                   <SurveyFolders
                     folders={surveyData?.folders || []}

@@ -131,10 +131,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SurveyTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+      {/* Position tabs container to account for fixed header */}
+      <div className="pt-14">
+        <SurveyTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </div>
 
       <div className="flex-1 w-full max-w-screen-2xl mx-auto">
         {activeTab === "edit" && (

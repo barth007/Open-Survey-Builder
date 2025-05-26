@@ -77,60 +77,46 @@
 @layer utilities {
   .scrollbar-hide {
     /* Hide scrollbar for Chrome, Safari and Opera */
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    
-    /* Hide scrollbar for IE, Edge and Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
   
-  .scrollbar-default:hover {
-    /* Show scrollbar on hover for Chrome, Safari and Opera */
-    &::-webkit-scrollbar {
-      display: block;
-      width: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 3px;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Show scrollbar on hover for Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
   
-  /* Alternative approach - always show thin scrollbar but make it subtle */
-  .scrollbar-thin {
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 2px;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.2);
-    }
-    
+  .scrollbar-hover {
+    /* Hide scrollbar by default */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hover::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hover:hover {
+    /* Show thin scrollbar on hover for Firefox */
     scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+  
+  .scrollbar-hover:hover::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+  }
+  
+  .scrollbar-hover:hover::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-hover:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-hover:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
   }
 }

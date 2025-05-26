@@ -17,7 +17,8 @@ const SurveyLayout = ({ children }: SurveyLayoutProps) => {
     return (
         <div className="h-screen flex flex-col">
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="flex flex-1 overflow-hidden">
+            {/* Add top padding to account for the fixed header (h-14 = 56px) */}
+            <div className="flex flex-1 overflow-hidden pt-14">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
                     <main className="flex-1 overflow-auto">

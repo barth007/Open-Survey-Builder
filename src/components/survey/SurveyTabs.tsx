@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -8,7 +9,7 @@ interface SurveyTabsProps {
 
 const SurveyTabs: React.FC<SurveyTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="w-full bg-pebble">
+    <div className="w-full bg-pebble sticky top-14 z-40">
       <div className="max-w-7xl mx-auto">
         <Tabs
           value={activeTab}
