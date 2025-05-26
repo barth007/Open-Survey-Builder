@@ -24,10 +24,10 @@ const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) 
                 <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
 
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden pt-28">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
-                    <main className="flex-1 overflow-auto pt-24">
+                    <main className="flex-1 overflow-auto">
                         {children}
                     </main>
                 </SidebarProvider>
