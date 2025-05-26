@@ -16,11 +16,11 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full">
+        <div className="flex h-screen w-full">
           <SurveySidebar />
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col">
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="pt-14 flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+            <div className="flex-1 flex items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           </div>
@@ -32,11 +32,11 @@ const Dashboard = () => {
   if (error) {
     return (
       <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full">
+        <div className="flex h-screen w-full">
           <SurveySidebar />
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col">
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="pt-14 flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
+            <div className="flex-1 flex items-center justify-center">
               <div className="text-center p-8 max-w-md text-destructive">
                 <h2 className="text-2xl font-semibold mb-4">Error Loading Dashboard</h2>
                 <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
@@ -50,11 +50,11 @@ const Dashboard = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-screen w-full">
         <SurveySidebar />
-        <div className="flex-1 bg-background">
+        <div className="flex-1 flex flex-col bg-background">
           <SurveyNavigationHeader activeUsers={activeUsers} />
-          <main className="pt-14 p-6">
+          <main className="flex-1 p-6 pt-20 overflow-y-auto">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
               
