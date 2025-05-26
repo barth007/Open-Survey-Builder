@@ -32,17 +32,18 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
         <h3 className="text-lg font-medium">Thank You Page</h3>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-4 w-full">
+          <div className="space-y-2 w-full">
             <Label htmlFor="thankYouTitle">Thank You Title</Label>
             <Input 
               id="thankYouTitle"
               placeholder="Thank you for your responses"
               value={thankYouTitle || ''}
               onChange={(e) => onThankYouTitleChange(e.target.value)}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="thankYouMessage">Thank You Message</Label>
             <Textarea 
               id="thankYouMessage"
@@ -50,24 +51,27 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
               value={thankYouMessage || ''}
               onChange={(e) => onThankYouMessageChange(e.target.value)}
               rows={2}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="thankYouButtonText">Button Text</Label>
             <Input 
               id="thankYouButtonText"
               placeholder="Close"
               value={thankYouButtonText || ''}
               onChange={(e) => onThankYouButtonTextChange(e.target.value)}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="redirectUrl">Redirect URL (Optional)</Label>
             <Input 
               id="redirectUrl"
               placeholder="https://example.com/thank-you"
               value={redirectUrl || ''}
               onChange={(e) => onRedirectUrlChange(e.target.value)}
+              className="w-full"
             />
           </div>
         </div>

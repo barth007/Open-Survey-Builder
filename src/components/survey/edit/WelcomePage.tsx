@@ -32,17 +32,18 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
         <h3 className="text-lg font-medium">Welcome Page</h3>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-4 w-full">
+          <div className="space-y-2 w-full">
             <Label htmlFor="welcomeTitle">Welcome Title</Label>
             <Input 
               id="welcomeTitle"
               placeholder="Welcome to our survey"
               value={welcomeTitle || ''}
               onChange={(e) => onWelcomeTitleChange(e.target.value)}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="welcomeMessage">Welcome Message</Label>
             <Textarea 
               id="welcomeMessage"
@@ -50,24 +51,27 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
               value={welcomeMessage || ''}
               onChange={(e) => onWelcomeMessageChange(e.target.value)}
               rows={2}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="welcomeInstructions">Instructions</Label>
             <Input 
               id="welcomeInstructions"
               placeholder="Click the button below to begin the survey."
               value={welcomeInstructions || ''}
               onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
+              className="w-full"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="welcomeButtonText">Button Text</Label>
             <Input 
               id="welcomeButtonText"
               placeholder="Start Survey"
               value={welcomeButtonText || ''}
               onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
+              className="w-full"
             />
           </div>
         </div>
