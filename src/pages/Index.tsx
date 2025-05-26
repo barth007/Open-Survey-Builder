@@ -135,73 +135,71 @@ const Index = () => {
   return (
     // Index.tsx
     <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      <div className="h-full p-4 bg-gray-100 overflow-hidden">
-        <div className="h-full w-full rounded-xl bg-white shadow-sm overflow-hidden">
-          {activeTab === "edit" && (
-            <SplitPanelLayout
-              middlePanel={
-                <EditTab
-                  survey={survey}
-                  onTitleChange={handleSurveyTitleChange}
-                  onDescriptionChange={handleDescriptionChangeWithTracking}
-                  onQuestionChange={handleQuestionChange}
-                  onDeleteQuestion={handleDeleteQuestion}
-                  onDuplicateQuestion={handleDuplicateQuestion}
-                  onAddQuestion={handleAddQuestion}
-                  onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
-                  onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
-                  onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
-                  onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
-                  onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
-                  onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
-                  onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
-                  onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
-                />
-              }
-              rightPanel={<PreviewPanel survey={survey} />}
-              middlePanelTitle="Editor"
-              rightPanelTitle="Preview"
-            />
-          )}
+      <div className="rounded-xl shadow-sm bg-gray-100 p-4">
+        {activeTab === "edit" && (
+          <SplitPanelLayout
+            middlePanel={
+              <EditTab
+                survey={survey}
+                onTitleChange={handleSurveyTitleChange}
+                onDescriptionChange={handleDescriptionChangeWithTracking}
+                onQuestionChange={handleQuestionChange}
+                onDeleteQuestion={handleDeleteQuestion}
+                onDuplicateQuestion={handleDuplicateQuestion}
+                onAddQuestion={handleAddQuestion}
+                onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
+                onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
+                onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
+                onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
+                onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
+                onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
+                onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
+                onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
+              />
+            }
+            rightPanel={<PreviewPanel survey={survey} />}
+            middlePanelTitle="Editor"
+            rightPanelTitle="Preview"
+          />
+        )}
 
-          {activeTab === "answers" && (
-            <SplitPanelLayout
-              middlePanel={
-                <AnswersTab
-                  survey={survey}
-                  responses={responses}
-                  filteredResponses={filteredResponses}
-                  totalResponses={totalResponses}
-                  filterText={filterText}
-                  setFilterText={setFilterText}
-                  sortBy={sortBy}
-                  setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
-                  chartType={chartType[selectedResponseGroup] || "bar"}
-                  handleChartTypeChange={(value: string) => {
-                    const [questionId, type] = value.split(':');
-                    handleChartTypeChange(questionId, type as "bar" | "pie");
-                  }}
-                  onCardClick={handleCardClick}
-                  exportToCSV={exportToCSV}
+        {activeTab === "answers" && (
+          <SplitPanelLayout
+            middlePanel={
+              <AnswersTab
+                survey={survey}
+                responses={responses}
+                filteredResponses={filteredResponses}
+                totalResponses={totalResponses}
+                filterText={filterText}
+                setFilterText={setFilterText}
+                sortBy={sortBy}
+                setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
+                chartType={chartType[selectedResponseGroup] || "bar"}
+                handleChartTypeChange={(value: string) => {
+                  const [questionId, type] = value.split(':');
+                  handleChartTypeChange(questionId, type as "bar" | "pie");
+                }}
+                onCardClick={handleCardClick}
+                exportToCSV={exportToCSV}
+                selectedResponseGroup={selectedResponseGroup}
+              />
+            }
+            rightPanel={
+              selectedResponseGroup ? (
+                <AnalysisPanel
                   selectedResponseGroup={selectedResponseGroup}
+                  responseData={selectedResponseData}
+                  onToggleVisibility={() => { }}
                 />
-              }
-              rightPanel={
-                selectedResponseGroup ? (
-                  <AnalysisPanel
-                    selectedResponseGroup={selectedResponseGroup}
-                    responseData={selectedResponseData}
-                    onToggleVisibility={() => { }}
-                  />
-                ) : (
-                  <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
-                )
-              }
-              middlePanelTitle="Responses"
-              rightPanelTitle="Analysis"
-            />
-          )}
-        </div>
+              ) : (
+                <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
+              )
+            }
+            middlePanelTitle="Responses"
+            rightPanelTitle="Analysis"
+          />
+        )}
       </div>
     </SurveyLayout>
 
