@@ -66,7 +66,7 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Navigation path */}
       <div className="flex items-center gap-4">
-        <div style={{ width: "256px" }}>
+        <div style={{ width: "232px" }}>
           <Button
             variant="ghost"
             size="sm"
@@ -93,7 +93,7 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
           </>
         )}
       </div>
-      
+
       {/* Right: Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-2 pr-2 z-50 relative">
