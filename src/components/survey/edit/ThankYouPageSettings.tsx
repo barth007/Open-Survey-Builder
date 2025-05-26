@@ -27,11 +27,11 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <Card className="w-full border border-ice">
+    <Card className="w-full border border-ice min-h-[280px] h-auto">
       <CardHeader className="pb-4">
         <h3 className="text-lg font-medium">Thank You Page</h3>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1">
         <div className="space-y-2">
           <Label htmlFor="thankYouTitle">Thank You Title</Label>
           <Input 
