@@ -27,7 +27,7 @@ const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) 
             <div className="flex flex-1 overflow-hidden">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
-                    <main className="flex-1 overflow-auto pt-24">
+                    <main className="flex-1 overflow-auto pt-20">
                         {children}
                     </main>
                 </SidebarProvider>
