@@ -62,6 +62,60 @@ export function useMutateFolder() {
     }
   });
 
+  const updateFolder = useMutation({
+    mutationFn: async ({ folderId, name }: { folderId: string; name: string }) => {
+      if (!user) {
+        throw new Error('You must be logged in to update folders');
+      }
+
+      try {
+        // Ensure session is fresh
+        await refreshSession();
+        
+        // Perform deep session validation
+        await performDeepSessionValidation();
+        
+        console.log('Updating folder with id:', folderId, 'to name:', name);
+        
+        const { data, error } = await supabase
+          .from('folders')
+          .update({ name })
+          .eq('id', folderId)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Folder update error:', error);
+          if (error.code === '23505') {
+            throw new Error('A folder with this name already exists');
+          } else if (error.message?.includes("relation \"public.folders\" does not exist")) {
+            throw new Error("The folders table doesn't exist in the Supabase database");
+          } else if (error.message?.includes("violates row-level security policy")) {
+            throw new Error("Authentication error: Please sign out and sign in again to refresh your session.");
+          }
+          throw new Error(`Database error: ${error.message}`);
+        }
+        
+        if (!data) {
+          throw new Error('No data returned from folder update');
+        }
+        
+        console.log('Folder updated successfully:', data);
+        return data;
+      } catch (err) {
+        console.error("Error in updateFolderMutation:", err);
+        throw err;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      toast.success("Folder renamed", { description: "Your folder has been renamed successfully" });
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to rename folder", { description: error.message || "Unknown error" });
+    }
+  });
+
   const deleteFolder = useMutation({
     mutationFn: async (folderId: string) => {
       if (!user) {
@@ -104,6 +158,7 @@ export function useMutateFolder() {
 
   return {
     createFolder: createFolder.mutateAsync,
+    updateFolder: updateFolder.mutateAsync,
     deleteFolder: deleteFolder.mutate
   };
 }
