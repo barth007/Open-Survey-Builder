@@ -133,9 +133,8 @@ const Index = () => {
   }
 
   return (
-    // Index.tsx
     <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      <div className="rounded-xl shadow-sm bg-gray-100 p-4">
+      <div className="rounded-xl shadow-sm bg-gray-100 p-1">
         {activeTab === "edit" && (
           <SplitPanelLayout
             middlePanel={
@@ -202,7 +201,6 @@ const Index = () => {
         )}
       </div>
     </SurveyLayout>
-
   );
 };
 
