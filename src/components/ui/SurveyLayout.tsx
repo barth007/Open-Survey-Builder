@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
@@ -8,35 +7,36 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import SurveyTabs from '@/components/survey/SurveyTabs';
 
 interface SurveyLayoutProps {
-    children: ReactNode;
-    activeTab: "edit" | "answers";
-    setActiveTab: (tab: "edit" | "answers") => void;
+  children: ReactNode;
+  activeTab: "edit" | "answers";
+  setActiveTab: (tab: "edit" | "answers") => void;
 }
 
 const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) => {
-    const { id: surveyId } = useParams();
-    const { activeUsers } = useActiveUsers(surveyId || '');
+  const { id: surveyId } = useParams();
+  const { activeUsers } = useActiveUsers(surveyId || '');
 
-    return (
-        <div className="h-screen flex flex-col">
-            <div className="flex">
-                <div className="w-64 flex-shrink-0" />
-                <div className="flex-1">
-                    <SurveyNavigationHeader activeUsers={activeUsers} />
-                    <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                </div>
-            </div>
-
-            <div className="flex flex-1 overflow-hidden">
-                <SidebarProvider collapsedWidth={60}>
-                    <SurveySidebar />
-                    <main className="flex-1 overflow-auto">
-                        {children}
-                    </main>
-                </SidebarProvider>
-            </div>
+  return (
+    <SidebarProvider collapsedWidth={60}>
+      <div className="h-screen flex flex-col">
+        <div className="flex">
+          {/* Sidebar space (empty div) for alignment */}
+          <div className="w-64 flex-shrink-0" />
+          <div className="flex-1">
+            <SurveyNavigationHeader activeUsers={activeUsers} />
+            <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          </div>
         </div>
-    );
+
+        <div className="flex flex-1 overflow-hidden">
+          <SurveySidebar />
+          <main className="flex-1 overflow-auto">
+            {children}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 };
 
 export default SurveyLayout;
