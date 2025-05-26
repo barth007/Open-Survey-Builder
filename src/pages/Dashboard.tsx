@@ -15,7 +15,7 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full">
           <SurveySidebar />
           <div className="flex-1">
@@ -31,7 +31,7 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full">
           <SurveySidebar />
           <div className="flex-1">
@@ -49,7 +49,7 @@ const Dashboard = () => {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
         <SurveySidebar />
         <div className="flex-1 bg-background">
