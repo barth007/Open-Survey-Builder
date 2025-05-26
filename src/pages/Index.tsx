@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -131,13 +130,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Position tabs container to account for fixed header */}
-      <div className="pt-14">
-        <SurveyTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-      </div>
+      <SurveyTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       <div className="flex-1 w-full max-w-screen-2xl mx-auto">
         {activeTab === "edit" && (
