@@ -34,6 +34,11 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   const { user: currentUser } = useAuth();
   const { collapsed } = useSidebar();
 
+  // Debug logging
+  console.log("[DEBUG] SurveyNavigationHeader - activeUsers prop:", activeUsers);
+  console.log("[DEBUG] SurveyNavigationHeader - currentUser:", currentUser);
+  console.log("[DEBUG] SurveyNavigationHeader - surveyId:", surveyId);
+
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
 
@@ -63,6 +68,9 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
     avatar_url: currentUser.user_metadata?.avatar_url,
     last_active: new Date(),
   }] : []);
+
+  console.log("[DEBUG] SurveyNavigationHeader - displayUsers:", displayUsers);
+  console.log("[DEBUG] SurveyNavigationHeader - will render", displayUsers.length, "users");
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
@@ -99,40 +107,46 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
       {/* Right: Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-2 pr-2 z-50 relative">
-          {displayUsers
-            .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
-            .slice(0, 4)
-            .map(user => {
-              const isYou = user.id === currentUser?.id;
-              return (
-                <Tooltip key={user.id}>
-                  <TooltipTrigger asChild>
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt={user.name || user.email || "User"}
-                        className={cn(
-                          "w-8 h-8 rounded-full border bg-white",
-                          isYou && "ring-2 ring-primary"
-                        )}
-                      />
-                    ) : (
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full border bg-muted text-xs flex items-center justify-center font-medium",
-                          isYou && "ring-2 ring-primary"
-                        )}
-                      >
-                        {user.name?.charAt(0).toUpperCase() || "?"}
-                      </div>
-                    )}
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
+          {console.log("[DEBUG] About to render users, displayUsers.length:", displayUsers.length)}
+          {displayUsers.length > 0 ? (
+            displayUsers
+              .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
+              .slice(0, 4)
+              .map(user => {
+                console.log("[DEBUG] Rendering user:", user);
+                const isYou = user.id === currentUser?.id;
+                return (
+                  <Tooltip key={user.id}>
+                    <TooltipTrigger asChild>
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.name || user.email || "User"}
+                          className={cn(
+                            "w-8 h-8 rounded-full border bg-white",
+                            isYou && "ring-2 ring-primary"
+                          )}
+                        />
+                      ) : (
+                        <div
+                          className={cn(
+                            "w-8 h-8 rounded-full border bg-muted text-xs flex items-center justify-center font-medium",
+                            isYou && "ring-2 ring-primary"
+                          )}
+                        >
+                          {user.name?.charAt(0).toUpperCase() || "?"}
+                        </div>
+                      )}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })
+          ) : (
+            <div className="text-sm text-muted-foreground">No active users</div>
+          )}
         </div>
       </TooltipProvider>
     </header>
