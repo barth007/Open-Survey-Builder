@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Survey } from '@/types/survey';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -40,7 +41,7 @@ const EditTab: React.FC<EditTabProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <div className="bg-red-100 border border-red-500 w-full">
+    <div className="w-full max-w-none">
       <EditorPanel
         survey={survey}
         onTitleChange={onTitleChange}
