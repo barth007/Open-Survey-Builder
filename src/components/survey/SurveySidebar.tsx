@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableContext, verticalListSortingStrategy } from '@dld-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Sidebar, SidebarContent, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
 import { SurveyFolders } from './SurveyFolders';
 import { UnorganizedSurveys } from './UnorganizedSurveys';
