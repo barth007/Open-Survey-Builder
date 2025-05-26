@@ -20,7 +20,7 @@ export const QuestionSection: React.FC<QuestionSectionProps> = ({
   onAddQuestion
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="w-full flex flex-col space-y-4">
       <h3 className="text-lg font-medium">Survey Questions</h3>
       <QuestionsList 
         questions={questions}

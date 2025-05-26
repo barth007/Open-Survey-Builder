@@ -50,7 +50,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         onDescriptionChange={onDescriptionChange}
       />
 
-      {/* Welcome Page Settings */}
       <WelcomePageSettings
         welcomeTitle={survey.welcomeTitle || ''}
         welcomeMessage={survey.welcomeMessage || ''}
@@ -62,7 +61,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         onWelcomeButtonTextChange={onWelcomeButtonTextChange}
       />
 
-      {/* Survey Questions */}
       <QuestionSection
         questions={survey.questions}
         onQuestionChange={onQuestionChange}
@@ -71,7 +69,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         onAddQuestion={onAddQuestion}
       />
 
-      {/* Thank You Page Settings */}
       <ThankYouPageSettings
         thankYouTitle={survey.thankYouTitle || ''}
         thankYouMessage={survey.thankYouMessage || ''}

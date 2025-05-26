@@ -34,7 +34,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ survey }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full flex flex-col space-y-6">
       {/* Welcome Page Preview */}
       {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
