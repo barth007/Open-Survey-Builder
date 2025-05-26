@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
@@ -24,10 +23,10 @@ export function SplitPanelLayout({
   minSizes = ["15%", "30%", "25%"]
 }: SplitPanelLayoutProps) {
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full h-full">
+    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden">
       {leftPanel && (
         <>
-          <ResizablePanel defaultSize={defaultLayout[0]} minSize={10} className="bg-white">
+          <ResizablePanel defaultSize={defaultLayout[0]} minSize={Number(minSizes[0].replace('%',''))} className="bg-white overflow-auto">
             <PanelContainer title={leftPanelTitle}>
               {leftPanel}
             </PanelContainer>
@@ -38,7 +37,7 @@ export function SplitPanelLayout({
 
       {middlePanel && (
         <>
-          <ResizablePanel defaultSize={defaultLayout[1]} minSize={30} className="bg-white">
+          <ResizablePanel defaultSize={defaultLayout[1]} minSize={Number(minSizes[1].replace('%',''))} className="bg-white overflow-auto">
             <PanelContainer title={middlePanelTitle}>
               {middlePanel}
             </PanelContainer>
@@ -48,7 +47,7 @@ export function SplitPanelLayout({
       )}
 
       {rightPanel && (
-        <ResizablePanel defaultSize={defaultLayout[2]} minSize={25} className="bg-gray-50">
+        <ResizablePanel defaultSize={defaultLayout[2]} minSize={Number(minSizes[2].replace('%',''))} className="bg-gray-50 overflow-auto">
           <PanelContainer title={rightPanelTitle} bg="bg-gray-50">
             {rightPanel}
           </PanelContainer>
@@ -63,10 +62,12 @@ const PanelContainer: React.FC<{
   children: React.ReactNode;
   bg?: string;
 }> = ({ title, children, bg = "bg-white" }) => (
-  <div className="h-full flex flex-col">
+  <div className={`h-full flex flex-col ${bg} overflow-hidden`}>
     <div className={`flex justify-between px-4 py-2 border-b sticky top-0 z-30 ${bg} h-10 items-center flex-shrink-0`}>
       <div className="font-medium text-sm">{title}</div>
     </div>
-    <div className={`flex-1 overflow-y-auto px-4 py-2 ${bg}`}>{children}</div>
+    <div className={`flex-1 overflow-auto px-4 py-2 ${bg}`}>
+      {children}
+    </div>
   </div>
 );
