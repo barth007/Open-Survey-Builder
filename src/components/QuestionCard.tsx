@@ -54,7 +54,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   } = useQuestionCardLogic(question, questions, onQuestionChange, onDeleteQuestion, onDuplicateQuestion);
 
   return (
-    <Card className={`w-full mb-4 ${isDragging ? 'opacity-50' : ''} border-abyss`}>
+    <Card className={`mb-4 ${isDragging ? 'opacity-50' : ''} border-abyss`}>
       <CardContent className="pt-6 space-y-5">
         <QuestionHeader 
           text={question.text}
