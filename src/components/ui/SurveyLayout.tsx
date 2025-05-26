@@ -20,7 +20,7 @@ const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) 
     return (
         <div className="h-screen flex flex-col">
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="fixed top-14 left-0 right-0 z-40">
+            <div className="fixed top-14 left-64 right-0 z-40">
                 <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
 
