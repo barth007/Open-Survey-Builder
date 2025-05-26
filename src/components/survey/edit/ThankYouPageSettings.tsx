@@ -32,8 +32,8 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
         <h3 className="text-lg font-medium">Thank You Page</h3>
       </CardHeader>
       <CardContent>
-        <div className="w-full">
-          <div className="w-full">
+        <div className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="thankYouTitle">Thank You Title</Label>
             <Input 
               id="thankYouTitle"
@@ -42,7 +42,7 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
               onChange={(e) => onThankYouTitleChange(e.target.value)}
             />
           </div>
-          <div className="w-full">
+          <div className="space-y-2">
             <Label htmlFor="thankYouMessage">Thank You Message</Label>
             <Textarea 
               id="thankYouMessage"
@@ -52,7 +52,7 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
               rows={2}
             />
           </div>
-          <div className="w-full">
+          <div className="space-y-2">
             <Label htmlFor="thankYouButtonText">Button Text</Label>
             <Input 
               id="thankYouButtonText"
@@ -61,7 +61,7 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
               onChange={(e) => onThankYouButtonTextChange(e.target.value)}
             />
           </div>
-          <div className="w-full">
+          <div className="space-y-2">
             <Label htmlFor="redirectUrl">Redirect URL (Optional)</Label>
             <Input 
               id="redirectUrl"
