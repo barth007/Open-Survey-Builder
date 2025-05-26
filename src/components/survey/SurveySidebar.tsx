@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -69,18 +70,27 @@ export function SurveySidebar() {
 
   if (isLoading) {
     return (
-      <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
-        <SidebarContent className="pt-6">
-          <div className="space-y-4 px-2">
-            {!collapsed && <Skeleton className="h-9 w-full" />}
+      <Sidebar className={cn("flex flex-col h-full", collapsed ? "w-14" : "w-64")} collapsible>
+        {/* Header */}
+        <div className="flex-shrink-0 p-2 border-b">
+          {!collapsed && <Skeleton className="h-9 w-full" />}
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto p-2">
             <div className="space-y-2">
               {Array(3).fill(0).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-full" />
               ))}
             </div>
           </div>
-        </SidebarContent>
-        <UserProfile compact={collapsed} />
+        </div>
+        
+        {/* Footer */}
+        <div className="flex-shrink-0 border-t">
+          <UserProfile compact={collapsed} />
+        </div>
       </Sidebar>
     );
   }
@@ -91,10 +101,11 @@ export function SurveySidebar() {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <Sidebar className={cn(collapsed ? "w-14" : "w-64")} collapsible>
-        <SidebarContent className="pt-6 flex-1">
-          {!collapsed && (
-            <div className="flex items-center mb-4 mx-2">
+      <Sidebar className={cn("flex flex-col h-full", collapsed ? "w-14" : "w-64")} collapsible>
+        {/* Header - Fixed search bar */}
+        {!collapsed && (
+          <div className="flex-shrink-0 p-2 border-b">
+            <div className="flex items-center">
               <Input
                 placeholder="Search surveys..."
                 value={searchTerm}
@@ -112,36 +123,46 @@ export function SurveySidebar() {
                 </Button>
               )}
             </div>
-          )}
-          <SidebarGroup defaultOpen className="flex-1">
-            <SortableContext items={[]} strategy={verticalListSortingStrategy}>
-              <SurveyFolders
-                folders={surveyData?.folders || []}
-                openFolders={openFolders}
-                onToggleFolder={toggleFolder}
-                onCreateFolder={handleCreateFolder}
-                onCreateSurvey={handleCreateSurvey}
-                onDeleteSurvey={deleteSurvey}
-                onDeleteFolder={deleteFolder}
-                onUpdateOrder={updateSurveyOrder}
-                onRenameFolder={handleRenameFolder}
-                isCollapsed={collapsed}
-                foldersList={foldersList}
-              />
-              <UnorganizedSurveys
-                surveys={surveyData?.unorganizedSurveys || []}
-                onCreateSurvey={() => handleCreateSurvey({ name: 'New Survey' })}
-                onDeleteSurvey={deleteSurvey}
-                onUpdateOrder={updateSurveyOrder}
-                isCollapsed={collapsed}
-                folders={foldersList}
-              />
-            </SortableContext>
-          </SidebarGroup>
-        </SidebarContent>
+          </div>
+        )}
+        
+        {/* Content - Scrollable area */}
+        <div className="flex-1 overflow-hidden">
+          <SidebarContent className="h-full">
+            <SidebarGroup defaultOpen className="h-full">
+              <div className="h-full overflow-y-auto">
+                <SortableContext items={[]} strategy={verticalListSortingStrategy}>
+                  <SurveyFolders
+                    folders={surveyData?.folders || []}
+                    openFolders={openFolders}
+                    onToggleFolder={toggleFolder}
+                    onCreateFolder={handleCreateFolder}
+                    onCreateSurvey={handleCreateSurvey}
+                    onDeleteSurvey={deleteSurvey}
+                    onDeleteFolder={deleteFolder}
+                    onUpdateOrder={updateSurveyOrder}
+                    onRenameFolder={handleRenameFolder}
+                    isCollapsed={collapsed}
+                    foldersList={foldersList}
+                  />
+                  <UnorganizedSurveys
+                    surveys={surveyData?.unorganizedSurveys || []}
+                    onCreateSurvey={() => handleCreateSurvey({ name: 'New Survey' })}
+                    onDeleteSurvey={deleteSurvey}
+                    onUpdateOrder={updateSurveyOrder}
+                    isCollapsed={collapsed}
+                    folders={foldersList}
+                  />
+                </SortableContext>
+              </div>
+            </SidebarGroup>
+          </SidebarContent>
+        </div>
 
-        {/* ✅ Always-visible profile block */}
-        <UserProfile compact={collapsed} />
+        {/* Footer - Fixed user profile */}
+        <div className="flex-shrink-0 border-t">
+          <UserProfile compact={collapsed} />
+        </div>
       </Sidebar>
     </DndContext>
   );

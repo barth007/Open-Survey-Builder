@@ -15,17 +15,17 @@ const SurveyLayout = ({ children }: SurveyLayoutProps) => {
     const { activeUsers } = useActiveUsers(surveyId || '');
 
     return (
-        <>
+        <div className="h-screen flex flex-col">
             <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="flex min-h-[calc(100vh-3.5rem)] pt-14 w-full bg-background">
+            <div className="flex flex-1 overflow-hidden">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
-                    <div className="flex-1">
+                    <main className="flex-1 overflow-auto">
                         {children}
-                    </div>
+                    </main>
                 </SidebarProvider>
             </div>
-        </>
+        </div>
     );
 };
 
