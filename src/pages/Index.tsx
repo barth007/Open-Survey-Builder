@@ -14,6 +14,11 @@ import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
 import SurveyLayout from '@/components/ui/SurveyLayout';
+import SurveyTitle from '@/components/SurveyTitle';
+import { WelcomePageSettings } from '@/components/survey/edit/WelcomePage';
+import { QuestionSection } from '@/components/survey/edit/QuestionSection';
+import { ThankYouPageSettings } from '@/components/survey/edit/ThankYouPageSettings';
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -136,32 +141,56 @@ const Index = () => {
     // Index.tsx
     <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       <div className="rounded-xl shadow-sm bg-gray-100 p-4">
-        {activeTab === "edit" && (
-          <SplitPanelLayout
-            middlePanel={
-              <EditTab
-                survey={survey}
-                onTitleChange={handleSurveyTitleChange}
-                onDescriptionChange={handleDescriptionChangeWithTracking}
-                onQuestionChange={handleQuestionChange}
-                onDeleteQuestion={handleDeleteQuestion}
-                onDuplicateQuestion={handleDuplicateQuestion}
-                onAddQuestion={handleAddQuestion}
-                onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
-                onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
-                onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
-                onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
-                onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
-                onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
-                onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
-                onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
-              />
-            }
-            rightPanel={<PreviewPanel survey={survey} />}
-            middlePanelTitle="Editor"
-            rightPanelTitle="Preview"
-          />
-        )}
+      {activeTab === "edit" && (
+  <div className="w-full h-full flex rounded-xl shadow-sm overflow-hidden bg-white">
+    {/* Middle Panel */}
+    <div className="flex-1 min-w-0 overflow-auto px-6 py-4 space-y-6">
+      <SurveyTitle
+        title={survey.title}
+        description={survey.description}
+        onTitleChange={handleSurveyTitleChange}
+        onDescriptionChange={handleDescriptionChangeWithTracking}
+      />
+
+      <WelcomePageSettings
+        welcomeTitle={survey.welcomeTitle || ''}
+        welcomeMessage={survey.welcomeMessage || ''}
+        welcomeInstructions={survey.welcomeInstructions || ''}
+        welcomeButtonText={survey.welcomeButtonText || ''}
+        onWelcomeTitleChange={(v) => updateSurvey({ welcomeTitle: v })}
+        onWelcomeMessageChange={(v) => updateSurvey({ welcomeMessage: v })}
+        onWelcomeInstructionsChange={(v) => updateSurvey({ welcomeInstructions: v })}
+        onWelcomeButtonTextChange={(v) => updateSurvey({ welcomeButtonText: v })}
+      />
+
+      <QuestionSection
+        questions={survey.questions}
+        onQuestionChange={handleQuestionChange}
+        onDeleteQuestion={handleDeleteQuestion}
+        onDuplicateQuestion={handleDuplicateQuestion}
+        onAddQuestion={handleAddQuestion}
+      />
+
+      <ThankYouPageSettings
+        thankYouTitle={survey.thankYouTitle || ''}
+        thankYouMessage={survey.thankYouMessage || ''}
+        thankYouButtonText={survey.thankYouButtonText || ''}
+        redirectUrl={survey.redirectUrl || ''}
+        onThankYouTitleChange={(v) => updateSurvey({ thankYouTitle: v })}
+        onThankYouMessageChange={(v) => updateSurvey({ thankYouMessage: v })}
+        onThankYouButtonTextChange={(v) => updateSurvey({ thankYouButtonText: v })}
+        onRedirectUrlChange={(v) => updateSurvey({ redirectUrl: v })}
+      />
+    </div>
+
+    {/* Right Panel */}
+    <div className="w-[40%] min-w-[300px] max-w-[600px] overflow-auto px-6 py-4 bg-gray-50 border-l border-gray-200">
+      <h2 className="text-sm font-semibold text-gray-500 mb-2">Preview</h2>
+      <PreviewPanel survey={survey} />
+    </div>
+  </div>
+)}
+
 
         {activeTab === "answers" && (
           <SplitPanelLayout
