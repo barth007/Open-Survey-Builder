@@ -921,7 +921,7 @@ export default function SidebarComponent() {
   }
 
   return (
-    <aside className="w-64 border-r h-full flex flex-col">
+    <Sidebar className="border-r">
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto p-2">
         <div className="flex items-center justify-between mb-4">
@@ -1043,23 +1043,23 @@ export default function SidebarComponent() {
         )}
       </div>
 
-  {/* Confirmation dialog for delete */ }
-  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-        <AlertDialogDescription>
-          This will permanently delete this {itemToDelete?.type}. This action cannot be undone.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600">
-          Delete
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-    </aside >
+      {/* Confirmation dialog for delete */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this {itemToDelete?.type}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Sidebar>
   );
 }
