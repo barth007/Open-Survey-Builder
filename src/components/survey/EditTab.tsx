@@ -2,7 +2,7 @@ import React from 'react';
 import { Survey } from '@/types/survey';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { HomeIcon } from 'lucide-react';
-import { EditorPanel } from './edit/EditorPanel';;
+import { EditorPanel } from './edit/EditorPanel';
 
 interface EditTabProps {
   survey: Survey;
