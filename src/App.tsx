@@ -16,7 +16,6 @@ import PublicSurvey from "@/pages/PublicSurvey";
 import Profile from './pages/Profile';
 import Landing from './pages/Landing';
 import AdminPanel from './pages/AdminPanel';
-import SurveyLayout from '@/components/ui/SurveyLayout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,9 +50,7 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <SurveyLayout>
-                    <Index />
-                  </SurveyLayout>
+                  <Index />
                 </ProtectedRoute>
               }
             />
@@ -62,9 +59,7 @@ const App = () => (
               path="/survey/:id"
               element={
                 <ProtectedRoute>
-                  <SurveyLayout>
-                    <Index />
-                  </SurveyLayout>
+                  <Index />
                 </ProtectedRoute>
               }
             />
