@@ -7,13 +7,13 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
-import SurveyTabs from '@/components/survey/SurveyTabs';
 import EditTab from '@/components/survey/EditTab';
 import AnswersTab from '@/components/AnswersTab';
 import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
 import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
+import SurveyLayout from '@/components/ui/SurveyLayout';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -111,97 +111,94 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
-      </div>
+      <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+        <div className="h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
+        </div>
+      </SurveyLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-8 max-w-md text-magma">
-          <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
-          <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
+      <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center p-8 max-w-md text-magma">
+            <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
+            <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
+          </div>
         </div>
-      </div>
+      </SurveyLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <SurveyTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+    <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+      {activeTab === "edit" && (
+        <SplitPanelLayout
+          middlePanel={
+            <EditTab
+              survey={survey}
+              onTitleChange={handleSurveyTitleChange}
+              onDescriptionChange={handleDescriptionChangeWithTracking}
+              onQuestionChange={handleQuestionChange}
+              onDeleteQuestion={handleDeleteQuestion}
+              onDuplicateQuestion={handleDuplicateQuestion}
+              onAddQuestion={handleAddQuestion}
+              onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
+              onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
+              onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
+              onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
+              onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
+              onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
+              onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
+              onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
+            />
+          }
+          rightPanel={<PreviewPanel survey={survey} />}
+          middlePanelTitle="Editor"
+          rightPanelTitle="Preview"
+        />
+      )}
 
-      <div className="flex-1 w-full max-w-screen-2xl mx-auto">
-        {activeTab === "edit" && (
-          <SplitPanelLayout
-            middlePanel={
-              <EditTab
-                survey={survey}
-                onTitleChange={handleSurveyTitleChange}
-                onDescriptionChange={handleDescriptionChangeWithTracking}
-                onQuestionChange={handleQuestionChange}
-                onDeleteQuestion={handleDeleteQuestion}
-                onDuplicateQuestion={handleDuplicateQuestion}
-                onAddQuestion={handleAddQuestion}
-                onWelcomeTitleChange={(value) => updateSurvey({ welcomeTitle: value })}
-                onWelcomeMessageChange={(value) => updateSurvey({ welcomeMessage: value })}
-                onWelcomeInstructionsChange={(value) => updateSurvey({ welcomeInstructions: value })}
-                onWelcomeButtonTextChange={(value) => updateSurvey({ welcomeButtonText: value })}
-                onThankYouTitleChange={(value) => updateSurvey({ thankYouTitle: value })}
-                onThankYouMessageChange={(value) => updateSurvey({ thankYouMessage: value })}
-                onThankYouButtonTextChange={(value) => updateSurvey({ thankYouButtonText: value })}
-                onRedirectUrlChange={(value) => updateSurvey({ redirectUrl: value })}
-              />
-            }
-            rightPanel={<PreviewPanel survey={survey} />}
-            middlePanelTitle="Editor"
-            rightPanelTitle="Preview"
-          />
-        )}
-
-        {activeTab === "answers" && (
-          <SplitPanelLayout
-            middlePanel={
-              <AnswersTab
-                survey={survey}
-                responses={responses}
-                filteredResponses={filteredResponses}
-                totalResponses={totalResponses}
-                filterText={filterText}
-                setFilterText={setFilterText}
-                sortBy={sortBy}
-                setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
-                chartType={chartType[selectedResponseGroup] || "bar"}
-                handleChartTypeChange={(value: string) => {
-                  const [questionId, type] = value.split(':');
-                  handleChartTypeChange(questionId, type as "bar" | "pie");
-                }}
-                onCardClick={handleCardClick}
-                exportToCSV={exportToCSV}
+      {activeTab === "answers" && (
+        <SplitPanelLayout
+          middlePanel={
+            <AnswersTab
+              survey={survey}
+              responses={responses}
+              filteredResponses={filteredResponses}
+              totalResponses={totalResponses}
+              filterText={filterText}
+              setFilterText={setFilterText}
+              sortBy={sortBy}
+              setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
+              chartType={chartType[selectedResponseGroup] || "bar"}
+              handleChartTypeChange={(value: string) => {
+                const [questionId, type] = value.split(':');
+                handleChartTypeChange(questionId, type as "bar" | "pie");
+              }}
+              onCardClick={handleCardClick}
+              exportToCSV={exportToCSV}
+              selectedResponseGroup={selectedResponseGroup}
+            />
+          }
+          rightPanel={
+            selectedResponseGroup ? (
+              <AnalysisPanel
                 selectedResponseGroup={selectedResponseGroup}
+                responseData={selectedResponseData}
+                onToggleVisibility={() => {}}
               />
-            }
-            rightPanel={
-              selectedResponseGroup ? (
-                <AnalysisPanel
-                  selectedResponseGroup={selectedResponseGroup}
-                  responseData={selectedResponseData}
-                  onToggleVisibility={() => {}}
-                />
-              ) : (
-                <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
-              )
-            }
-            middlePanelTitle="Responses"
-            rightPanelTitle="Analysis"
-          />
-        )}
-      </div>
-    </div>
+            ) : (
+              <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
+            )
+          }
+          middlePanelTitle="Responses"
+          rightPanelTitle="Analysis"
+        />
+      )}
+    </SurveyLayout>
   );
 };
 
