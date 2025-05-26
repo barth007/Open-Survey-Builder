@@ -19,12 +19,15 @@ const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) 
 
     return (
         <div className="h-screen flex flex-col">
-            <SurveyNavigationHeader activeUsers={activeUsers} />
-            <div className="fixed top-14 left-64 right-0 z-40">
-                <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <div className="flex">
+                <div className="w-64 flex-shrink-0" />
+                <div className="flex-1">
+                    <SurveyNavigationHeader activeUsers={activeUsers} />
+                    <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden pt-28">
+            <div className="flex flex-1 overflow-hidden">
                 <SidebarProvider collapsedWidth={60}>
                     <SurveySidebar />
                     <main className="flex-1 overflow-auto">
