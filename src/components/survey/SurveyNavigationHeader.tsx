@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
-
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface ActiveUser {
   id: string;
@@ -37,6 +37,9 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
   const { user: currentUser } = useAuth();
+  const { collapsed } = useSidebar();
+
+  const sidebarWidth = collapsed ? '3.5rem' : '16rem'; // Tailwind: w-14 vs w-64
 
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
@@ -61,9 +64,8 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
-
       {/* Left: Navigation path */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4" style={{ minWidth: sidebarWidth }}>
         <Button
           variant="ghost"
           size="sm"
@@ -71,10 +73,10 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
           className="flex items-center gap-2"
         >
           <Home className="h-4 w-4" />
-          Dashboard
+          {!collapsed && <span>Dashboard</span>}
         </Button>
 
-        {current && (
+        {!collapsed && current && (
           <>
             <Separator orientation="vertical" className="h-4" />
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
