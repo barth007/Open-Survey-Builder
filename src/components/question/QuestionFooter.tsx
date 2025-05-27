@@ -43,7 +43,7 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
             className={`text-abyss border-abyss hover:bg-abyss hover:text-white ${isMobile ? 'flex-1 px-0 sm:px-2' : 'px-3'}`}
           >
             <Copy size={16} className={isMobile ? 'mx-auto' : 'mr-2'} />
-            {!isMobile && <span>Duplicate</span>}
+            {!isMobile}
           </Button>
         )}
         <Button 
@@ -53,7 +53,7 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
           className={`text-magma hover:text-magma hover:bg-red-50 ${isMobile ? 'flex-1 px-0 sm:px-2' : 'px-3'}`}
         >
           <Trash size={16} className={isMobile ? 'mx-auto' : 'mr-2'} />
-          {!isMobile && <span>Delete</span>}
+          {!isMobile}
         </Button>
       </div>
     </div>
