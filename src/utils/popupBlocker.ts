@@ -1,5 +1,4 @@
 
-
 // Popup blocker utility to prevent any external popups from appearing
 export const initializePopupBlocker = () => {
   console.log('[Popup Blocker] Initializing...');
@@ -8,38 +7,61 @@ export const initializePopupBlocker = () => {
   const popupKeywords = [
     'edit with lovable',
     'edit in lovable',
-    'lovable',
     'edit this page',
     'edit code',
     'powered by',
     'made with'
   ];
 
+  // Essential elements that should never be blocked
+  const essentialTags = ['html', 'head', 'body', 'script', 'style', 'link', 'meta', 'title'];
+
   // Function to check if an element should be blocked
   const shouldBlockElement = (element: Element): boolean => {
     if (!element) return false;
 
-    // Check text content
-    const textContent = element.textContent?.toLowerCase() || '';
-    if (popupKeywords.some(keyword => textContent.includes(keyword))) {
+    // Never block essential HTML structure elements
+    const tagName = element.tagName?.toLowerCase();
+    if (essentialTags.includes(tagName)) {
+      return false;
+    }
+
+    // Never block elements that are part of the main app structure
+    if (element.id === 'root' || element.closest('#root')) {
+      return false;
+    }
+
+    // Only target specific lovable badge elements
+    if (element.id === 'lovable-badge' || element.id === 'lovable-badge-close') {
       return true;
     }
 
-    // Check attributes
+    // Check for lovable-specific attributes
     const attributes = ['class', 'id', 'data-testid', 'aria-label', 'title'];
     for (const attr of attributes) {
       const value = element.getAttribute(attr)?.toLowerCase() || '';
-      if (popupKeywords.some(keyword => value.includes(keyword))) {
+      if (value.includes('lovable')) {
         return true;
       }
     }
 
-    // Check if it's a fixed positioned element in bottom-right corner
+    // Check text content only for non-essential elements
+    const textContent = element.textContent?.toLowerCase() || '';
+    if (popupKeywords.some(keyword => textContent.includes(keyword))) {
+      // Additional safety check - make sure it's not a large container
+      if (textContent.length > 100) {
+        return false;
+      }
+      return true;
+    }
+
+    // Check if it's a fixed positioned element in corner (likely a badge/popup)
     const computedStyle = window.getComputedStyle(element);
     if (
       computedStyle.position === 'fixed' &&
       (computedStyle.bottom !== 'auto' || computedStyle.right !== 'auto') &&
-      parseInt(computedStyle.zIndex) > 1000
+      parseInt(computedStyle.zIndex) > 1000 &&
+      element.tagName?.toLowerCase() !== 'div' // Be more specific about what we block
     ) {
       return true;
     }
@@ -72,8 +94,20 @@ export const initializePopupBlocker = () => {
 
   // Scan existing elements
   const scanExistingElements = () => {
-    const allElements = document.querySelectorAll('*');
-    allElements.forEach(element => {
+    // Only scan for specific lovable elements, not all elements
+    const lovableBadge = document.getElementById('lovable-badge');
+    if (lovableBadge && shouldBlockElement(lovableBadge)) {
+      removeBlockedElement(lovableBadge);
+    }
+
+    const lovableBadgeClose = document.getElementById('lovable-badge-close');
+    if (lovableBadgeClose && shouldBlockElement(lovableBadgeClose)) {
+      removeBlockedElement(lovableBadgeClose);
+    }
+
+    // Check for elements with lovable in their attributes
+    const elementsWithLovable = document.querySelectorAll('[class*="lovable"], [id*="lovable"], [data-testid*="lovable"]');
+    elementsWithLovable.forEach(element => {
       if (shouldBlockElement(element)) {
         removeBlockedElement(element);
       }
@@ -94,13 +128,15 @@ export const initializePopupBlocker = () => {
             return;
           }
 
-          // Check all child elements
-          const children = element.querySelectorAll('*');
-          children.forEach(child => {
-            if (shouldBlockElement(child)) {
-              removeBlockedElement(child);
-            }
-          });
+          // Only check children for non-essential elements
+          if (!essentialTags.includes(element.tagName?.toLowerCase())) {
+            const children = element.querySelectorAll('*');
+            children.forEach(child => {
+              if (shouldBlockElement(child)) {
+                removeBlockedElement(child);
+              }
+            });
+          }
         }
       });
 
@@ -114,8 +150,9 @@ export const initializePopupBlocker = () => {
     });
   });
 
-  // Start observing
-  observer.observe(document.body, {
+  // Start observing only the body, not the entire document
+  const targetNode = document.body || document.documentElement;
+  observer.observe(targetNode, {
     childList: true,
     subtree: true,
     attributes: true,
@@ -125,16 +162,16 @@ export const initializePopupBlocker = () => {
   // Scan existing elements immediately
   scanExistingElements();
 
-  // Also scan periodically as a fallback
-  const intervalScan = setInterval(scanExistingElements, 1000);
+  // Scan periodically but less frequently
+  const intervalScan = setInterval(scanExistingElements, 3000);
 
-  // Override common popup injection methods
+  // Override common popup injection methods with safer checks
   const originalAppendChild = Node.prototype.appendChild;
   const originalInsertBefore = Node.prototype.insertBefore;
 
   Node.prototype.appendChild = function<T extends Node>(newChild: T): T {
     const result = originalAppendChild.call(this, newChild);
-    // Only check if it's an Element node
+    // Only check if it's an Element node and not an essential element
     if (newChild.nodeType === Node.ELEMENT_NODE) {
       const element = newChild as unknown as Element;
       if (shouldBlockElement(element)) {
@@ -146,7 +183,7 @@ export const initializePopupBlocker = () => {
 
   Node.prototype.insertBefore = function<T extends Node>(newChild: T, referenceChild: Node | null): T {
     const result = originalInsertBefore.call(this, newChild, referenceChild);
-    // Only check if it's an Element node
+    // Only check if it's an Element node and not an essential element
     if (newChild.nodeType === Node.ELEMENT_NODE) {
       const element = newChild as unknown as Element;
       if (shouldBlockElement(element)) {
@@ -167,4 +204,3 @@ export const initializePopupBlocker = () => {
     console.log('[Popup Blocker] Cleaned up');
   };
 };
-
