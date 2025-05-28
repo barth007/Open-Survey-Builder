@@ -15,9 +15,9 @@ import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
 import SurveyLayout from '@/components/ui/SurveyLayout';
 import SurveyTitle from '@/components/SurveyTitle';
-import { WelcomePageSettings } from '@/components/survey/edit/WelcomePage';
+import { WelcomeCard } from '@/components/survey/edit/WelcomeCard';
 import { QuestionSection } from '@/components/survey/edit/QuestionSection';
-import { ThankYouPageSettings } from '@/components/survey/edit/ThankYouPageSettings';
+import { ThankYouCard } from '@/components/survey/edit/ThankYouCard';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 const Index = () => {
@@ -152,7 +152,7 @@ const Index = () => {
                   onDescriptionChange={handleDescriptionChangeWithTracking}
                 />    
   
-                <WelcomePageSettings
+                <WelcomeCard
                   welcomeTitle={survey.welcomeTitle || ''}
                   welcomeMessage={survey.welcomeMessage || ''}
                   welcomeInstructions={survey.welcomeInstructions || ''}
@@ -171,7 +171,7 @@ const Index = () => {
                   onAddQuestion={handleAddQuestion}
                 />
   
-                <ThankYouPageSettings
+                <ThankYouCard
                   thankYouTitle={survey.thankYouTitle || ''}
                   thankYouMessage={survey.thankYouMessage || ''}
                   thankYouButtonText={survey.thankYouButtonText || ''}
