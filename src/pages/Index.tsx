@@ -167,6 +167,7 @@ const Index = () => {
       setActiveTab={setActiveTab}
       isSaving={isSaving}
       lastSaved={lastSaved}
+      survey={survey} // Pass the survey data to SurveyLayout
     >
       <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
         {activeTab === "edit" && (

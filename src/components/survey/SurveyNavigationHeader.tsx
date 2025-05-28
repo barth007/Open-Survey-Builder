@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Home, FileText, Check, RotateCw, WifiOff, Share } from 'lucide-react';
@@ -14,6 +15,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
+import { Survey } from '@/types/survey';
 
 interface ActiveUser {
   id: string;
@@ -27,9 +29,10 @@ interface SurveyNavigationHeaderProps {
   activeUsers: ActiveUser[];
   isSaving?: boolean;
   lastSaved?: Date | null;
+  survey?: Survey; // Add the full survey data as a prop
 }
 
-export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: SurveyNavigationHeaderProps) {
+export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, survey }: SurveyNavigationHeaderProps) {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
@@ -90,12 +93,12 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
     if (unorganized) return { name: unorganized.name, survey: unorganized };
 
     for (const folder of surveyData.folders) {
-      const survey = folder.surveys.find(s => s.id === surveyId);
-      if (survey) {
+      const folderSurvey = folder.surveys.find(s => s.id === surveyId);
+      if (folderSurvey) {
         return {
-          name: survey.name,
+          name: folderSurvey.name,
           folder: folder.name,
-          survey: survey,
+          survey: folderSurvey,
         };
       }
     }
@@ -170,11 +173,11 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
-        {/* Share Survey Button - only show when in a survey */}
-        {current?.survey && (
+        {/* Share Survey Button - only show when in a survey and we have the full survey data */}
+        {survey && surveyId && (
           <>
             <ShareSurveyButton 
-              survey={current.survey}
+              survey={survey}
               onPublishToggle={() => {
                 // This will be handled by the parent component
                 console.log('Publish toggle requested');

@@ -1,53 +1,49 @@
 
-import React, { ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
-import { SurveySidebar } from '@/components/survey/SurveySidebar';
+import React from 'react';
 import { SurveyNavigationHeader } from '@/components/survey/SurveyNavigationHeader';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SurveyTabs } from '@/components/survey/SurveyTabs';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
-import SurveyTabs from '@/components/survey/SurveyTabs';
+import { useParams } from 'react-router-dom';
+import { Survey } from '@/types/survey';
 
 interface SurveyLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   activeTab: "edit" | "answers";
   setActiveTab: (tab: "edit" | "answers") => void;
   isSaving?: boolean;
   lastSaved?: Date | null;
+  survey?: Survey;
 }
 
-const SurveyLayout = ({ children, activeTab, setActiveTab, isSaving, lastSaved }: SurveyLayoutProps) => {
+const SurveyLayout = ({ 
+  children, 
+  activeTab, 
+  setActiveTab, 
+  isSaving, 
+  lastSaved,
+  survey 
+}: SurveyLayoutProps) => {
   const { id: surveyId } = useParams();
-  const { activeUsers } = useActiveUsers(surveyId || '');
+  const { activeUsers } = useActiveUsers(surveyId);
 
   return (
-    <SidebarProvider collapsedWidth={60}>
-      <div className="h-screen flex flex-col">
-        {/* Fixed header spanning full width */}
-        <SurveyNavigationHeader 
-          activeUsers={activeUsers} 
-          isSaving={isSaving}
-          lastSaved={lastSaved}
-        />
-
-        {/* Main layout with sidebar and content */}
-        <div className="flex flex-1 overflow-hidden pt-14">
-          <SurveySidebar />
-          
-          {/* Main content area with sticky tabs */}
-          <main className="flex-1 flex flex-col overflow-hidden">
-            {/* Sticky tabs - only in content area, not over sidebar */}
-            <div className="sticky top-0 z-40 bg-white border-b flex-shrink-0">
-              <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-            </div>
-            
-            {/* Scrollable content area */}
-            <div className="flex-1 overflow-auto">
-              {children}
-            </div>
-          </main>
+    <div className="min-h-screen bg-background">
+      <SurveyNavigationHeader 
+        activeUsers={activeUsers} 
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+        survey={survey}
+      />
+      
+      <div className="pt-14 h-screen">
+        <div className="h-full flex flex-col">
+          <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="flex-1 overflow-hidden">
+            {children}
+          </div>
         </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
