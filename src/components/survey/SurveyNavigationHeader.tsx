@@ -144,11 +144,8 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
       return <RotateCw className="h-4 w-4 text-gray-400 animate-spin" />;
     }
     
-    if (lastSaved) {
-      return <Check className="h-4 w-4 text-gray-400" />;
-    }
-    
-    return <WifiOff className="h-4 w-4 text-gray-400" />;
+    // Default to saved status when online and not saving
+    return <Check className="h-4 w-4 text-gray-400" />;
   };
 
   const getSaveStatusText = () => {
