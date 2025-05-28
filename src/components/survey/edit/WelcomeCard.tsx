@@ -15,19 +15,20 @@ interface WelcomeCardProps {
   onWelcomeButtonTextChange: (value: string) => void;
 }
 
-export const WelcomeCard: React.FC<WelcomeCardProps> = ({
-  welcomeTitle,
-  welcomeMessage,
-  welcomeInstructions,
-  welcomeButtonText,
-  onWelcomeTitleChange,
-  onWelcomeMessageChange,
-  onWelcomeInstructionsChange,
-  onWelcomeButtonTextChange
-}) => {
-  return (
-    <Card className="w-full mb-4 border-abyss">
-      <CardContent className="pt-6 space-y-5">
+export const WelcomeCard = ({
+    welcomeTitle,
+    welcomeMessage,
+    welcomeInstructions,
+    welcomeButtonText,
+    onWelcomeTitleChange,
+    onWelcomeMessageChange,
+    onWelcomeInstructionsChange,
+    onWelcomeButtonTextChange,
+  }: WelcomeCardProps) => {
+    return (
+      <div className="rounded-xl border border-ice bg-white p-6 space-y-4">
+        <h3 className="text-lg font-medium">Welcome Page</h3>
+  
         <div className="space-y-2">
           <Label htmlFor="welcomeTitle">Welcome Title</Label>
           <Input
@@ -35,44 +36,40 @@ export const WelcomeCard: React.FC<WelcomeCardProps> = ({
             value={welcomeTitle}
             onChange={(e) => onWelcomeTitleChange(e.target.value)}
             placeholder="Welcome to our survey"
-            className="w-full"
           />
         </div>
-
+  
         <div className="space-y-2">
-          <Label htmlFor="welcomeMessage">Message</Label>
+          <Label htmlFor="welcomeMessage">Welcome Message</Label>
           <Textarea
             id="welcomeMessage"
+            rows={3}
             value={welcomeMessage}
             onChange={(e) => onWelcomeMessageChange(e.target.value)}
-            placeholder="We're glad you're here..."
-            className="w-full resize-none"
-            rows={3}
+            placeholder="Thank you for joining…"
           />
         </div>
-
+  
         <div className="space-y-2">
           <Label htmlFor="welcomeInstructions">Instructions</Label>
           <Input
             id="welcomeInstructions"
             value={welcomeInstructions}
             onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
-            placeholder="Click the button to begin"
-            className="w-full"
+            placeholder="Click the button to begin."
           />
         </div>
-
+  
         <div className="space-y-2">
           <Label htmlFor="welcomeButtonText">Button Text</Label>
           <Input
             id="welcomeButtonText"
             value={welcomeButtonText}
             onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
-            placeholder="Start"
-            className="w-full"
+            placeholder="Start Survey"
           />
         </div>
-      </CardContent>
-    </Card>
-  );
-};
+      </div>
+    );
+  };
+  
