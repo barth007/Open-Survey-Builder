@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -75,7 +76,7 @@ export function SurveySidebar() {
         
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-        <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
+          <div className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
             <div className="space-y-2">
               {Array(3).fill(0).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-full" />
@@ -99,11 +100,11 @@ export function SurveySidebar() {
       onDragEnd={handleDragEnd}
     >
       <Sidebar className={cn("flex flex-col h-full", collapsed ? "w-14" : "w-64")} collapsible>
-        {/* Content - Scrollable area with improved scrollbar hiding */}
+        {/* Content - Scrollable area */}
         <div className="flex-1 overflow-hidden">
-          <SidebarContent className="h-full">
-            <SidebarGroup defaultOpen className="h-full">
-            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
+          <SidebarContent>
+            <SidebarGroup defaultOpen>
+              <div className="flex flex-col w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
                 <SortableContext items={[]} strategy={verticalListSortingStrategy}>
                   <SurveyFolders
                     folders={surveyData?.folders || []}

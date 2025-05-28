@@ -133,7 +133,7 @@ const Index = () => {
   if (isLoading) {
     return (
       <SidebarProvider>
-        <div className="flex min-h-screen w-full">
+        <div className="flex h-screen w-full">
           <SurveySidebar />
           <div className="flex-1">
             <SurveyLayout 
@@ -157,7 +157,7 @@ const Index = () => {
   if (error) {
     return (
       <SidebarProvider>
-        <div className="flex min-h-screen w-full">
+        <div className="flex h-screen w-full">
           <SurveySidebar />
           <div className="flex-1">
             <SurveyLayout 
@@ -183,7 +183,7 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-screen w-full">
         <SurveySidebar />
         <div className="flex-1">
           <SurveyLayout 
