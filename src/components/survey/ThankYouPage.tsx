@@ -1,8 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
   thankYouTitle: string;
@@ -20,27 +17,29 @@ export const ThankYouPage: React.FC<Props> = ({
   return (
     <Card className="w-full border border-ice min-h-[320px] h-auto">
       <CardContent className="space-y-4 p-6">
-        <h3 className="text-lg font-medium">Thank You Page</h3>
+        <h1 className="text-2xl font-semibold text-abyss">{thankYouTitle}</h1>
 
-        <div className="space-y-2">
-          <Label>Thank You Title</Label>
-          <Input value={thankYouTitle} disabled />
-        </div>
+        {thankYouMessage && (
+          <p className="text-gray-700 text-base">{thankYouMessage}</p>
+        )}
 
-        <div className="space-y-2">
-          <Label>Thank You Message</Label>
-          <Textarea value={thankYouMessage} rows={3} disabled />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Button Text</Label>
-          <Input value={thankYouButtonText} disabled />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Redirect URL</Label>
-          <Input value={redirectUrl} disabled />
-        </div>
+        {redirectUrl ? (
+          <a
+            href={redirectUrl}
+            className="inline-block rounded-md bg-abyss px-4 py-2 text-white hover:bg-abyss/90 transition"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {thankYouButtonText || "Go to site"}
+          </a>
+        ) : thankYouButtonText ? (
+          <button
+            className="inline-block rounded-md bg-abyss px-4 py-2 text-white opacity-60 cursor-not-allowed"
+            disabled
+          >
+            {thankYouButtonText}
+          </button>
+        ) : null}
       </CardContent>
     </Card>
   );

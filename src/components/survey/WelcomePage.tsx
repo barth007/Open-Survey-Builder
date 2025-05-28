@@ -1,8 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
   welcomeTitle: string;
@@ -20,27 +17,24 @@ export const WelcomePage: React.FC<Props> = ({
   return (
     <Card className="w-full border border-ice min-h-[320px] h-auto">
       <CardContent className="space-y-4 p-6">
-        <h3 className="text-lg font-medium">Welcome Page</h3>
+        <h1 className="text-2xl font-semibold text-abyss">{welcomeTitle}</h1>
 
-        <div className="space-y-2">
-          <Label>Welcome Title</Label>
-          <Input value={welcomeTitle} disabled />
-        </div>
+        {welcomeMessage && (
+          <p className="text-gray-700 text-base">{welcomeMessage}</p>
+        )}
 
-        <div className="space-y-2">
-          <Label>Welcome Message</Label>
-          <Textarea value={welcomeMessage} rows={3} disabled />
-        </div>
+        {welcomeInstructions && (
+          <p className="text-sm text-gray-500">{welcomeInstructions}</p>
+        )}
 
-        <div className="space-y-2">
-          <Label>Instructions</Label>
-          <Input value={welcomeInstructions} disabled />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Button Text</Label>
-          <Input value={welcomeButtonText} disabled />
-        </div>
+        {welcomeButtonText && (
+          <button
+            className="mt-4 inline-block rounded-md bg-abyss px-4 py-2 text-white hover:bg-abyss/90 transition"
+            disabled
+          >
+            {welcomeButtonText}
+          </button>
+        )}
       </CardContent>
     </Card>
   );

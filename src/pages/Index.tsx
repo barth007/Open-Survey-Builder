@@ -205,11 +205,11 @@ const Index = () => {
 
                 {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
                   <ThankYouPage
-                    thankYouTitle={survey.thankYouTitle}
-                    thankYouMessage={survey.thankYouMessage}
-                    thankYouButtonText={survey.thankYouButtonText}
-                    redirectUrl={survey.redirectUrl}
-                  />
+                  thankYouTitle={survey.thankYouTitle}
+                  thankYouMessage={survey.thankYouMessage}
+                  thankYouButtonText={survey.thankYouButtonText}
+                  redirectUrl={survey.redirectUrl}
+                />
                 )}
 
               </div>
