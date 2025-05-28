@@ -99,30 +99,6 @@ export function SurveySidebar() {
       onDragEnd={handleDragEnd}
     >
       <Sidebar className={cn("flex flex-col h-full", collapsed ? "w-14" : "w-64")} collapsible>
-        {/* Header - Fixed search bar */}
-        {!collapsed && (
-          <div className="flex-shrink-0 p-2 border-b">
-            <div className="flex items-center">
-              <Input
-                placeholder="Search surveys..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-9"
-              />
-              {searchTerm && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                  onClick={() => setSearchTerm('')}
-                >
-                  Clear
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-        
         {/* Content - Scrollable area with improved scrollbar hiding */}
         <div className="flex-1 overflow-hidden">
           <SidebarContent className="h-full">
