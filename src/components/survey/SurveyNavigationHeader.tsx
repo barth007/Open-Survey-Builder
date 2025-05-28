@@ -181,7 +181,7 @@ export function SurveyNavigationHeader({
       {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
 
-        <div style={{ width: "255,2px" }}>
+        <div style={{ width: "255px" }}>
           <Button
             variant="ghost"
             size="sm"
