@@ -41,7 +41,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
 
   // Check if user is online
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
-  
+
   // State for showing saving status with minimum duration
   const [showSaving, setShowSaving] = React.useState(false);
   const savingTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
@@ -122,7 +122,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
 
   const formatLastSaved = (date: Date | null) => {
     if (!date) return 'Never saved';
-    
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffSeconds = Math.floor(diffMs / 1000);
@@ -144,11 +144,11 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
     if (!isOnline) {
       return <WifiOff className="h-4 w-4 text-gray-400" />;
     }
-    
+
     if (showSaving) {
       return <RotateCw className="h-4 w-4 text-gray-400 animate-spin" />;
     }
-    
+
     // Default to saved status when online and not saving
     return <Check className="h-4 w-4 text-gray-400" />;
   };
@@ -157,11 +157,11 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
     if (!isOnline) {
       return 'Offline';
     }
-    
+
     if (showSaving) {
       return 'Saving...';
     }
-    
+
     return formatLastSaved(lastSaved);
   };
 
@@ -173,7 +173,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
-  
+
         <div style={{ width: "230px" }}>
           <Button
             variant="ghost"
@@ -185,19 +185,6 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
             <span>Dashboard</span>
           </Button>
         </div>
-                {/* Share Survey Button - only show when in a survey and we have the full survey data */}
-                {survey && surveyId && (
-          <>
-            <ShareSurveyButton 
-              survey={survey}
-              onPublishToggle={() => {
-                // This will be handled by the parent component
-                console.log('Publish toggle requested');
-              }}
-            />
-            <Separator orientation="vertical" className="h-4" />
-          </>
-        )}
         {current && (
           <>
             <Separator orientation="vertical" className="h-4" />
@@ -211,6 +198,19 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
               <FileText className="h-4 w-4" />
               <span className="truncate">{current.name}</span>
             </div>
+            {/* Share Survey Button - only show when in a survey and we have the full survey data */}
+            {survey && surveyId && (
+              <>
+                <ShareSurveyButton
+                  survey={survey}
+                  onPublishToggle={() => {
+                    // This will be handled by the parent component
+                    console.log('Publish toggle requested');
+                  }}
+                />
+                <Separator orientation="vertical" className="h-4" />
+              </>
+            )}
           </>
         )}
       </div>
