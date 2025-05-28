@@ -131,6 +131,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
             welcomeMessage={survey.welcomeMessage || ''}
             welcomeInstructions={survey.welcomeInstructions || ''}
             welcomeButtonText={survey.welcomeButtonText || ''}
+            onStart={handleStartSurvey}
           />
         )}
 

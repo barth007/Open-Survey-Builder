@@ -7,13 +7,15 @@ interface Props {
   welcomeMessage: string;
   welcomeInstructions: string;
   welcomeButtonText: string;
+  onStart?: () => void;
 }
 
 export const WelcomePage: React.FC<Props> = ({
   welcomeTitle,
   welcomeMessage,
   welcomeInstructions,
-  welcomeButtonText
+  welcomeButtonText,
+  onStart
 }) => {
   return (
     <Card className="w-full border border-abyss min-h-fit h-auto">
@@ -31,7 +33,8 @@ export const WelcomePage: React.FC<Props> = ({
         {welcomeButtonText && (
           <button
             className="mt-4 inline-block rounded-md bg-abyss px-4 py-2 text-white hover:bg-abyss/90 transition"
-            disabled
+            onClick={onStart}
+            disabled={!onStart}
           >
             {welcomeButtonText}
           </button>
