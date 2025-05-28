@@ -75,7 +75,7 @@ export function SurveySidebar() {
         
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-        <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
+        <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
             <div className="space-y-2">
               {Array(3).fill(0).map((_, i) => (
                 <Skeleton key={i} className="h-8 w-full" />
@@ -127,7 +127,7 @@ export function SurveySidebar() {
         <div className="flex-1 overflow-hidden">
           <SidebarContent className="h-full">
             <SidebarGroup defaultOpen className="h-full">
-            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
+            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
                 <SortableContext items={[]} strategy={verticalListSortingStrategy}>
                   <SurveyFolders
                     folders={surveyData?.folders || []}

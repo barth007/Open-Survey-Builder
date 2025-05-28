@@ -54,7 +54,7 @@ const Dashboard = () => {
         <SurveySidebar />
         <div className="flex-1 flex flex-col bg-background">
           <SurveyNavigationHeader activeUsers={activeUsers} />
-          <main className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
+          <main className="flex-1 p-6 pt-20 overflow-y-auto">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
               

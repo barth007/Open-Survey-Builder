@@ -144,7 +144,7 @@ const Index = () => {
           <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
             {/* Middle Panel */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
-            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
+            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}

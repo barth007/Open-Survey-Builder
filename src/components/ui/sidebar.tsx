@@ -130,7 +130,7 @@ export function SidebarContent({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn("flex-1 overflow-y-auto", className)}>
+    <div className={cn("flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4", className)}>
       {children}
     </div>
   );
@@ -923,7 +923,7 @@ export default function SidebarComponent() {
   return (
     <Sidebar className="border-r">
       {/* Scrollable content */}
-      <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
+      <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate("/dashboard")}
