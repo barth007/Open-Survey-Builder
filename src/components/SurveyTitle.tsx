@@ -33,7 +33,7 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   };
 
   return (
-    <Card className="w-full border rounded-lg bg-white min-h-[180px] flex flex-col">
+    <Card className="w-full rounded-lg bg-white min-h-[180px] flex flex-col">
       <CardContent className="flex flex-col gap-4 pt-6 px-6 flex-1">
         <div className="flex items-center gap-3">
           <Input
