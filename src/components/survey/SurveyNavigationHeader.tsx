@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Home, FileText, Check, RotateCw, WifiOff } from 'lucide-react';
+import { Home, FileText, Check, RotateCw, WifiOff, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
+import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
 
 interface ActiveUser {
   id: string;
@@ -86,7 +87,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
     if (!surveyId || !surveyData) return null;
 
     const unorganized = surveyData.unorganizedSurveys.find(s => s.id === surveyId);
-    if (unorganized) return { name: unorganized.name };
+    if (unorganized) return { name: unorganized.name, survey: unorganized };
 
     for (const folder of surveyData.folders) {
       const survey = folder.surveys.find(s => s.id === surveyId);
@@ -94,6 +95,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
         return {
           name: survey.name,
           folder: folder.name,
+          survey: survey,
         };
       }
     }
@@ -166,8 +168,22 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
-      {/* Left: Navigation path */}
+      {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
+        {/* Share Survey Button - only show when in a survey */}
+        {current?.survey && (
+          <>
+            <ShareSurveyButton 
+              survey={current.survey}
+              onPublishToggle={() => {
+                // This will be handled by the parent component
+                console.log('Publish toggle requested');
+              }}
+            />
+            <Separator orientation="vertical" className="h-4" />
+          </>
+        )}
+        
         <div style={{ width: "230px" }}>
           <Button
             variant="ghost"
