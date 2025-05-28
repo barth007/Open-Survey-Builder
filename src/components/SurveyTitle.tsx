@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { GripVertical } from 'lucide-react';
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useParams } from 'react-router-dom';
@@ -33,19 +33,19 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   };
 
   return (
-    <Card className="w-full border border-ice rounded-lg bg-white">
-      <div className="flex items-center gap-3 px-6 pt-6">
-        <GripVertical className="text-carbon" size={18} />
-        <Input
-          ref={titleInputRef}
-          value={title}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Survey Title"
-          className="text-xl font-bold border-none px-0 focus-visible:ring-0 w-full h-auto min-h-[40px]"
-        />
-      </div>
+    <Card className="w-full border border-ice rounded-lg bg-white min-h-[160px] flex flex-col">
+      <CardContent className="flex flex-col gap-4 pt-6 px-6 flex-1">
+        <div className="flex items-center gap-3">
+          <GripVertical className="text-carbon" size={18} />
+          <Input
+            ref={titleInputRef}
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Survey Title"
+            className="text-xl font-bold border-none px-0 focus-visible:ring-0 w-full h-auto min-h-[40px]"
+          />
+        </div>
 
-      <div className="px-6 pt-4 pb-6">
         <Textarea
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
@@ -53,7 +53,7 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
           className="border-none resize-none px-0 focus-visible:ring-0 w-full min-h-[60px]"
           rows={3}
         />
-      </div>
+      </CardContent>
     </Card>
   );
 };
