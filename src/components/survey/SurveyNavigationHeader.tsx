@@ -198,6 +198,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
               <FileText className="h-4 w-4" />
               <span className="truncate">{current.name}</span>
             </div>
+            <Separator orientation="vertical" className="h-4" />
             {/* Share Survey Button - only show when in a survey and we have the full survey data */}
             {survey && surveyId && (
               <>
@@ -208,7 +209,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
                     console.log('Publish toggle requested');
                   }}
                 />
-                <Separator orientation="vertical" className="h-4" />
+
               </>
             )}
           </>
