@@ -28,7 +28,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col space-y-4">
-      <h3 className="text-lg font-medium">Thank You Page</h3>
+      <h3 className="text-lg font-medium">Welcome Page</h3>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="welcomeTitle">Welcome Title</Label>
