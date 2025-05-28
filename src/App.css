@@ -1,21 +1,50 @@
 
-/* Hide Lovable badge/popup */
+/* Hide Lovable badge/popup with enhanced selectors */
 [data-lovable-badge],
 [class*="lovable"],
 [id*="lovable"],
-div[style*="position: fixed"][style*="z-index"] {
+[data-testid*="lovable"],
+div[style*="position: fixed"][style*="z-index"],
+iframe[src*="lovable"],
+script[src*="lovable"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
-/* Additional selectors for common popup patterns */
-div[style*="position: fixed"][style*="bottom"][style*="right"] {
+/* Target common popup patterns */
+div[style*="position: fixed"][style*="bottom"][style*="right"],
+div[style*="position: fixed"][style*="bottom"][style*="left"],
+div[style*="position: fixed"][style*="top"][style*="right"],
+div[style*="position: fixed"][style*="top"][style*="left"] {
   display: none !important;
 }
 
 /* Hide any floating edit buttons or badges */
 button[style*="position: fixed"],
-a[style*="position: fixed"] {
+a[style*="position: fixed"],
+div[style*="position: fixed"]:not([role]):not([aria-label]):not([data-radix-popper-content-wrapper]) {
+  display: none !important;
+}
+
+/* Target elements containing specific text patterns */
+*:has-text("Edit with"),
+*:has-text("Edit in"),
+*:has-text("Powered by"),
+*:has-text("Made with") {
+  display: none !important;
+}
+
+/* Aggressive blocking for high z-index elements */
+*[style*="z-index: 99"],
+*[style*="z-index: 999"],
+*[style*="z-index: 9999"] {
   display: none !important;
 }
