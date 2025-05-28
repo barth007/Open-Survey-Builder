@@ -5,24 +5,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSurveyTitle } from './survey/useSurveyTitle';
 import { useQuestionManagement } from './survey/useQuestionManagement';
+import { useDebounce } from './useDebounce';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { survey: surveyData, isLoading, error } = useQuerySurvey(surveyId);
   const { updateSurvey } = useMutateSurvey();
-  const { handleTitleChange } = useSurveyTitle(surveyId);
+  
   const [survey, setSurvey] = useState<Survey>({
     id: surveyId || "survey-1",
     title: "Untitled Survey",
     description: "Survey description",
     questions: [],
     isPublished: false,
-    publicCode: '', // Ensure we initialize with an empty string rather than undefined
-    teamId: undefined, // Initialize teamId as undefined
-    // Initialize welcome and thank you page fields
+    publicCode: '',
+    teamId: undefined,
     welcomeTitle: '',
     welcomeMessage: '',
     welcomeInstructions: '',
@@ -33,6 +32,12 @@ export const useSurveyState = (surveyId: string | undefined) => {
     redirectUrl: ''
   });
 
+  const [pendingChanges, setPendingChanges] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState<number>(0);
+
+  // Debounce del titolo per evitare salvataggi eccessivi
+  const debouncedTitle = useDebounce(survey.title, 1000);
+
   const {
     questions,
     setQuestions,
@@ -42,6 +47,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     duplicateQuestion
   } = useQuestionManagement(survey.questions);
 
+  // Inizializza lo stato quando arrivano i dati dal server
   useEffect(() => {
     if (surveyData) {
       setSurvey(surveyData);
@@ -49,8 +55,66 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyData, setQuestions]);
 
+  // Gestisce il salvataggio automatico quando cambia il titolo (debounced)
+  useEffect(() => {
+    if (debouncedTitle !== surveyData?.title && surveyData) {
+      setPendingChanges(true);
+    }
+  }, [debouncedTitle, surveyData?.title]);
+
+  // Aggiorna la cache locale immediatamente per la preview
+  const updateLocalCache = (updates: Partial<Survey>) => {
+    if (surveyId) {
+      queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...updates };
+      });
+    }
+  };
+
+  const handleTitleChange = (title: string) => {
+    const updatedSurvey = { ...survey, title };
+    setSurvey(updatedSurvey);
+    updateLocalCache({ title });
+    document.title = title;
+    setPendingChanges(true);
+  };
+
   const handleDescriptionChange = (description: string) => {
-    setSurvey((prev) => ({ ...prev, description }));
+    const updatedSurvey = { ...survey, description };
+    setSurvey(updatedSurvey);
+    updateLocalCache({ description });
+    setPendingChanges(true);
+  };
+
+  // Unified update function for all survey fields
+  const updateSurveyField = (field: keyof Survey, value: any) => {
+    const updatedSurvey = { ...survey, [field]: value };
+    setSurvey(updatedSurvey);
+    updateLocalCache({ [field]: value });
+    setPendingChanges(true);
+  };
+
+  const handleQuestionChange = (updatedQuestion: Question) => {
+    updateQuestion(updatedQuestion);
+    setPendingChanges(true);
+  };
+
+  const handleAddQuestion = () => {
+    const newQuestion = addQuestion();
+    setPendingChanges(true);
+    return newQuestion;
+  };
+
+  const handleDeleteQuestion = (questionId: string) => {
+    deleteQuestion(questionId);
+    setPendingChanges(true);
+  };
+
+  const handleDuplicateQuestion = (question: Question) => {
+    const newQuestion = duplicateQuestion(question);
+    setPendingChanges(true);
+    return newQuestion;
   };
 
   const generatePublicCode = () => {
@@ -60,29 +124,26 @@ export const useSurveyState = (surveyId: string | undefined) => {
   const togglePublish = async () => {
     const newPublishState = !survey.isPublished;
     
-    // Generate a public code if it doesn't exist and we're publishing
     const publicCode = newPublishState && !survey.publicCode 
       ? generatePublicCode()
       : survey.publicCode;
     
-    // Update local state immediately for better UX
-    setSurvey(prev => ({
-      ...prev,
+    // Optimistic update
+    const updates = { 
       isPublished: newPublishState,
-      publicCode: publicCode || prev.publicCode
-    }));
+      publicCode: publicCode || survey.publicCode
+    };
+    
+    setSurvey(prev => ({ ...prev, ...updates }));
+    updateLocalCache(updates);
     
     try {
       if (surveyId) {
         await updateSurvey({
           surveyId,
-          updates: { 
-            isPublished: newPublishState,
-            publicCode
-          }
+          updates
         });
         
-        // Update local cache after successful update
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
         
@@ -94,12 +155,16 @@ export const useSurveyState = (surveyId: string | undefined) => {
         });
       }
     } catch (error) {
-      // Revert local state on error
+      // Revert optimistic update on error
       setSurvey(prev => ({
         ...prev,
         isPublished: !newPublishState,
-        publicCode: prev.publicCode // Restore previous public code
+        publicCode: prev.publicCode
       }));
+      updateLocalCache({ 
+        isPublished: !newPublishState,
+        publicCode: survey.publicCode
+      });
       
       console.error("Error updating survey publish status:", error);
       toast({
@@ -111,44 +176,51 @@ export const useSurveyState = (surveyId: string | undefined) => {
   };
 
   const handleSave = async () => {
+    const now = Date.now();
+    
+    // Evita salvataggi troppo frequenti (minimo 500ms tra un salvataggio e l'altro)
+    if (now - lastSaveTime < 500) {
+      return;
+    }
+
     try {
       if (surveyId) {
-        // Make sure we have a public code if the survey is published
         const publicCode = survey.isPublished && !survey.publicCode 
           ? generatePublicCode()
           : survey.publicCode;
           
+        const updates = { 
+          title: survey.title,
+          description: survey.description,
+          questions: questions,
+          isPublished: survey.isPublished,
+          publicCode,
+          teamId: survey.teamId,
+          welcomeTitle: survey.welcomeTitle,
+          welcomeMessage: survey.welcomeMessage,
+          welcomeInstructions: survey.welcomeInstructions,
+          welcomeButtonText: survey.welcomeButtonText,
+          thankYouTitle: survey.thankYouTitle,
+          thankYouMessage: survey.thankYouMessage,
+          thankYouButtonText: survey.thankYouButtonText,
+          redirectUrl: survey.redirectUrl
+        };
+
         await updateSurvey({
           surveyId,
-          updates: { 
-            title: survey.title,
-            description: survey.description,
-            questions: questions,
-            isPublished: survey.isPublished,
-            publicCode,
-            teamId: survey.teamId,
-            // Include welcome and thank you page fields
-            welcomeTitle: survey.welcomeTitle,
-            welcomeMessage: survey.welcomeMessage,
-            welcomeInstructions: survey.welcomeInstructions,
-            welcomeButtonText: survey.welcomeButtonText,
-            thankYouTitle: survey.thankYouTitle,
-            thankYouMessage: survey.thankYouMessage,
-            thankYouButtonText: survey.thankYouButtonText,
-            redirectUrl: survey.redirectUrl
-          }
+          updates
         });
         
-        // If we added a public code, update the local state
         if (publicCode !== survey.publicCode) {
-          setSurvey(prev => ({
-            ...prev,
-            publicCode
-          }));
+          setSurvey(prev => ({ ...prev, publicCode }));
+          updateLocalCache({ publicCode });
         }
         
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        
+        setPendingChanges(false);
+        setLastSaveTime(now);
         
         toast({
           title: "Survey saved",
@@ -168,20 +240,23 @@ export const useSurveyState = (surveyId: string | undefined) => {
   const currentSurvey: Survey = {
     ...survey,
     questions,
-    publicCode: survey.publicCode || '', // Ensure publicCode is always at least an empty string
-    teamId: survey.teamId // Include teamId in the returned survey
+    publicCode: survey.publicCode || '',
+    teamId: survey.teamId
   };
 
   return {
     survey: currentSurvey,
     handleTitleChange,
     handleDescriptionChange,
-    addQuestion,
-    updateQuestion,
-    deleteQuestion,
-    duplicateQuestion,
+    updateSurveyField,
+    addQuestion: handleAddQuestion,
+    updateQuestion: handleQuestionChange,
+    deleteQuestion: handleDeleteQuestion,
+    duplicateQuestion: handleDuplicateQuestion,
     togglePublish,
     handleSave,
+    pendingChanges,
+    setPendingChanges,
     isLoading,
     error
   };

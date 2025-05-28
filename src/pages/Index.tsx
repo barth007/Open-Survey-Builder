@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,41 +30,35 @@ const Index = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Make sure activeUsers are the correct type
   const { activeUsers } = useActiveUsers(surveyId) as { activeUsers: ActiveUser[] };
 
   const {
     survey,
     handleTitleChange,
     handleDescriptionChange,
+    updateSurveyField,
     addQuestion,
     updateQuestion,
     deleteQuestion,
     duplicateQuestion,
     togglePublish,
     handleSave,
+    pendingChanges,
+    setPendingChanges,
     isLoading,
     error
   } = useSurveyState(surveyId);
 
-  const { pendingChanges, setPendingChanges } = useAutoSave({ onSave: handleSave });
+  const { isSaving, lastSaved } = useAutoSave({ 
+    onSave: handleSave,
+    delay: 2000 
+  });
 
   useEffect(() => {
     if (survey.title) {
       document.title = survey.title;
     }
   }, [survey.title]);
-
-  const handleSurveyTitleChange = (title: string) => {
-    handleTitleChange(title);
-    setPendingChanges(true);
-    if (surveyId) {
-      queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
-        if (!oldData) return oldData;
-        return { ...oldData, title, name: title };
-      });
-    }
-  };
 
   const handleQuestionChange = (updatedQuestion: any) => {
     updateQuestion(updatedQuestion);
@@ -90,14 +85,12 @@ const Index = () => {
     setPendingChanges(true);
   };
 
-  function updateSurvey(updates: Partial<typeof survey>) {
-    if (!surveyId) return;
-    queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
-      if (!oldData) return oldData;
-      return { ...oldData, ...updates };
+  const updateSurveyWithTracking = (updates: Partial<typeof survey>) => {
+    Object.entries(updates).forEach(([key, value]) => {
+      updateSurveyField(key as keyof typeof survey, value);
     });
     setPendingChanges(true);
-  }
+  };
 
   const {
     chartType,
@@ -141,16 +134,29 @@ const Index = () => {
   return (
     <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
+        {/* Save Status Indicator */}
+        {(isSaving || pendingChanges) && (
+          <div className="fixed top-4 right-4 z-50 bg-white px-3 py-2 rounded-lg shadow-md border text-sm">
+            {isSaving ? (
+              <span className="text-blue-600 flex items-center gap-2">
+                <div className="animate-spin rounded-full h-3 w-3 border border-blue-600 border-t-transparent"></div>
+                Saving...
+              </span>
+            ) : (
+              <span className="text-gray-600">Unsaved changes</span>
+            )}
+          </div>
+        )}
+
         {activeTab === "edit" && (
           <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
-            {/* Middle Panel */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
               <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
 
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}
-                  onTitleChange={handleSurveyTitleChange}
+                  onTitleChange={handleTitleChange}
                   onDescriptionChange={handleDescriptionChangeWithTracking}
                 />
 
@@ -159,10 +165,10 @@ const Index = () => {
                   welcomeMessage={survey.welcomeMessage || ''}
                   welcomeInstructions={survey.welcomeInstructions || ''}
                   welcomeButtonText={survey.welcomeButtonText || ''}
-                  onWelcomeTitleChange={(v) => updateSurvey({ welcomeTitle: v })}
-                  onWelcomeMessageChange={(v) => updateSurvey({ welcomeMessage: v })}
-                  onWelcomeInstructionsChange={(v) => updateSurvey({ welcomeInstructions: v })}
-                  onWelcomeButtonTextChange={(v) => updateSurvey({ welcomeButtonText: v })}
+                  onWelcomeTitleChange={(v) => updateSurveyWithTracking({ welcomeTitle: v })}
+                  onWelcomeMessageChange={(v) => updateSurveyWithTracking({ welcomeMessage: v })}
+                  onWelcomeInstructionsChange={(v) => updateSurveyWithTracking({ welcomeInstructions: v })}
+                  onWelcomeButtonTextChange={(v) => updateSurveyWithTracking({ welcomeButtonText: v })}
                 />
 
                 <QuestionSection
@@ -178,17 +184,16 @@ const Index = () => {
                   thankYouMessage={survey.thankYouMessage || ''}
                   thankYouButtonText={survey.thankYouButtonText || ''}
                   redirectUrl={survey.redirectUrl || ''}
-                  onThankYouTitleChange={(v) => updateSurvey({ thankYouTitle: v })}
-                  onThankYouMessageChange={(v) => updateSurvey({ thankYouMessage: v })}
-                  onThankYouButtonTextChange={(v) => updateSurvey({ thankYouButtonText: v })}
-                  onRedirectUrlChange={(v) => updateSurvey({ redirectUrl: v })}
+                  onThankYouTitleChange={(v) => updateSurveyWithTracking({ thankYouTitle: v })}
+                  onThankYouMessageChange={(v) => updateSurveyWithTracking({ thankYouMessage: v })}
+                  onThankYouButtonTextChange={(v) => updateSurveyWithTracking({ thankYouButtonText: v })}
+                  onRedirectUrlChange={(v) => updateSurveyWithTracking({ redirectUrl: v })}
                 />
               </div>
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            {/* Right Panel - Preview */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
               <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
 
