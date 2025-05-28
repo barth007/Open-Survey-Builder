@@ -1,9 +1,8 @@
-
 import React, { useEffect, useRef } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { GripVertical } from 'lucide-react';
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
 interface SurveyTitleProps {
@@ -20,10 +19,8 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   onDescriptionChange,
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
   const { id: surveyId } = useParams();
 
-  // Focus the title input when the component mounts if it's empty
   useEffect(() => {
     if (title === "Untitled Survey" && titleInputRef.current) {
       titleInputRef.current.select();
@@ -32,21 +29,23 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
 
   const handleTitleChange = (newTitle: string) => {
     onTitleChange(newTitle);
-    
-    // Update the document title immediately for better UX
     document.title = newTitle;
   };
 
   return (
-    <Card className={`w-full mb-4 border-abyss`}>
-      <CardContent className="pt-6 space-y-5">
+    <Card className="w-full border border-ice rounded-lg bg-white">
+      <div className="flex items-center gap-3 px-6 pt-6">
+        <GripVertical className="text-carbon" size={18} />
         <Input
           ref={titleInputRef}
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Survey Title"
-          className="text-2xl font-bold border-none px-0 focus-visible:ring-0 mb-2 w-full h-auto min-h-[40px]"
+          className="text-xl font-bold border-none px-0 focus-visible:ring-0 w-full h-auto min-h-[40px]"
         />
+      </div>
+
+      <div className="px-6 pt-4 pb-6">
         <Textarea
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
@@ -54,7 +53,7 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
           className="border-none resize-none px-0 focus-visible:ring-0 w-full min-h-[60px]"
           rows={3}
         />
-      </CardContent>
+      </div>
     </Card>
   );
 };
