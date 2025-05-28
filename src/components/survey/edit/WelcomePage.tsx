@@ -27,14 +27,12 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
   onWelcomeButtonTextChange
 }) => {
   return (
-    <Card className="w-full border-t-4 border-t-indigo-500 h-full">
-      <CardHeader className="pb-4">
-        <h3 className="text-lg font-medium">Welcome Page</h3>
-      </CardHeader>
+    <div className="w-full flex flex-col space-y-4">
+      <h3 className="text-lg font-medium">Thank You Page</h3>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="welcomeTitle">Welcome Title</Label>
-          <Input 
+          <Input
             id="welcomeTitle"
             placeholder="Welcome to our survey"
             value={welcomeTitle || ''}
@@ -44,7 +42,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="welcomeMessage">Welcome Message</Label>
-          <Textarea 
+          <Textarea
             id="welcomeMessage"
             placeholder="Thank you for taking the time to participate in our survey..."
             value={welcomeMessage || ''}
@@ -55,7 +53,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="welcomeInstructions">Instructions</Label>
-          <Input 
+          <Input
             id="welcomeInstructions"
             placeholder="Click the button below to begin the survey."
             value={welcomeInstructions || ''}
@@ -65,7 +63,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
         </div>
         <div className="space-y-2">
           <Label htmlFor="welcomeButtonText">Button Text</Label>
-          <Input 
+          <Input
             id="welcomeButtonText"
             placeholder="Start Survey"
             value={welcomeButtonText || ''}
@@ -74,6 +72,6 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
           />
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 };
