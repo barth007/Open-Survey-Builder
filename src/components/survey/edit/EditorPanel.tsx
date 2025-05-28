@@ -3,10 +3,10 @@ import React from 'react';
 import { Survey, Question } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
 import { WelcomePageSettings } from './WelcomePage';
-import WelcomeCard from './WelcomeCard';
+import { WelcomeCard } from './WelcomeCard';
 import { QuestionSection } from './QuestionSection';
 import { ThankYouPageSettings } from './ThankYouPageSettings';
-import ThankYouCard from './ThankYouCard';
+import { ThankYouCard } from './ThankYouCard';
 
 interface EditorPanelProps {
   survey: Survey;
@@ -43,44 +43,53 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
   onThankYouButtonTextChange,
   onRedirectUrlChange
 }) => {
+  const updateSurvey = (updatedFields: Partial<Survey>) => {
+    // Implement the logic to update the survey object here
+    console.log("Updating survey with fields:", updatedFields);
+  };
+
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto space-y-4 px-6 py-4">
-      <SurveyTitle
+  <div className="p-4">
+    <SurveyTitle
         title={survey.title}
         description={survey.description}
         onTitleChange={onTitleChange}
         onDescriptionChange={onDescriptionChange}
       />
+    <WelcomeCard
+      welcomeTitle={survey.welcomeTitle || ""}
+      welcomeMessage={survey.welcomeMessage || ""}
+      welcomeInstructions={survey.welcomeInstructions || ""}
+      welcomeButtonText={survey.welcomeButtonText || ""}
+      onWelcomeTitleChange={(v) => updateSurvey({ welcomeTitle: v })}
+      onWelcomeMessageChange={(v) => updateSurvey({ welcomeMessage: v })}
+      onWelcomeInstructionsChange={(v) => updateSurvey({ welcomeInstructions: v })}
+      onWelcomeButtonTextChange={(v) => updateSurvey({ welcomeButtonText: v })}
+    />
+  </div>
 
-<WelcomeCard
-  welcomeTitle={survey.welcomeTitle || ''}
-  welcomeMessage={survey.welcomeMessage || ''}
-  welcomeInstructions={survey.welcomeInstructions || ''}
-  welcomeButtonText={survey.welcomeButtonText || ''}
-  onWelcomeTitleChange={onWelcomeTitleChange}
-  onWelcomeMessageChange={onWelcomeMessageChange}
-  onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-  onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-/>
+  <QuestionSection
+    questions={survey.questions}
+    onQuestionChange={onQuestionChange}
+    onDeleteQuestion={onDeleteQuestion}
+    onDuplicateQuestion={onDuplicateQuestion}
+    onAddQuestion={onAddQuestion}
+  />
 
-      <QuestionSection
-        questions={survey.questions}
-        onQuestionChange={onQuestionChange}
-        onDeleteQuestion={onDeleteQuestion}
-        onDuplicateQuestion={onDuplicateQuestion}
-        onAddQuestion={onAddQuestion}
-      />
+  <div className="p-4">
+    <ThankYouCard
+      thankYouTitle={survey.thankYouTitle || ""}
+      thankYouMessage={survey.thankYouMessage || ""}
+      thankYouButtonText={survey.thankYouButtonText || ""}
+      redirectUrl={survey.redirectUrl || ""}
+      onThankYouTitleChange={(v) => updateSurvey({ thankYouTitle: v })}
+      onThankYouMessageChange={(v) => updateSurvey({ thankYouMessage: v })}
+      onThankYouButtonTextChange={(v) => updateSurvey({ thankYouButtonText: v })}
+      onRedirectUrlChange={(v) => updateSurvey({ redirectUrl: v })}
+    />
+  </div>
+</div>
 
-<ThankYouCard
-  thankYouTitle={survey.thankYouTitle || ''}
-  thankYouMessage={survey.thankYouMessage || ''}
-  thankYouButtonText={survey.thankYouButtonText || ''}
-  redirectUrl={survey.redirectUrl || ''}
-  onThankYouTitleChange={onThankYouTitleChange}
-  onThankYouMessageChange={onThankYouMessageChange}
-  onThankYouButtonTextChange={onThankYouButtonTextChange}
-  onRedirectUrlChange={onRedirectUrlChange}
-/>
-    </div>
   );
 };

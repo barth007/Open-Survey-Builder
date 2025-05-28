@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
-interface Props {
+interface WelcomeCardProps {
   welcomeTitle: string;
   welcomeMessage: string;
   welcomeInstructions: string;
@@ -15,7 +15,7 @@ interface Props {
   onWelcomeButtonTextChange: (value: string) => void;
 }
 
-const WelcomeCard: React.FC<Props> = ({
+export const WelcomeCard: React.FC<WelcomeCardProps> = ({
   welcomeTitle,
   welcomeMessage,
   welcomeInstructions,
@@ -24,48 +24,55 @@ const WelcomeCard: React.FC<Props> = ({
   onWelcomeMessageChange,
   onWelcomeInstructionsChange,
   onWelcomeButtonTextChange
-}) => (
-    <Card className="w-full border border-ice shadow-sm rounded-xl bg-white">
-    <CardContent className="pt-6 pb-6 px-4 sm:px-6 space-y-5">
-      <div className="space-y-2">
-        <Label htmlFor="welcomeTitle">Welcome Title</Label>
-        <Input
-          id="welcomeTitle"
-          placeholder="Welcome to our survey"
-          value={welcomeTitle}
-          onChange={(e) => onWelcomeTitleChange(e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="welcomeMessage">Welcome Message</Label>
-        <Textarea
-          id="welcomeMessage"
-          placeholder="Thank you for taking the time..."
-          value={welcomeMessage}
-          onChange={(e) => onWelcomeMessageChange(e.target.value)}
-          rows={3}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="welcomeInstructions">Instructions</Label>
-        <Input
-          id="welcomeInstructions"
-          placeholder="Click the button to begin"
-          value={welcomeInstructions}
-          onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="welcomeButtonText">Button Text</Label>
-        <Input
-          id="welcomeButtonText"
-          placeholder="Start Survey"
-          value={welcomeButtonText}
-          onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
-        />
-      </div>
-    </CardContent>
-  </Card>
-);
+}) => {
+  return (
+    <Card className="w-full mb-4 border-abyss">
+      <CardContent className="pt-6 space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="welcomeTitle">Welcome Title</Label>
+          <Input
+            id="welcomeTitle"
+            value={welcomeTitle}
+            onChange={(e) => onWelcomeTitleChange(e.target.value)}
+            placeholder="Welcome to our survey"
+            className="w-full"
+          />
+        </div>
 
-export default WelcomeCard;
+        <div className="space-y-2">
+          <Label htmlFor="welcomeMessage">Message</Label>
+          <Textarea
+            id="welcomeMessage"
+            value={welcomeMessage}
+            onChange={(e) => onWelcomeMessageChange(e.target.value)}
+            placeholder="We're glad you're here..."
+            className="w-full resize-none"
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="welcomeInstructions">Instructions</Label>
+          <Input
+            id="welcomeInstructions"
+            value={welcomeInstructions}
+            onChange={(e) => onWelcomeInstructionsChange(e.target.value)}
+            placeholder="Click the button to begin"
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="welcomeButtonText">Button Text</Label>
+          <Input
+            id="welcomeButtonText"
+            value={welcomeButtonText}
+            onChange={(e) => onWelcomeButtonTextChange(e.target.value)}
+            placeholder="Start"
+            className="w-full"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
