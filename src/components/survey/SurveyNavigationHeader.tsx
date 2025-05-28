@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Home, FileText, Check, RotateCw, WifiOff } from 'lucide-react';
@@ -38,6 +37,10 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
 
   // Check if user is online
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+  
+  // State for showing saving status with minimum duration
+  const [showSaving, setShowSaving] = React.useState(false);
+  const savingTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   React.useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -51,6 +54,28 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Handle saving state with minimum 1-second display
+  React.useEffect(() => {
+    if (isSaving) {
+      setShowSaving(true);
+      // Clear any existing timeout
+      if (savingTimeoutRef.current) {
+        clearTimeout(savingTimeoutRef.current);
+      }
+    } else if (showSaving) {
+      // When saving stops, wait at least 1 second before hiding
+      savingTimeoutRef.current = setTimeout(() => {
+        setShowSaving(false);
+      }, 1000);
+    }
+
+    return () => {
+      if (savingTimeoutRef.current) {
+        clearTimeout(savingTimeoutRef.current);
+      }
+    };
+  }, [isSaving, showSaving]);
 
   // Debug logging
   console.log("[DEBUG] SurveyNavigationHeader - activeUsers prop:", activeUsers);
@@ -112,15 +137,15 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
 
   const getSaveStatusIcon = () => {
     if (!isOnline) {
-      return <WifiOff className="h-4 w-4 text-red-500" />;
+      return <WifiOff className="h-4 w-4 text-gray-400" />;
     }
     
-    if (isSaving) {
-      return <RotateCw className="h-4 w-4 text-blue-600 animate-spin" />;
+    if (showSaving) {
+      return <RotateCw className="h-4 w-4 text-gray-400 animate-spin" />;
     }
     
     if (lastSaved) {
-      return <Check className="h-4 w-4 text-green-600" />;
+      return <Check className="h-4 w-4 text-gray-400" />;
     }
     
     return <WifiOff className="h-4 w-4 text-gray-400" />;
@@ -131,11 +156,15 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
       return 'Offline';
     }
     
-    if (isSaving) {
+    if (showSaving) {
       return 'Saving...';
     }
     
     return formatLastSaved(lastSaved);
+  };
+
+  const shouldShowText = () => {
+    return showSaving; // Only show text when saving
   };
 
   return (
@@ -179,9 +208,11 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-2">
                   {getSaveStatusIcon()}
-                  <span className="text-sm text-muted-foreground">
-                    {getSaveStatusText()}
-                  </span>
+                  {shouldShowText() && (
+                    <span className="text-sm text-muted-foreground">
+                      {getSaveStatusText()}
+                    </span>
+                  )}
                 </div>
               </TooltipTrigger>
               <TooltipContent>
