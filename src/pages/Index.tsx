@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -28,6 +29,14 @@ const Index = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Redirect to dashboard if no surveyId
+  useEffect(() => {
+    if (!surveyId) {
+      navigate('/dashboard');
+      return;
+    }
+  }, [surveyId, navigate]);
 
   const { activeUsers } = useActiveUsers(surveyId) as { activeUsers: ActiveUser[] };
 
@@ -113,6 +122,11 @@ const Index = () => {
     handleCardClick,
     selectedResponseData
   } = useAnswersTab(survey);
+
+  // Don't render anything if no surveyId
+  if (!surveyId) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -214,7 +228,7 @@ const Index = () => {
                 )}
 
                 {survey.questions?.length > 0 && (
-                  <PreviewTab survey={survey} />
+                  <PreviewTab survey={survey} key={`preview-${survey.id}-${survey.questions.length}`} />
                 )}
 
                 {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
