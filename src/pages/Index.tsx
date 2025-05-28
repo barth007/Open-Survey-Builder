@@ -7,18 +7,19 @@ import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
-import EditTab from '@/components/survey/EditTab';
 import AnswersTab from '@/components/AnswersTab';
 import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
 import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
-import { PreviewPanel } from '@/components/survey/edit/PreviewPanel';
 import SurveyLayout from '@/components/ui/SurveyLayout';
 import SurveyTitle from '@/components/SurveyTitle';
 import { WelcomeCard } from '@/components/survey/edit/WelcomeCard';
 import { QuestionSection } from '@/components/survey/edit/QuestionSection';
 import { ThankYouCard } from '@/components/survey/edit/ThankYouCard';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import PreviewTab from '@/components/survey/PreviewTab';
+import { WelcomePage } from '@/components/survey/WelcomePage';
+import { ThankYouPage } from '@/components/survey/ThankYouPage';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -144,7 +145,7 @@ const Index = () => {
           <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
             {/* Middle Panel */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
-            <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
+              <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}
@@ -188,10 +189,49 @@ const Index = () => {
 
             {/* Right Panel */}
             <ResizablePanel defaultSize={50} minSize={25} className="overflow-auto min-w-0 bg-gray-50">
-              <div className="h-full w-full px-6 py-4">
-                <h2 className="text-sm font-semibold text-gray-500 mb-2">Preview</h2>
-                <PreviewPanel survey={survey} />
+              <div className="w-full h-full flex flex-col space-y-6">
+                {/* Welcome Page Preview */}
+                {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                    <div className="mb-3 pb-2 border-b border-gray-100">
+                      <span className="text-xs font-medium text-gray-500 uppercase">Welcome Page</span>
+                    </div>
+                    <WelcomePage
+                      title={survey.welcomeTitle}
+                      message={survey.welcomeMessage}
+                      instructions={survey.welcomeInstructions}
+                      buttonText={survey.welcomeButtonText}
+                      onStart={() => { }}
+                    />
+                  </div>
+                )}
+
+                {/* Questions Preview */}
+                {survey.questions && survey.questions.length > 0 && (
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                    <div className="mb-3 pb-2 border-b border-gray-100">
+                      <span className="text-xs font-medium text-gray-500 uppercase">Survey Questions</span>
+                    </div>
+                    <PreviewTab survey={survey} />
+                  </div>
+                )}
+
+                {/* Thank You Page Preview */}
+                {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                    <div className="mb-3 pb-2 border-b border-gray-100">
+                      <span className="text-xs font-medium text-gray-500 uppercase">Thank You Page</span>
+                    </div>
+                    <ThankYouPage
+                      title={survey.thankYouTitle}
+                      message={survey.thankYouMessage}
+                      buttonText={survey.thankYouButtonText}
+                      redirectUrl={survey.redirectUrl}
+                    />
+                  </div>
+                )}
               </div>
+
             </ResizablePanel>
           </ResizablePanelGroup>
         )}
