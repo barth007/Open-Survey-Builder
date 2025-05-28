@@ -26,7 +26,7 @@ export const WelcomeCard = ({
     onWelcomeButtonTextChange,
   }: WelcomeCardProps) => {
     return (
-      <div className="rounded-xl border border-ice bg-white p-6 space-y-4">
+      <div className="rounded-xl border border-abyss bg-white p-6 space-y-4">
         <h3 className="text-lg font-medium">Welcome Page</h3>
   
         <div className="space-y-2">
@@ -72,4 +72,3 @@ export const WelcomeCard = ({
       </div>
     );
   };
-  

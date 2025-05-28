@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +26,7 @@ export const ThankYouCard: React.FC<Props> = ({
   onRedirectUrlChange,
 }) => {
   return (
-    <div className="rounded-xl border border-ice bg-white p-6 space-y-4">
+    <div className="rounded-xl border border-abyss bg-white p-6 space-y-4">
       <h3 className="text-lg font-medium">Thank You Page</h3>
 
       <div className="space-y-2">
