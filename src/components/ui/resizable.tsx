@@ -21,10 +21,7 @@ const ResizablePanel = ({
   ...props
 }: React.ComponentProps<typeof ResizablePrimitive.Panel>) => (
   <ResizablePrimitive.Panel
-    className={cn(
-      "flex w-full overflow-auto",
-      className
-    )}
+  className={cn("flex w-full flex-col overflow-auto min-h-0", className)}
     {...props}
   />
 )
