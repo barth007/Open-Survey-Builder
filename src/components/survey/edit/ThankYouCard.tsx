@@ -28,7 +28,6 @@ export const ThankYouCard: React.FC<Props> = ({
   return (
     <div className="rounded-xl border border-abyss bg-white p-6 space-y-4">
       <h3 className="text-lg font-medium">Thank You Page</h3>
-
       <div className="space-y-2">
         <Label htmlFor="thankYouTitle">Thank You Title</Label>
         <Input

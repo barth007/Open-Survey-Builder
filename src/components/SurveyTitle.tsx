@@ -38,8 +38,8 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   };
 
   return (
-    <Card className="w-full border-t-4 border-t-indigo-500 min-h-[120px]">
-      <CardContent className="pt-6 pb-6 min-h-[120px]">
+    <Card className={`w-full mb-4 border-abyss`}>
+      <CardContent className="pt-6 space-y-5">
         <Input
           ref={titleInputRef}
           value={title}
