@@ -183,7 +183,16 @@ const Index = () => {
                 />
               </div>
             </ResizablePanel>
+            
+            <ResizableHandle withHandle />
 
+            {/* Right Panel */}
+            <ResizablePanel defaultSize={50} minSize={25} className="overflow-auto min-w-0 bg-gray-50">
+              <div className="h-full w-full px-6 py-4">
+                <h2 className="text-sm font-semibold text-gray-500 mb-2">Preview</h2>
+                <PreviewPanel survey={survey} />
+              </div>
+            </ResizablePanel>
           </ResizablePanelGroup>
         )}
 
