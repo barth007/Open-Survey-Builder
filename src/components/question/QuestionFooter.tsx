@@ -22,7 +22,7 @@ const QuestionFooter: React.FC<QuestionFooterProps> = ({
   const isMobile = useIsMobile();
   
   return (
-    <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between'} border-t px-3 sm:px-6 py-4 border-ice w-full`}>
+    <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between'} border-t px-3 sm:px-6 py-4 border-ice w-full min-h-[fit-content]`}>
       <div className="flex items-center gap-3">
         <div className="flex items-center space-x-2">
           <Switch
