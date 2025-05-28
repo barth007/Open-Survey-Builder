@@ -27,7 +27,8 @@ export const ThankYouPageSettings: React.FC<ThankYouPageSettingsProps> = ({
   onRedirectUrlChange
 }) => {
   return (
-    <Card className="w-full border border-ice min-h-[280px] h-auto">
+    <Card className="w-full border border-ice h-fit">
+
       <CardHeader className="pb-4">
         <h3 className="text-lg font-medium">Thank You Page</h3>
       </CardHeader>
