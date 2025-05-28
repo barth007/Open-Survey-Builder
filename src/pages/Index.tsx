@@ -191,42 +191,30 @@ const Index = () => {
             {/* Right Panel */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
               <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
-                {/* Welcome Page Preview */}
+
                 <WelcomePage
-                  title={survey.welcomeTitle}
-                  message={survey.welcomeMessage}
-                  instructions={survey.welcomeInstructions}
-                  buttonText={survey.welcomeButtonText}
-                  onStart={() => { }}
+                  welcomeTitle={survey.welcomeTitle}
+                  welcomeMessage={survey.welcomeMessage}
+                  welcomeInstructions={survey.welcomeInstructions}
+                  welcomeButtonText={survey.welcomeButtonText}
                 />
 
-                {/* Questions Preview */}
-                {survey.questions && survey.questions.length > 0 && (
-                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <div className="mb-3 pb-2 border-b border-gray-100">
-                      <span className="text-xs font-medium text-gray-500 uppercase">Survey Questions</span>
-                    </div>
-                    <PreviewTab survey={survey} />
-                  </div>
+                {survey.questions?.length > 0 && (
+                  <PreviewTab survey={survey} />
                 )}
 
-                {/* Thank You Page Preview */}
                 {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
-                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <div className="mb-3 pb-2 border-b border-gray-100">
-                      <span className="text-xs font-medium text-gray-500 uppercase">Thank You Page</span>
-                    </div>
-                    <ThankYouPage
-                      title={survey.thankYouTitle}
-                      message={survey.thankYouMessage}
-                      buttonText={survey.thankYouButtonText}
-                      redirectUrl={survey.redirectUrl}
-                    />
-                  </div>
+                  <ThankYouPage
+                    thankYouTitle={survey.thankYouTitle}
+                    thankYouMessage={survey.thankYouMessage}
+                    thankYouButtonText={survey.thankYouButtonText}
+                    redirectUrl={survey.redirectUrl}
+                  />
                 )}
-              </div>
 
+              </div>
             </ResizablePanel>
+
           </ResizablePanelGroup>
         )}
 
