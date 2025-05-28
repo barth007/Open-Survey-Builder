@@ -3,8 +3,10 @@ import React from 'react';
 import { Survey, Question } from '@/types/survey';
 import SurveyTitle from '@/components/SurveyTitle';
 import { WelcomePageSettings } from './WelcomePage';
+import WelcomeCard from './WelcomeCard';
 import { QuestionSection } from './QuestionSection';
 import { ThankYouPageSettings } from './ThankYouPageSettings';
+import ThankYouCard from './ThankYouCard';
 
 interface EditorPanelProps {
   survey: Survey;
@@ -50,16 +52,16 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         onDescriptionChange={onDescriptionChange}
       />
 
-      <WelcomePageSettings
-        welcomeTitle={survey.welcomeTitle || ''}
-        welcomeMessage={survey.welcomeMessage || ''}
-        welcomeInstructions={survey.welcomeInstructions || ''}
-        welcomeButtonText={survey.welcomeButtonText || ''}
-        onWelcomeTitleChange={onWelcomeTitleChange}
-        onWelcomeMessageChange={onWelcomeMessageChange}
-        onWelcomeInstructionsChange={onWelcomeInstructionsChange}
-        onWelcomeButtonTextChange={onWelcomeButtonTextChange}
-      />
+<WelcomeCard
+  welcomeTitle={survey.welcomeTitle || ''}
+  welcomeMessage={survey.welcomeMessage || ''}
+  welcomeInstructions={survey.welcomeInstructions || ''}
+  welcomeButtonText={survey.welcomeButtonText || ''}
+  onWelcomeTitleChange={onWelcomeTitleChange}
+  onWelcomeMessageChange={onWelcomeMessageChange}
+  onWelcomeInstructionsChange={onWelcomeInstructionsChange}
+  onWelcomeButtonTextChange={onWelcomeButtonTextChange}
+/>
 
       <QuestionSection
         questions={survey.questions}
@@ -69,16 +71,16 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
         onAddQuestion={onAddQuestion}
       />
 
-      <ThankYouPageSettings
-        thankYouTitle={survey.thankYouTitle || ''}
-        thankYouMessage={survey.thankYouMessage || ''}
-        thankYouButtonText={survey.thankYouButtonText || ''}
-        redirectUrl={survey.redirectUrl || ''}
-        onThankYouTitleChange={onThankYouTitleChange}
-        onThankYouMessageChange={onThankYouMessageChange}
-        onThankYouButtonTextChange={onThankYouButtonTextChange}
-        onRedirectUrlChange={onRedirectUrlChange}
-      />
+<ThankYouCard
+  thankYouTitle={survey.thankYouTitle || ''}
+  thankYouMessage={survey.thankYouMessage || ''}
+  thankYouButtonText={survey.thankYouButtonText || ''}
+  redirectUrl={survey.redirectUrl || ''}
+  onThankYouTitleChange={onThankYouTitleChange}
+  onThankYouMessageChange={onThankYouMessageChange}
+  onThankYouButtonTextChange={onThankYouButtonTextChange}
+  onRedirectUrlChange={onRedirectUrlChange}
+/>
     </div>
   );
 };
