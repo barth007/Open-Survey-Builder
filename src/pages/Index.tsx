@@ -188,23 +188,17 @@ const Index = () => {
             <ResizableHandle withHandle />
 
             {/* Right Panel */}
-            <ResizablePanel defaultSize={50} minSize={25} className="overflow-auto min-w-0 bg-gray-50">
-              <div className="w-full h-full flex flex-col space-y-6">
+            <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
+              <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
+                
                 {/* Welcome Page Preview */}
-                {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
-                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                    <div className="mb-3 pb-2 border-b border-gray-100">
-                      <span className="text-xs font-medium text-gray-500 uppercase">Welcome Page</span>
-                    </div>
-                    <WelcomePage
-                      title={survey.welcomeTitle}
-                      message={survey.welcomeMessage}
-                      instructions={survey.welcomeInstructions}
-                      buttonText={survey.welcomeButtonText}
-                      onStart={() => { }}
-                    />
-                  </div>
-                )}
+                  <WelcomePage
+                    title={survey.welcomeTitle}
+                    message={survey.welcomeMessage}
+                    instructions={survey.welcomeInstructions}
+                    buttonText={survey.welcomeButtonText}
+                    onStart={() => { }}
+                  />
 
                 {/* Questions Preview */}
                 {survey.questions && survey.questions.length > 0 && (
