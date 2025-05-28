@@ -20,7 +20,7 @@ export function SurveyCard({ survey }: SurveyCardProps) {
   };
 
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleCardClick}
     >
@@ -36,7 +36,7 @@ export function SurveyCard({ survey }: SurveyCardProps) {
           <Users className="h-4 w-4" />
           <span>Personal</span>
         </div>
-        
+
         {/* Sharing status */}
         <div className="flex items-center gap-2">
           {survey.isPublished ? (
