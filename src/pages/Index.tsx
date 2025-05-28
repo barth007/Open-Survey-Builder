@@ -23,7 +23,6 @@ import { WelcomePage } from '@/components/survey/WelcomePage';
 import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
-import { UserAvatars } from '@/components/survey/UserAvatars';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -320,9 +319,6 @@ const Index = () => {
               )}
             </div>
           </SurveyLayout>
-          
-          {/* User Avatars positioned at bottom right */}
-          {surveyId && <UserAvatars activeUsers={activeUsers} />}
         </div>
       </div>
     </SidebarProvider>

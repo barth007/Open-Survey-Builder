@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
+import { UserAvatars } from '@/components/survey/UserAvatars';
 import { Survey } from '@/types/survey';
 
 interface ActiveUser {
@@ -157,6 +158,12 @@ export function SurveyNavigationHeader({
     return showSaving; // Only show text when saving
   };
 
+  // Convert activeUsers to match UserAvatars interface
+  const convertedActiveUsers: ActiveUser[] = activeUsers.map(user => ({
+    ...user,
+    last_active: user.last_active || new Date()
+  }));
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Share button and Navigation path */}
@@ -197,7 +204,7 @@ export function SurveyNavigationHeader({
         )}
       </div>
 
-      {/* Right: Only Save status */}
+      {/* Right: Save status and User Avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-4 pr-2 z-50 relative">
           {/* Save Status Indicator */}
@@ -218,6 +225,9 @@ export function SurveyNavigationHeader({
               </TooltipContent>
             </Tooltip>
           )}
+
+          {/* User Avatars */}
+          {surveyId && <UserAvatars activeUsers={convertedActiveUsers} />}
         </div>
       </TooltipProvider>
     </header>
