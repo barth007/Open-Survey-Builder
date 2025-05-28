@@ -1,39 +1,47 @@
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-interface WelcomePageProps {
-  title?: string;
-  message?: string;
-  instructions?: string;
-  buttonText?: string;
-  onStart: () => void;
+interface Props {
+  welcomeTitle: string;
+  welcomeMessage: string;
+  welcomeInstructions: string;
+  welcomeButtonText: string;
 }
 
-export const WelcomePage: React.FC<WelcomePageProps> = ({ 
-  title = "Welcome to this survey",
-  message = "Thank you for taking the time to fill out this survey. Your feedback is important to us.",
-  instructions = "Click the button below to begin the survey.",
-  buttonText = "Start Survey",
-  onStart
+export const WelcomePage: React.FC<Props> = ({
+  welcomeTitle,
+  welcomeMessage,
+  welcomeInstructions,
+  welcomeButtonText
 }) => {
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-        {message && <CardDescription className="text-base mt-2">{message}</CardDescription>}
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          {instructions}
-        </p>
+    <Card className="w-full border border-ice min-h-[320px] h-auto">
+      <CardContent className="space-y-4 p-6">
+        <h3 className="text-lg font-medium">Welcome Page</h3>
+
+        <div className="space-y-2">
+          <Label>Welcome Title</Label>
+          <Input value={welcomeTitle} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Welcome Message</Label>
+          <Textarea value={welcomeMessage} rows={3} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Instructions</Label>
+          <Input value={welcomeInstructions} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Button Text</Label>
+          <Input value={welcomeButtonText} disabled />
+        </div>
       </CardContent>
-      <CardFooter>
-        <Button onClick={onStart} className="w-full md:w-auto">
-          {buttonText}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

@@ -1,54 +1,47 @@
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-
-interface ThankYouPageProps {
-  title?: string;
-  message?: string;
-  buttonText?: string;
-  redirectUrl?: string;
-  onClose?: () => void;
+interface Props {
+  thankYouTitle: string;
+  thankYouMessage: string;
+  thankYouButtonText: string;
+  redirectUrl: string;
 }
 
-export const ThankYouPage: React.FC<ThankYouPageProps> = ({ 
-  title = "Thank you for your responses",
-  message = "Your feedback has been submitted successfully.",
-  buttonText = "Close",
-  redirectUrl,
-  onClose
+export const ThankYouPage: React.FC<Props> = ({
+  thankYouTitle,
+  thankYouMessage,
+  thankYouButtonText,
+  redirectUrl
 }) => {
-  useEffect(() => {
-    // If we have a redirect URL, navigate after a short delay
-    if (redirectUrl) {
-      const timer = setTimeout(() => {
-        window.location.href = redirectUrl;
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [redirectUrl]);
-
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-        {message && <CardDescription className="text-base mt-2">{message}</CardDescription>}
-      </CardHeader>
-      <CardContent>
-        {redirectUrl && (
-          <p className="text-sm text-muted-foreground">
-            You will be redirected in a few seconds...
-          </p>
-        )}
+    <Card className="w-full border border-ice min-h-[320px] h-auto">
+      <CardContent className="space-y-4 p-6">
+        <h3 className="text-lg font-medium">Thank You Page</h3>
+
+        <div className="space-y-2">
+          <Label>Thank You Title</Label>
+          <Input value={thankYouTitle} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Thank You Message</Label>
+          <Textarea value={thankYouMessage} rows={3} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Button Text</Label>
+          <Input value={thankYouButtonText} disabled />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Redirect URL</Label>
+          <Input value={redirectUrl} disabled />
+        </div>
       </CardContent>
-      <CardFooter>
-        {!redirectUrl && onClose && (
-          <Button onClick={onClose} className="w-full md:w-auto">
-            {buttonText}
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 };

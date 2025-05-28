@@ -191,8 +191,6 @@ const Index = () => {
             {/* Right Panel */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
               <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
-
-
                 {/* Welcome Page Preview */}
                 <WelcomePage
                   title={survey.welcomeTitle}
