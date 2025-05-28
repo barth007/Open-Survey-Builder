@@ -141,61 +141,49 @@ const Index = () => {
     <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
         {activeTab === "edit" && (
-          <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
-            {/* Middle Panel */}
-            <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
-<div className="flex flex-col h-full w-full overflow-y-auto px-6 py-4 space-y-6">
-                <SurveyTitle
-                  title={survey.title}
-                  description={survey.description}
-                  onTitleChange={handleSurveyTitleChange}
-                  onDescriptionChange={handleDescriptionChangeWithTracking}
-                />    
-  
-                <WelcomeCard
-                  welcomeTitle={survey.welcomeTitle || ''}
-                  welcomeMessage={survey.welcomeMessage || ''}
-                  welcomeInstructions={survey.welcomeInstructions || ''}
-                  welcomeButtonText={survey.welcomeButtonText || ''}
-                  onWelcomeTitleChange={(v) => updateSurvey({ welcomeTitle: v })}
-                  onWelcomeMessageChange={(v) => updateSurvey({ welcomeMessage: v })}
-                  onWelcomeInstructionsChange={(v) => updateSurvey({ welcomeInstructions: v })}
-                  onWelcomeButtonTextChange={(v) => updateSurvey({ welcomeButtonText: v })}
-                />
-  
-                <QuestionSection
-                  questions={survey.questions}
-                  onQuestionChange={handleQuestionChange}
-                  onDeleteQuestion={handleDeleteQuestion}
-                  onDuplicateQuestion={handleDuplicateQuestion}
-                  onAddQuestion={handleAddQuestion}
-                />
-  
-                <ThankYouCard
-                  thankYouTitle={survey.thankYouTitle || ''}
-                  thankYouMessage={survey.thankYouMessage || ''}
-                  thankYouButtonText={survey.thankYouButtonText || ''}
-                  redirectUrl={survey.redirectUrl || ''}
-                  onThankYouTitleChange={(v) => updateSurvey({ thankYouTitle: v })}
-                  onThankYouMessageChange={(v) => updateSurvey({ thankYouMessage: v })}
-                  onThankYouButtonTextChange={(v) => updateSurvey({ thankYouButtonText: v })}
-                  onRedirectUrlChange={(v) => updateSurvey({ redirectUrl: v })}
-                />
-              </div>
-            </ResizablePanel>
-  
-            <ResizableHandle withHandle />
-  
-            {/* Right Panel */}
-            <ResizablePanel defaultSize={50} minSize={25} className="overflow-auto min-w-0 bg-gray-50">
-              <div className="h-full w-full px-6 py-4">
-                <h2 className="text-sm font-semibold text-gray-500 mb-2">Preview</h2>
-                <PreviewPanel survey={survey} />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+          <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
+          <div className="flex flex-col h-full w-full overflow-y-auto gap-4 p-4">
+            <SurveyTitle
+              title={survey.title}
+              description={survey.description}
+              onTitleChange={handleSurveyTitleChange}
+              onDescriptionChange={handleDescriptionChangeWithTracking}
+            />
+        
+            <WelcomeCard
+              welcomeTitle={survey.welcomeTitle || ''}
+              welcomeMessage={survey.welcomeMessage || ''}
+              welcomeInstructions={survey.welcomeInstructions || ''}
+              welcomeButtonText={survey.welcomeButtonText || ''}
+              onWelcomeTitleChange={(v) => updateSurvey({ welcomeTitle: v })}
+              onWelcomeMessageChange={(v) => updateSurvey({ welcomeMessage: v })}
+              onWelcomeInstructionsChange={(v) => updateSurvey({ welcomeInstructions: v })}
+              onWelcomeButtonTextChange={(v) => updateSurvey({ welcomeButtonText: v })}
+            />
+        
+            <QuestionSection
+              questions={survey.questions}
+              onQuestionChange={handleQuestionChange}
+              onDeleteQuestion={handleDeleteQuestion}
+              onDuplicateQuestion={handleDuplicateQuestion}
+              onAddQuestion={handleAddQuestion}
+            />
+        
+            <ThankYouCard
+              thankYouTitle={survey.thankYouTitle || ''}
+              thankYouMessage={survey.thankYouMessage || ''}
+              thankYouButtonText={survey.thankYouButtonText || ''}
+              redirectUrl={survey.redirectUrl || ''}
+              onThankYouTitleChange={(v) => updateSurvey({ thankYouTitle: v })}
+              onThankYouMessageChange={(v) => updateSurvey({ thankYouMessage: v })}
+              onThankYouButtonTextChange={(v) => updateSurvey({ thankYouButtonText: v })}
+              onRedirectUrlChange={(v) => updateSurvey({ redirectUrl: v })}
+            />
+          </div>
+        </ResizablePanel>
+        
         )}
-  
+
         {activeTab === "answers" && (
           <SplitPanelLayout
             middlePanel={
@@ -223,7 +211,7 @@ const Index = () => {
                 <AnalysisPanel
                   selectedResponseGroup={selectedResponseGroup}
                   responseData={selectedResponseData}
-                  onToggleVisibility={() => {}}
+                  onToggleVisibility={() => { }}
                 />
               ) : (
                 <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
