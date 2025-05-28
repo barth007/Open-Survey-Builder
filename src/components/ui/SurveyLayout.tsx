@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SurveyNavigationHeader } from '@/components/survey/SurveyNavigationHeader';
-import { SurveyTabs } from '@/components/survey/SurveyTabs';
+import SurveyTabs from '@/components/survey/SurveyTabs';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useParams } from 'react-router-dom';
 import { Survey } from '@/types/survey';
