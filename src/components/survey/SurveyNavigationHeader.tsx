@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Home, FileText, Clock, RotateCw } from 'lucide-react';
+import { Home, FileText, Check, RotateCw, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -35,6 +35,22 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
   const { surveyData } = useSurveyData();
   const { user: currentUser } = useAuth();
   const { collapsed } = useSidebar();
+
+  // Check if user is online
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Debug logging
   console.log("[DEBUG] SurveyNavigationHeader - activeUsers prop:", activeUsers);
@@ -94,6 +110,34 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
     }
   };
 
+  const getSaveStatusIcon = () => {
+    if (!isOnline) {
+      return <WifiOff className="h-4 w-4 text-red-500" />;
+    }
+    
+    if (isSaving) {
+      return <RotateCw className="h-4 w-4 text-blue-600 animate-spin" />;
+    }
+    
+    if (lastSaved) {
+      return <Check className="h-4 w-4 text-green-600" />;
+    }
+    
+    return <WifiOff className="h-4 w-4 text-gray-400" />;
+  };
+
+  const getSaveStatusText = () => {
+    if (!isOnline) {
+      return 'Offline';
+    }
+    
+    if (isSaving) {
+      return 'Saving...';
+    }
+    
+    return formatLastSaved(lastSaved);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Navigation path */}
@@ -133,16 +177,15 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
           {surveyId && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center">
-                  {isSaving ? (
-                    <RotateCw className="h-4 w-4 text-blue-600 animate-spin" />
-                  ) : (
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                  )}
+                <div className="flex items-center gap-2">
+                  {getSaveStatusIcon()}
+                  <span className="text-sm text-muted-foreground">
+                    {getSaveStatusText()}
+                  </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{isSaving ? 'Saving...' : formatLastSaved(lastSaved)}</p>
+                <p>{getSaveStatusText()}</p>
               </TooltipContent>
             </Tooltip>
           )}
