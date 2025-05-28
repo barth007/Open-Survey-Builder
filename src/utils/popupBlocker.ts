@@ -1,4 +1,5 @@
 
+
 // Popup blocker utility to prevent any external popups from appearing
 export const initializePopupBlocker = () => {
   console.log('[Popup Blocker] Initializing...');
@@ -131,18 +132,26 @@ export const initializePopupBlocker = () => {
   const originalAppendChild = Node.prototype.appendChild;
   const originalInsertBefore = Node.prototype.insertBefore;
 
-  Node.prototype.appendChild = function(newChild) {
+  Node.prototype.appendChild = function<T extends Node>(newChild: T): T {
     const result = originalAppendChild.call(this, newChild);
-    if (newChild.nodeType === Node.ELEMENT_NODE && shouldBlockElement(newChild as Element)) {
-      removeBlockedElement(newChild as Element);
+    // Only check if it's an Element node
+    if (newChild.nodeType === Node.ELEMENT_NODE) {
+      const element = newChild as unknown as Element;
+      if (shouldBlockElement(element)) {
+        removeBlockedElement(element);
+      }
     }
     return result;
   };
 
-  Node.prototype.insertBefore = function(newChild, referenceChild) {
+  Node.prototype.insertBefore = function<T extends Node>(newChild: T, referenceChild: Node | null): T {
     const result = originalInsertBefore.call(this, newChild, referenceChild);
-    if (newChild.nodeType === Node.ELEMENT_NODE && shouldBlockElement(newChild as Element)) {
-      removeBlockedElement(newChild as Element);
+    // Only check if it's an Element node
+    if (newChild.nodeType === Node.ELEMENT_NODE) {
+      const element = newChild as unknown as Element;
+      if (shouldBlockElement(element)) {
+        removeBlockedElement(element);
+      }
     }
     return result;
   };
@@ -158,3 +167,4 @@ export const initializePopupBlocker = () => {
     console.log('[Popup Blocker] Cleaned up');
   };
 };
+
