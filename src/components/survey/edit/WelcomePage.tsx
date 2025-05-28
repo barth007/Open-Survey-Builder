@@ -27,7 +27,7 @@ export const WelcomePageSettings: React.FC<WelcomePageSettingsProps> = ({
   onWelcomeButtonTextChange
 }) => {
   return (
-    <Card className="w-full border border-ice flex flex-col min-h-0">
+    <Card className="w-full border-t-4 border-t-indigo-500 min-h-[120px]">
       <CardHeader className="pb-4">
         <h3 className="text-lg font-medium">Welcome Page</h3>
       </CardHeader>
