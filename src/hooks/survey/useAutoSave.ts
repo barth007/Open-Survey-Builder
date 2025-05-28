@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 interface UseAutoSaveProps {
   onSave: () => Promise<void>;
   delay?: number;
+  pendingChanges: boolean;
+  setPendingChanges: (pending: boolean) => void;
 }
 
-export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
-  const [pendingChanges, setPendingChanges] = useState(false);
+export const useAutoSave = ({ onSave, delay = 2000, pendingChanges, setPendingChanges }: UseAutoSaveProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -38,7 +39,7 @@ export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
         clearTimeout(saveTimerRef.current);
       }
     };
-  }, [pendingChanges, isSaving, onSave, delay]);
+  }, [pendingChanges, isSaving, onSave, delay, setPendingChanges]);
 
   // Save before unload
   useEffect(() => {
@@ -50,6 +51,7 @@ export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
         // Try to save immediately
         try {
           await onSave();
+          setPendingChanges(false);
         } catch (error) {
           console.error('Failed to save before unload:', error);
         }
@@ -61,11 +63,9 @@ export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [pendingChanges, isSaving, onSave]);
+  }, [pendingChanges, isSaving, onSave, setPendingChanges]);
 
   return {
-    pendingChanges,
-    setPendingChanges,
     isSaving,
     lastSaved
   };

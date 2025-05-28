@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -51,15 +50,10 @@ const Index = () => {
 
   const { isSaving, lastSaved } = useAutoSave({ 
     onSave: handleSave,
-    delay: 2000 
+    delay: 2000,
+    pendingChanges,
+    setPendingChanges
   });
-
-  // Trigger auto-save when pendingChanges becomes true
-  useEffect(() => {
-    if (pendingChanges && !isSaving) {
-      // The auto-save hook will handle this automatically
-    }
-  }, [pendingChanges, isSaving]);
 
   useEffect(() => {
     if (survey.title) {
@@ -74,6 +68,11 @@ const Index = () => {
 
   const handleDescriptionChangeWithTracking = (description: string) => {
     handleDescriptionChange(description);
+    setPendingChanges(true);
+  };
+
+  const handleTitleChangeWithTracking = (title: string) => {
+    handleTitleChange(title);
     setPendingChanges(true);
   };
 
@@ -164,7 +163,7 @@ const Index = () => {
                 <SurveyTitle
                   title={survey.title}
                   description={survey.description}
-                  onTitleChange={handleTitleChange}
+                  onTitleChange={handleTitleChangeWithTracking}
                   onDescriptionChange={handleDescriptionChangeWithTracking}
                 />
 
