@@ -188,16 +188,18 @@ const Index = () => {
 
             <ResizableHandle withHandle />
 
-            {/* Right Panel */}
+            {/* Right Panel - Preview */}
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
               <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
 
-                <WelcomePage
-                  welcomeTitle={survey.welcomeTitle}
-                  welcomeMessage={survey.welcomeMessage}
-                  welcomeInstructions={survey.welcomeInstructions}
-                  welcomeButtonText={survey.welcomeButtonText}
-                />
+                {(survey.welcomeTitle || survey.welcomeMessage || survey.welcomeInstructions || survey.welcomeButtonText) && (
+                  <WelcomePage
+                    welcomeTitle={survey.welcomeTitle || ''}
+                    welcomeMessage={survey.welcomeMessage || ''}
+                    welcomeInstructions={survey.welcomeInstructions || ''}
+                    welcomeButtonText={survey.welcomeButtonText || ''}
+                  />
+                )}
 
                 {survey.questions?.length > 0 && (
                   <PreviewTab survey={survey} />
@@ -205,11 +207,19 @@ const Index = () => {
 
                 {(survey.thankYouTitle || survey.thankYouMessage || survey.thankYouButtonText || survey.redirectUrl) && (
                   <ThankYouPage
-                  thankYouTitle={survey.thankYouTitle}
-                  thankYouMessage={survey.thankYouMessage}
-                  thankYouButtonText={survey.thankYouButtonText}
-                  redirectUrl={survey.redirectUrl}
-                />
+                    thankYouTitle={survey.thankYouTitle || ''}
+                    thankYouMessage={survey.thankYouMessage || ''}
+                    thankYouButtonText={survey.thankYouButtonText || ''}
+                    redirectUrl={survey.redirectUrl || ''}
+                  />
+                )}
+
+                {!survey.welcomeTitle && !survey.welcomeMessage && !survey.welcomeInstructions && !survey.welcomeButtonText && 
+                 !survey.questions?.length && 
+                 !survey.thankYouTitle && !survey.thankYouMessage && !survey.thankYouButtonText && !survey.redirectUrl && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Start building your survey to see the preview</p>
+                  </div>
                 )}
 
               </div>

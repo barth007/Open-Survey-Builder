@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -15,7 +16,7 @@ export const ThankYouPage: React.FC<Props> = ({
   redirectUrl
 }) => {
   return (
-    <Card className="w-full border border-ice min-h-[320px] h-auto">
+    <Card className="w-full border border-abyss min-h-fit h-auto">
       <CardContent className="space-y-4 p-6">
         <h1 className="text-2xl font-semibold text-abyss">{thankYouTitle}</h1>
 
