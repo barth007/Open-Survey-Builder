@@ -923,7 +923,7 @@ export default function SidebarComponent() {
   return (
     <Sidebar className="border-r">
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover gap-4 p-4">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate("/dashboard")}
