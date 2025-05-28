@@ -29,10 +29,17 @@ interface SurveyNavigationHeaderProps {
   activeUsers: ActiveUser[];
   isSaving?: boolean;
   lastSaved?: Date | null;
-  survey?: Survey; // Add the full survey data as a prop
+  survey?: Survey;
+  onPublishToggle?: () => void;
 }
 
-export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, survey }: SurveyNavigationHeaderProps) {
+export function SurveyNavigationHeader({ 
+  activeUsers, 
+  isSaving, 
+  lastSaved, 
+  survey,
+  onPublishToggle 
+}: SurveyNavigationHeaderProps) {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
@@ -173,8 +180,15 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
+        {/* Share Survey Button - only show when in a survey and we have the full survey data */}
+        {survey && surveyId && (
+          <ShareSurveyButton
+            survey={survey}
+            onPublishToggle={onPublishToggle}
+          />
+        )}
 
-        <div style={{ width: "230px" }}>
+        <div style={{ width: "200px" }}>
           <Button
             variant="ghost"
             size="sm"
@@ -198,20 +212,6 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
               <FileText className="h-4 w-4" />
               <span className="truncate">{current.name}</span>
             </div>
-            <Separator orientation="vertical" className="h-4" />
-            {/* Share Survey Button - only show when in a survey and we have the full survey data */}
-            {survey && surveyId && (
-              <>
-                <ShareSurveyButton
-                  survey={survey}
-                  onPublishToggle={() => {
-                    // This will be handled by the parent component
-                    console.log('Publish toggle requested');
-                  }}
-                />
-
-              </>
-            )}
           </>
         )}
       </div>

@@ -13,6 +13,7 @@ interface SurveyLayoutProps {
   isSaving?: boolean;
   lastSaved?: Date | null;
   survey?: Survey;
+  onPublishToggle?: () => void;
 }
 
 const SurveyLayout = ({ 
@@ -21,7 +22,8 @@ const SurveyLayout = ({
   setActiveTab, 
   isSaving, 
   lastSaved,
-  survey 
+  survey,
+  onPublishToggle
 }: SurveyLayoutProps) => {
   const { id: surveyId } = useParams();
   const { activeUsers } = useActiveUsers(surveyId);
@@ -33,6 +35,7 @@ const SurveyLayout = ({
         isSaving={isSaving}
         lastSaved={lastSaved}
         survey={survey}
+        onPublishToggle={onPublishToggle}
       />
       
       <div className="pt-14 h-screen">
