@@ -54,6 +54,13 @@ const Index = () => {
     delay: 2000 
   });
 
+  // Trigger auto-save when pendingChanges becomes true
+  useEffect(() => {
+    if (pendingChanges && !isSaving) {
+      // The auto-save hook will handle this automatically
+    }
+  }, [pendingChanges, isSaving]);
+
   useEffect(() => {
     if (survey.title) {
       document.title = survey.title;
@@ -110,7 +117,12 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+      <SurveyLayout 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+      >
         <div className="h-full flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
         </div>
@@ -120,7 +132,12 @@ const Index = () => {
 
   if (error) {
     return (
-      <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+      <SurveyLayout 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+      >
         <div className="h-full flex items-center justify-center">
           <div className="text-center p-8 max-w-md text-magma">
             <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
@@ -132,22 +149,13 @@ const Index = () => {
   }
 
   return (
-    <SurveyLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <SurveyLayout 
+      activeTab={activeTab} 
+      setActiveTab={setActiveTab}
+      isSaving={isSaving}
+      lastSaved={lastSaved}
+    >
       <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
-        {/* Save Status Indicator */}
-        {(isSaving || pendingChanges) && (
-          <div className="fixed top-4 right-4 z-50 bg-white px-3 py-2 rounded-lg shadow-md border text-sm">
-            {isSaving ? (
-              <span className="text-blue-600 flex items-center gap-2">
-                <div className="animate-spin rounded-full h-3 w-3 border border-blue-600 border-t-transparent"></div>
-                Saving...
-              </span>
-            ) : (
-              <span className="text-gray-600">Unsaved changes</span>
-            )}
-          </div>
-        )}
-
         {activeTab === "edit" && (
           <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
             <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Home, FileText } from 'lucide-react';
+import { Home, FileText, Clock, Sync } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -25,9 +25,11 @@ interface ActiveUser {
 
 interface SurveyNavigationHeaderProps {
   activeUsers: ActiveUser[];
+  isSaving?: boolean;
+  lastSaved?: Date | null;
 }
 
-export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderProps) {
+export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: SurveyNavigationHeaderProps) {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
   const { surveyData } = useSurveyData();
@@ -72,6 +74,26 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
   console.log("[DEBUG] SurveyNavigationHeader - displayUsers:", displayUsers);
   console.log("[DEBUG] SurveyNavigationHeader - will render", displayUsers.length, "users");
 
+  const formatLastSaved = (date: Date | null) => {
+    if (!date) return 'Never saved';
+    
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+
+    if (diffSeconds < 60) {
+      return 'Saved just now';
+    } else if (diffMinutes < 60) {
+      return `Saved ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+      return `Saved ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else {
+      return `Saved on ${date.toLocaleDateString()}`;
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Navigation path */}
@@ -104,48 +126,69 @@ export function SurveyNavigationHeader({ activeUsers }: SurveyNavigationHeaderPr
         )}
       </div>
 
-      {/* Right: Active user avatars */}
+      {/* Right: Save status and Active user avatars */}
       <TooltipProvider>
-        <div className="flex items-center gap-2 pr-2 z-50 relative">
-          {displayUsers.length > 0 ? (
-            displayUsers
-              .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
-              .slice(0, 4)
-              .map(user => {
-                console.log("[DEBUG] Rendering user:", user);
-                const isYou = user.id === currentUser?.id;
-                return (
-                  <Tooltip key={user.id}>
-                    <TooltipTrigger asChild>
-                      {user.avatar_url ? (
-                        <img
-                          src={user.avatar_url}
-                          alt={user.name || user.email || "User"}
-                          className={cn(
-                            "w-8 h-8 rounded-full border bg-white",
-                            isYou && "ring-2 ring-primary"
-                          )}
-                        />
-                      ) : (
-                        <div
-                          className={cn(
-                            "w-8 h-8 rounded-full border bg-muted text-xs flex items-center justify-center font-medium",
-                            isYou && "ring-2 ring-primary"
-                          )}
-                        >
-                          {user.name?.charAt(0).toUpperCase() || "?"}
-                        </div>
-                      )}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })
-          ) : (
-            <div className="text-sm text-muted-foreground">No active users</div>
+        <div className="flex items-center gap-4 pr-2 z-50 relative">
+          {/* Save Status Indicator */}
+          {surveyId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  {isSaving ? (
+                    <Sync className="h-4 w-4 text-blue-600 animate-spin" />
+                  ) : (
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isSaving ? 'Saving...' : formatLastSaved(lastSaved)}</p>
+              </TooltipContent>
+            </Tooltip>
           )}
+
+          {/* Active Users */}
+          <div className="flex items-center gap-2">
+            {displayUsers.length > 0 ? (
+              displayUsers
+                .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
+                .slice(0, 4)
+                .map(user => {
+                  console.log("[DEBUG] Rendering user:", user);
+                  const isYou = user.id === currentUser?.id;
+                  return (
+                    <Tooltip key={user.id}>
+                      <TooltipTrigger asChild>
+                        {user.avatar_url ? (
+                          <img
+                            src={user.avatar_url}
+                            alt={user.name || user.email || "User"}
+                            className={cn(
+                              "w-8 h-8 rounded-full border bg-white",
+                              isYou && "ring-2 ring-primary"
+                            )}
+                          />
+                        ) : (
+                          <div
+                            className={cn(
+                              "w-8 h-8 rounded-full border bg-muted text-xs flex items-center justify-center font-medium",
+                              isYou && "ring-2 ring-primary"
+                            )}
+                          >
+                            {user.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })
+            ) : (
+              <div className="text-sm text-muted-foreground">No active users</div>
+            )}
+          </div>
         </div>
       </TooltipProvider>
     </header>

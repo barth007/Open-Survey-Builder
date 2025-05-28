@@ -11,9 +11,11 @@ interface SurveyLayoutProps {
   children: ReactNode;
   activeTab: "edit" | "answers";
   setActiveTab: (tab: "edit" | "answers") => void;
+  isSaving?: boolean;
+  lastSaved?: Date | null;
 }
 
-const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) => {
+const SurveyLayout = ({ children, activeTab, setActiveTab, isSaving, lastSaved }: SurveyLayoutProps) => {
   const { id: surveyId } = useParams();
   const { activeUsers } = useActiveUsers(surveyId || '');
 
@@ -21,7 +23,11 @@ const SurveyLayout = ({ children, activeTab, setActiveTab }: SurveyLayoutProps) 
     <SidebarProvider collapsedWidth={60}>
       <div className="h-screen flex flex-col">
         {/* Fixed header spanning full width */}
-        <SurveyNavigationHeader activeUsers={activeUsers} />
+        <SurveyNavigationHeader 
+          activeUsers={activeUsers} 
+          isSaving={isSaving}
+          lastSaved={lastSaved}
+        />
 
         {/* Main layout with sidebar and content */}
         <div className="flex flex-1 overflow-hidden pt-14">

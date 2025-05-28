@@ -12,12 +12,13 @@ export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Trigger auto-save when pendingChanges becomes true
   useEffect(() => {
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current);
-    }
-    
     if (pendingChanges && !isSaving) {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+      
       saveTimerRef.current = setTimeout(async () => {
         setIsSaving(true);
         try {
@@ -38,6 +39,29 @@ export const useAutoSave = ({ onSave, delay = 2000 }: UseAutoSaveProps) => {
       }
     };
   }, [pendingChanges, isSaving, onSave, delay]);
+
+  // Save before unload
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      if (pendingChanges && !isSaving) {
+        e.preventDefault();
+        e.returnValue = '';
+        
+        // Try to save immediately
+        try {
+          await onSave();
+        } catch (error) {
+          console.error('Failed to save before unload:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [pendingChanges, isSaving, onSave]);
 
   return {
     pendingChanges,
