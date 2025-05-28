@@ -922,94 +922,96 @@ export default function SidebarComponent() {
 
   return (
     <Sidebar className="border-r">
-      {/* Scrollable content */}
-      <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="text-sm font-semibold text-blue-600 flex items-center gap-1"
-          >
-            <Home size={16} /> Dashboard
-          </button>
-        </div>
-
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
-          {/* Folders section */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-medium">Folders</h2>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button onClick={handleAddFolder} size="icon" variant="ghost" className="h-6 w-6">
-                      <Plus size={14} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Create folder</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            <SortableContext items={folders.map(f => f.id)} strategy={verticalListSortingStrategy}>
-              {folders.map((folder) => (
-                <SortableFolder
-                  key={folder.id}
-                  folder={folder}
-                  onDelete={() => handleDeleteRequest(folder.id, "folder")}
-                  onEdit={() => handleEditItem(folder.id, folder.name, "folder")}
-                  isEditing={editingItemId === folder.id}
-                  editingName={editingItemName}
-                  setEditingName={setEditingItemName}
-                  onSaveEdit={handleSaveEdit}
-                  handleCreateSurveyInFolder={handleCreateSurveyInFolder}
-                />
-              ))}
-            </SortableContext>
+      <div className="flex flex-col h-full">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="text-sm font-semibold text-blue-600 flex items-center gap-1"
+            >
+              <Home size={16} /> Dashboard
+            </button>
           </div>
 
-          {/* Surveys section */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-medium">Surveys</h2>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button onClick={handleAddSurvey} size="icon" variant="ghost" className="h-6 w-6">
-                      <Plus size={14} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Create survey</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <SortableContext items={(surveysByFolder["null"] || []).map((s) => s.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-1">
-                {(surveysByFolder["null"] || []).map((survey) => (
-                  <SortableSurveyItem
-                    key={survey.id}
-                    survey={survey}
-                    onDelete={() => handleDeleteRequest(survey.id, 'survey')}
-                    onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
-                    isEditing={editingItemId === survey.id}
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
+            {/* Folders section */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-medium">Folders</h2>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={handleAddFolder} size="icon" variant="ghost" className="h-6 w-6">
+                        <Plus size={14} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Create folder</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              <SortableContext items={folders.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                {folders.map((folder) => (
+                  <SortableFolder
+                    key={folder.id}
+                    folder={folder}
+                    onDelete={() => handleDeleteRequest(folder.id, "folder")}
+                    onEdit={() => handleEditItem(folder.id, folder.name, "folder")}
+                    isEditing={editingItemId === folder.id}
                     editingName={editingItemName}
                     setEditingName={setEditingItemName}
                     onSaveEdit={handleSaveEdit}
-                    folders={folders}
-                    onMoveToFolder={(folderId) => handleMoveSurveyToFolder(survey.id, folderId)}
-                    onCreateNewFolder={handleAddFolder}
+                    handleCreateSurveyInFolder={handleCreateSurveyInFolder}
                   />
                 ))}
+              </SortableContext>
+            </div>
+
+            {/* Surveys section */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-medium">Surveys</h2>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={handleAddSurvey} size="icon" variant="ghost" className="h-6 w-6">
+                        <Plus size={14} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Create survey</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-            </SortableContext>
-          </div>
-        </DndContext>
+              <SortableContext items={(surveysByFolder["null"] || []).map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-1">
+                  {(surveysByFolder["null"] || []).map((survey) => (
+                    <SortableSurveyItem
+                      key={survey.id}
+                      survey={survey}
+                      onDelete={() => handleDeleteRequest(survey.id, 'survey')}
+                      onEdit={() => handleEditItem(survey.id, survey.name, 'survey')}
+                      isEditing={editingItemId === survey.id}
+                      editingName={editingItemName}
+                      setEditingName={setEditingItemName}
+                      onSaveEdit={handleSaveEdit}
+                      folders={folders}
+                      onMoveToFolder={(folderId) => handleMoveSurveyToFolder(survey.id, folderId)}
+                      onCreateNewFolder={handleAddFolder}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </div>
+          </DndContext>
+        </div>
       </div>
 
-      {/* Fixed user profile */}
+      {/* Sticky Footer */}
       <div className="p-2 border-t">
         {profile && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground justify-between group">
@@ -1020,8 +1022,12 @@ export default function SidebarComponent() {
                 className="w-6 h-6 rounded-full border"
               />
               <div className="flex flex-col text-left">
-                <span className="font-medium text-sm text-foreground">{profile.full_name || "User"}</span>
-                <span className="text-muted-foreground text-xs">{profile.email || ""}</span>
+                <span className="font-medium text-sm text-foreground">
+                  {profile.full_name || "User"}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {profile.email || ""}
+                </span>
               </div>
             </button>
             <TooltipProvider>
@@ -1060,6 +1066,6 @@ export default function SidebarComponent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Sidebar>
+    </Sidebar >
   );
 }
