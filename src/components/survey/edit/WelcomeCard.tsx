@@ -25,8 +25,8 @@ const WelcomeCard: React.FC<Props> = ({
   onWelcomeInstructionsChange,
   onWelcomeButtonTextChange
 }) => (
-  <Card className="w-full mb-4 border-abyss">
-    <CardContent className="pt-6 space-y-5">
+    <Card className="w-full border border-ice shadow-sm rounded-xl bg-white">
+    <CardContent className="pt-6 pb-6 px-4 sm:px-6 space-y-5">
       <div className="space-y-2">
         <Label htmlFor="welcomeTitle">Welcome Title</Label>
         <Input
