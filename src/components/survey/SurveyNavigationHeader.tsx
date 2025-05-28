@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Home, FileText, Clock, sync as Sync } from 'lucide-react';
+import { Home, FileText, Clock, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSurveyData } from '@/hooks/useSurveyData';
@@ -135,7 +135,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved }: Sur
               <TooltipTrigger asChild>
                 <div className="flex items-center">
                   {isSaving ? (
-                    <Sync className="h-4 w-4 text-blue-600 animate-spin" />
+                    <RotateCw className="h-4 w-4 text-blue-600 animate-spin" />
                   ) : (
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   )}
