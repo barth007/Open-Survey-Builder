@@ -173,20 +173,7 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
       {/* Left: Share button and Navigation path */}
       <div className="flex items-center gap-4">
-        {/* Share Survey Button - only show when in a survey and we have the full survey data */}
-        {survey && surveyId && (
-          <>
-            <ShareSurveyButton 
-              survey={survey}
-              onPublishToggle={() => {
-                // This will be handled by the parent component
-                console.log('Publish toggle requested');
-              }}
-            />
-            <Separator orientation="vertical" className="h-4" />
-          </>
-        )}
-        
+  
         <div style={{ width: "230px" }}>
           <Button
             variant="ghost"
@@ -198,6 +185,19 @@ export function SurveyNavigationHeader({ activeUsers, isSaving, lastSaved, surve
             <span>Dashboard</span>
           </Button>
         </div>
+                {/* Share Survey Button - only show when in a survey and we have the full survey data */}
+                {survey && surveyId && (
+          <>
+            <ShareSurveyButton 
+              survey={survey}
+              onPublishToggle={() => {
+                // This will be handled by the parent component
+                console.log('Publish toggle requested');
+              }}
+            />
+            <Separator orientation="vertical" className="h-4" />
+          </>
+        )}
         {current && (
           <>
             <Separator orientation="vertical" className="h-4" />
