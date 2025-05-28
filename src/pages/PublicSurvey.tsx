@@ -127,11 +127,10 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
         {/* Welcome page */}
         {flowState === 'welcome' && (
           <WelcomePage
-            title={survey.welcomeTitle}
-            message={survey.welcomeMessage}
-            instructions={survey.welcomeInstructions}
-            buttonText={survey.welcomeButtonText}
-            onStart={handleStartSurvey}
+            welcomeTitle={survey.welcomeTitle || ''}
+            welcomeMessage={survey.welcomeMessage || ''}
+            welcomeInstructions={survey.welcomeInstructions || ''}
+            welcomeButtonText={survey.welcomeButtonText || ''}
           />
         )}
 
@@ -177,11 +176,10 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
         {/* Thank You page */}
         {flowState === 'thankYou' && (
           <ThankYouPage
-            title={survey.thankYouTitle}
-            message={survey.thankYouMessage}
-            buttonText={survey.thankYouButtonText}
-            redirectUrl={survey.redirectUrl}
-            onClose={() => setFlowState('welcome')}
+            thankYouTitle={survey.thankYouTitle || ''}
+            thankYouMessage={survey.thankYouMessage || ''}
+            thankYouButtonText={survey.thankYouButtonText || ''}
+            redirectUrl={survey.redirectUrl || ''}
           />
         )}
       </div>

@@ -152,19 +152,18 @@ const PagesTab: React.FC<PagesTabProps> = ({
           <div className="space-y-6">
             <h3 className="text-lg font-medium">Welcome Page Preview</h3>
             <WelcomePage 
-              title={survey.welcomeTitle} 
-              message={survey.welcomeMessage}
-              instructions={survey.welcomeInstructions}
-              buttonText={survey.welcomeButtonText}
-              onStart={() => {}}
+              welcomeTitle={survey.welcomeTitle || ''} 
+              welcomeMessage={survey.welcomeMessage || ''}
+              welcomeInstructions={survey.welcomeInstructions || ''}
+              welcomeButtonText={survey.welcomeButtonText || ''}
             />
             
             <h3 className="text-lg font-medium mt-8">Thank You Page Preview</h3>
             <ThankYouPage 
-              title={survey.thankYouTitle} 
-              message={survey.thankYouMessage}
-              buttonText={survey.thankYouButtonText}
-              redirectUrl={survey.redirectUrl}
+              thankYouTitle={survey.thankYouTitle || ''} 
+              thankYouMessage={survey.thankYouMessage || ''}
+              thankYouButtonText={survey.thankYouButtonText || ''}
+              redirectUrl={survey.redirectUrl || ''}
             />
           </div>
         </TabsContent>
