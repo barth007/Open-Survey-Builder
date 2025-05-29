@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import { Github, Rocket, ShieldCheck, Server, LayoutGrid } from "lucide-react"
 import { Link } from "react-router-dom"
@@ -22,14 +21,9 @@ export default function Landing() {
             <Link to="/login">
               <Button
                 size="lg"
-                className="w-full sm:w-auto flex items-center gap-2 border border-input shadow-sm bg-white text-foreground hover:bg-muted"
+                className="w-full sm:w-auto flex items-center gap-2"
               >
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  alt="Google icon"
-                  className="h-5 w-5"
-                />
-                Sign in with Google
+                Get Started
               </Button>
             </Link>
           </div>
