@@ -111,9 +111,12 @@ export type Database = {
           questions: Json | null
           redirect_url: string | null
           team_id: string | null
+          thank_you_button_text: string | null
           thank_you_message: string | null
           thank_you_title: string | null
           user_id: string | null
+          welcome_button_text: string | null
+          welcome_instructions: string | null
           welcome_message: string | null
           welcome_title: string | null
         }
@@ -129,9 +132,12 @@ export type Database = {
           questions?: Json | null
           redirect_url?: string | null
           team_id?: string | null
+          thank_you_button_text?: string | null
           thank_you_message?: string | null
           thank_you_title?: string | null
           user_id?: string | null
+          welcome_button_text?: string | null
+          welcome_instructions?: string | null
           welcome_message?: string | null
           welcome_title?: string | null
         }
@@ -147,9 +153,12 @@ export type Database = {
           questions?: Json | null
           redirect_url?: string | null
           team_id?: string | null
+          thank_you_button_text?: string | null
           thank_you_message?: string | null
           thank_you_title?: string | null
           user_id?: string | null
+          welcome_button_text?: string | null
+          welcome_instructions?: string | null
           welcome_message?: string | null
           welcome_title?: string | null
         }

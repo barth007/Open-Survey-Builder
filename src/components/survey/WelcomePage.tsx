@@ -17,28 +17,40 @@ export const WelcomePage: React.FC<Props> = ({
   welcomeButtonText,
   onStart
 }) => {
+  console.log('WelcomePage props received:', {
+    welcomeTitle,
+    welcomeMessage,
+    welcomeInstructions,
+    welcomeButtonText,
+    hasOnStart: !!onStart
+  });
+
+  // Use fallbacks for empty strings but show content if it exists
+  const displayTitle = welcomeTitle?.trim() || 'Welcome';
+  const hasMessage = welcomeMessage?.trim();
+  const hasInstructions = welcomeInstructions?.trim();
+  const displayButtonText = welcomeButtonText?.trim() || 'Start';
+
   return (
     <Card className="w-full border border-abyss min-h-fit h-auto">
       <CardContent className="space-y-4 p-6">
-        <h1 className="text-2xl font-semibold text-abyss">{welcomeTitle}</h1>
+        <h1 className="text-2xl font-semibold text-abyss">{displayTitle}</h1>
 
-        {welcomeMessage && (
+        {hasMessage && (
           <p className="text-gray-700 text-base">{welcomeMessage}</p>
         )}
 
-        {welcomeInstructions && (
+        {hasInstructions && (
           <p className="text-sm text-gray-500">{welcomeInstructions}</p>
         )}
 
-        {welcomeButtonText && (
-          <button
-            className="mt-4 inline-block rounded-md bg-abyss px-4 py-2 text-white hover:bg-abyss/90 transition"
-            onClick={onStart}
-            disabled={!onStart}
-          >
-            {welcomeButtonText}
-          </button>
-        )}
+        <button
+          className="mt-4 inline-block rounded-md bg-abyss px-4 py-2 text-white hover:bg-abyss/90 transition"
+          onClick={onStart}
+          disabled={!onStart}
+        >
+          {displayButtonText}
+        </button>
       </CardContent>
     </Card>
   );

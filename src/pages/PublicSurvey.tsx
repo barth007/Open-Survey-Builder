@@ -35,6 +35,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   // Track the current state of the survey flow
   const [flowState, setFlowState] = useState<SurveyFlowState>('welcome');
 
+  console.log('PublicSurvey survey data:', survey);
+
   const handleStartSurvey = () => {
     setFlowState('questions');
   };
@@ -83,6 +85,29 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     }
   };
 
+  // Check if welcome page should be shown - show if ANY welcome field has content
+  const hasWelcomeContent = survey && (
+    survey.welcomeTitle?.trim() || 
+    survey.welcomeMessage?.trim() || 
+    survey.welcomeInstructions?.trim() || 
+    survey.welcomeButtonText?.trim()
+  );
+
+  // Check if thank you page should be shown - show if ANY thank you field has content
+  const hasThankYouContent = survey && (
+    survey.thankYouTitle?.trim() || 
+    survey.thankYouMessage?.trim() || 
+    survey.thankYouButtonText?.trim() || 
+    survey.redirectUrl?.trim()
+  );
+
+  // If there's no welcome content, skip directly to questions
+  React.useEffect(() => {
+    if (survey && !hasWelcomeContent && flowState === 'welcome') {
+      setFlowState('questions');
+    }
+  }, [survey, hasWelcomeContent, flowState]);
+
   if (isLoading) {
     return (
       <PublicSurveyLayout surveyTitle="Loading..." isPreviewMode={isPreviewMode}>
@@ -124,8 +149,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           </Alert>
         )}
 
-        {/* Welcome page */}
-        {flowState === 'welcome' && (
+        {/* Welcome page - only show if there's welcome content */}
+        {flowState === 'welcome' && hasWelcomeContent && (
           <WelcomePage
             welcomeTitle={survey.welcomeTitle || ''}
             welcomeMessage={survey.welcomeMessage || ''}
@@ -157,7 +182,17 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
               ))}
 
               <div className="pt-4">
-                <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
+                <Button 
+                  type="submit" 
+                  className="w-full md:w-auto" 
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    // If no thank you content, just show success message instead of changing flow state
+                    if (!hasThankYouContent && !isPreviewMode) {
+                      // The form submission will handle this case
+                    }
+                  }}
+                >
                   {isSubmitting ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
@@ -174,8 +209,8 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           </>
         )}
 
-        {/* Thank You page */}
-        {flowState === 'thankYou' && (
+        {/* Thank You page - only show if there's thank you content */}
+        {flowState === 'thankYou' && hasThankYouContent && (
           <ThankYouPage
             thankYouTitle={survey.thankYouTitle || ''}
             thankYouMessage={survey.thankYouMessage || ''}
