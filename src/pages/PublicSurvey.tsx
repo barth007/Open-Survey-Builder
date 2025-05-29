@@ -139,16 +139,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       isPreviewMode={isPreviewMode}
     >
       <div className="container max-w-3xl py-10 px-4">
-        {/* Preview Mode Banner */}
-        {isPreviewMode && (
-          <Alert className="mb-6 border-amber-500 bg-amber-50">
-            <AlertTitle className="text-amber-800 font-bold">Survey Preview Mode</AlertTitle>
-            <AlertDescription className="text-amber-700">
-              This is a preview of your survey. Responses submitted here will not be recorded.
-            </AlertDescription>
-          </Alert>
-        )}
-
+      
         {/* Welcome page - only show if there's welcome content */}
         {flowState === 'welcome' && hasWelcomeContent && (
           <WelcomePage
