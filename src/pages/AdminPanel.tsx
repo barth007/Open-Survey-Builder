@@ -14,7 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Check, X } from 'lucide-react';
+import { Loader2, Check, X, ArrowLeft, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ProfileRequest {
   id: string;
@@ -136,83 +137,121 @@ const AdminPanel = () => {
 
   if (!isAdmin) {
     return (
-      <div className="container mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p>You do not have permission to view this page.</p>
+      <div className="min-h-screen bg-background">
+        {/* Navigation Header */}
+        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-14 items-center">
+            <Link 
+              to="/dashboard" 
+              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+            <div className="ml-auto flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="font-semibold">Admin Panel</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto p-6 text-center">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p>You do not have permission to view this page.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Panel</h1>
-      
-      <div className="bg-card rounded-lg border shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Access Requests</h2>
-        
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    <div className="min-h-screen bg-background">
+      {/* Navigation Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 items-center">
+          <Link 
+            to="/dashboard" 
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+          <div className="ml-auto flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span className="font-semibold">Admin Panel</span>
           </div>
-        ) : (
-          <>
-            {!pendingRequests || pendingRequests.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No pending access requests.
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Requested</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pendingRequests.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.full_name || 'No name'}</TableCell>
-                      <TableCell>{request.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={request.status === 'pending' ? 'outline' : 'default'}>
-                          {request.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(request.updated_at || '').toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => handleApprove(request.id)}
-                            disabled={updateProfileStatus.isPending}
-                            className="flex items-center gap-1"
-                          >
-                            <Check className="h-4 w-4" /> Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleReject(request.id)}
-                            disabled={updateProfileStatus.isPending}
-                            className="flex items-center gap-1"
-                          >
-                            <X className="h-4 w-4" /> Reject
-                          </Button>
-                        </div>
-                      </TableCell>
+        </div>
+      </header>
+
+      <div className="container mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">Admin Panel</h1>
+        
+        <div className="bg-card rounded-lg border shadow-sm p-6">
+          <h2 className="text-xl font-semibold mb-4">Access Requests</h2>
+          
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              {!pendingRequests || pendingRequests.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No pending access requests.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Requested</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </>
-        )}
+                  </TableHeader>
+                  <TableBody>
+                    {pendingRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">{request.full_name || 'No name'}</TableCell>
+                        <TableCell>{request.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={request.status === 'pending' ? 'outline' : 'default'}>
+                            {request.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(request.updated_at || '').toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handleApprove(request.id)}
+                              disabled={updateProfileStatus.isPending}
+                              className="flex items-center gap-1"
+                            >
+                              <Check className="h-4 w-4" /> Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleReject(request.id)}
+                              disabled={updateProfileStatus.isPending}
+                              className="flex items-center gap-1"
+                            >
+                              <X className="h-4 w-4" /> Reject
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
