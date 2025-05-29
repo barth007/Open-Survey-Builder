@@ -17,12 +17,12 @@ export interface DbSurvey {
   public_code: string | null;
   created_at: string | null;
   user_id: string | null;
-  // Welcome page fields
+  // Welcome page fields - now including all new fields
   welcome_title: string | null;
   welcome_message: string | null;
   welcome_instructions: string | null;
   welcome_button_text: string | null;
-  // Thank you page fields
+  // Thank you page fields - now including thank_you_button_text
   thank_you_title: string | null;
   thank_you_message: string | null;
   thank_you_button_text: string | null;

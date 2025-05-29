@@ -36,12 +36,12 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     teamId: dbSurvey.team_id || undefined,
     publicCode: dbSurvey.public_code || undefined,
     createdAt: dbSurvey.created_at || new Date().toISOString(),
-    // Welcome page fields
+    // Welcome page fields - now including welcome_instructions and welcome_button_text
     welcomeTitle: dbSurvey.welcome_title || undefined,
     welcomeMessage: dbSurvey.welcome_message || undefined,
     welcomeInstructions: dbSurvey.welcome_instructions || undefined,
     welcomeButtonText: dbSurvey.welcome_button_text || undefined,
-    // Thank you page fields
+    // Thank you page fields - now including thank_you_button_text
     thankYouTitle: dbSurvey.thank_you_title || undefined,
     thankYouMessage: dbSurvey.thank_you_message || undefined,
     thankYouButtonText: dbSurvey.thank_you_button_text || undefined,
@@ -63,12 +63,12 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     folder_id: survey.folderId,
     team_id: survey.teamId,
     public_code: survey.publicCode,
-    // Welcome page fields
+    // Welcome page fields - now including all fields
     welcome_title: survey.welcomeTitle,
     welcome_message: survey.welcomeMessage,
     welcome_instructions: survey.welcomeInstructions,
     welcome_button_text: survey.welcomeButtonText,
-    // Thank you page fields
+    // Thank you page fields - now including thank_you_button_text
     thank_you_title: survey.thankYouTitle,
     thank_you_message: survey.thankYouMessage,
     thank_you_button_text: survey.thankYouButtonText,

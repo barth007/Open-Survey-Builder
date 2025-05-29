@@ -34,6 +34,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Debounce del titolo per evitare salvataggi eccessivi
   const debouncedTitle = useDebounce(survey.title, 1000);
@@ -169,7 +170,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       console.error("Error updating survey publish status:", error);
       toast({
         title: "Error updating survey",
-        description: "There was an error updating your survey. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error updating your survey. Please try again.",
         variant: "destructive"
       });
     }
@@ -178,10 +179,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
   const handleSave = async () => {
     const now = Date.now();
     
-    // Evita salvataggi troppo frequenti (minimo 500ms tra un salvataggio e l'altro)
-    if (now - lastSaveTime < 500) {
+    // Evita salvataggi troppo frequenti (minimo 1000ms tra un salvataggio e l'altro)
+    if (now - lastSaveTime < 1000 || isSaving) {
+      console.log("Skipping save - too frequent or already saving");
       return;
     }
+
+    setIsSaving(true);
 
     try {
       if (surveyId) {
@@ -205,6 +209,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
           thankYouButtonText: survey.thankYouButtonText,
           redirectUrl: survey.redirectUrl
         };
+
+        console.log("Saving survey with updates:", updates);
 
         await updateSurvey({
           surveyId,
@@ -231,9 +237,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
       console.error("Error saving survey:", error);
       toast({
         title: "Error saving survey",
-        description: "There was an error saving your survey. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error saving your survey. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -258,6 +266,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     pendingChanges,
     setPendingChanges,
     isLoading,
-    error
+    error,
+    isSaving
   };
 };

@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { surveyToDbSurvey } from '@/utils/type-mappers';
@@ -75,13 +76,21 @@ export function useMutateSurvey() {
       updates: Partial<Survey>
     }) => {
       try {
+        console.log("Updating survey with ID:", surveyId);
+        console.log("Updates:", updates);
+        
         // Convert the updates to database format
         const dbUpdates = surveyToDbSurvey(updates as Survey);
         
-        // Remove undefined values
+        // Remove undefined values and id from updates
         const cleanedUpdates = Object.fromEntries(
-          Object.entries(dbUpdates).filter(([_, v]) => v !== undefined)
+          Object.entries(dbUpdates).filter(([key, value]) => value !== undefined && key !== 'id')
         );
+
+        console.log("Cleaned DB updates:", cleanedUpdates);
+
+        // Ensure we have a fresh session
+        await refreshSession();
 
         const { data, error } = await supabase
           .from('surveys')
@@ -91,9 +100,24 @@ export function useMutateSurvey() {
           .single();
 
         if (error) {
+          console.error("Supabase update error:", error);
+          
+          if (error.message?.includes("violates row-level security policy")) {
+            throw new Error("Permission denied: You don't have access to update this survey. Please check your permissions.");
+          } else if (error.code === '23503') {
+            throw new Error('Invalid folder or team reference');
+          } else if (error.code === '42501') {
+            throw new Error('Insufficient permissions to update this survey');
+          }
+          
           throw new Error(`Database error: ${error.message}`);
         }
         
+        if (!data) {
+          throw new Error('No data returned from survey update');
+        }
+
+        console.log("Survey updated successfully:", data);
         return data;
       } catch (err) {
         console.error("Error in updateSurveyMutation:", err);
@@ -103,6 +127,10 @@ export function useMutateSurvey() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       queryClient.invalidateQueries({ queryKey: ['survey', variables.surveyId] });
+      console.log("Survey update successful, queries invalidated");
+    },
+    onError: (error: Error) => {
+      console.error("Survey update failed:", error);
     }
   });
 
