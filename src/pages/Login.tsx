@@ -4,9 +4,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import EmailAuthForm from '@/components/auth/EmailAuthForm';
 
 const Login = () => {
   const { signInWithGoogle, user, isLoading, session, refreshSession, approvalStatus, checkApprovalStatus } = useAuth();
@@ -14,6 +16,7 @@ const Login = () => {
   const [recoveryAttempted, setRecoveryAttempted] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -152,6 +155,10 @@ const Login = () => {
     }
   };
 
+  const toggleAuthMode = () => {
+    setIsSignUp(!isSignUp);
+  };
+
   // Only show loading state while checking authentication
   if (isLoading || redirecting) {
     return (
@@ -182,13 +189,30 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          </CardTitle>
           <CardDescription className="text-center">
-            Sign in to create and manage your surveys
+            {isSignUp 
+              ? 'Sign up to create and manage your surveys'
+              : 'Sign in to create and manage your surveys'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <EmailAuthForm onToggleMode={toggleAuthMode} isSignUp={isSignUp} />
+          
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative bg-background px-4 text-xs uppercase text-muted-foreground">
+              Or continue with
+            </div>
+          </div>
+          
           <Button
+            variant="outline"
             className="w-full flex items-center justify-center gap-2"
             onClick={handleGoogleLogin}
             disabled={isAuthenticating}
@@ -215,17 +239,8 @@ const Login = () => {
                 />
               </svg>
             )}
-            {isAuthenticating ? "Signing in..." : "Sign in with Google"}
+            {isAuthenticating ? "Signing in..." : "Continue with Google"}
           </Button>
-          
-          <div className="relative flex items-center justify-center mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-muted"></div>
-            </div>
-            <div className="relative bg-background px-4 text-xs uppercase text-muted-foreground">
-              Secure Authentication
-            </div>
-          </div>
         </CardContent>
         <CardFooter className="text-center text-sm text-gray-500 justify-center">
           By signing in, you agree to our Terms of Service and Privacy Policy

@@ -15,6 +15,9 @@ export interface AuthContextType {
   isLoading: boolean;
   approvalStatus: ApprovalStatus;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<any>;
+  signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<any>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
   checkApprovalStatus: () => Promise<ApprovalStatus>;

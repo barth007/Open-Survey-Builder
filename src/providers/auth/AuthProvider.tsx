@@ -3,7 +3,15 @@ import React, { createContext, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { useAuthState } from './useAuthState';
 import { AuthContextType, ApprovalStatus } from './types';
-import { checkApprovalStatus, refreshSession, signInWithGoogle, signOut as authSignOut } from './authService';
+import { 
+  checkApprovalStatus, 
+  refreshSession, 
+  signInWithGoogle, 
+  signInWithEmail,
+  signUpWithEmail,
+  resetPassword,
+  signOut as authSignOut 
+} from './authService';
 
 // Create the auth context with default values
 const AuthContext = createContext<AuthContextType>({
@@ -12,6 +20,9 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   approvalStatus: 'unknown',
   signInWithGoogle: async () => {},
+  signInWithEmail: async () => {},
+  signUpWithEmail: async () => {},
+  resetPassword: async () => {},
   signOut: async () => {},
   refreshSession: async () => false,
   checkApprovalStatus: async () => 'unknown',
@@ -64,6 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     approvalStatus,
     signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    resetPassword,
     signOut: handleSignOut,
     refreshSession: handleRefreshSession,
     checkApprovalStatus: handleCheckApprovalStatus,

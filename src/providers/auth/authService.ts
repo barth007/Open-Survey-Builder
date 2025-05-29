@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ApprovalStatus, StatusCache } from './types';
 import { toast } from '@/components/ui/sonner';
@@ -197,6 +196,84 @@ export async function signInWithGoogle() {
   } catch (error) {
     console.error('Error signing in with Google:', error);
     toast("Failed to sign in with Google. Please try again.");
+    throw error;
+  }
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('Email sign-in error:', error.message);
+      toast.error(error.message);
+      throw error;
+    }
+
+    console.log('Email sign-in successful:', data);
+    return data;
+  } catch (error) {
+    console.error('Error signing in with email:', error);
+    toast.error("Failed to sign in. Please check your credentials.");
+    throw error;
+  }
+}
+
+export async function signUpWithEmail(email: string, password: string, fullName?: string) {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName || '',
+        },
+      },
+    });
+
+    if (error) {
+      console.error('Email sign-up error:', error.message);
+      toast.error(error.message);
+      throw error;
+    }
+
+    console.log('Email sign-up successful:', data);
+    
+    if (data.user && !data.session) {
+      toast.success("Check your email", {
+        description: "We've sent you a confirmation link to complete your registration."
+      });
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error signing up with email:', error);
+    toast.error("Failed to create account. Please try again.");
+    throw error;
+  }
+}
+
+export async function resetPassword(email: string) {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login?reset=true',
+    });
+
+    if (error) {
+      console.error('Password reset error:', error.message);
+      toast.error(error.message);
+      throw error;
+    }
+
+    toast.success("Password reset email sent", {
+      description: "Check your email for the password reset link."
+    });
+  } catch (error) {
+    console.error('Error sending password reset:', error);
+    toast.error("Failed to send password reset email. Please try again.");
     throw error;
   }
 }
