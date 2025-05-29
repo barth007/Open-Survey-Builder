@@ -59,9 +59,9 @@ const Index = () => {
     error
   } = useSurveyState(surveyId);
 
-  const { isSaving, lastSaved } = useAutoSave({ 
+  const { isSaving, lastSaved, retryCount } = useAutoSave({ 
     onSave: handleSave,
-    delay: 2000,
+    delay: 5000, // Increased delay for better batching
     pendingChanges,
     setPendingChanges
   });
@@ -72,37 +72,9 @@ const Index = () => {
     }
   }, [survey.title]);
 
-  const handleQuestionChange = (updatedQuestion: any) => {
-    updateQuestion(updatedQuestion);
-    setPendingChanges(true);
-  };
-
-  const handleDescriptionChangeWithTracking = (description: string) => {
-    handleDescriptionChange(description);
-    setPendingChanges(true);
-  };
-
-  const handleTitleChangeWithTracking = (title: string) => {
-    handleTitleChange(title);
-    setPendingChanges(true);
-  };
-
-  const handleAddQuestion = () => {
-    addQuestion();
-    setPendingChanges(true);
-  };
-
-  const handleDeleteQuestion = (questionId: string) => {
-    deleteQuestion(questionId);
-    setPendingChanges(true);
-  };
-
-  const handleDuplicateQuestion = (question: any) => {
-    duplicateQuestion(question);
-    setPendingChanges(true);
-  };
-
+  // Optimized update functions with batching
   const updateSurveyWithTracking = (updates: Partial<typeof survey>) => {
+    console.log("Batched update:", updates);
     Object.entries(updates).forEach(([key, value]) => {
       updateSurveyField(key as keyof typeof survey, value);
     });
@@ -172,6 +144,9 @@ const Index = () => {
                 <div className="text-center p-8 max-w-md text-magma">
                   <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
                   <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
+                  {retryCount > 0 && (
+                    <p className="text-sm text-gray-500 mt-2">Retrying... (attempt {retryCount})</p>
+                  )}
                 </div>
               </div>
             </SurveyLayout>
@@ -203,8 +178,8 @@ const Index = () => {
                       <SurveyTitle
                         title={survey.title}
                         description={survey.description}
-                        onTitleChange={handleTitleChangeWithTracking}
-                        onDescriptionChange={handleDescriptionChangeWithTracking}
+                        onTitleChange={handleTitleChange}
+                        onDescriptionChange={handleDescriptionChange}
                       />
 
                       <WelcomeCard
@@ -220,10 +195,10 @@ const Index = () => {
 
                       <QuestionSection
                         questions={survey.questions}
-                        onQuestionChange={handleQuestionChange}
-                        onDeleteQuestion={handleDeleteQuestion}
-                        onDuplicateQuestion={handleDuplicateQuestion}
-                        onAddQuestion={handleAddQuestion}
+                        onQuestionChange={updateQuestion}
+                        onDeleteQuestion={deleteQuestion}
+                        onDuplicateQuestion={duplicateQuestion}
+                        onAddQuestion={addQuestion}
                       />
 
                       <ThankYouCard

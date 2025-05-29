@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuerySurvey } from './survey/useQuerySurvey';
@@ -33,6 +33,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
   });
 
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [pendingUpdates, setPendingUpdates] = useState<Partial<Survey>>({});
   const [lastSaveTime, setLastSaveTime] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,65 +65,73 @@ export const useSurveyState = (surveyId: string | undefined) => {
   }, [debouncedTitle, surveyData?.title]);
 
   // Aggiorna la cache locale immediatamente per la preview
-  const updateLocalCache = (updates: Partial<Survey>) => {
+  const updateLocalCache = useCallback((updates: Partial<Survey>) => {
     if (surveyId) {
       queryClient.setQueriesData({ queryKey: ['survey', surveyId] }, (oldData: any) => {
         if (!oldData) return oldData;
         return { ...oldData, ...updates };
       });
     }
-  };
+  }, [surveyId, queryClient]);
 
-  const handleTitleChange = (title: string) => {
-    const updatedSurvey = { ...survey, title };
-    setSurvey(updatedSurvey);
-    updateLocalCache({ title });
+  // Batch updates to reduce API calls
+  const batchUpdate = useCallback((updates: Partial<Survey>) => {
+    setPendingUpdates(prev => ({ ...prev, ...updates }));
+    const mergedUpdates = { ...pendingUpdates, ...updates };
+    
+    setSurvey(prev => ({ ...prev, ...mergedUpdates }));
+    updateLocalCache(mergedUpdates);
+    setPendingChanges(true);
+  }, [pendingUpdates, updateLocalCache]);
+
+  const handleTitleChange = useCallback((title: string) => {
+    batchUpdate({ title });
     document.title = title;
-    setPendingChanges(true);
-  };
+  }, [batchUpdate]);
 
-  const handleDescriptionChange = (description: string) => {
-    const updatedSurvey = { ...survey, description };
-    setSurvey(updatedSurvey);
-    updateLocalCache({ description });
-    setPendingChanges(true);
-  };
+  const handleDescriptionChange = useCallback((description: string) => {
+    batchUpdate({ description });
+  }, [batchUpdate]);
 
-  // Unified update function for all survey fields
-  const updateSurveyField = (field: keyof Survey, value: any) => {
-    const updatedSurvey = { ...survey, [field]: value };
-    setSurvey(updatedSurvey);
-    updateLocalCache({ [field]: value });
-    setPendingChanges(true);
-  };
+  // Unified update function for all survey fields with validation
+  const updateSurveyField = useCallback((field: keyof Survey, value: any) => {
+    console.log(`Updating field ${field} with value:`, value);
+    
+    // Basic validation
+    if (field === 'redirectUrl' && value && !value.startsWith('http')) {
+      console.warn('Invalid URL format for redirectUrl:', value);
+    }
+    
+    batchUpdate({ [field]: value });
+  }, [batchUpdate]);
 
-  const handleQuestionChange = (updatedQuestion: Question) => {
+  const handleQuestionChange = useCallback((updatedQuestion: Question) => {
     updateQuestion(updatedQuestion);
     setPendingChanges(true);
-  };
+  }, [updateQuestion]);
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = useCallback(() => {
     const newQuestion = addQuestion();
     setPendingChanges(true);
     return newQuestion;
-  };
+  }, [addQuestion]);
 
-  const handleDeleteQuestion = (questionId: string) => {
+  const handleDeleteQuestion = useCallback((questionId: string) => {
     deleteQuestion(questionId);
     setPendingChanges(true);
-  };
+  }, [deleteQuestion]);
 
-  const handleDuplicateQuestion = (question: Question) => {
+  const handleDuplicateQuestion = useCallback((question: Question) => {
     const newQuestion = duplicateQuestion(question);
     setPendingChanges(true);
     return newQuestion;
-  };
+  }, [duplicateQuestion]);
 
-  const generatePublicCode = () => {
+  const generatePublicCode = useCallback(() => {
     return `s-${Math.random().toString(36).substring(2, 10)}`;
-  };
+  }, []);
 
-  const togglePublish = async () => {
+  const togglePublish = useCallback(async () => {
     const newPublishState = !survey.isPublished;
     
     const publicCode = newPublishState && !survey.publicCode 
@@ -135,8 +144,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       publicCode: publicCode || survey.publicCode
     };
     
-    setSurvey(prev => ({ ...prev, ...updates }));
-    updateLocalCache(updates);
+    batchUpdate(updates);
     
     try {
       if (surveyId) {
@@ -145,8 +153,11 @@ export const useSurveyState = (surveyId: string | undefined) => {
           updates
         });
         
-        queryClient.invalidateQueries({ queryKey: ['surveys'] });
-        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        // Reduce query invalidations
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['surveys'] });
+          queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        }, 500);
         
         toast({
           title: newPublishState ? "Survey published" : "Survey unpublished",
@@ -157,12 +168,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       }
     } catch (error) {
       // Revert optimistic update on error
-      setSurvey(prev => ({
-        ...prev,
-        isPublished: !newPublishState,
-        publicCode: prev.publicCode
-      }));
-      updateLocalCache({ 
+      batchUpdate({
         isPublished: !newPublishState,
         publicCode: survey.publicCode
       });
@@ -174,13 +180,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
         variant: "destructive"
       });
     }
-  };
+  }, [survey.isPublished, survey.publicCode, surveyId, batchUpdate, updateSurvey, queryClient, toast, generatePublicCode]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     const now = Date.now();
     
-    // Evita salvataggi troppo frequenti (minimo 1000ms tra un salvataggio e l'altro)
-    if (now - lastSaveTime < 1000 || isSaving) {
+    // Evita salvataggi troppo frequenti (minimo 2000ms tra un salvataggio e l'altro)
+    if (now - lastSaveTime < 2000 || isSaving) {
       console.log("Skipping save - too frequent or already saving");
       return;
     }
@@ -192,8 +198,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
         const publicCode = survey.isPublished && !survey.publicCode 
           ? generatePublicCode()
           : survey.publicCode;
-          
-        const updates = { 
+
+        // Create the complete update object including pending updates
+        const completeUpdates = { 
           title: survey.title,
           description: survey.description,
           questions: questions,
@@ -207,14 +214,15 @@ export const useSurveyState = (surveyId: string | undefined) => {
           thankYouTitle: survey.thankYouTitle,
           thankYouMessage: survey.thankYouMessage,
           thankYouButtonText: survey.thankYouButtonText,
-          redirectUrl: survey.redirectUrl
+          redirectUrl: survey.redirectUrl,
+          ...pendingUpdates // Include any pending batched updates
         };
 
-        console.log("Saving survey with updates:", updates);
+        console.log("Saving survey with updates:", completeUpdates);
 
         await updateSurvey({
           surveyId,
-          updates
+          updates: completeUpdates
         });
         
         if (publicCode !== survey.publicCode) {
@@ -222,8 +230,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
           updateLocalCache({ publicCode });
         }
         
-        queryClient.invalidateQueries({ queryKey: ['surveys'] });
-        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        // Clear pending updates after successful save
+        setPendingUpdates({});
+        
+        // Reduced frequency of query invalidations
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['surveys'] });
+          queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+        }, 1000);
         
         setPendingChanges(false);
         setLastSaveTime(now);
@@ -235,15 +249,19 @@ export const useSurveyState = (surveyId: string | undefined) => {
       }
     } catch (error) {
       console.error("Error saving survey:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      
       toast({
         title: "Error saving survey",
-        description: error instanceof Error ? error.message : "There was an error saving your survey. Please try again.",
+        description: `${errorMessage}. Please try again.`,
         variant: "destructive"
       });
+      
+      // Don't clear pending updates on error so they can be retried
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [surveyId, survey, questions, pendingUpdates, lastSaveTime, isSaving, updateSurvey, queryClient, toast, generatePublicCode, updateLocalCache]);
 
   const currentSurvey: Survey = {
     ...survey,
