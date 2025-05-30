@@ -49,7 +49,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     duplicateQuestion
   } = useQuestionManagement(survey.questions);
 
-  // Inizializza lo stato quando arrivano i dati dal server - FIX: Only update if surveyId matches
+  // Inizializza lo stato quando arrivano i dati dal server
   useEffect(() => {
     if (surveyData && surveyData.id === surveyId) {
       console.log(`Initializing survey state for ID: ${surveyId}`, surveyData);
@@ -65,7 +65,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [debouncedTitle, surveyData?.title]);
 
-  // Aggiorna la cache locale immediatamente per la preview - FIX: More specific cache key
+  // Aggiorna la cache locale immediatamente per la preview
   const updateLocalCache = useCallback((updates: Partial<Survey>) => {
     if (surveyId) {
       console.log(`Updating local cache for survey ${surveyId}:`, updates);
@@ -81,7 +81,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyId, queryClient]);
 
-  // Batch updates to reduce API calls - FIX: Ensure surveyId is included in all updates
+  // Batch updates to reduce API calls
   const batchUpdate = useCallback((updates: Partial<Survey>) => {
     console.log(`Batching update for survey ${surveyId}:`, updates);
     
@@ -152,10 +152,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     return newQuestion;
   }, [surveyId, duplicateQuestion]);
 
-  const generatePublicCode = useCallback(() => {
-    return `s-${Math.random().toString(36).substring(2, 10)}`;
-  }, []);
-
   const togglePublish = useCallback(async () => {
     if (!surveyId) {
       console.error('Cannot toggle publish: no survey ID');
@@ -165,23 +161,26 @@ export const useSurveyState = (surveyId: string | undefined) => {
     const newPublishState = !survey.isPublished;
     console.log(`Toggling publish state for survey ${surveyId}: ${newPublishState}`);
     
-    const publicCode = newPublishState && !survey.publicCode 
-      ? generatePublicCode()
-      : survey.publicCode;
-    
-    // Optimistic update
+    // Optimistic update - don't try to generate publicCode on frontend
+    // Let the database handle it via the trigger
     const updates = { 
-      isPublished: newPublishState,
-      publicCode: publicCode || survey.publicCode
+      isPublished: newPublishState
     };
     
     batchUpdate(updates);
     
     try {
-      await updateSurvey({
+      const result = await updateSurvey({
         surveyId,
         updates
       });
+      
+      // Update local state with the actual public_code from database
+      if (result.public_code && result.public_code !== survey.publicCode) {
+        console.log(`Received new public code from database: ${result.public_code}`);
+        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
+        updateLocalCache({ publicCode: result.public_code });
+      }
       
       // Reduce query invalidations and be more specific
       setTimeout(() => {
@@ -198,8 +197,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     } catch (error) {
       // Revert optimistic update on error
       batchUpdate({
-        isPublished: !newPublishState,
-        publicCode: survey.publicCode
+        isPublished: !newPublishState
       });
       
       console.error("Error updating survey publish status:", error);
@@ -209,7 +207,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         variant: "destructive"
       });
     }
-  }, [survey.isPublished, survey.publicCode, surveyId, batchUpdate, updateSurvey, queryClient, toast, generatePublicCode]);
+  }, [survey.isPublished, survey.publicCode, surveyId, batchUpdate, updateSurvey, queryClient, toast, updateLocalCache]);
 
   const handleSave = useCallback(async () => {
     if (!surveyId) {
@@ -229,17 +227,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
     setIsSaving(true);
 
     try {
-      const publicCode = survey.isPublished && !survey.publicCode 
-        ? generatePublicCode()
-        : survey.publicCode;
-
       // Create the complete update object including pending updates
+      // Don't try to generate publicCode on frontend - let database handle it
       const completeUpdates = { 
         title: survey.title,
         description: survey.description,
         questions: questions,
         isPublished: survey.isPublished,
-        publicCode,
         teamId: survey.teamId,
         welcomeTitle: survey.welcomeTitle,
         welcomeMessage: survey.welcomeMessage,
@@ -254,14 +248,16 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
       console.log(`Saving survey ${surveyId} with updates:`, completeUpdates);
 
-      await updateSurvey({
+      const result = await updateSurvey({
         surveyId,
         updates: completeUpdates
       });
       
-      if (publicCode !== survey.publicCode) {
-        setSurvey(prev => ({ ...prev, publicCode }));
-        updateLocalCache({ publicCode });
+      // Update local state with any new data from database (like public_code)
+      if (result.public_code && result.public_code !== survey.publicCode) {
+        console.log(`Received updated public code from database: ${result.public_code}`);
+        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
+        updateLocalCache({ publicCode: result.public_code });
       }
       
       // Clear pending updates after successful save
@@ -294,9 +290,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
     } finally {
       setIsSaving(false);
     }
-  }, [surveyId, survey, questions, pendingUpdates, lastSaveTime, isSaving, updateSurvey, queryClient, toast, generatePublicCode, updateLocalCache]);
+  }, [surveyId, survey, questions, pendingUpdates, lastSaveTime, isSaving, updateSurvey, queryClient, toast, updateLocalCache]);
 
-  // FIX: Ensure current survey always has the correct ID
+  // Ensure current survey always has the correct ID
   const currentSurvey: Survey = {
     ...survey,
     id: surveyId || survey.id, // Always use the correct surveyId
