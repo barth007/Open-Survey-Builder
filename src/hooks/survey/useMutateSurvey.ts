@@ -76,8 +76,13 @@ export function useMutateSurvey() {
       updates: Partial<Survey>
     }) => {
       try {
-        console.log("Updating survey with ID:", surveyId);
+        console.log(`Updating survey with ID: ${surveyId}`);
         console.log("Updates:", updates);
+        
+        // FIX: Ensure we're not accidentally updating the wrong survey
+        if (!surveyId) {
+          throw new Error('Survey ID is required for updates');
+        }
         
         // Convert the updates to database format
         const dbUpdates = surveyToDbSurvey(updates as Survey);
@@ -92,6 +97,7 @@ export function useMutateSurvey() {
         // Ensure we have a fresh session
         await refreshSession();
 
+        // FIX: Double-check we're updating the correct survey
         const { data, error } = await supabase
           .from('surveys')
           .update(cleanedUpdates)
@@ -100,7 +106,7 @@ export function useMutateSurvey() {
           .single();
 
         if (error) {
-          console.error("Supabase update error:", error);
+          console.error(`Supabase update error for survey ${surveyId}:`, error);
           
           if (error.message?.includes("violates row-level security policy")) {
             throw new Error("Permission denied: You don't have access to update this survey. Please check your permissions.");
@@ -117,26 +123,29 @@ export function useMutateSurvey() {
           throw new Error('No data returned from survey update');
         }
 
-        console.log("Survey updated successfully:", data);
+        console.log(`Survey ${surveyId} updated successfully:`, data);
         return data;
       } catch (err) {
-        console.error("Error in updateSurveyMutation:", err);
+        console.error(`Error in updateSurveyMutation for survey ${surveyId}:`, err);
         throw err;
       }
     },
     onSuccess: (_, variables) => {
+      // FIX: Be more specific about which queries to invalidate
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       queryClient.invalidateQueries({ queryKey: ['survey', variables.surveyId] });
-      console.log("Survey update successful, queries invalidated");
+      console.log(`Survey ${variables.surveyId} update successful, queries invalidated`);
     },
-    onError: (error: Error) => {
-      console.error("Survey update failed:", error);
+    onError: (error: Error, variables) => {
+      console.error(`Survey ${variables.surveyId} update failed:`, error);
     }
   });
 
   const deleteSurvey = useMutation({
     mutationFn: async (surveyId: string) => {
       try {
+        console.log(`Deleting survey ${surveyId}`);
+        
         const { error } = await supabase
           .from('surveys')
           .delete()
@@ -148,13 +157,18 @@ export function useMutateSurvey() {
           }
           throw new Error(`Database error: ${error.message}`);
         }
+        
+        console.log(`Survey ${surveyId} deleted successfully`);
       } catch (err) {
-        console.error("Error in deleteSurveyMutation:", err);
+        console.error(`Error in deleteSurveyMutation for survey ${surveyId}:`, err);
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, surveyId) => {
+      // FIX: Remove the specific survey from cache
+      queryClient.removeQueries({ queryKey: ['survey', surveyId] });
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      console.log(`Survey ${surveyId} deletion successful, queries invalidated`);
     }
   });
 

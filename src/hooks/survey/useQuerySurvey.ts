@@ -17,6 +17,8 @@ export function useQuerySurvey(surveyId: string | undefined) {
         throw new Error('Survey ID is required');
       }
 
+      console.log(`Fetching survey with ID: ${surveyId}`);
+
       const { data, error } = await supabase
         .from('surveys')
         .select('*')
@@ -24,12 +26,20 @@ export function useQuerySurvey(surveyId: string | undefined) {
         .maybeSingle();
 
       if (error) {
+        console.error(`Error fetching survey ${surveyId}:`, error);
         throw new Error(`Error fetching survey: ${error.message}`);
       }
 
       if (!data) {
+        console.error(`Survey with ID "${surveyId}" not found`);
         throw new Error(`Survey with ID "${surveyId}" not found`);
       }
+
+      console.log(`Survey ${surveyId} fetched:`, { 
+        id: data.id, 
+        name: data.name, 
+        description: data.description 
+      });
 
       // Convert the database survey to the Survey type using our utility function
       const survey: Survey = dbSurveyToSurvey(data as DbSurvey);
