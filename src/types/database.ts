@@ -38,7 +38,24 @@ export interface DbSurveyResponse {
   answers: Json;
   submitted_at: string | null;
   participant_id: string | null;
+  participant_email: string | null; // Added new field
+  deleted_at: string | null; // Added new field for soft delete
   metadata: Json | null;
+}
+
+/**
+ * Database ResponseDeletion type - represents a deletion log entry
+ */
+export interface DbResponseDeletion {
+  id: string;
+  survey_id: string;
+  participant_id: string | null;
+  participant_email: string | null;
+  deleted_by: string | null;
+  deletion_reason: string | null;
+  responses_count: number;
+  deleted_at: string | null;
+  responses_backup: Json | null;
 }
 
 // Export Json type so it can be used by other files

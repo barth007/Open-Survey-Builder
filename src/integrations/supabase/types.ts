@@ -63,27 +63,69 @@ export type Database = {
         }
         Relationships: []
       }
+      response_deletions: {
+        Row: {
+          deleted_at: string | null
+          deleted_by: string | null
+          deletion_reason: string | null
+          id: string
+          participant_email: string | null
+          participant_id: string | null
+          responses_backup: Json | null
+          responses_count: number
+          survey_id: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          id?: string
+          participant_email?: string | null
+          participant_id?: string | null
+          responses_backup?: Json | null
+          responses_count: number
+          survey_id: string
+        }
+        Update: {
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deletion_reason?: string | null
+          id?: string
+          participant_email?: string | null
+          participant_id?: string | null
+          responses_backup?: Json | null
+          responses_count?: number
+          survey_id?: string
+        }
+        Relationships: []
+      }
       survey_responses: {
         Row: {
           answers: Json
+          deleted_at: string | null
           id: string
           metadata: Json | null
+          participant_email: string | null
           participant_id: string | null
           submitted_at: string | null
           survey_id: string | null
         }
         Insert: {
           answers: Json
+          deleted_at?: string | null
           id?: string
           metadata?: Json | null
+          participant_email?: string | null
           participant_id?: string | null
           submitted_at?: string | null
           survey_id?: string | null
         }
         Update: {
           answers?: Json
+          deleted_at?: string | null
           id?: string
           metadata?: Json | null
+          participant_email?: string | null
           participant_id?: string | null
           submitted_at?: string | null
           survey_id?: string | null
@@ -281,6 +323,16 @@ export type Database = {
       can_access_team: {
         Args: { team_id_param: string }
         Returns: boolean
+      }
+      delete_responses_by_participant: {
+        Args: {
+          p_survey_id: string
+          p_participant_id?: string
+          p_participant_email?: string
+          p_soft_delete?: boolean
+          p_deletion_reason?: string
+        }
+        Returns: number
       }
       generate_invitation_code: {
         Args: Record<PropertyKey, never>
