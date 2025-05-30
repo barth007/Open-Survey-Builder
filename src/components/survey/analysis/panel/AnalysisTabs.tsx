@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Tag, Filter, Scale, AlertTriangle } from "lucide-react";
+import { Tag, Filter, Scale, AlertTriangle, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type TabType = 'tagging' | 'statistics' | 'scale' | 'outliers';
+type TabType = 'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary';
 
 interface AnalysisTabsProps {
   activeTab: TabType;
@@ -54,6 +54,14 @@ export const AnalysisTabs: React.FC<AnalysisTabsProps> = ({
           </Button>
         </>
       )}
+      <Button 
+        variant={activeTab === 'summary' ? 'default' : 'outline'}
+        size="sm" 
+        onClick={() => setActiveTab('summary')}
+        className="flex-grow md:flex-grow-0"
+      >
+        <FileText className="mr-1 h-4 w-4" /> Summary
+      </Button>
     </div>
   );
 };

@@ -15,11 +15,19 @@ interface ResponseGroup {
   likert: boolean;
 }
 
-interface StatisticalInsightsProps {
-  responseData: ResponseGroup;
+interface ScaleValues {
+  [key: string]: number;
 }
 
-export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({ responseData }) => {
+interface StatisticalInsightsProps {
+  responseData: ResponseGroup;
+  scaleValues?: ScaleValues;
+}
+
+export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({ 
+  responseData, 
+  scaleValues 
+}) => {
   // Calculate basic statistics
   const totalResponses = responseData.responses.reduce((sum, r) => sum + r.count, 0);
   const uniqueAnswers = responseData.responses.length;
@@ -29,44 +37,120 @@ export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({ respon
     [...responseData.responses].sort((a, b) => b.count - a.count)[0]?.answer :
     null;
 
-  // For likert scales, try to calculate median
-  let median = null;
-  if (responseData.likert && responseData.responses.length > 0) {
+  // Calculate weighted average using custom scale values
+  const calculateWeightedAverage = () => {
+    if (!responseData.likert || !scaleValues) return null;
+    
+    let totalWeightedSum = 0;
+    let totalCount = 0;
+    
+    responseData.responses.forEach(response => {
+      const numericValue = scaleValues[response.answer] || 0;
+      totalWeightedSum += numericValue * response.count;
+      totalCount += response.count;
+    });
+    
+    return totalCount > 0 ? (totalWeightedSum / totalCount).toFixed(2) : null;
+  };
+
+  // Calculate median using custom scale values
+  const calculateMedian = () => {
+    if (!responseData.likert || !scaleValues) return null;
+    
     const numericAnswers: number[] = [];
     
-    // Transform verbal responses to numeric (assuming they're properly ordered)
     responseData.responses.forEach(response => {
-      // Add each answer as many times as its count
-      for (let i = 0; i < response.count; i++) {
-        // Using the index in the array as the numeric value
-        const index = responseData.responses.findIndex(r => r.answer === response.answer);
-        numericAnswers.push(index + 1);
+      const numericValue = scaleValues[response.answer];
+      if (numericValue !== undefined) {
+        for (let i = 0; i < response.count; i++) {
+          numericAnswers.push(numericValue);
+        }
       }
     });
     
-    // Sort numeric answers
+    if (numericAnswers.length === 0) return null;
+    
     numericAnswers.sort((a, b) => a - b);
     
-    // Calculate median
+    let medianValue: number;
     if (numericAnswers.length % 2 === 0) {
-      // Even number of responses
       const mid = numericAnswers.length / 2;
-      const medianValue = (numericAnswers[mid - 1] + numericAnswers[mid]) / 2;
-      
-      // Map back to the answer text
-      if (medianValue % 1 === 0) {
-        // Whole number
-        median = responseData.responses[medianValue - 1]?.answer;
-      } else {
-        // Fractional number, meaning it's between two values
-        median = `Between "${responseData.responses[Math.floor(medianValue) - 1]?.answer}" and "${responseData.responses[Math.ceil(medianValue) - 1]?.answer}"`;
-      }
+      medianValue = (numericAnswers[mid - 1] + numericAnswers[mid]) / 2;
     } else {
-      // Odd number of responses
       const mid = Math.floor(numericAnswers.length / 2);
-      median = responseData.responses[numericAnswers[mid] - 1]?.answer;
+      medianValue = numericAnswers[mid];
     }
-  }
+    
+    // Find the answer closest to the median value
+    let closestAnswer = responseData.responses[0]?.answer;
+    let closestDiff = Infinity;
+    
+    responseData.responses.forEach(response => {
+      const value = scaleValues[response.answer];
+      if (value !== undefined) {
+        const diff = Math.abs(value - medianValue);
+        if (diff < closestDiff) {
+          closestDiff = diff;
+          closestAnswer = response.answer;
+        }
+      }
+    });
+    
+    return closestAnswer;
+  };
+
+  // Analyze distribution trend using custom scale values
+  const analyzeTrend = () => {
+    if (!responseData.likert || !scaleValues) return 'N/A';
+    
+    const weightedAvg = parseFloat(calculateWeightedAverage() || '0');
+    const scaleRange = Object.values(scaleValues);
+    const minScale = Math.min(...scaleRange);
+    const maxScale = Math.max(...scaleRange);
+    const midpoint = (minScale + maxScale) / 2;
+    
+    if (weightedAvg > midpoint + (maxScale - minScale) * 0.15) {
+      return 'Skewed towards higher values';
+    } else if (weightedAvg < midpoint - (maxScale - minScale) * 0.15) {
+      return 'Skewed towards lower values';
+    } else {
+      return 'Centered distribution';
+    }
+  };
+
+  // Calculate variance interpretation
+  const analyzeVariance = () => {
+    if (!responseData.likert || !scaleValues) return 'N/A';
+    
+    const weightedAvg = parseFloat(calculateWeightedAverage() || '0');
+    let variance = 0;
+    let totalCount = 0;
+    
+    responseData.responses.forEach(response => {
+      const numericValue = scaleValues[response.answer];
+      if (numericValue !== undefined) {
+        variance += response.count * Math.pow(numericValue - weightedAvg, 2);
+        totalCount += response.count;
+      }
+    });
+    
+    variance = variance / totalCount;
+    const standardDeviation = Math.sqrt(variance);
+    
+    const scaleRange = Math.max(...Object.values(scaleValues)) - Math.min(...Object.values(scaleValues));
+    const relativeSD = standardDeviation / scaleRange;
+    
+    if (relativeSD < 0.2) {
+      return 'Low variance (concentrated responses)';
+    } else if (relativeSD > 0.4) {
+      return 'High variance (distributed responses)';
+    } else {
+      return 'Moderate variance';
+    }
+  };
+
+  const weightedAverage = calculateWeightedAverage();
+  const median = calculateMedian();
   
   return (
     <div className="space-y-6">
@@ -91,35 +175,48 @@ export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({ respon
                 <span className="text-gray-500">Mode (most common):</span>
                 <span className="font-medium">{mode || 'N/A'}</span>
               </p>
-              <p className="flex justify-between">
-                <span className="text-gray-500">Median:</span>
-                <span className="font-medium">{median || 'N/A'}</span>
-              </p>
+              {median && (
+                <p className="flex justify-between">
+                  <span className="text-gray-500">Median:</span>
+                  <span className="font-medium">{median}</span>
+                </p>
+              )}
+              {weightedAverage && (
+                <p className="flex justify-between">
+                  <span className="text-gray-500">Weighted average:</span>
+                  <span className="font-medium">{weightedAverage}</span>
+                </p>
+              )}
             </>
           )}
         </div>
       </div>
       
-      {responseData.likert && (
+      {responseData.likert && scaleValues && (
         <div className="bg-gray-50 p-4 rounded-md border border-ice">
           <h4 className="font-medium mb-3">Distribution Analysis</h4>
-          <p className="text-sm text-gray-500">
-            The distribution appears to be {responseData.responses.length > 3 ? 'multimodal' : 'unimodal'} with 
-            {responseData.responses.some(r => r.percentage && r.percentage > 40) ? ' a dominant peak.' : ' no clear dominant answer.'}
-          </p>
+          
+          <div className="space-y-2">
+            <p className="text-sm">
+              <span className="text-gray-500">Response trend:</span>{' '}
+              <span className="font-medium">{analyzeTrend()}</span>
+            </p>
+            <p className="text-sm">
+              <span className="text-gray-500">Data spread:</span>{' '}
+              <span className="font-medium">{analyzeVariance()}</span>
+            </p>
+          </div>
           
           <div className="mt-4 pt-4 border-t border-gray-100">
-            <h5 className="font-medium text-sm mb-2">Quantitative Insights</h5>
-            <div className="space-y-2">
-              <p className="text-sm">
-                <span className="text-gray-500">Response trend:</span>{' '}
-                {responseData.responses[0]?.count > responseData.responses[responseData.responses.length - 1]?.count ? 
-                  'Skewed towards lower values' : 'Skewed towards higher values'}
+            <h5 className="font-medium text-sm mb-2">Scale Information</h5>
+            <div className="space-y-1 text-sm">
+              <p>
+                <span className="text-gray-500">Scale range:</span>{' '}
+                {Math.min(...Object.values(scaleValues))} - {Math.max(...Object.values(scaleValues))}
               </p>
-              <p className="text-sm">
-                <span className="text-gray-500">Data spread:</span>{' '}
-                {responseData.responses.some(r => r.percentage && r.percentage > 70) ? 
-                  'Low variance (concentrated responses)' : 'High variance (distributed responses)'}
+              <p>
+                <span className="text-gray-500">Custom mapping:</span>{' '}
+                {Object.keys(scaleValues).length} levels configured
               </p>
             </div>
           </div>

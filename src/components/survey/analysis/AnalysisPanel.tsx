@@ -10,6 +10,7 @@ import { AnalysisPanelHeader } from './panel/AnalysisPanelHeader';
 import { AnalysisTabs } from './panel/AnalysisTabs';
 import { TaggingTab } from './panel/TaggingTab';
 import { CollapsedAnalysisPanel } from './panel/CollapsedAnalysisPanel';
+import { InsightsSummary } from './InsightsSummary';
 
 interface ResponseData {
   answer: string;
@@ -22,6 +23,10 @@ interface ResponseGroup {
   question: string;
   responses: ResponseData[];
   likert: boolean;
+}
+
+interface ScaleValues {
+  [key: string]: number;
 }
 
 interface AnalysisPanelProps {
@@ -38,7 +43,29 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   isCollapsed = false
 }) => {
   const [tags, setTags] = useState<Record<string, string[]>>({});
-  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers'>('tagging');
+  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary'>('tagging');
+  const [researcherNotes, setResearcherNotes] = useState<string>('');
+  
+  // Initialize scale values based on response data
+  const [scaleValues, setScaleValues] = useState<ScaleValues>(() => {
+    if (!responseData) return {};
+    const initialValues: ScaleValues = {};
+    responseData.responses.forEach((response, index) => {
+      initialValues[response.answer] = index + 1;
+    });
+    return initialValues;
+  });
+
+  // Update scale values when response data changes
+  React.useEffect(() => {
+    if (responseData) {
+      const newScaleValues: ScaleValues = {};
+      responseData.responses.forEach((response, index) => {
+        newScaleValues[response.answer] = index + 1;
+      });
+      setScaleValues(newScaleValues);
+    }
+  }, [responseData]);
 
   if (isCollapsed) {
     return <CollapsedAnalysisPanel onToggleVisibility={onToggleVisibility!} />;
@@ -47,7 +74,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   return (
     <Card className="h-full border-ice overflow-hidden">
       <AnalysisPanelHeader onToggleVisibility={onToggleVisibility} />
-      <CardContent className="p-0 overflow-hidden h-[calc(100%-57px)]"> {/* Adjust height to account for header */}
+      <CardContent className="p-0 overflow-hidden h-[calc(100%-57px)]">
         <ScrollArea className="h-full">
           <div className="p-6">
             {!selectedResponseGroup ? (
@@ -69,15 +96,32 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                 )}
 
                 {activeTab === 'statistics' && responseData && (
-                  <StatisticalInsights responseData={responseData} />
+                  <StatisticalInsights 
+                    responseData={responseData} 
+                    scaleValues={scaleValues}
+                  />
                 )}
 
                 {activeTab === 'scale' && responseData?.likert && (
-                  <ScaleMapping responseData={responseData} />
+                  <ScaleMapping 
+                    responseData={responseData} 
+                    scaleValues={scaleValues}
+                    setScaleValues={setScaleValues}
+                  />
                 )}
 
                 {activeTab === 'outliers' && responseData?.likert && (
                   <OutlierDetection responseData={responseData} />
+                )}
+
+                {activeTab === 'summary' && responseData && (
+                  <InsightsSummary 
+                    responseData={responseData}
+                    scaleValues={scaleValues}
+                    tags={tags}
+                    researcherNotes={researcherNotes}
+                    setResearcherNotes={setResearcherNotes}
+                  />
                 )}
               </div>
             )}

@@ -18,24 +18,21 @@ interface ResponseGroup {
   likert: boolean;
 }
 
-interface ScaleMappingProps {
-  responseData: ResponseGroup;
-}
-
 interface ScaleValues {
   [key: string]: number;
 }
 
-export const ScaleMapping: React.FC<ScaleMappingProps> = ({ responseData }) => {
-  const [scaleValues, setScaleValues] = useState<ScaleValues>(() => {
-    // Initialize scale values with default mappings based on position
-    const initialValues: ScaleValues = {};
-    responseData.responses.forEach((response, index) => {
-      initialValues[response.answer] = index + 1;
-    });
-    return initialValues;
-  });
+interface ScaleMappingProps {
+  responseData: ResponseGroup;
+  scaleValues: ScaleValues;
+  setScaleValues: React.Dispatch<React.SetStateAction<ScaleValues>>;
+}
 
+export const ScaleMapping: React.FC<ScaleMappingProps> = ({ 
+  responseData, 
+  scaleValues, 
+  setScaleValues 
+}) => {
   const [initializing, setInitializing] = useState(true);
 
   const handleScaleValueChange = (answer: string, value: string) => {
@@ -45,13 +42,11 @@ export const ScaleMapping: React.FC<ScaleMappingProps> = ({ responseData }) => {
       [answer]: numericValue
     }));
     
-    // After first edit, turn off initializing mode
     if (initializing) {
       setInitializing(false);
     }
   };
 
-  // Simple statistics based on numeric mappings
   const calculateWeightedAverage = () => {
     let totalWeightedSum = 0;
     let totalCount = 0;
@@ -66,7 +61,6 @@ export const ScaleMapping: React.FC<ScaleMappingProps> = ({ responseData }) => {
   };
 
   const resetToDefault = () => {
-    // Reset to sequential values
     const defaultValues: ScaleValues = {};
     responseData.responses.forEach((response, index) => {
       defaultValues[response.answer] = index + 1;
@@ -76,7 +70,6 @@ export const ScaleMapping: React.FC<ScaleMappingProps> = ({ responseData }) => {
   };
 
   const resetToCustom = () => {
-    // Reset to a 0-100 scale spread evenly
     const customValues: ScaleValues = {};
     const step = 100 / (responseData.responses.length - 1 || 1);
     
