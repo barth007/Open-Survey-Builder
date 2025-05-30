@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FileText, Download, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -193,14 +192,25 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
   const tagSummary = getTagSummary();
 
   return (
-    <div className="space-y-6">
+    <div 
+      className="space-y-6" 
+      role="region" 
+      aria-label="Summary insights"
+      id="summary-panel"
+      tabIndex={-1}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <FileText className="h-4 w-4 mr-2 text-blue-600" />
+          <FileText className="h-4 w-4 mr-2 text-blue-600" aria-hidden="true" />
           <h4 className="font-medium text-sm">Summary Insights</h4>
         </div>
-        <Button variant="outline" size="sm" onClick={exportToMarkdown}>
-          <Download className="mr-1 h-4 w-4" />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={exportToMarkdown}
+          aria-label="Export summary as markdown file"
+        >
+          <Download className="mr-1 h-4 w-4" aria-hidden="true" />
           Export
         </Button>
       </div>
@@ -213,11 +223,21 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
         <CardContent className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Total responses:</span>
-            <span className="font-medium">{totalResponses}</span>
+            <span 
+              className="font-medium"
+              aria-label={`Total responses: ${totalResponses}`}
+            >
+              {totalResponses}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Unique answers:</span>
-            <span className="font-medium">{uniqueAnswers}</span>
+            <span 
+              className="font-medium"
+              aria-label={`Unique answers: ${uniqueAnswers}`}
+            >
+              {uniqueAnswers}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -231,23 +251,43 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
           <CardContent className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Mode (most common):</span>
-              <span className="font-medium">{mode}</span>
+              <span 
+                className="font-medium"
+                aria-label={`Most common response: ${mode}`}
+              >
+                {mode}
+              </span>
             </div>
             {median && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Median:</span>
-                <span className="font-medium">{median}</span>
+                <span 
+                  className="font-medium"
+                  aria-label={`Median response: ${median}`}
+                >
+                  {median}
+                </span>
               </div>
             )}
             {weightedAvg && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Weighted average:</span>
-                <span className="font-medium">{weightedAvg}</span>
+                <span 
+                  className="font-medium"
+                  aria-label={`Weighted average score: ${weightedAvg}`}
+                >
+                  {weightedAvg}
+                </span>
               </div>
             )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Trend:</span>
-              <span className="font-medium">{trend}</span>
+              <span 
+                className="font-medium"
+                aria-label={`Response trend: ${trend}`}
+              >
+                {trend}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -263,7 +303,12 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
             {Object.entries(tagSummary).map(([tag, count]) => (
               <div key={tag} className="flex justify-between text-sm">
                 <span className="text-gray-500">{tag}:</span>
-                <span className="font-medium">{count}</span>
+                <span 
+                  className="font-medium"
+                  aria-label={`Tag ${tag}: ${count} occurrences`}
+                >
+                  {count}
+                </span>
               </div>
             ))}
           </CardContent>
@@ -274,7 +319,7 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center">
-            <StickyNote className="h-4 w-4 mr-2" />
+            <StickyNote className="h-4 w-4 mr-2" aria-hidden="true" />
             Researcher Notes
           </CardTitle>
         </CardHeader>
@@ -284,7 +329,12 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
             value={researcherNotes}
             onChange={(e) => setResearcherNotes(e.target.value)}
             className="min-h-[100px] resize-none"
+            aria-label="Researcher notes textarea"
+            aria-describedby="notes-description"
           />
+          <p id="notes-description" className="sr-only">
+            This field allows you to add your research notes, observations, or interpretations about the survey responses.
+          </p>
         </CardContent>
       </Card>
 
@@ -297,7 +347,10 @@ export const InsightsSummary: React.FC<InsightsSummaryProps> = ({
           {responseData.responses.map(response => (
             <div key={response.answer} className="flex justify-between text-sm">
               <span className="text-gray-500 truncate flex-1 mr-2">{response.answer}:</span>
-              <span className="font-medium">
+              <span 
+                className="font-medium"
+                aria-label={`${response.answer}: ${response.count} responses, ${response.percentage} percent`}
+              >
                 {response.count} ({response.percentage}%)
               </span>
             </div>

@@ -16,23 +16,46 @@ export const AnalysisTabs: React.FC<AnalysisTabsProps> = ({
   setActiveTab,
   isLikert
 }) => {
+  const handleKeyDown = (event: React.KeyboardEvent, tabType: TabType) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setActiveTab(tabType);
+    }
+  };
+
   return (
-    <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
+    <div 
+      className="flex flex-wrap gap-2 mb-4 border-b pb-4"
+      role="tablist"
+      aria-label="Analysis tabs"
+    >
       <Button 
         variant={activeTab === 'tagging' ? 'default' : 'outline'} 
         size="sm"
         onClick={() => setActiveTab('tagging')}
+        onKeyDown={(e) => handleKeyDown(e, 'tagging')}
         className="flex-grow md:flex-grow-0"
+        role="tab"
+        aria-selected={activeTab === 'tagging'}
+        aria-controls="tagging-panel"
+        tabIndex={0}
+        aria-label="Tagging analysis tab"
       >
-        <Tag className="mr-1 h-4 w-4" /> Tagging
+        <Tag className="mr-1 h-4 w-4" aria-hidden="true" /> Tagging
       </Button>
       <Button 
         variant={activeTab === 'statistics' ? 'default' : 'outline'}
         size="sm" 
         onClick={() => setActiveTab('statistics')}
+        onKeyDown={(e) => handleKeyDown(e, 'statistics')}
         className="flex-grow md:flex-grow-0"
+        role="tab"
+        aria-selected={activeTab === 'statistics'}
+        aria-controls="statistics-panel"
+        tabIndex={0}
+        aria-label="Statistical analysis tab"
       >
-        <Filter className="mr-1 h-4 w-4" /> Statistics
+        <Filter className="mr-1 h-4 w-4" aria-hidden="true" /> Statistics
       </Button>
       {isLikert && (
         <>
@@ -40,17 +63,29 @@ export const AnalysisTabs: React.FC<AnalysisTabsProps> = ({
             variant={activeTab === 'scale' ? 'default' : 'outline'}
             size="sm" 
             onClick={() => setActiveTab('scale')}
+            onKeyDown={(e) => handleKeyDown(e, 'scale')}
             className="flex-grow md:flex-grow-0"
+            role="tab"
+            aria-selected={activeTab === 'scale'}
+            aria-controls="scale-panel"
+            tabIndex={0}
+            aria-label="Scale mapping tab"
           >
-            <Scale className="mr-1 h-4 w-4" /> Scale Mapping
+            <Scale className="mr-1 h-4 w-4" aria-hidden="true" /> Scale Mapping
           </Button>
           <Button 
             variant={activeTab === 'outliers' ? 'default' : 'outline'}
             size="sm" 
             onClick={() => setActiveTab('outliers')}
+            onKeyDown={(e) => handleKeyDown(e, 'outliers')}
             className="flex-grow md:flex-grow-0"
+            role="tab"
+            aria-selected={activeTab === 'outliers'}
+            aria-controls="outliers-panel"
+            tabIndex={0}
+            aria-label="Outliers detection tab"
           >
-            <AlertTriangle className="mr-1 h-4 w-4" /> Outliers
+            <AlertTriangle className="mr-1 h-4 w-4" aria-hidden="true" /> Outliers
           </Button>
         </>
       )}
@@ -58,9 +93,15 @@ export const AnalysisTabs: React.FC<AnalysisTabsProps> = ({
         variant={activeTab === 'summary' ? 'default' : 'outline'}
         size="sm" 
         onClick={() => setActiveTab('summary')}
+        onKeyDown={(e) => handleKeyDown(e, 'summary')}
         className="flex-grow md:flex-grow-0"
+        role="tab"
+        aria-selected={activeTab === 'summary'}
+        aria-controls="summary-panel"
+        tabIndex={0}
+        aria-label="Summary insights tab"
       >
-        <FileText className="mr-1 h-4 w-4" /> Summary
+        <FileText className="mr-1 h-4 w-4" aria-hidden="true" /> Summary
       </Button>
     </div>
   );

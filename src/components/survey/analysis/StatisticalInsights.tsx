@@ -153,38 +153,63 @@ export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({
   const median = calculateMedian();
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="region" aria-label="Statistical analysis">
       <div className="bg-gray-50 p-4 rounded-md border border-ice">
         <div className="flex items-center mb-2">
-          <Filter className="h-4 w-4 mr-2 text-blue-600" />
+          <Filter className="h-4 w-4 mr-2 text-blue-600" aria-hidden="true" />
           <h4 className="font-medium text-sm">Statistical Summary</h4>
         </div>
-        <div className="space-y-3 text-sm">
-          <p className="flex justify-between">
+        <div className="space-y-3 text-sm" role="list" aria-label="Basic statistics">
+          <p className="flex justify-between" role="listitem">
             <span className="text-gray-500">Total responses:</span>
-            <span className="font-medium">{totalResponses}</span>
+            <span 
+              className="font-medium" 
+              aria-label={`Total responses: ${totalResponses}`}
+            >
+              {totalResponses}
+            </span>
           </p>
-          <p className="flex justify-between">
+          <p className="flex justify-between" role="listitem">
             <span className="text-gray-500">Unique answers:</span>
-            <span className="font-medium">{uniqueAnswers}</span>
+            <span 
+              className="font-medium"
+              aria-label={`Unique answers: ${uniqueAnswers}`}
+            >
+              {uniqueAnswers}
+            </span>
           </p>
           
           {responseData.likert && (
             <>
-              <p className="flex justify-between">
+              <p className="flex justify-between" role="listitem">
                 <span className="text-gray-500">Mode (most common):</span>
-                <span className="font-medium">{mode || 'N/A'}</span>
+                <span 
+                  className="font-medium"
+                  aria-label={`Most common response: ${mode || 'Not available'}`}
+                >
+                  {mode || 'N/A'}
+                </span>
               </p>
               {median && (
-                <p className="flex justify-between">
+                <p className="flex justify-between" role="listitem">
                   <span className="text-gray-500">Median:</span>
-                  <span className="font-medium">{median}</span>
+                  <span 
+                    className="font-medium"
+                    aria-label={`Median response: ${median}`}
+                  >
+                    {median}
+                  </span>
                 </p>
               )}
               {weightedAverage && (
-                <p className="flex justify-between">
+                <p className="flex justify-between" role="listitem">
                   <span className="text-gray-500">Weighted average:</span>
-                  <span className="font-medium">{weightedAverage}</span>
+                  <span 
+                    className="font-medium"
+                    aria-label={`Weighted average score: ${weightedAverage}`}
+                  >
+                    {weightedAverage}
+                  </span>
                 </p>
               )}
             </>
@@ -196,27 +221,45 @@ export const StatisticalInsights: React.FC<StatisticalInsightsProps> = ({
         <div className="bg-gray-50 p-4 rounded-md border border-ice">
           <h4 className="font-medium mb-3">Distribution Analysis</h4>
           
-          <div className="space-y-2">
-            <p className="text-sm">
+          <div className="space-y-2" role="list" aria-label="Distribution analysis">
+            <p className="text-sm" role="listitem">
               <span className="text-gray-500">Response trend:</span>{' '}
-              <span className="font-medium">{analyzeTrend()}</span>
+              <span 
+                className="font-medium"
+                aria-label={`Response trend: ${analyzeTrend()}`}
+              >
+                {analyzeTrend()}
+              </span>
             </p>
-            <p className="text-sm">
+            <p className="text-sm" role="listitem">
               <span className="text-gray-500">Data spread:</span>{' '}
-              <span className="font-medium">{analyzeVariance()}</span>
+              <span 
+                className="font-medium"
+                aria-label={`Data spread: ${analyzeVariance()}`}
+              >
+                {analyzeVariance()}
+              </span>
             </p>
           </div>
           
           <div className="mt-4 pt-4 border-t border-gray-100">
             <h5 className="font-medium text-sm mb-2">Scale Information</h5>
-            <div className="space-y-1 text-sm">
-              <p>
+            <div className="space-y-1 text-sm" role="list" aria-label="Scale configuration">
+              <p role="listitem">
                 <span className="text-gray-500">Scale range:</span>{' '}
-                {Math.min(...Object.values(scaleValues))} - {Math.max(...Object.values(scaleValues))}
+                <span 
+                  aria-label={`Scale range from ${Math.min(...Object.values(scaleValues))} to ${Math.max(...Object.values(scaleValues))}`}
+                >
+                  {Math.min(...Object.values(scaleValues))} - {Math.max(...Object.values(scaleValues))}
+                </span>
               </p>
-              <p>
+              <p role="listitem">
                 <span className="text-gray-500">Custom mapping:</span>{' '}
-                {Object.keys(scaleValues).length} levels configured
+                <span 
+                  aria-label={`${Object.keys(scaleValues).length} levels configured in custom mapping`}
+                >
+                  {Object.keys(scaleValues).length} levels configured
+                </span>
               </p>
             </div>
           </div>
