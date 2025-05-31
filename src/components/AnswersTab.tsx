@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
 import { SummaryCard } from '@/components/survey/analysis/SummaryCard';
@@ -8,6 +7,7 @@ import { ResponsesList } from '@/components/survey/analysis/ResponsesList';
 import { DeleteResponsesDialog } from '@/components/survey/analysis/DeleteResponsesDialog';
 import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
 import { useQueryClient } from '@tanstack/react-query';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -103,35 +103,47 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
   };
 
   return (
-    <div className="px-6 py-4 space-y-8">
-      <SummaryCard responses={responses} onExportCSV={exportToCSV} />
+    <div className="h-full flex flex-col">
+      <div className="flex-shrink-0 px-6 py-4">
+        <SummaryCard responses={responses} onExportCSV={exportToCSV} />
+      </div>
 
       {totalResponses === 0 ? (
-        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+        <div className="flex-1 px-6 py-4">
+          <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+        </div>
       ) : filteredResponses.length === 0 ? (
-        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+        <div className="flex-1 px-6 py-4">
+          <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+        </div>
       ) : (
         <>
-          <FilterControls
-            filterText={filterText}
-            setFilterText={setFilterText}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            showParticipantFilter={true}
-            onParticipantFilter={handleParticipantFilter}
-            onDeleteRequest={handleDeleteRequest}
-            filteredParticipant={filteredParticipant}
-            participantResponseCount={participantResponseCount}
-          />
+          <div className="flex-shrink-0 px-6 py-2">
+            <FilterControls
+              filterText={filterText}
+              setFilterText={setFilterText}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              showParticipantFilter={true}
+              onParticipantFilter={handleParticipantFilter}
+              onDeleteRequest={handleDeleteRequest}
+              filteredParticipant={filteredParticipant}
+              participantResponseCount={participantResponseCount}
+            />
+          </div>
 
-          <ResponsesList
-            responseGroups={filteredResponses}
-            sortBy={sortBy}
-            selectedResponseGroup={selectedResponseGroup}
-            chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
-            onChartTypeChange={handleChartTypeChange}
-            onCardClick={onCardClick}
-          />
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-6 pb-6">
+              <ResponsesList
+                responseGroups={filteredResponses}
+                sortBy={sortBy}
+                selectedResponseGroup={selectedResponseGroup}
+                chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
+                onChartTypeChange={handleChartTypeChange}
+                onCardClick={onCardClick}
+              />
+            </div>
+          </ScrollArea>
         </>
       )}
 
