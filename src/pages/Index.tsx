@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,9 +8,7 @@ import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
 import AnswersTab from '@/components/AnswersTab';
-import { SplitPanelLayout } from "@/components/ui/split-panel-layout";
 import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
-import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import SurveyLayout from '@/components/ui/SurveyLayout';
 import SurveyTitle from '@/components/SurveyTitle';
 import { WelcomeCard } from '@/components/survey/edit/WelcomeCard';
@@ -256,40 +253,23 @@ const Index = () => {
               )}
 
               {activeTab === "answers" && (
-                <SplitPanelLayout
-                  middlePanel={
-                    <AnswersTab
-                      survey={survey}
-                      responses={responses}
-                      filteredResponses={filteredResponses}
-                      totalResponses={totalResponses}
-                      filterText={filterText}
-                      setFilterText={setFilterText}
-                      sortBy={sortBy}
-                      setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
-                      chartType={chartType[selectedResponseGroup] || "bar"}
-                      handleChartTypeChange={(value: string) => {
-                        const [questionId, type] = value.split(':');
-                        handleChartTypeChange(questionId, type as "bar" | "pie");
-                      }}
-                      onCardClick={handleCardClick}
-                      exportToCSV={exportToCSV}
-                      selectedResponseGroup={selectedResponseGroup}
-                    />
-                  }
-                  rightPanel={
-                    selectedResponseGroup ? (
-                      <AnalysisPanel
-                        selectedResponseGroup={selectedResponseGroup}
-                        responseData={selectedResponseData}
-                        onToggleVisibility={() => { }}
-                      />
-                    ) : (
-                      <div className="text-center text-gray-500 text-sm p-6">No question selected</div>
-                    )
-                  }
-                  middlePanelTitle="Responses"
-                  rightPanelTitle="Analysis"
+                <AnswersTab
+                  survey={survey}
+                  responses={responses}
+                  filteredResponses={filteredResponses}
+                  totalResponses={totalResponses}
+                  filterText={filterText}
+                  setFilterText={setFilterText}
+                  sortBy={sortBy}
+                  setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
+                  chartType={chartType[selectedResponseGroup] || "bar"}
+                  handleChartTypeChange={(value: string) => {
+                    const [questionId, type] = value.split(':');
+                    handleChartTypeChange(questionId, type as "bar" | "pie");
+                  }}
+                  onCardClick={handleCardClick}
+                  exportToCSV={exportToCSV}
+                  selectedResponseGroup={selectedResponseGroup}
                 />
               )}
             </div>
