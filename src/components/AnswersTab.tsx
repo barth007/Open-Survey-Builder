@@ -6,8 +6,10 @@ import { FilterControls } from '@/components/survey/analysis/FilterControls';
 import { NoResponsesView } from '@/components/survey/analysis/NoResponsesView';
 import { ResponsesList } from '@/components/survey/analysis/ResponsesList';
 import { DeleteResponsesDialog } from '@/components/survey/analysis/DeleteResponsesDialog';
+import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
 import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
 import { useQueryClient } from '@tanstack/react-query';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface AnswersTabProps {
   survey: Survey;
@@ -44,6 +46,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeletion, setPendingDeletion] = useState<{ id: string; email: string } | null>(null);
   const [participantResponseCount, setParticipantResponseCount] = useState(0);
+  const [analysisPanelVisible, setAnalysisPanelVisible] = useState(true);
   
   const { deleteResponsesByParticipant, isDeleting } = useDeleteResponses();
   const queryClient = useQueryClient();
@@ -102,36 +105,64 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     return 'Unknown participant';
   };
 
+  const selectedResponseData = selectedResponseGroup 
+    ? filteredResponses.find(r => r.questionId === selectedResponseGroup)
+    : null;
+
   return (
-    <div className="px-6 py-4 space-y-8">
-      <SummaryCard responses={responses} onExportCSV={exportToCSV} />
+    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0">
+      <ResizablePanel defaultSize={analysisPanelVisible ? 60 : 100} minSize={30} className="bg-white min-w-0">
+        <div className="h-full flex flex-col bg-white overflow-hidden">
+          <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10 items-center flex-shrink-0">
+            <div className="font-medium text-sm">Responses</div>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-2 bg-white w-full min-w-0 h-0">
+            <div className="space-y-8">
+              <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
-      {totalResponses === 0 ? (
-        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-      ) : filteredResponses.length === 0 ? (
-        <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-      ) : (
+              {totalResponses === 0 ? (
+                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+              ) : filteredResponses.length === 0 ? (
+                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+              ) : (
+                <>
+                  <FilterControls
+                    filterText={filterText}
+                    setFilterText={setFilterText}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    showParticipantFilter={true}
+                    onParticipantFilter={handleParticipantFilter}
+                    onDeleteRequest={handleDeleteRequest}
+                    filteredParticipant={filteredParticipant}
+                    participantResponseCount={participantResponseCount}
+                  />
+
+                  <ResponsesList
+                    responseGroups={filteredResponses}
+                    sortBy={sortBy}
+                    selectedResponseGroup={selectedResponseGroup}
+                    chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
+                    onChartTypeChange={handleChartTypeChange}
+                    onCardClick={onCardClick}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </ResizablePanel>
+
+      {analysisPanelVisible && (
         <>
-          <FilterControls
-            filterText={filterText}
-            setFilterText={setFilterText}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            showParticipantFilter={true}
-            onParticipantFilter={handleParticipantFilter}
-            onDeleteRequest={handleDeleteRequest}
-            filteredParticipant={filteredParticipant}
-            participantResponseCount={participantResponseCount}
-          />
-
-          <ResponsesList
-            responseGroups={filteredResponses}
-            sortBy={sortBy}
-            selectedResponseGroup={selectedResponseGroup}
-            chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
-            onChartTypeChange={handleChartTypeChange}
-            onCardClick={onCardClick}
-          />
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={40} minSize={25} className="bg-gray-50 min-w-0">
+            <AnalysisPanel 
+              survey={survey}
+              selectedResponseData={selectedResponseData}
+              onToggleVisibility={() => setAnalysisPanelVisible(false)}
+            />
+          </ResizablePanel>
         </>
       )}
 
@@ -143,7 +174,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
         responseCount={participantResponseCount}
         isDeleting={isDeleting}
       />
-    </div>
+    </ResizablePanelGroup>
   );
 };
 
