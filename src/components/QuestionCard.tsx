@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Question } from '@/types/survey';
@@ -9,6 +10,7 @@ import QuestionOptions from './question/QuestionOptions';
 import LikertScaleOptions from './question/LikertScaleOptions';
 import QuestionConditionalLogic from './question/QuestionConditionalLogic';
 import QuestionFooter from './question/QuestionFooter';
+import { RecordingSettings } from './survey/recording/RecordingSettings';
 import { useQuestionCardLogic } from '@/hooks/question/useQuestionCardLogic';
 
 interface QuestionCardProps {
@@ -94,6 +96,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             onEditOptions={handleLikertOptionsEdit}
           />
         </div>
+
+        <RecordingSettings 
+          question={question}
+          onQuestionChange={onQuestionChange}
+        />
 
         <QuestionConditionalLogic 
           question={question}

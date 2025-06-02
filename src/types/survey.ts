@@ -35,6 +35,9 @@ export interface Question {
   conditionalLogic?: ConditionalLogic;
   customLikertLabels?: boolean; // Flag to indicate if the question uses custom Likert labels
   isVisible?: boolean;
+  // New recording settings
+  recordingEnabled?: boolean;
+  recordingRequired?: boolean;
 }
 
 /**
@@ -64,6 +67,9 @@ export interface Survey {
   thankYouMessage?: string;
   thankYouButtonText?: string;
   redirectUrl?: string;
+  // Survey-wide recording settings
+  recordingEnabled?: boolean;
+  recordingRequired?: boolean;
 }
 
 /**
@@ -72,6 +78,7 @@ export interface Survey {
 export interface Answer {
   questionId: string;
   value: string | string[];
+  recordingUrl?: string; // Optional recording for this answer
 }
 
 /**
@@ -83,6 +90,22 @@ export interface SurveyResponse {
   answers: Answer[];
   submittedAt: string;
   participantId?: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Recording metadata interface
+ */
+export interface QuestionRecording {
+  id: string;
+  responseId: string;
+  questionId: string;
+  recordingUrl: string;
+  recordingType: 'audio' | 'video';
+  fileFormat: string;
+  durationSeconds?: number;
+  fileSizeBytes?: number;
+  createdAt: string;
   metadata?: Record<string, any>;
 }
 
