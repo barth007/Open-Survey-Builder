@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
@@ -14,7 +15,8 @@ const SurveyResponse = () => {
     isSubmitting, 
     handleAnswerChange, 
     handleSubmit, 
-    isQuestionVisible 
+    isQuestionVisible,
+    responseId
   } = useSurveyResponseLogic(surveyId);
 
   // Helper function to ensure we're working with an array of questions
@@ -35,7 +37,9 @@ const SurveyResponse = () => {
       figmaPrototypeUrl: q.figmaPrototypeUrl,
       media: q.media,
       conditionalLogic: q.conditionalLogic,
-      isVisible: q.isVisible !== undefined ? q.isVisible : true
+      isVisible: q.isVisible !== undefined ? q.isVisible : true,
+      recordingEnabled: q.recordingEnabled || false,
+      recordingRequired: q.recordingRequired || false
     }));
   };
 
@@ -43,6 +47,11 @@ const SurveyResponse = () => {
   const getSurveyTitle = (): string => {
     if (!surveyData) return "Untitled Survey";
     return surveyData.title || "Untitled Survey";
+  };
+
+  const handleRecordingComplete = (questionId: string, recordingUrl: string) => {
+    console.log('Recording completed for question:', questionId, 'URL:', recordingUrl);
+    // The recording is already saved to the database, we just log it here
   };
 
   if (isLoading) {
@@ -89,6 +98,8 @@ const SurveyResponse = () => {
                 index={index}
                 answers={answers}
                 onAnswerChange={handleAnswerChange}
+                responseId={responseId}
+                onRecordingComplete={handleRecordingComplete}
               />
             )
           ))}

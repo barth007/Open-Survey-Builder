@@ -324,6 +324,17 @@ export type Database = {
         Args: { team_id_param: string }
         Returns: boolean
       }
+      create_question_recording: {
+        Args: {
+          p_response_id: string
+          p_question_id: string
+          p_recording_url: string
+          p_recording_type: string
+          p_file_format: string
+          p_file_size_bytes: number
+        }
+        Returns: string
+      }
       delete_responses_by_participant: {
         Args: {
           p_survey_id: string
