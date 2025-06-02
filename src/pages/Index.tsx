@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
-import { useAutoSave } from '@/hooks/survey/useAutoSave';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
 import AnswersTab from '@/components/AnswersTab';
@@ -50,18 +49,13 @@ const Index = () => {
     duplicateQuestion,
     togglePublish,
     handleSave,
-    pendingChanges,
-    setPendingChanges,
+    isSaving,
+    isTyping,
+    lastSaved,
+    retryCount,
     isLoading,
     error
   } = useSurveyState(surveyId);
-
-  const { isSaving, lastSaved, retryCount } = useAutoSave({ 
-    onSave: handleSave,
-    delay: 5000, // Increased delay for better batching
-    pendingChanges,
-    setPendingChanges
-  });
 
   useEffect(() => {
     if (survey.title) {
@@ -69,13 +63,12 @@ const Index = () => {
     }
   }, [survey.title]);
 
-  // Optimized update functions with batching
+  // Optimized update functions with smart batching
   const updateSurveyWithTracking = (updates: Partial<typeof survey>) => {
     console.log("Batched update:", updates);
     Object.entries(updates).forEach(([key, value]) => {
       updateSurveyField(key as keyof typeof survey, value);
     });
-    setPendingChanges(true);
   };
 
   const {
@@ -112,6 +105,7 @@ const Index = () => {
               lastSaved={lastSaved}
               survey={survey}
               onPublishToggle={togglePublish}
+              isTyping={isTyping}
             >
               <div className="h-full flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
@@ -136,6 +130,7 @@ const Index = () => {
               lastSaved={lastSaved}
               survey={survey}
               onPublishToggle={togglePublish}
+              isTyping={isTyping}
             >
               <div className="h-full flex items-center justify-center">
                 <div className="text-center p-8 max-w-md text-magma">
@@ -165,6 +160,7 @@ const Index = () => {
             lastSaved={lastSaved}
             survey={survey}
             onPublishToggle={togglePublish}
+            isTyping={isTyping}
           >
             <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
               {activeTab === "edit" && (

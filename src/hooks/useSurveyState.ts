@@ -6,7 +6,7 @@ import { useQuerySurvey } from './survey/useQuerySurvey';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQuestionManagement } from './survey/useQuestionManagement';
-import { useDebounce } from './useDebounce';
+import { useSmartAutoSave } from './survey/useSmartAutoSave';
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
@@ -32,13 +32,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     redirectUrl: ''
   });
 
-  const [pendingChanges, setPendingChanges] = useState(false);
   const [pendingUpdates, setPendingUpdates] = useState<Partial<Survey>>({});
-  const [lastSaveTime, setLastSaveTime] = useState<number>(0);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Debounce del titolo per evitare salvataggi eccessivi
-  const debouncedTitle = useDebounce(survey.title, 1000);
 
   const {
     questions,
@@ -49,7 +43,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     duplicateQuestion
   } = useQuestionManagement(survey.questions);
 
-  // Inizializza lo stato quando arrivano i dati dal server
+  // Initialize survey state when data arrives from server
   useEffect(() => {
     if (surveyData && surveyData.id === surveyId) {
       console.log(`Initializing survey state for ID: ${surveyId}`, surveyData);
@@ -58,14 +52,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyData, surveyId, setQuestions]);
 
-  // Gestisce il salvataggio automatico quando cambia il titolo (debounced)
-  useEffect(() => {
-    if (debouncedTitle !== surveyData?.title && surveyData) {
-      setPendingChanges(true);
-    }
-  }, [debouncedTitle, surveyData?.title]);
-
-  // Aggiorna la cache locale immediatamente per la preview
+  // Update local cache immediately for preview
   const updateLocalCache = useCallback((updates: Partial<Survey>) => {
     if (surveyId) {
       console.log(`Updating local cache for survey ${surveyId}:`, updates);
@@ -81,154 +68,16 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyId, queryClient]);
 
-  // Batch updates to reduce API calls
-  const batchUpdate = useCallback((updates: Partial<Survey>) => {
-    console.log(`Batching update for survey ${surveyId}:`, updates);
-    
-    // Ensure the update is for the correct survey
-    const safeUpdates = { ...updates, id: surveyId };
-    
-    setPendingUpdates(prev => ({ ...prev, ...safeUpdates }));
-    const mergedUpdates = { ...pendingUpdates, ...safeUpdates };
-    
-    setSurvey(prev => {
-      if (prev.id !== surveyId) {
-        console.warn(`State update mismatch: expected ${surveyId}, got ${prev.id}`);
-        return prev;
-      }
-      return { ...prev, ...mergedUpdates };
-    });
-    
-    updateLocalCache(mergedUpdates);
-    setPendingChanges(true);
-  }, [surveyId, pendingUpdates, updateLocalCache]);
-
-  const handleTitleChange = useCallback((title: string) => {
-    console.log(`Title change for survey ${surveyId}: ${title}`);
-    batchUpdate({ title });
-    document.title = title;
-  }, [surveyId, batchUpdate]);
-
-  const handleDescriptionChange = useCallback((description: string) => {
-    console.log(`Description change for survey ${surveyId}: ${description}`);
-    batchUpdate({ description });
-  }, [surveyId, batchUpdate]);
-
-  // Unified update function for all survey fields with validation
-  const updateSurveyField = useCallback((field: keyof Survey, value: any) => {
-    console.log(`Updating field ${field} for survey ${surveyId} with value:`, value);
-    
-    // Basic validation
-    if (field === 'redirectUrl' && value && !value.startsWith('http')) {
-      console.warn('Invalid URL format for redirectUrl:', value);
-    }
-    
-    batchUpdate({ [field]: value });
-  }, [surveyId, batchUpdate]);
-
-  const handleQuestionChange = useCallback((updatedQuestion: Question) => {
-    console.log(`Question change for survey ${surveyId}:`, updatedQuestion.id);
-    updateQuestion(updatedQuestion);
-    setPendingChanges(true);
-  }, [surveyId, updateQuestion]);
-
-  const handleAddQuestion = useCallback(() => {
-    console.log(`Adding question to survey ${surveyId}`);
-    const newQuestion = addQuestion();
-    setPendingChanges(true);
-    return newQuestion;
-  }, [surveyId, addQuestion]);
-
-  const handleDeleteQuestion = useCallback((questionId: string) => {
-    console.log(`Deleting question ${questionId} from survey ${surveyId}`);
-    deleteQuestion(questionId);
-    setPendingChanges(true);
-  }, [surveyId, deleteQuestion]);
-
-  const handleDuplicateQuestion = useCallback((question: Question) => {
-    console.log(`Duplicating question ${question.id} in survey ${surveyId}`);
-    const newQuestion = duplicateQuestion(question);
-    setPendingChanges(true);
-    return newQuestion;
-  }, [surveyId, duplicateQuestion]);
-
-  const togglePublish = useCallback(async () => {
-    if (!surveyId) {
-      console.error('Cannot toggle publish: no survey ID');
-      return;
-    }
-
-    const newPublishState = !survey.isPublished;
-    console.log(`Toggling publish state for survey ${surveyId}: ${newPublishState}`);
-    
-    // Optimistic update - don't try to generate publicCode on frontend
-    // Let the database handle it via the trigger
-    const updates = { 
-      isPublished: newPublishState
-    };
-    
-    batchUpdate(updates);
-    
-    try {
-      const result = await updateSurvey({
-        surveyId,
-        updates
-      });
-      
-      // Update local state with the actual public_code from database
-      if (result.public_code && result.public_code !== survey.publicCode) {
-        console.log(`Received new public code from database: ${result.public_code}`);
-        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
-        updateLocalCache({ publicCode: result.public_code });
-      }
-      
-      // Reduce query invalidations and be more specific
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['surveys'] });
-        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-      }, 500);
-      
-      toast({
-        title: newPublishState ? "Survey published" : "Survey unpublished",
-        description: newPublishState 
-          ? "The survey is now live and can receive responses" 
-          : "The survey is now in draft mode",
-      });
-    } catch (error) {
-      // Revert optimistic update on error
-      batchUpdate({
-        isPublished: !newPublishState
-      });
-      
-      console.error("Error updating survey publish status:", error);
-      toast({
-        title: "Error updating survey",
-        description: error instanceof Error ? error.message : "There was an error updating your survey. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [survey.isPublished, survey.publicCode, surveyId, batchUpdate, updateSurvey, queryClient, toast, updateLocalCache]);
-
+  // Handle save operation
   const handleSave = useCallback(async () => {
     if (!surveyId) {
       console.error('Cannot save: no survey ID');
       return;
     }
 
-    const now = Date.now();
-    
-    // Evita salvataggi troppo frequenti (minimo 2000ms tra un salvataggio e l'altro)
-    if (now - lastSaveTime < 2000 || isSaving) {
-      console.log("Skipping save - too frequent or already saving");
-      return;
-    }
-
     console.log(`Saving survey ${surveyId}`);
-    setIsSaving(true);
 
     try {
-      // Create the complete update object including pending updates
-      // Don't try to generate publicCode on frontend - let database handle it
       const completeUpdates = { 
         title: survey.title,
         description: survey.description,
@@ -243,7 +92,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         thankYouMessage: survey.thankYouMessage,
         thankYouButtonText: survey.thankYouButtonText,
         redirectUrl: survey.redirectUrl,
-        ...pendingUpdates // Include any pending batched updates
+        ...pendingUpdates
       };
 
       console.log(`Saving survey ${surveyId} with updates:`, completeUpdates);
@@ -253,24 +102,18 @@ export const useSurveyState = (surveyId: string | undefined) => {
         updates: completeUpdates
       });
       
-      // Update local state with any new data from database (like public_code)
       if (result.public_code && result.public_code !== survey.publicCode) {
         console.log(`Received updated public code from database: ${result.public_code}`);
         setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
         updateLocalCache({ publicCode: result.public_code });
       }
       
-      // Clear pending updates after successful save
       setPendingUpdates({});
       
-      // Reduced frequency of query invalidations and be more specific
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
       }, 1000);
-      
-      setPendingChanges(false);
-      setLastSaveTime(now);
       
       toast({
         title: "Survey saved",
@@ -286,16 +129,152 @@ export const useSurveyState = (surveyId: string | undefined) => {
         variant: "destructive"
       });
       
-      // Don't clear pending updates on error so they can be retried
-    } finally {
-      setIsSaving(false);
+      throw error; // Re-throw for retry logic
     }
-  }, [surveyId, survey, questions, pendingUpdates, lastSaveTime, isSaving, updateSurvey, queryClient, toast, updateLocalCache]);
+  }, [surveyId, survey, questions, pendingUpdates, updateSurvey, queryClient, toast, updateLocalCache]);
+
+  // Smart auto-save hook
+  const smartAutoSave = useSmartAutoSave({
+    onSave: handleSave,
+    textFieldDelay: 3000, // 3 seconds for text fields
+    structuralChangeDelay: 1000 // 1 second for structural changes
+  });
+
+  // Batch update function
+  const batchUpdate = useCallback((updates: Partial<Survey>) => {
+    console.log(`Batching update for survey ${surveyId}:`, updates);
+    
+    const safeUpdates = { ...updates, id: surveyId };
+    
+    setPendingUpdates(prev => ({ ...prev, ...safeUpdates }));
+    const mergedUpdates = { ...pendingUpdates, ...safeUpdates };
+    
+    setSurvey(prev => {
+      if (prev.id !== surveyId) {
+        console.warn(`State update mismatch: expected ${surveyId}, got ${prev.id}`);
+        return prev;
+      }
+      return { ...prev, ...mergedUpdates };
+    });
+    
+    updateLocalCache(mergedUpdates);
+  }, [surveyId, pendingUpdates, updateLocalCache]);
+
+  const handleTitleChange = useCallback((title: string) => {
+    console.log(`Title change for survey ${surveyId}: ${title}`);
+    batchUpdate({ title });
+    document.title = title;
+    smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
+  }, [surveyId, batchUpdate, smartAutoSave]);
+
+  const handleDescriptionChange = useCallback((description: string) => {
+    console.log(`Description change for survey ${surveyId}: ${description}`);
+    batchUpdate({ description });
+    smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
+  }, [surveyId, batchUpdate, smartAutoSave]);
+
+  const updateSurveyField = useCallback((field: keyof Survey, value: any) => {
+    console.log(`Updating field ${field} for survey ${surveyId} with value:`, value);
+    
+    if (field === 'redirectUrl' && value && !value.startsWith('http')) {
+      console.warn('Invalid URL format for redirectUrl:', value);
+    }
+    
+    batchUpdate({ [field]: value });
+    
+    // Determine if this is a text change or structural change
+    const textFields = ['welcomeTitle', 'welcomeMessage', 'welcomeInstructions', 'welcomeButtonText', 
+                       'thankYouTitle', 'thankYouMessage', 'thankYouButtonText', 'redirectUrl'];
+    
+    if (textFields.includes(field)) {
+      smartAutoSave.markTextChange();
+    } else {
+      smartAutoSave.markStructuralChange();
+    }
+  }, [surveyId, batchUpdate, smartAutoSave]);
+
+  const handleQuestionChange = useCallback((updatedQuestion: Question) => {
+    console.log(`Question change for survey ${surveyId}:`, updatedQuestion.id);
+    updateQuestion(updatedQuestion);
+    smartAutoSave.markTextChange(); // Question text changes are typically text
+  }, [surveyId, updateQuestion, smartAutoSave]);
+
+  const handleAddQuestion = useCallback(() => {
+    console.log(`Adding question to survey ${surveyId}`);
+    const newQuestion = addQuestion();
+    smartAutoSave.markStructuralChange(); // Adding questions is structural
+    return newQuestion;
+  }, [surveyId, addQuestion, smartAutoSave]);
+
+  const handleDeleteQuestion = useCallback((questionId: string) => {
+    console.log(`Deleting question ${questionId} from survey ${surveyId}`);
+    deleteQuestion(questionId);
+    smartAutoSave.markStructuralChange(); // Deleting questions is structural
+  }, [surveyId, deleteQuestion, smartAutoSave]);
+
+  const handleDuplicateQuestion = useCallback((question: Question) => {
+    console.log(`Duplicating question ${question.id} in survey ${surveyId}`);
+    const newQuestion = duplicateQuestion(question);
+    smartAutoSave.markStructuralChange(); // Duplicating questions is structural
+    return newQuestion;
+  }, [surveyId, duplicateQuestion, smartAutoSave]);
+
+  const togglePublish = useCallback(async () => {
+    if (!surveyId) {
+      console.error('Cannot toggle publish: no survey ID');
+      return;
+    }
+
+    const newPublishState = !survey.isPublished;
+    console.log(`Toggling publish state for survey ${surveyId}: ${newPublishState}`);
+    
+    const updates = { 
+      isPublished: newPublishState
+    };
+    
+    batchUpdate(updates);
+    
+    try {
+      const result = await updateSurvey({
+        surveyId,
+        updates
+      });
+      
+      if (result.public_code && result.public_code !== survey.publicCode) {
+        console.log(`Received new public code from database: ${result.public_code}`);
+        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
+        updateLocalCache({ publicCode: result.public_code });
+      }
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['surveys'] });
+        queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
+      }, 500);
+      
+      toast({
+        title: newPublishState ? "Survey published" : "Survey unpublished",
+        description: newPublishState 
+          ? "The survey is now live and can receive responses" 
+          : "The survey is now in draft mode",
+      });
+    } catch (error) {
+      batchUpdate({
+        isPublished: !newPublishState
+      });
+      
+      console.error("Error updating survey publish status:", error);
+      toast({
+        title: "Error updating survey",
+        description: error instanceof Error ? error.message : "There was an error updating your survey. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [survey.isPublished, survey.publicCode, surveyId, batchUpdate, updateSurvey, queryClient, toast, updateLocalCache]);
 
   // Ensure current survey always has the correct ID
   const currentSurvey: Survey = {
     ...survey,
-    id: surveyId || survey.id, // Always use the correct surveyId
+    id: surveyId || survey.id,
     questions,
     publicCode: survey.publicCode || '',
     teamId: survey.teamId
@@ -311,11 +290,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
     deleteQuestion: handleDeleteQuestion,
     duplicateQuestion: handleDuplicateQuestion,
     togglePublish,
-    handleSave,
-    pendingChanges,
-    setPendingChanges,
+    handleSave: smartAutoSave.manualSave, // Expose manual save
+    pendingChanges: smartAutoSave.hasPendingChanges(),
+    setPendingChanges: () => {}, // No longer needed with smart auto-save
     isLoading,
     error,
-    isSaving
+    isSaving: smartAutoSave.isSaving,
+    isTyping: smartAutoSave.isTyping, // New: expose typing state
+    lastSaved: smartAutoSave.lastSaved,
+    retryCount: smartAutoSave.retryCount
   };
 };

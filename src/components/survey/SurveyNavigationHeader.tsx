@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Home, FileText, Check, RotateCw, WifiOff, Share } from 'lucide-react';
@@ -31,6 +30,7 @@ interface SurveyNavigationHeaderProps {
   lastSaved?: Date | null;
   survey?: Survey;
   onPublishToggle?: () => void;
+  statusText?: string | null;
 }
 
 export function SurveyNavigationHeader({ 
@@ -38,7 +38,8 @@ export function SurveyNavigationHeader({
   isSaving, 
   lastSaved, 
   survey,
-  onPublishToggle 
+  onPublishToggle,
+  statusText 
 }: SurveyNavigationHeaderProps) {
   const navigate = useNavigate();
   const { id: surveyId } = useParams();
@@ -147,33 +148,30 @@ export function SurveyNavigationHeader({
     }
   };
 
+  const getSaveStatusText = () => {
+    if (statusText) return statusText;
+    if (!isOnline) return 'Offline';
+    return formatLastSaved(lastSaved);
+  };
+
   const getSaveStatusIcon = () => {
     if (!isOnline) {
       return <WifiOff className="h-4 w-4 text-gray-400" />;
     }
 
-    if (showSaving) {
+    if (statusText === "Typing...") {
+      return <div className="h-4 w-4 rounded-full bg-blue-400"></div>;
+    }
+
+    if (showSaving || statusText === "Saving...") {
       return <RotateCw className="h-4 w-4 text-gray-400 animate-spin" />;
     }
 
-    // Default to saved status when online and not saving
     return <Check className="h-4 w-4 text-gray-400" />;
   };
 
-  const getSaveStatusText = () => {
-    if (!isOnline) {
-      return 'Offline';
-    }
-
-    if (showSaving) {
-      return 'Saving...';
-    }
-
-    return formatLastSaved(lastSaved);
-  };
-
   const shouldShowText = () => {
-    return showSaving; // Only show text when saving
+    return showSaving || statusText !== null;
   };
 
   return (
@@ -208,7 +206,6 @@ export function SurveyNavigationHeader({
           </>
         )}
          <Separator orientation="vertical" className="h-4" />
-         {/* Share Survey Button - only show when in a survey and we have the full survey data */}
          {survey && surveyId && (
           <ShareSurveyButton
             survey={survey}
