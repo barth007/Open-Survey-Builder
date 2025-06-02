@@ -50,18 +50,15 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
 
       const recordingUrl = urlData.publicUrl;
 
-      // Save recording metadata to database
-      const { error: dbError } = await supabase
-        .from('question_recordings')
-        .insert({
-          response_id: responseId,
-          question_id: questionId,
-          recording_url: recordingUrl,
-          recording_type: recordingType,
-          file_format: fileExtension,
-          duration_seconds: 0, // Will be updated with actual duration
-          file_size_bytes: blob.size
-        });
+      // Save recording metadata to database using RPC call since types aren't updated yet
+      const { error: dbError } = await supabase.rpc('create_question_recording', {
+        p_response_id: responseId,
+        p_question_id: questionId,
+        p_recording_url: recordingUrl,
+        p_recording_type: recordingType,
+        p_file_format: fileExtension,
+        p_file_size_bytes: blob.size
+      });
 
       if (dbError) {
         // If database insert fails, try to clean up the uploaded file
