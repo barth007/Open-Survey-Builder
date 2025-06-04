@@ -109,7 +109,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     : null;
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden">
+    <ResizablePanelGroup direction="horizontal" className="w-full min-h-0 h-full overflow-hidden">
       <ResizablePanel defaultSize={60} minSize={40} className="min-w-0 min-h-0">
         <div className="flex flex-col h-full bg-white">
           <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">
