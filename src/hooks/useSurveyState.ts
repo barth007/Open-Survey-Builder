@@ -143,26 +143,22 @@ export const useSurveyState = (surveyId: string | undefined) => {
   // Batch update function
   const batchUpdate = useCallback((updates: Partial<Survey>) => {
     console.log(`Batching update for survey ${surveyId}:`, updates);
-
+    
     const safeUpdates = { ...updates, id: surveyId };
-
-    setPendingUpdates(prev => {
-      const mergedUpdates = { ...prev, ...safeUpdates };
-
-      setSurvey(prevSurvey => {
-        if (prevSurvey.id !== surveyId) {
-          console.warn(
-            `State update mismatch: expected ${surveyId}, got ${prevSurvey.id}`
-          );
-          return prevSurvey;
-        }
-        return { ...prevSurvey, ...mergedUpdates };
-      });
-
-      updateLocalCache(mergedUpdates);
-      return mergedUpdates;
+    
+    setPendingUpdates(prev => ({ ...prev, ...safeUpdates }));
+    const mergedUpdates = { ...pendingUpdates, ...safeUpdates };
+    
+    setSurvey(prev => {
+      if (prev.id !== surveyId) {
+        console.warn(`State update mismatch: expected ${surveyId}, got ${prev.id}`);
+        return prev;
+      }
+      return { ...prev, ...mergedUpdates };
     });
-  }, [surveyId, updateLocalCache]);
+    
+    updateLocalCache(mergedUpdates);
+  }, [surveyId, pendingUpdates, updateLocalCache]);
 
   const handleTitleChange = useCallback((title: string) => {
     console.log(`Title change for survey ${surveyId}: ${title}`);
