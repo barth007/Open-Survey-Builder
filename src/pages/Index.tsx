@@ -133,7 +133,7 @@ const Index = () => {
               onPublishToggle={togglePublish}
               isTyping={isTyping}
             >
-              <div className="h-full flex items-center justify-center">
+              <div className="h-screen flex items-center justify-center">
                 <div className="text-center p-8 max-w-md text-magma">
                   <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
                   <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
