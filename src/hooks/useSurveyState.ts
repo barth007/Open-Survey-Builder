@@ -12,11 +12,11 @@ import { useSmartAutoSave } from './survey/useSmartAutoSave';
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { survey: surveyData, isLoading, error } = useQuerySurvey(surveyId);
+  const { survey: surveyData, isLoading, error } = useQuerySurvey(surveyId || undefined);
   const { updateSurvey } = useMutateSurvey();
   
   const [survey, setSurvey] = useState<Survey>({
-    id: surveyId || "survey-1",
+    id: surveyId || "",
     title: "Untitled Survey",
     description: "Survey description",
     questions: [],
@@ -46,7 +46,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   // Initialize survey state when data arrives from server
   useEffect(() => {
-    if (surveyData && surveyData.id === surveyId) {
+    if (surveyId && surveyData && surveyData.id === surveyId) {
       debugLog(`Initializing survey state for ID: ${surveyId}`, surveyData);
       setSurvey(surveyData);
       setQuestions(surveyData.questions);
