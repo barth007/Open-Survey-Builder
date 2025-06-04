@@ -9,14 +9,14 @@ import {
 } from './ResponsesProcessor';
 import { useCSVExporter } from './CSVExporter';
 
-export function useAnswersTab(survey: Survey) {
+export function useAnswersTab(survey: Survey, surveyId: string | undefined) {
   const [chartType, setChartType] = useState<Record<string, "bar" | "pie">>({});
   const [filterText, setFilterText] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "count" | "alpha">("default");
   const [selectedResponseGroup, setSelectedResponseGroup] = useState<string | null>(null);
   
   // Fetch responses data
-  const { data: responses, isLoading, error } = useQuerySurveyResponses(survey.id);
+  const { data: responses, isLoading, error } = useQuerySurveyResponses(surveyId);
   
   // Process the responses
   const processedResponses = useMemo(() => 
