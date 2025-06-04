@@ -82,7 +82,7 @@ export async function processInvitation(invitationCode: string, userId: string) 
  * @returns The team ID the user was added to
  */
 export async function acceptInvitation(invitationId: string, userId: string) {
-  // Start transaction
+  // Fetch invitation details
   const { data: invitation, error: fetchError } = await supabase
     .from('team_invitations')
     .select('invitation_code, team_id')
