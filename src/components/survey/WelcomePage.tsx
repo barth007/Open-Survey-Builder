@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +18,7 @@ export const WelcomePage: React.FC<Props> = ({
   welcomeButtonText,
   onStart
 }) => {
-  console.log('WelcomePage props received:', {
+  debugLog('WelcomePage props received:', {
     welcomeTitle,
     welcomeMessage,
     welcomeInstructions,

@@ -1,7 +1,8 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 // Popup blocker utility to prevent Lovable badge from appearing
 export const initializePopupBlocker = () => {
-  console.log('[Popup Blocker] Initializing...');
+  debugLog('[Popup Blocker] Initializing...');
 
   // Function to check if an element should be blocked - very specific targeting
   const shouldBlockElement = (element: Element): boolean => {
@@ -18,10 +19,10 @@ export const initializePopupBlocker = () => {
   // Function to remove blocked elements
   const removeBlockedElement = (element: Element) => {
     try {
-      console.log('[Popup Blocker] Removing blocked element:', element);
+      debugLog('[Popup Blocker] Removing blocked element:', element);
       element.remove();
     } catch (error) {
-      console.warn('[Popup Blocker] Failed to remove element:', error);
+      debugWarn('[Popup Blocker] Failed to remove element:', error);
       // Fallback: hide with CSS
       (element as HTMLElement).style.cssText = `
         display: none !important;
@@ -89,12 +90,12 @@ export const initializePopupBlocker = () => {
   // Scan periodically but less frequently
   const intervalScan = setInterval(scanForLovableBadge, 2000);
 
-  console.log('[Popup Blocker] Initialized successfully');
+  debugLog('[Popup Blocker] Initialized successfully');
 
   // Return cleanup function
   return () => {
     observer.disconnect();
     clearInterval(intervalScan);
-    console.log('[Popup Blocker] Cleaned up');
+    debugLog('[Popup Blocker] Cleaned up');
   };
 };

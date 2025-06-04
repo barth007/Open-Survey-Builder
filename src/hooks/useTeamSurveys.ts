@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ export function useTeamSurveys() {
   // Helper function to ensure valid auth session
   const ensureAuthSession = async () => {
     if (!user || !session?.access_token) {
-      console.log('No valid session found, attempting to refresh');
+      debugLog('No valid session found, attempting to refresh');
       const recovered = await refreshSession();
       if (!recovered) {
         throw new Error("You must be logged in to perform this action");
@@ -26,7 +27,7 @@ export function useTeamSurveys() {
       
       try {
         // FIXED: Clean update call without problematic parameters
-        console.log('Executing survey team update for surveyId:', surveyId, 'teamId:', teamId);
+        debugLog('Executing survey team update for surveyId:', surveyId, 'teamId:', teamId);
         const { data, error } = await supabase
           .from('surveys')
           .update({ team_id: teamId })
@@ -84,7 +85,7 @@ export function useTeamSurveys() {
         };
 
         // Log auth state before making the request
-        console.log('Creating team survey with auth state:', { 
+        debugLog('Creating team survey with auth state:', { 
           userId: user.id,
           hasSession: !!sessionData.session,
           tokenExpiry: sessionData.session?.expires_at ? 
@@ -92,7 +93,7 @@ export function useTeamSurveys() {
         });
 
         // FIXED: Clean insert call without problematic parameters
-        console.log('Executing team survey insert');
+        debugLog('Executing team survey insert');
         const { data, error } = await supabase
           .from('surveys')
           .insert([newSurvey])

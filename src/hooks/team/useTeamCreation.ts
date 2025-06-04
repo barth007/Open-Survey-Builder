@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
@@ -14,15 +15,15 @@ export function useTeamCreation() {
       // Check for authenticated user
       if (!user) throw new Error('You must be logged in to create a team');
       
-      console.log('Team creation auth debug:');
-      console.log('Creating team with auth state:', { 
+      debugLog('Team creation auth debug:');
+      debugLog('Creating team with auth state:', { 
         userId: user.id, 
         authenticated: !!user,
         email: user.email
       });
       
       // Show detailed auth state
-      console.log('Current auth state:', await getAuthStateDebugInfo());
+      debugLog('Current auth state:', await getAuthStateDebugInfo());
       
       try {
         // Always refresh session before team creation
@@ -36,7 +37,7 @@ export function useTeamCreation() {
           throw validationError;
         }
         
-        console.log('Session is valid, proceeding with team creation');
+        debugLog('Session is valid, proceeding with team creation');
         const team = await createTeam(user.id, name, description);
         
         // Immediately invalidate teams query to refresh the UI

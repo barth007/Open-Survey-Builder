@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
@@ -36,7 +37,7 @@ export const TeamMembersList = ({
   } | null>(null);
   
   useEffect(() => {
-    console.log('TeamMembersList rendered with:', {
+    debugLog('TeamMembersList rendered with:', {
       teamMembersCount: teamMembers?.length,
       teamMembers,
       currentUserId,
@@ -46,7 +47,7 @@ export const TeamMembersList = ({
     // Log if the current user is in the members list
     if (teamMembers && currentUserId) {
       const currentUserMember = teamMembers.find(member => member.user_id === currentUserId);
-      console.log('Current user in members list?', 
+      debugLog('Current user in members list?', 
         currentUserMember 
           ? `Yes, with role: ${currentUserMember.role}` 
           : 'No');
@@ -56,12 +57,12 @@ export const TeamMembersList = ({
   const canManageMembers = userRole === 'owner' || userRole === 'admin';
   const isOwner = userRole === 'owner';
 
-  console.log('TeamMembersList: Can manage members?', canManageMembers);
-  console.log('TeamMembersList: Is owner?', isOwner);
+  debugLog('TeamMembersList: Can manage members?', canManageMembers);
+  debugLog('TeamMembersList: Is owner?', isOwner);
 
   // Check if we have a valid array of team members
   if (!teamMembers || !Array.isArray(teamMembers)) {
-    console.log('TeamMembersList: Invalid team members data', teamMembers);
+    debugLog('TeamMembersList: Invalid team members data', teamMembers);
     return (
       <Card>
         <CardHeader className="py-3">
@@ -79,7 +80,7 @@ export const TeamMembersList = ({
 
   // If the array is empty but valid, show a different message
   if (teamMembers.length === 0) {
-    console.log('TeamMembersList: No team members found in the array');
+    debugLog('TeamMembersList: No team members found in the array');
     return (
       <Card>
         <CardHeader className="py-3">
@@ -93,7 +94,7 @@ export const TeamMembersList = ({
   }
 
   const handleMemberRoleChange = (userId: string, name: string | null, currentRole: string) => {
-    console.log('TeamMembersList: Setting member to change role', {
+    debugLog('TeamMembersList: Setting member to change role', {
       userId,
       name,
       role: currentRole
@@ -130,7 +131,7 @@ export const TeamMembersList = ({
                 (isOwner || (userRole === 'admin' && member.role !== 'owner' && member.role !== 'admin')) && 
                 !isCurrentUser;
               
-              console.log('TeamMembersList: Member details', {
+              debugLog('TeamMembersList: Member details', {
                 memberId: member.id,
                 memberUserId: member.user_id,
                 memberRole: member.role,
@@ -159,13 +160,13 @@ export const TeamMembersList = ({
           <ChangeRoleDialog
             isOpen={!!memberToChangeRole}
             onOpenChange={(isOpen) => {
-              console.log('TeamMembersList: Role dialog open state changed to', isOpen);
+              debugLog('TeamMembersList: Role dialog open state changed to', isOpen);
               if (!isOpen) setMemberToChangeRole(null);
             }}
             memberName={memberToChangeRole.name}
             currentRole={memberToChangeRole.role}
             onConfirm={(newRole) => {
-              console.log('TeamMembersList: Role change confirmed', {
+              debugLog('TeamMembersList: Role change confirmed', {
                 userId: memberToChangeRole.userId,
                 name: memberToChangeRole.name,
                 oldRole: memberToChangeRole.role,

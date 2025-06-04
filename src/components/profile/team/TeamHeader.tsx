@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,7 @@ export const TeamHeader = ({
             variant="outline" 
             size="sm"
             onClick={() => {
-              console.log('TeamHeader: Edit button clicked for team', team.id);
+              debugLog('TeamHeader: Edit button clicked for team', team.id);
               onEditTeam();
             }}
           >
@@ -50,7 +51,7 @@ export const TeamHeader = ({
             variant="secondary" 
             size="sm"
             onClick={() => {
-              console.log('TeamHeader: Invite button clicked for team', team.id);
+              debugLog('TeamHeader: Invite button clicked for team', team.id);
               onInvite(team.id);
             }}
           >
@@ -64,7 +65,7 @@ export const TeamHeader = ({
             variant="destructive" 
             size="sm"
             onClick={() => {
-              console.log('TeamHeader: Delete team button clicked for team', team.id);
+              debugLog('TeamHeader: Delete team button clicked for team', team.id);
               onDeleteTeam(team.id);
             }}
           >

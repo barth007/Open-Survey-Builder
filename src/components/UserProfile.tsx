@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -26,7 +27,7 @@ const UserProfile = ({ compact = false }: UserProfileProps) => {
   const { profile, loading } = useProfile();
   const navigate = useNavigate();
 
-  console.log('UserProfile rendering:', { user: user?.id, profileId: profile?.id, loading, compact });
+  debugLog('UserProfile rendering:', { user: user?.id, profileId: profile?.id, loading, compact });
 
   if (!user) return null;
 

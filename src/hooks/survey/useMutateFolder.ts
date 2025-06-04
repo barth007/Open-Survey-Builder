@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +23,7 @@ export function useMutateFolder() {
         // Perform deep session validation
         await performDeepSessionValidation();
         
-        console.log('Creating folder with name:', name, 'for user:', user.id);
+        debugLog('Creating folder with name:', name, 'for user:', user.id);
         
         const { data, error } = await supabase
           .from('folders')
@@ -46,7 +47,7 @@ export function useMutateFolder() {
           throw new Error('No data returned from folder creation');
         }
         
-        console.log('Folder created successfully:', data);
+        debugLog('Folder created successfully:', data);
         return data;
       } catch (err) {
         console.error("Error in createFolderMutation:", err);
@@ -75,7 +76,7 @@ export function useMutateFolder() {
         // Perform deep session validation
         await performDeepSessionValidation();
         
-        console.log('Updating folder with id:', folderId, 'to name:', name);
+        debugLog('Updating folder with id:', folderId, 'to name:', name);
         
         const { data, error } = await supabase
           .from('folders')
@@ -100,7 +101,7 @@ export function useMutateFolder() {
           throw new Error('No data returned from folder update');
         }
         
-        console.log('Folder updated successfully:', data);
+        debugLog('Folder updated successfully:', data);
         return data;
       } catch (err) {
         console.error("Error in updateFolderMutation:", err);

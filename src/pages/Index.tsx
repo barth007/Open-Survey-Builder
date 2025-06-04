@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -65,7 +66,7 @@ const Index = () => {
 
   // Optimized update functions with smart batching
   const updateSurveyWithTracking = (updates: Partial<typeof survey>) => {
-    console.log("Batched update:", updates);
+    debugLog("Batched update:", updates);
     Object.entries(updates).forEach(([key, value]) => {
       updateSurveyField(key as keyof typeof survey, value);
     });

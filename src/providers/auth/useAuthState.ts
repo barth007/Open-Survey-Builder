@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
@@ -23,7 +24,7 @@ export function useAuthState() {
 
   // Debug function for session state
   const logSessionState = (prefix: string, currentSession: Session | null) => {
-    console.log(
+    debugLog(
       `${prefix} - Session state:`, 
       {
         hasSession: !!currentSession,
@@ -38,13 +39,13 @@ export function useAuthState() {
 
   // Handle user session
   useEffect(() => {
-    console.log('Setting up auth state listener');
+    debugLog('Setting up auth state listener');
     let mounted = true;
     
     // Set up auth listener first to avoid missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.log('Auth state changed:', event, currentSession?.user?.id);
+        debugLog('Auth state changed:', event, currentSession?.user?.id);
         logSessionState('Auth state change event', currentSession);
         
         if (!mounted) return;
@@ -64,7 +65,7 @@ export function useAuthState() {
           toast("You have been signed out");
           setApprovalStatus('unknown');
         } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed automatically');
+          debugLog('Token refreshed automatically');
         }
         
         setIsLoading(false);
@@ -74,7 +75,7 @@ export function useAuthState() {
     // Then check for an existing session
     const initializeAuth = async () => {
       try {
-        console.log('Initializing auth state...');
+        debugLog('Initializing auth state...');
         // Always start with loading state
         setIsLoading(true);
         

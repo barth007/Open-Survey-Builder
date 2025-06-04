@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Trash, Shield, ShieldOff, MoreHorizontal } from 'lucide-react';
@@ -75,7 +76,7 @@ export const TeamMemberRow = ({
                 {isOwner && member.role !== 'owner' && (
                   <DropdownMenuItem
                     onClick={() => {
-                      console.log('TeamMemberRow: Change role clicked', {
+                      debugLog('TeamMemberRow: Change role clicked', {
                         userId: member.user_id,
                         name: member.profile?.full_name,
                         role: member.role
@@ -99,7 +100,7 @@ export const TeamMemberRow = ({
                 )}
                 <DropdownMenuItem
                   onClick={() => {
-                    console.log('TeamMemberRow: Remove member clicked', {
+                    debugLog('TeamMemberRow: Remove member clicked', {
                       userId: member.user_id,
                       name: member.profile?.full_name
                     });

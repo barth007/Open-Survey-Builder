@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -50,7 +51,7 @@ const AdminPanel = () => {
           return;
         }
 
-        console.log("User role from database:", data?.role);
+        debugLog("User role from database:", data?.role);
         setIsAdmin(data?.role === 'admin');
       } catch (e) {
         console.error("Exception checking admin status:", e);
@@ -66,7 +67,7 @@ const AdminPanel = () => {
   const { data: pendingRequests, isLoading } = useQuery({
     queryKey: ['pendingRequests'],
     queryFn: async () => {
-      console.log("Fetching pending requests, isAdmin:", isAdmin);
+      debugLog("Fetching pending requests, isAdmin:", isAdmin);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -78,7 +79,7 @@ const AdminPanel = () => {
         throw error;
       }
       
-      console.log("Pending requests:", data);
+      debugLog("Pending requests:", data);
       return data as ProfileRequest[];
     },
     enabled: isAdmin && !isCheckingAdmin
@@ -87,7 +88,7 @@ const AdminPanel = () => {
   // Mutation to update profile status
   const updateProfileStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => {
-      console.log(`Updating profile ${id} status to ${status}`);
+      debugLog(`Updating profile ${id} status to ${status}`);
       const { error } = await supabase
         .from('profiles')
         .update({ status, updated_at: new Date().toISOString() })
@@ -100,7 +101,7 @@ const AdminPanel = () => {
       
       // Placeholder for sending email notification
       if (status === 'approved') {
-        console.log("Should send approval email for user:", id);
+        debugLog("Should send approval email for user:", id);
         // In a real implementation, you would call an edge function here
         // to send the email using a service like Resend or SendGrid
       }

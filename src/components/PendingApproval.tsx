@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
@@ -39,14 +40,14 @@ const PendingApproval = () => {
     
     try {
       setCheckingStatus(true);
-      console.log('PendingApproval: Checking approval status for user:', userRef.current.id);
+      debugLog('PendingApproval: Checking approval status for user:', userRef.current.id);
       
       // Use the centralized approval status check
       const status = await checkApprovalStatus();
       
       // If the user has been approved, redirect to dashboard
       if (status === 'approved') {
-        console.log('User is now approved, redirecting to dashboard');
+        debugLog('User is now approved, redirecting to dashboard');
         toast.success('Your account has been approved!', {
           description: 'You can now access the application.'
         });
@@ -107,7 +108,7 @@ const PendingApproval = () => {
   // Handle user not logged in after loading completes
   useEffect(() => {
     if (!isLoadingRef.current && !userRef.current) {
-      console.log('No user found on pending page, redirecting to login');
+      debugLog('No user found on pending page, redirecting to login');
       navigate('/login', { replace: true });
     }
   }, [isLoading, user, navigate]);

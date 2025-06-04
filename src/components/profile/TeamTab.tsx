@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Users, Plus } from 'lucide-react';
@@ -46,7 +47,7 @@ const TeamTabInner = () => {
   const loader = <TeamTabLoader isLoading={isLoading} error={error} />;
   if (isLoading || error) return loader;
 
-  console.log('TeamTab rendering with teams:', teams);
+  debugLog('TeamTab rendering with teams:', teams);
 
   // Show user's received invitations at the top, if they exist
   const hasReceivedInvitations = receivedInvitations && receivedInvitations.length > 0;
@@ -65,7 +66,7 @@ const TeamTabInner = () => {
           />
         )}
         <EmptyTeamState onCreateTeam={() => {
-          console.log('Create team button clicked from empty state');
+          debugLog('Create team button clicked from empty state');
           setIsCreateTeamDialogOpen(true);
         }} />
       </>
@@ -89,7 +90,7 @@ const TeamTabInner = () => {
 
       {(!teams || teams.length === 0) ? (
         <EmptyTeamState onCreateTeam={() => {
-          console.log('Create team button clicked from empty state');
+          debugLog('Create team button clicked from empty state');
           setIsCreateTeamDialogOpen(true);
         }} />
       ) : (
@@ -103,7 +104,7 @@ const TeamTabInner = () => {
               <CardDescription>Manage your teams and team members</CardDescription>
             </div>
             <Button onClick={() => {
-              console.log('Create team button clicked');
+              debugLog('Create team button clicked');
               setIsCreateTeamDialogOpen(true);
             }}>
               <Plus className="h-4 w-4 mr-2" />
@@ -114,7 +115,7 @@ const TeamTabInner = () => {
             <Tabs 
               value={activeTeamTab || undefined} 
               onValueChange={(value) => {
-                console.log('Team tab changed to:', value);
+                debugLog('Team tab changed to:', value);
                 setActiveTeamTab(value);
               }}
             >

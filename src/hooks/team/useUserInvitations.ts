@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
@@ -15,11 +16,11 @@ export function useUserInvitations() {
     queryKey: ['user_invitations', user?.email],
     queryFn: async () => {
       if (!user || !user.email) {
-        console.log('No user email available to fetch invitations');
+        debugLog('No user email available to fetch invitations');
         return [];
       }
       try {
-        console.log('Fetching invitations for user:', user.email);
+        debugLog('Fetching invitations for user:', user.email);
         const invitations = await fetchUserInvitations(user.email);
         return invitations;
       } catch (error) {

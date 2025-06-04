@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { performDeepSessionValidation } from './teamAuthService';
@@ -9,7 +10,7 @@ import { performDeepSessionValidation } from './teamAuthService';
  * @returns Object containing the team ID and user ID that was removed
  */
 export async function removeTeamMember(teamId: string, userId: string) {
-  console.log(`Removing member ${userId} from team ${teamId}`);
+  debugLog(`Removing member ${userId} from team ${teamId}`);
   
   try {
     // Verify authentication before proceeding
@@ -41,7 +42,7 @@ export async function removeTeamMember(teamId: string, userId: string) {
  * @returns The updated team member record
  */
 export async function updateTeamMemberRole(teamId: string, userId: string, newRole: 'admin' | 'member') {
-  console.log(`Updating member ${userId} role to ${newRole} in team ${teamId}`);
+  debugLog(`Updating member ${userId} role to ${newRole} in team ${teamId}`);
   
   try {
     // Verify authentication before proceeding
@@ -91,7 +92,7 @@ export async function updateTeamMemberRole(teamId: string, userId: string, newRo
  * @returns The updated team record
  */
 export async function updateTeam(teamId: string, updates: { name?: string; description?: string }) {
-  console.log(`Updating team ${teamId}:`, updates);
+  debugLog(`Updating team ${teamId}:`, updates);
   
   try {
     // Verify authentication before proceeding
@@ -126,7 +127,7 @@ export async function updateTeam(teamId: string, updates: { name?: string; descr
  * @returns The deleted team ID
  */
 export async function deleteTeam(teamId: string) {
-  console.log(`Deleting team ${teamId}`);
+  debugLog(`Deleting team ${teamId}`);
   
   try {
     // Verify authentication before proceeding

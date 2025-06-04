@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -24,7 +25,7 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  console.log("PersonalInfoTab rendering with profile:", profile);
+  debugLog("PersonalInfoTab rendering with profile:", profile);
   
   useEffect(() => {
     // Update local state when profile changes

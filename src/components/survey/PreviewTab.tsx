@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Question, Survey } from '@/types/survey';
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
     const { dependsOn, operator, value } = question.conditionalLogic;
     const answer = answers[dependsOn];
     
-    console.log('Conditional logic check:', {
+    debugLog('Conditional logic check:', {
       questionId: question.id,
       dependsOn,
       operator,
@@ -65,7 +66,7 @@ const PreviewTab: React.FC<PreviewTabProps> = ({ survey }) => {
       [questionId]: value
     }));
     
-    console.log('Answer updated:', { questionId, value, allAnswers: {...answers, [questionId]: value} });
+    debugLog('Answer updated:', { questionId, value, allAnswers: {...answers, [questionId]: value} });
   };
 
   const handleCheckboxChange = (questionId: string, optionId: string) => {

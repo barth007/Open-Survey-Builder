@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -35,7 +36,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   // Track the current state of the survey flow
   const [flowState, setFlowState] = useState<SurveyFlowState>('welcome');
 
-  console.log('PublicSurvey survey data:', survey);
+  debugLog('PublicSurvey survey data:', survey);
 
   const handleStartSurvey = () => {
     setFlowState('questions');

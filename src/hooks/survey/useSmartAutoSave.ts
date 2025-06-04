@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDebounce } from '../useDebounce';
@@ -54,7 +55,7 @@ export function useSmartAutoSave({
 
   const performSaveWithRetry = useCallback(async (): Promise<boolean> => {
     try {
-      console.log(`Attempting save (attempt ${retryCount + 1}/${maxRetries + 1})`);
+      debugLog(`Attempting save (attempt ${retryCount + 1}/${maxRetries + 1})`);
       await onSave();
       setLastSaved(new Date());
       setRetryCount(0);
@@ -67,7 +68,7 @@ export function useSmartAutoSave({
         lastStructuralChange: 0
       };
       
-      console.log("Save completed successfully");
+      debugLog("Save completed successfully");
       return true;
     } catch (error) {
       console.error(`Save failed (attempt ${retryCount + 1}):`, error);
@@ -81,7 +82,7 @@ export function useSmartAutoSave({
       if (isTemporaryError && retryCount < maxRetries) {
         setRetryCount(prev => prev + 1);
         const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
-        console.log(`Retrying save in ${retryDelay}ms...`);
+        debugLog(`Retrying save in ${retryDelay}ms...`);
         
         setTimeout(() => {
           if (!isManualSaveRef.current) {
@@ -103,15 +104,15 @@ export function useSmartAutoSave({
       clearTimeout(saveTimeoutRef.current);
     }
 
-    console.log(`Scheduling save in ${delay}ms`);
+    debugLog(`Scheduling save in ${delay}ms`);
     
     saveTimeoutRef.current = setTimeout(async () => {
       if (isSaving || isManualSaveRef.current) {
-        console.log("Skipping scheduled save - already saving or manual save in progress");
+        debugLog("Skipping scheduled save - already saving or manual save in progress");
         return;
       }
 
-      console.log("Executing scheduled save");
+      debugLog("Executing scheduled save");
       setIsSaving(true);
       
       try {
@@ -132,7 +133,7 @@ export function useSmartAutoSave({
     changeBufferRef.current.hasTextChanges = true;
     changeBufferRef.current.lastTextChange = now;
     
-    console.log("Text change detected, scheduling save");
+    debugLog("Text change detected, scheduling save");
     scheduleSave(textFieldDelay);
   }, [markAsTyping, scheduleSave, textFieldDelay]);
 
@@ -142,13 +143,13 @@ export function useSmartAutoSave({
     changeBufferRef.current.hasStructuralChanges = true;
     changeBufferRef.current.lastStructuralChange = now;
     
-    console.log("Structural change detected, scheduling quick save");
+    debugLog("Structural change detected, scheduling quick save");
     scheduleSave(structuralChangeDelay);
   }, [scheduleSave, structuralChangeDelay]);
 
   // Manual save function
   const manualSave = useCallback(async () => {
-    console.log("Starting manual save...");
+    debugLog("Starting manual save...");
     isManualSaveRef.current = true;
     
     // Clear any pending auto-save
@@ -160,12 +161,12 @@ export function useSmartAutoSave({
     setIsSaving(true);
     try {
       await performSaveWithRetry();
-      console.log("Manual save completed successfully");
+      debugLog("Manual save completed successfully");
     } finally {
       setIsSaving(false);
       setTimeout(() => {
         isManualSaveRef.current = false;
-        console.log("Manual save flag reset");
+        debugLog("Manual save flag reset");
       }, 1000);
     }
   }, [performSaveWithRetry]);

@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamMember, TeamInvitation } from '@/types/team-types';
@@ -8,7 +9,7 @@ import { Team, TeamMember, TeamInvitation } from '@/types/team-types';
  * @returns Promise resolving to an array of teams
  */
 export async function fetchTeams(userId: string): Promise<Team[]> {
-  console.log('Fetching teams for user:', userId);
+  debugLog('Fetching teams for user:', userId);
   
   try {
     // First fetch teams where user is the owner
@@ -22,7 +23,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       throw ownedError;
     }
     
-    console.log('Owned teams fetched:', ownedTeams);
+    debugLog('Owned teams fetched:', ownedTeams);
     
     // Then fetch team IDs where user is a member (avoiding the problematic join)
     const { data: memberships, error: memberError } = await supabase
@@ -35,11 +36,11 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       throw memberError;
     }
     
-    console.log('Team memberships fetched:', memberships);
+    debugLog('Team memberships fetched:', memberships);
     
     // Extract team IDs from memberships
     const teamIds = memberships.map(m => m.team_id);
-    console.log('Team IDs from memberships:', teamIds);
+    debugLog('Team IDs from memberships:', teamIds);
     
     // If user is a member of any teams, fetch those teams
     let memberTeams: any[] = [];
@@ -55,7 +56,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       }
       
       memberTeams = teams || [];
-      console.log('Member teams fetched:', memberTeams);
+      debugLog('Member teams fetched:', memberTeams);
     }
     
     // Combine and deduplicate the results
@@ -64,7 +65,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
       index === self.findIndex(t => t.id === team.id)
     );
     
-    console.log('Final combined teams (after deduplication):', uniqueTeams);
+    debugLog('Final combined teams (after deduplication):', uniqueTeams);
     return uniqueTeams as Team[];
   } catch (error) {
     console.error('Error in fetchTeams:', error);
@@ -78,7 +79,7 @@ export async function fetchTeams(userId: string): Promise<Team[]> {
  * @returns Promise resolving to an array of team members
  */
 export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
-  console.log(`Starting fetchTeamMembers for team ${teamId}`);
+  debugLog(`Starting fetchTeamMembers for team ${teamId}`);
   
   try {
     // Fetch team members directly without trying to join with profiles
@@ -94,14 +95,14 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
 
     // Convert to array if not already
     const members = Array.isArray(membersData) ? membersData : [];
-    console.log(`Team ${teamId} members basic data:`, members);
+    debugLog(`Team ${teamId} members basic data:`, members);
     
     // Now fetch profiles separately and join them in memory
     const userIds = members.map(member => member.user_id);
     
     // If no members, return empty array
     if (userIds.length === 0) {
-      console.log(`No members found for team ${teamId}, returning empty array`);
+      debugLog(`No members found for team ${teamId}, returning empty array`);
       return members as TeamMember[];
     }
     
@@ -114,7 +115,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
     if (profilesError) {
       console.error(`Error fetching profiles for team ${teamId}:`, profilesError);
       // Don't throw here, we can still return members without profiles
-      console.log(`Returning members without profile data`);
+      debugLog(`Returning members without profile data`);
       return members as TeamMember[];
     }
     
@@ -124,7 +125,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
       profilesMap[profile.id] = profile;
     });
 
-    console.log(`Profiles data fetched:`, profilesData);
+    debugLog(`Profiles data fetched:`, profilesData);
     
     // Join the profiles with members
     const membersWithProfiles = members.map(member => ({
@@ -132,7 +133,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
       profile: profilesMap[member.user_id] || null
     }));
     
-    console.log(`Team ${teamId} members with profiles:`, membersWithProfiles);
+    debugLog(`Team ${teamId} members with profiles:`, membersWithProfiles);
     return membersWithProfiles as TeamMember[];
   } catch (error) {
     console.error(`Error in fetchTeamMembers for team ${teamId}:`, error);
@@ -146,7 +147,7 @@ export async function fetchTeamMembers(teamId: string): Promise<TeamMember[]> {
  * @returns Promise resolving to an array of team invitations
  */
 export async function fetchTeamInvitations(teamId: string): Promise<TeamInvitation[]> {
-  console.log(`Starting fetchTeamInvitations for team ${teamId}`);
+  debugLog(`Starting fetchTeamInvitations for team ${teamId}`);
   
   try {
     const { data, error } = await supabase
@@ -168,7 +169,7 @@ export async function fetchTeamInvitations(teamId: string): Promise<TeamInvitati
       throw error;
     }
     
-    console.log(`Team ${teamId} invitations data:`, data);
+    debugLog(`Team ${teamId} invitations data:`, data);
     return data as TeamInvitation[];
   } catch (error) {
     console.error(`Error in fetchTeamInvitations for team ${teamId}:`, error);
@@ -182,7 +183,7 @@ export async function fetchTeamInvitations(teamId: string): Promise<TeamInvitati
  * @returns Promise resolving to an array of team invitations
  */
 export async function fetchUserInvitations(userEmail: string): Promise<TeamInvitation[]> {
-  console.log(`Fetching invitations for user email: ${userEmail}`);
+  debugLog(`Fetching invitations for user email: ${userEmail}`);
   
   try {
     const { data, error } = await supabase
@@ -212,7 +213,7 @@ export async function fetchUserInvitations(userEmail: string): Promise<TeamInvit
       throw error;
     }
     
-    console.log(`Found ${data?.length || 0} invitations for ${userEmail}:`, data);
+    debugLog(`Found ${data?.length || 0} invitations for ${userEmail}:`, data);
     
     // Transform the data to match our TeamInvitation type
     const invitationsWithTeamInfo = data?.map(inv => ({
