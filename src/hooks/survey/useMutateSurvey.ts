@@ -180,6 +180,6 @@ export function useMutateSurvey() {
   return {
     createSurvey: createSurvey.mutateAsync,
     updateSurvey: updateSurvey.mutateAsync,
-    deleteSurvey: deleteSurvey.mutate
+    deleteSurvey: deleteSurvey.mutateAsync
   };
 }
