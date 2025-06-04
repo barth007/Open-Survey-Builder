@@ -86,7 +86,7 @@ const Index = () => {
     handleChartTypeChange,
     handleCardClick,
     selectedResponseData
-  } = useAnswersTab(survey);
+  } = useAnswersTab(survey, surveyId);
 
   // Don't render anything if no surveyId
   if (!surveyId) {
