@@ -26,11 +26,13 @@ This repository contains a React + Vite + TypeScript survey application. The fol
 - Radix UI components and other libraries listed in `package.json`.
 
 ## Workflow
+- Use **Node.js 18+**.
 - Install dependencies with `npm install`.
+- Create `.env.local` from `.env.example` before starting development.
 - Create or update files in the `src` directory following the structure above.
 - Use hooks from `src/hooks` to share logic between components.
 - Run `npm run dev` to start the development server.
-- Lint the project using `npm run lint` before committing any changes.
+- Run `npm run lint` and `npm run build` before committing any changes.
 
 ## Pull Requests
 - Summaries should mention the files modified and the purpose of the change.
