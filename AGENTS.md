@@ -18,6 +18,12 @@ This repository contains a React + Vite + TypeScript survey application. The fol
 - **src/contexts** / **src/providers** – React context definitions and their providers.
 - **src/utils** – Utility functions used across the app.
 
+Components typically rely on hooks from `src/hooks` for local and server state and call functions from `src/services` to fetch or persist data. This keeps UI logic focused on rendering while data access lives in a dedicated layer.
+
+Pages compose multiple components to build each route. They orchestrate data loading by invoking services and passing results down to their children.
+
+Contexts and their providers hold shared application state. Components access this state through the corresponding context hooks so it can be reused across pages and components.
+
 ## Dependencies
 - **React 18** with **TypeScript** as the primary framework.
 - **Tailwind CSS** and **shadcn/ui** for styling.
