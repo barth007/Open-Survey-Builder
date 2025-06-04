@@ -110,46 +110,45 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
 
   return (
     <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden">
-          <ResizablePanelGroup
-      direction="horizontal"
-      className="w-full h-full overflow-hidden min-w-0 min-h-0"
-    >
-        <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">
-          <div className="font-medium text-sm">Responses</div>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
-          <div className="space-y-8 pb-8">
-            <SummaryCard responses={responses} onExportCSV={exportToCSV} />
+      <ResizablePanel defaultSize={60} minSize={40} className="min-w-0 min-h-0">
+        <div className="flex flex-col h-full bg-white">
+          <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">
+            <div className="font-medium text-sm">Responses</div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
+            <div className="space-y-8 pb-8">
+              <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
-            {totalResponses === 0 ? (
-              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-            ) : filteredResponses.length === 0 ? (
-              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-            ) : (
-              <>
-                <FilterControls
-                  filterText={filterText}
-                  setFilterText={setFilterText}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  showParticipantFilter={true}
-                  onParticipantFilter={handleParticipantFilter}
-                  onDeleteRequest={handleDeleteRequest}
-                  filteredParticipant={filteredParticipant}
-                  participantResponseCount={participantResponseCount}
-                />
+              {totalResponses === 0 ? (
+                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+              ) : filteredResponses.length === 0 ? (
+                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+              ) : (
+                <>
+                  <FilterControls
+                    filterText={filterText}
+                    setFilterText={setFilterText}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    showParticipantFilter={true}
+                    onParticipantFilter={handleParticipantFilter}
+                    onDeleteRequest={handleDeleteRequest}
+                    filteredParticipant={filteredParticipant}
+                    participantResponseCount={participantResponseCount}
+                  />
 
-                <ResponsesList
-                  responseGroups={filteredResponses}
-                  sortBy={sortBy}
-                  selectedResponseGroup={selectedResponseGroup}
-                  chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
-                  onChartTypeChange={handleChartTypeChange}
-                  onCardClick={onCardClick}
-                />
-              </>
-            )}
+                  <ResponsesList
+                    responseGroups={filteredResponses}
+                    sortBy={sortBy}
+                    selectedResponseGroup={selectedResponseGroup}
+                    chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
+                    onChartTypeChange={handleChartTypeChange}
+                    onCardClick={onCardClick}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </ResizablePanel>
