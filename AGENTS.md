@@ -54,3 +54,41 @@ Contexts and their providers hold shared application state. Components access th
 - `src/components/survey/analysis/useAnswersTab.ts` ties together fetching responses and user interactions in the analysis tab.
 
 These files coordinate to process responses and present insights within the survey analysis UI.
+
+### Index Agent
+- `src/pages/Index.tsx` drives the main survey editor, handling title and question updates while showing a live preview.
+- `src/hooks/useSurveyState.ts` manages client-side survey state and autosaving behavior.
+- `src/components/survey/SurveySidebar.tsx` and `SurveyNavigationHeader.tsx` provide navigation around the editing experience.
+
+### Login Agent
+- `src/pages/Login.tsx` handles user authentication with Supabase and Google OAuth.
+- `src/components/auth/EmailAuthForm.tsx` manages email sign in and sign up forms.
+- `src/providers/auth/AuthProvider.tsx` supplies authentication context used across the app.
+
+### Dashboard Agent
+- `src/pages/Dashboard.tsx` lists surveys and folders for the current user.
+- `src/hooks/useSurveyData.ts` fetches surveys and organizes them for display.
+- `src/components/dashboard/SurveyCard.tsx` and `FolderCard.tsx` render survey and folder summaries.
+
+### Profile Agent
+- `src/pages/Profile.tsx` renders personal info, team management and settings tabs.
+- `src/hooks/useProfile.ts` loads and updates profile records.
+- `src/components/profile` contains `PersonalInfoTab.tsx`, `TeamTab.tsx` and `AccountSettingsTab.tsx` used within the page.
+
+### Teams Agent
+- `src/hooks/useTeams.ts` exposes team queries and mutations.
+- `src/hooks/team/useTeamTabLogic.ts` coordinates dialogs and team actions within the profile page.
+- `src/components/profile/team` holds UI pieces like `TeamList.tsx`, `InvitationDialog.tsx` and other team management components.
+
+### Public Survey Agent
+- `src/pages/PublicSurvey.tsx` shows a shareable survey that records responses.
+- `src/hooks/survey/useSurveyResponseLogic.ts` tracks answers and handles submission.
+- `src/components/survey/response/QuestionItem.tsx` renders individual questions during public participation.
+
+### Survey Response Agent
+- `src/pages/SurveyResponse.tsx` allows viewing and completing a private survey link.
+- Relies on the same response logic and question components as the public survey flow.
+
+### Admin Agent
+- `src/pages/AdminPanel.tsx` is used by administrators to approve or reject access requests.
+- Uses Supabase queries and mutations to manage profile status and roles.
