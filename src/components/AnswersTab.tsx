@@ -156,7 +156,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
       {analysisPanelVisible && (
         <>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={25} className="bg-gray-50 min-w-0">
+          <ResizablePanel defaultSize={50} minSize={25} className="min-w-0 min-h-0">
             <AnalysisPanel 
               selectedResponseGroup={selectedResponseGroup}
               responseData={selectedResponseData}
