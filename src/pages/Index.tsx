@@ -152,7 +152,7 @@ const Index = () => {
     <SidebarProvider>
       <div className="flex h-screen w-full">
         <SurveySidebar />
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col min-h-0">
           <SurveyLayout 
             activeTab={activeTab} 
             setActiveTab={setActiveTab}
@@ -162,9 +162,9 @@ const Index = () => {
             onPublishToggle={togglePublish}
             isTyping={isTyping}
           >
-            <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full">
+            <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full flex flex-col min-h-0">
               {activeTab === "edit" && (
-                <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0 min-h-0 rounded-xl">
+                <ResizablePanelGroup direction="horizontal" className="w-full flex-1 overflow-hidden min-w-0 min-h-0 rounded-xl">
                   <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
                     <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
 
@@ -249,24 +249,26 @@ const Index = () => {
               )}
 
               {activeTab === "answers" && (
-                <AnswersTab
-                  survey={survey}
-                  responses={responses}
-                  filteredResponses={filteredResponses}
-                  totalResponses={totalResponses}
-                  filterText={filterText}
-                  setFilterText={setFilterText}
-                  sortBy={sortBy}
-                  setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
-                  chartType={chartType[selectedResponseGroup] || "bar"}
-                  handleChartTypeChange={(value: string) => {
-                    const [questionId, type] = value.split(':');
-                    handleChartTypeChange(questionId, type as "bar" | "pie");
-                  }}
-                  onCardClick={handleCardClick}
-                  exportToCSV={exportToCSV}
-                  selectedResponseGroup={selectedResponseGroup}
-                />
+                <div className="flex-1 min-h-0">
+                  <AnswersTab
+                    survey={survey}
+                    responses={responses}
+                    filteredResponses={filteredResponses}
+                    totalResponses={totalResponses}
+                    filterText={filterText}
+                    setFilterText={setFilterText}
+                    sortBy={sortBy}
+                    setSortBy={(value: string) => setSortBy(value as "default" | "count" | "alpha")}
+                    chartType={chartType[selectedResponseGroup] || "bar"}
+                    handleChartTypeChange={(value: string) => {
+                      const [questionId, type] = value.split(':');
+                      handleChartTypeChange(questionId, type as "bar" | "pie");
+                    }}
+                    onCardClick={handleCardClick}
+                    exportToCSV={exportToCSV}
+                    selectedResponseGroup={selectedResponseGroup}
+                  />
+                </div>
               )}
             </div>
           </SurveyLayout>

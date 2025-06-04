@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
 import { SummaryCard } from '@/components/survey/analysis/SummaryCard';
@@ -110,45 +109,44 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     : null;
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden min-w-0">
-      <ResizablePanel defaultSize={analysisPanelVisible ? 60 : 100} minSize={30} className="bg-white min-w-0">
-        <div className="h-full flex flex-col bg-white overflow-hidden">
-          <div className="flex justify-between px-4 py-2 border-b sticky top-0 z-30 bg-white h-10 items-center flex-shrink-0">
-            <div className="font-medium text-sm">Responses</div>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-2 bg-white w-full min-w-0 h-0">
-            <div className="space-y-8">
-              <SummaryCard responses={responses} onExportCSV={exportToCSV} />
+    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden">
+      <ResizablePanel defaultSize={analysisPanelVisible ? 60 : 100} minSize={30} className="flex flex-col min-w-0">
+        <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">
+          <div className="font-medium text-sm">Responses</div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
+          <div className="space-y-8 pb-8">
+            <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
-              {totalResponses === 0 ? (
-                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-              ) : filteredResponses.length === 0 ? (
-                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-              ) : (
-                <>
-                  <FilterControls
-                    filterText={filterText}
-                    setFilterText={setFilterText}
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    showParticipantFilter={true}
-                    onParticipantFilter={handleParticipantFilter}
-                    onDeleteRequest={handleDeleteRequest}
-                    filteredParticipant={filteredParticipant}
-                    participantResponseCount={participantResponseCount}
-                  />
+            {totalResponses === 0 ? (
+              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+            ) : filteredResponses.length === 0 ? (
+              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+            ) : (
+              <>
+                <FilterControls
+                  filterText={filterText}
+                  setFilterText={setFilterText}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  showParticipantFilter={true}
+                  onParticipantFilter={handleParticipantFilter}
+                  onDeleteRequest={handleDeleteRequest}
+                  filteredParticipant={filteredParticipant}
+                  participantResponseCount={participantResponseCount}
+                />
 
-                  <ResponsesList
-                    responseGroups={filteredResponses}
-                    sortBy={sortBy}
-                    selectedResponseGroup={selectedResponseGroup}
-                    chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
-                    onChartTypeChange={handleChartTypeChange}
-                    onCardClick={onCardClick}
-                  />
-                </>
-              )}
-            </div>
+                <ResponsesList
+                  responseGroups={filteredResponses}
+                  sortBy={sortBy}
+                  selectedResponseGroup={selectedResponseGroup}
+                  chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
+                  onChartTypeChange={handleChartTypeChange}
+                  onCardClick={onCardClick}
+                />
+              </>
+            )}
           </div>
         </div>
       </ResizablePanel>
