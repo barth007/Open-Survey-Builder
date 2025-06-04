@@ -159,6 +159,10 @@ export const useSurveyState = (surveyId: string | undefined) => {
         return { ...prevSurvey, ...mergedUpdates };
       });
 
+      if (!surveyId) {
+        return mergedUpdates;
+      }
+
       updateLocalCache(mergedUpdates);
       return mergedUpdates;
     });
