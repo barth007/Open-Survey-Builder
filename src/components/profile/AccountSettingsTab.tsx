@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +31,7 @@ const AccountSettingsTab = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   
-  console.log("AccountSettingsTab rendering");
+  debugLog("AccountSettingsTab rendering");
   
   const handleSignOut = async () => {
     try {

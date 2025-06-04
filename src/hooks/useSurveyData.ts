@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import { useQuerySurveys } from './survey/useQuerySurveys';
 import { useMutateSurvey } from './survey/useMutateSurvey';
 import { useMutateFolder } from './survey/useMutateFolder';
@@ -15,7 +16,7 @@ export function useSurveyData() {
   const { createFolder, deleteFolder: deleteApiFolder, updateFolder } = useMutateFolder();
 
   const updateSurveyOrder = async (activeId: string, overId: string) => {
-    console.log(`Moving survey ${activeId} to position of ${overId}`);
+    debugLog(`Moving survey ${activeId} to position of ${overId}`);
     
     // Find both surveys to determine if we're moving between folders
     const activeSurvey = findSurveyById(activeId);

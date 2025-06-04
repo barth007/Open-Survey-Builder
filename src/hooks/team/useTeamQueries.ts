@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/providers/AuthProvider';
@@ -15,10 +16,10 @@ export function useTeamQueries() {
     queryKey: ['teams', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      console.log('Fetching teams for user in useTeamQueries:', user.id);
+      debugLog('Fetching teams for user in useTeamQueries:', user.id);
       try {
         const fetchedTeams = await fetchTeams(user.id);
-        console.log('Teams fetched successfully:', fetchedTeams);
+        debugLog('Teams fetched successfully:', fetchedTeams);
         return fetchedTeams;
       } catch (fetchError) {
         console.error('Error fetching teams:', fetchError);
@@ -34,17 +35,17 @@ export function useTeamQueries() {
       if (!teams || teams.length === 0) return {};
       
       const teamMembersMap: Record<string, any[]> = {};
-      console.log(`Fetching members for ${teams.length} teams`);
+      debugLog(`Fetching members for ${teams.length} teams`);
       
       try {
         await Promise.all(teams.map(async (team) => {
-          console.log(`Fetching members for team ${team.id} (${team.name})`);
+          debugLog(`Fetching members for team ${team.id} (${team.name})`);
           try {
             const members = await fetchTeamMembers(team.id);
             
             // Enhanced debug logging
             if (members && Array.isArray(members)) {
-              console.log(`Team ${team.id} (${team.name}) members fetched:`, {
+              debugLog(`Team ${team.id} (${team.name}) members fetched:`, {
                 count: members.length,
                 memberDetails: members.map(m => ({
                   id: m.id,
@@ -54,7 +55,7 @@ export function useTeamQueries() {
                 }))
               });
             } else {
-              console.warn(`Team ${team.id} returned invalid members data:`, members);
+              debugWarn(`Team ${team.id} returned invalid members data:`, members);
             }
             
             teamMembersMap[team.id] = members || [];
@@ -79,13 +80,13 @@ export function useTeamQueries() {
       if (!teams || teams.length === 0) return {};
       
       const invitationsMap: Record<string, any[]> = {};
-      console.log('Fetching invitations for teams:', teams);
+      debugLog('Fetching invitations for teams:', teams);
       
       try {
         await Promise.all(teams.map(async (team) => {
-          console.log(`Fetching invitations for team ${team.id}`);
+          debugLog(`Fetching invitations for team ${team.id}`);
           const teamInvitations = await fetchTeamInvitations(team.id);
-          console.log(`Team ${team.id} invitations:`, teamInvitations);
+          debugLog(`Team ${team.id} invitations:`, teamInvitations);
           invitationsMap[team.id] = teamInvitations || [];
         }));
         

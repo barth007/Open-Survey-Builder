@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -22,27 +23,27 @@ const Login = () => {
   
   // Debug current URL and search parameters
   useEffect(() => {
-    console.log('Login page loaded at:', window.location.href);
+    debugLog('Login page loaded at:', window.location.href);
     
     // Only log URL details on first load
     const urlParams = new URLSearchParams(window.location.search);
     for (const [key, value] of urlParams.entries()) {
-      console.log(`URL param: ${key} = ${value}`);
+      debugLog(`URL param: ${key} = ${value}`);
     }
 
     // Log hash parameters if present (often used for tokens)
     if (window.location.hash) {
-      console.log('Hash params present:', window.location.hash.substring(0, 20) + '...');
+      debugLog('Hash params present:', window.location.hash.substring(0, 20) + '...');
     }
 
     // Check local storage for session data
     try {
       const hasLocalStorage = !!window.localStorage;
-      console.log('LocalStorage available:', hasLocalStorage);
+      debugLog('LocalStorage available:', hasLocalStorage);
       
       if (hasLocalStorage) {
         const supabaseSession = localStorage.getItem('sb-gtzcjxzllsrtaieopsgc-auth-token');
-        console.log('Supabase session in storage:', !!supabaseSession);
+        debugLog('Supabase session in storage:', !!supabaseSession);
       }
     } catch (e) {
       console.error('Error accessing localStorage:', e);
@@ -58,7 +59,7 @@ const Login = () => {
       // If we're on the login page but have a session token that might be invalid,
       // let's try to refresh it once
       if (currentSession.data?.session && !recoveryAttempted) {
-        console.log('Found existing session on login page, attempting refresh');
+        debugLog('Found existing session on login page, attempting refresh');
         try {
           await refreshSession();
           setRecoveryAttempted(true);
@@ -88,13 +89,13 @@ const Login = () => {
         setCheckingStatus(true);
         
         // Check user approval status using the throttled function
-        console.log('Login page checking approval status');
+        debugLog('Login page checking approval status');
         const status = await checkApprovalStatus();
         
-        console.log('Login page: User status is', status);
+        debugLog('Login page: User status is', status);
         
         if (status === 'approved') {
-          console.log('User is approved, redirecting to dashboard');
+          debugLog('User is approved, redirecting to dashboard');
           navigate('/dashboard', { replace: true });
         } else if (status === 'pending') {
           toast("Your account is pending approval", { 
@@ -108,11 +109,11 @@ const Login = () => {
           navigate('/', { replace: true });
         } else if (status === 'unknown') {
           // If status is unknown, try to create a profile
-          console.log('Status unknown, redirecting to pending page after creating profile');
+          debugLog('Status unknown, redirecting to pending page after creating profile');
           navigate('/pending', { replace: true });
         } else {
           // If status is unknown due to errors, don't get stuck in a redirect loop
-          console.log('Status unknown, waiting before retry');
+          debugLog('Status unknown, waiting before retry');
           // Allow one more attempt after a delay
           setTimeout(() => {
             setRedirecting(false);
@@ -136,7 +137,7 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     try {
       setIsAuthenticating(true);
-      console.log('Initiating Google login...');
+      debugLog('Initiating Google login...');
       toast("Authentication", {
         description: "Starting Google authentication flow"
       });

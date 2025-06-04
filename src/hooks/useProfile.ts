@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +40,7 @@ export function useProfile() {
 
       try {
         setLoading(true);
-        console.log('Fetching profile for user:', user.id);
+        debugLog('Fetching profile for user:', user.id);
         
         // Use maybeSingle instead of single to handle case where profile doesn't exist
         const { data, error: fetchError } = await supabase
@@ -55,16 +56,16 @@ export function useProfile() {
 
         if (isMounted) {
           if (data) {
-            console.log('Profile fetched successfully:', data);
+            debugLog('Profile fetched successfully:', data);
             
             // Log the exact status value received from the database
-            console.log('Profile status from database:', data.status);
+            debugLog('Profile status from database:', data.status);
             
             setProfile(data as Profile);
             setError(null);
             setProfileCreated(true);
           } else {
-            console.log('No profile found, creating a new one');
+            debugLog('No profile found, creating a new one');
             // Create a new profile if one doesn't exist
             await createProfile();
           }
@@ -77,7 +78,7 @@ export function useProfile() {
           // Retry logic for profile fetch
           if (retryCount < maxRetries) {
             retryCount++;
-            console.log(`Retrying profile fetch (${retryCount}/${maxRetries}) after ${retryDelay}ms`);
+            debugLog(`Retrying profile fetch (${retryCount}/${maxRetries}) after ${retryDelay}ms`);
             
             setTimeout(() => {
               if (isMounted && !profileCreated) {
@@ -87,7 +88,7 @@ export function useProfile() {
           } else {
             // Let's try to create a profile if we couldn't find one
             if ((error as any).code === 'PGRST116') {
-              console.log('Trying to create a profile after fetch error');
+              debugLog('Trying to create a profile after fetch error');
               try {
                 await createProfile();
               } catch (createError) {
@@ -122,7 +123,7 @@ export function useProfile() {
           updated_at: new Date().toISOString()
         };
         
-        console.log('Creating new profile:', newProfile);
+        debugLog('Creating new profile:', newProfile);
         
         const { error: insertError, data } = await supabase
           .from('profiles')
@@ -161,7 +162,7 @@ export function useProfile() {
           setProfileCreated(true);
         }
 
-        console.log('New profile created successfully:', data || newProfile);
+        debugLog('New profile created successfully:', data || newProfile);
       } catch (error) {
         console.error('Error creating profile:', error);
         setError(error as Error);
@@ -187,7 +188,7 @@ export function useProfile() {
         updated_at: new Date().toISOString(),
       };
       
-      console.log('Updating profile with data:', updatedData);
+      debugLog('Updating profile with data:', updatedData);
       
       const { error: updateError } = await supabase
         .from('profiles')

@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Survey, Question } from '@/types/survey';
@@ -46,7 +47,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
   // Initialize survey state when data arrives from server
   useEffect(() => {
     if (surveyData && surveyData.id === surveyId) {
-      console.log(`Initializing survey state for ID: ${surveyId}`, surveyData);
+      debugLog(`Initializing survey state for ID: ${surveyId}`, surveyData);
       setSurvey(surveyData);
       setQuestions(surveyData.questions);
     }
@@ -55,14 +56,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
   // Update local cache immediately for preview
   const updateLocalCache = useCallback((updates: Partial<Survey>) => {
     if (surveyId) {
-      console.log(`Updating local cache for survey ${surveyId}:`, updates);
+      debugLog(`Updating local cache for survey ${surveyId}:`, updates);
       queryClient.setQueryData(['survey', surveyId], (oldData: Survey | undefined) => {
         if (!oldData || oldData.id !== surveyId) {
-          console.warn(`Cache mismatch for survey ${surveyId}`);
+          debugWarn(`Cache mismatch for survey ${surveyId}`);
           return oldData;
         }
         const updatedData = { ...oldData, ...updates };
-        console.log(`Cache updated for survey ${surveyId}:`, updatedData);
+        debugLog(`Cache updated for survey ${surveyId}:`, updatedData);
         return updatedData;
       });
     }
@@ -75,7 +76,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       return;
     }
 
-    console.log(`Saving survey ${surveyId}`);
+    debugLog(`Saving survey ${surveyId}`);
 
     try {
       const completeUpdates = { 
@@ -95,7 +96,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
         ...pendingUpdates
       };
 
-      console.log(`Saving survey ${surveyId} with updates:`, completeUpdates);
+      debugLog(`Saving survey ${surveyId} with updates:`, completeUpdates);
 
       const result = await updateSurvey({
         surveyId,
@@ -103,7 +104,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       });
       
       if (result.public_code && result.public_code !== survey.publicCode) {
-        console.log(`Received updated public code from database: ${result.public_code}`);
+        debugLog(`Received updated public code from database: ${result.public_code}`);
         setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
         updateLocalCache({ publicCode: result.public_code });
       }
@@ -142,7 +143,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
   // Batch update function
   const batchUpdate = useCallback((updates: Partial<Survey>) => {
-    console.log(`Batching update for survey ${surveyId}:`, updates);
+    debugLog(`Batching update for survey ${surveyId}:`, updates);
 
     const safeUpdates = { ...updates, id: surveyId };
 
@@ -151,7 +152,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
 
       setSurvey(prevSurvey => {
         if (prevSurvey.id !== surveyId) {
-          console.warn(
+          debugWarn(
             `State update mismatch: expected ${surveyId}, got ${prevSurvey.id}`
           );
           return prevSurvey;
@@ -169,23 +170,23 @@ export const useSurveyState = (surveyId: string | undefined) => {
   }, [surveyId, updateLocalCache]);
 
   const handleTitleChange = useCallback((title: string) => {
-    console.log(`Title change for survey ${surveyId}: ${title}`);
+    debugLog(`Title change for survey ${surveyId}: ${title}`);
     batchUpdate({ title });
     document.title = title;
     smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
   }, [surveyId, batchUpdate, smartAutoSave]);
 
   const handleDescriptionChange = useCallback((description: string) => {
-    console.log(`Description change for survey ${surveyId}: ${description}`);
+    debugLog(`Description change for survey ${surveyId}: ${description}`);
     batchUpdate({ description });
     smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
   }, [surveyId, batchUpdate, smartAutoSave]);
 
   const updateSurveyField = useCallback((field: keyof Survey, value: any) => {
-    console.log(`Updating field ${field} for survey ${surveyId} with value:`, value);
+    debugLog(`Updating field ${field} for survey ${surveyId} with value:`, value);
     
     if (field === 'redirectUrl' && value && !value.startsWith('http')) {
-      console.warn('Invalid URL format for redirectUrl:', value);
+      debugWarn('Invalid URL format for redirectUrl:', value);
     }
     
     batchUpdate({ [field]: value });
@@ -202,26 +203,26 @@ export const useSurveyState = (surveyId: string | undefined) => {
   }, [surveyId, batchUpdate, smartAutoSave]);
 
   const handleQuestionChange = useCallback((updatedQuestion: Question) => {
-    console.log(`Question change for survey ${surveyId}:`, updatedQuestion.id);
+    debugLog(`Question change for survey ${surveyId}:`, updatedQuestion.id);
     updateQuestion(updatedQuestion);
     smartAutoSave.markTextChange(); // Question text changes are typically text
   }, [surveyId, updateQuestion, smartAutoSave]);
 
   const handleAddQuestion = useCallback(() => {
-    console.log(`Adding question to survey ${surveyId}`);
+    debugLog(`Adding question to survey ${surveyId}`);
     const newQuestion = addQuestion();
     smartAutoSave.markStructuralChange(); // Adding questions is structural
     return newQuestion;
   }, [surveyId, addQuestion, smartAutoSave]);
 
   const handleDeleteQuestion = useCallback((questionId: string) => {
-    console.log(`Deleting question ${questionId} from survey ${surveyId}`);
+    debugLog(`Deleting question ${questionId} from survey ${surveyId}`);
     deleteQuestion(questionId);
     smartAutoSave.markStructuralChange(); // Deleting questions is structural
   }, [surveyId, deleteQuestion, smartAutoSave]);
 
   const handleDuplicateQuestion = useCallback((question: Question) => {
-    console.log(`Duplicating question ${question.id} in survey ${surveyId}`);
+    debugLog(`Duplicating question ${question.id} in survey ${surveyId}`);
     const newQuestion = duplicateQuestion(question);
     smartAutoSave.markStructuralChange(); // Duplicating questions is structural
     return newQuestion;
@@ -234,7 +235,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
 
     const newPublishState = !survey.isPublished;
-    console.log(`Toggling publish state for survey ${surveyId}: ${newPublishState}`);
+    debugLog(`Toggling publish state for survey ${surveyId}: ${newPublishState}`);
     
     const updates = { 
       isPublished: newPublishState
@@ -249,7 +250,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       });
       
       if (result.public_code && result.public_code !== survey.publicCode) {
-        console.log(`Received new public code from database: ${result.public_code}`);
+        debugLog(`Received new public code from database: ${result.public_code}`);
         setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
         updateLocalCache({ publicCode: result.public_code });
       }

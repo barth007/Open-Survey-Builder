@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +18,7 @@ export const TeamList = ({ teams, userRole }: TeamListProps) => {
     <TabsList className="mb-4">
       {teams.map(team => {
         const role = userRole(team);
-        console.log(`Team ${team.id} (${team.name}) - User role: ${role}`);
+        debugLog(`Team ${team.id} (${team.name}) - User role: ${role}`);
         
         return (
           <TabsTrigger key={team.id} value={team.id} className="relative">

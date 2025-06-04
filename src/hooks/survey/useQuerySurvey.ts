@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
@@ -17,7 +18,7 @@ export function useQuerySurvey(surveyId: string | undefined) {
         throw new Error('Survey ID is required');
       }
 
-      console.log(`Fetching survey with ID: ${surveyId}`);
+      debugLog(`Fetching survey with ID: ${surveyId}`);
 
       const { data, error } = await supabase
         .from('surveys')
@@ -35,7 +36,7 @@ export function useQuerySurvey(surveyId: string | undefined) {
         throw new Error(`Survey with ID "${surveyId}" not found`);
       }
 
-      console.log(`Survey ${surveyId} fetched:`, { 
+      debugLog(`Survey ${surveyId} fetched:`, { 
         id: data.id, 
         name: data.name, 
         description: data.description 

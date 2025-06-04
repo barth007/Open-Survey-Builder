@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -29,7 +30,7 @@ export const TeamTabContent = ({
   const { setTeamToDelete, setMemberToRemove } = useTeamContext();
 
   if (!teams || teams.length === 0) {
-    console.log('TeamTabContent: No teams available to display');
+    debugLog('TeamTabContent: No teams available to display');
     return null;
   }
 
@@ -40,7 +41,7 @@ export const TeamTabContent = ({
         const members = teamMembers?.[team.id];
         const teamInvitations = invitations?.[team.id];
         
-        console.log(`TeamTabContent: Rendering team ${team.id} (${team.name})`, {
+        debugLog(`TeamTabContent: Rendering team ${team.id} (${team.name})`, {
           teamOwnerId: team.owner_id,
           currentUserId,
           isOwner: team.owner_id === currentUserId,
@@ -64,7 +65,7 @@ export const TeamTabContent = ({
               onOpenInvite={onOpenInvite}
               onDeleteTeam={setTeamToDelete}
               onRemoveMember={(teamId, userId, name) => {
-                console.log('TeamTabContent: Remove member requested:', { teamId, userId, name });
+                debugLog('TeamTabContent: Remove member requested:', { teamId, userId, name });
                 setMemberToRemove({ teamId, userId, name });
               }}
               onUpdateTeam={onUpdateTeam}

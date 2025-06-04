@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 import { performDeepSessionValidation } from './teamAuthService';
@@ -10,13 +11,13 @@ import { performDeepSessionValidation } from './teamAuthService';
  * @returns The newly created team data
  */
 export async function createTeam(userId: string, name: string, description?: string) {
-  console.log('=== TEAM CREATION START ===');
-  console.log('Creating team with owner_id:', userId);
-  console.log(`Will insert: { name: "${name}", description: ${description ? `"${description}"` : 'null'}, owner_id: "${userId}" }`);
+  debugLog('=== TEAM CREATION START ===');
+  debugLog('Creating team with owner_id:', userId);
+  debugLog(`Will insert: { name: "${name}", description: ${description ? `"${description}"` : 'null'}, owner_id: "${userId}" }`);
   
   try {
     // Perform authentication check with the server
-    console.log('Performing deep authentication validation before team creation...');
+    debugLog('Performing deep authentication validation before team creation...');
     try {
       await performDeepSessionValidation();
     } catch (authError) {
@@ -25,7 +26,7 @@ export async function createTeam(userId: string, name: string, description?: str
     }
     
     // Create the team - the trigger will automatically add the owner as a member
-    console.log('Executing team insert...');
+    debugLog('Executing team insert...');
     const { data: teamData, error: teamError } = await supabase
       .from('teams')
       .insert([{ 
@@ -51,8 +52,8 @@ export async function createTeam(userId: string, name: string, description?: str
       throw teamError;
     }
     
-    console.log('Team created successfully:', teamData);
-    console.log('=== TEAM CREATION COMPLETE ===');
+    debugLog('Team created successfully:', teamData);
+    debugLog('=== TEAM CREATION COMPLETE ===');
     return teamData;
   } catch (error) {
     console.error('=== TEAM CREATION FAILED ===', error);

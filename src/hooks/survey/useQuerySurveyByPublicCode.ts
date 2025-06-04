@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,7 @@ import { DbSurvey } from '@/types/database';
  * @param isPreviewMode Whether to bypass the is_published check
  */
 export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = false) {
-  console.log(`Fetching survey with public code: ${publicCode}, preview mode: ${isPreviewMode}`);
+  debugLog(`Fetching survey with public code: ${publicCode}, preview mode: ${isPreviewMode}`);
   
   return useQuery({
     queryKey: ['survey', 'public', publicCode, isPreviewMode],
@@ -49,7 +50,7 @@ export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = f
           throw new Error('Survey not found');
         }
 
-        console.log('Raw survey data from database:', data);
+        debugLog('Raw survey data from database:', data);
 
         // Handle possibly missing fields that are now required in DbSurvey
         const surveyData = {
@@ -62,7 +63,7 @@ export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = f
 
         // Use the type mapper utility to convert the database format to our frontend format
         const convertedSurvey = dbSurveyToSurvey(surveyData);
-        console.log('Converted survey data:', convertedSurvey);
+        debugLog('Converted survey data:', convertedSurvey);
         
         return convertedSurvey;
       } catch (error) {

@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,7 +28,7 @@ export async function performDeepSessionValidation() {
         throw new Error('Authentication error: Please sign in again to continue.');
       }
       
-      console.log('Session refreshed automatically during validation');
+      debugLog('Session refreshed automatically during validation');
     }
     
     // Verify session with server-side validation
@@ -39,7 +40,7 @@ export async function performDeepSessionValidation() {
         throw new Error('Authentication error: Your session could not be verified.');
       }
       
-      console.log('Auth validation successful:', data);
+      debugLog('Auth validation successful:', data);
       return data; // This should be the user ID
     } catch (e) {
       console.error('RPC execution error:', e);

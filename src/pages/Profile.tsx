@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useProfile } from '@/hooks/useProfile';
@@ -16,7 +17,7 @@ const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  console.log("Profile page rendering with:", { 
+  debugLog("Profile page rendering with:", { 
     userId: user?.id,
     profileId: profile?.id,
     loading, 

@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
@@ -28,7 +29,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
         avatar_url: user.user_metadata?.avatar_url,
         online_at: new Date().toISOString(),
       });
-      console.log("[DEBUG] track result:", result);
+      debugLog("[DEBUG] track result:", result);
     };
 
     // Subscribe to presence changes
@@ -37,7 +38,7 @@ export const useActiveUsers = (surveyId: string | undefined) => {
     channel
       .on('presence', { event: 'sync' }, () => {
         const newState = channel.presenceState();
-        console.log("[DEBUG] presenceState raw:", newState);
+        debugLog("[DEBUG] presenceState raw:", newState);
         const usersArray: ActiveUser[] = Object.values(newState).map((users: any) => {
           const userInfo = users[0]; // Taking first presence
           return {
@@ -59,11 +60,11 @@ export const useActiveUsers = (surveyId: string | undefined) => {
         };
 
         const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
-        console.log("[DEBUG] activeUsers parsed:", uniqueUsers);
+        debugLog("[DEBUG] activeUsers parsed:", uniqueUsers);
         setActiveUsers(uniqueUsers);
       })
       .subscribe(async (status) => {
-        console.log("[DEBUG] channel status:", status);
+        debugLog("[DEBUG] channel status:", status);
         if (status === 'SUBSCRIBED') {
           await updatePresence(); // ✅ now it’s safe to push
           presenceInterval = setInterval(updatePresence, 30000);

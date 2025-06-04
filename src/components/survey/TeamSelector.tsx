@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -39,7 +40,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
     queryFn: async () => {
       if (!user) return [];
       
-      console.log('Fetching teams for user:', user.id);
+      debugLog('Fetching teams for user:', user.id);
       
       const { data, error } = await supabase
         .from('team_members')
@@ -54,7 +55,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
       if (!data || data.length === 0) return [];
       
       const teamIds = data.map(member => member.team_id);
-      console.log('Found team IDs:', teamIds);
+      debugLog('Found team IDs:', teamIds);
       
       const { data: teamsData, error: teamsError } = await supabase
         .from('teams')
@@ -66,7 +67,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
         throw teamsError;
       }
       
-      console.log('Teams data loaded:', teamsData);
+      debugLog('Teams data loaded:', teamsData);
       return teamsData as Team[];
     },
     enabled: !!user
@@ -77,7 +78,7 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
     
     setIsLoading(true);
     try {
-      console.log('Updating survey team:', { surveyId, teamId });
+      debugLog('Updating survey team:', { surveyId, teamId });
       await updateSurveyTeam({ surveyId, teamId });
     } catch (error) {
       console.error('Error updating survey team:', error);

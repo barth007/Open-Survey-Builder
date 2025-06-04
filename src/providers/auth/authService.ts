@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { ApprovalStatus, StatusCache } from './types';
 import { toast } from '@/components/ui/sonner';
@@ -19,7 +20,7 @@ export async function checkApprovalStatus(
   
   // Check if a request is already in progress
   if (checkingStatusRef.current) {
-    console.log('Status check already in progress, using cached value:', statusCacheRef.current.status);
+    debugLog('Status check already in progress, using cached value:', statusCacheRef.current.status);
     return statusCacheRef.current.status;
   }
   
@@ -29,7 +30,7 @@ export async function checkApprovalStatus(
   
   // If we checked recently and have a valid status, return cached value
   if (timeSinceLastCheck < MIN_STATUS_CHECK_INTERVAL && statusCacheRef.current.status !== 'unknown') {
-    console.log('Using cached status check:', statusCacheRef.current.status, 
+    debugLog('Using cached status check:', statusCacheRef.current.status, 
       'Age:', Math.round(timeSinceLastCheck/1000), 'seconds');
     return statusCacheRef.current.status;
   }
@@ -37,7 +38,7 @@ export async function checkApprovalStatus(
   // Check if we've hit max retries for failed requests
   if (statusCacheRef.current.attemptCount >= MAX_STATUS_CHECK_RETRIES && 
       statusCacheRef.current.status === 'unknown') {
-    console.log('Max retries reached for status check, circuit broken');
+    debugLog('Max retries reached for status check, circuit broken');
     // Reset attempt count after a cooling period (30 seconds)
     if (timeSinceLastCheck > 30000) {
       statusCacheRef.current.attemptCount = 0;
@@ -51,7 +52,7 @@ export async function checkApprovalStatus(
     checkingStatusRef.current = true;
     setApprovalStatus('checking');
     
-    console.log('Checking profile status for user:', userId, 
+    debugLog('Checking profile status for user:', userId, 
       'Attempt:', statusCacheRef.current.attemptCount + 1);
     
     const { data, error } = await supabase
@@ -69,10 +70,10 @@ export async function checkApprovalStatus(
       return 'unknown';
     }
     
-    console.log('Profile status result:', data?.status);
+    debugLog('Profile status result:', data?.status);
     
     if (!data) {
-      console.log('No profile found, creating one...');
+      debugLog('No profile found, creating one...');
       
       try {
         // Create a profile for this user
@@ -110,7 +111,7 @@ export async function checkApprovalStatus(
           return 'unknown';
         }
         
-        console.log('Created new profile during status check:', newProfile);
+        debugLog('Created new profile during status check:', newProfile);
         statusCacheRef.current = {
           status: 'pending',
           timestamp: now,
@@ -151,7 +152,7 @@ export async function checkApprovalStatus(
 
 export async function refreshSession() {
   try {
-    console.log('Manually refreshing session...');
+    debugLog('Manually refreshing session...');
     
     // First try refreshing the token
     const { data, error } = await supabase.auth.refreshSession();
@@ -162,13 +163,13 @@ export async function refreshSession() {
     }
     
     if (data.session) {
-      console.log('Session refreshed', {
+      debugLog('Session refreshed', {
         hasSession: !!data.session,
         userId: data.session?.user?.id || 'none',
       });
       return true;
     } else {
-      console.log('No session found during refresh');
+      debugLog('No session found during refresh');
       return false;
     }
   } catch (error) {
@@ -192,7 +193,7 @@ export async function signInWithGoogle() {
       throw error;
     }
 
-    console.log('OAuth sign-in initiated:', data);
+    debugLog('OAuth sign-in initiated:', data);
   } catch (error) {
     console.error('Error signing in with Google:', error);
     toast("Failed to sign in with Google. Please try again.");
@@ -213,7 +214,7 @@ export async function signInWithEmail(email: string, password: string) {
       throw error;
     }
 
-    console.log('Email sign-in successful:', data);
+    debugLog('Email sign-in successful:', data);
     return data;
   } catch (error) {
     console.error('Error signing in with email:', error);
@@ -240,7 +241,7 @@ export async function signUpWithEmail(email: string, password: string, fullName?
       throw error;
     }
 
-    console.log('Email sign-up successful:', data);
+    debugLog('Email sign-up successful:', data);
     
     if (data.user && !data.session) {
       toast.success("Check your email", {
@@ -284,7 +285,7 @@ export async function signOut() {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key && (key.includes('supabase') || key.includes('sb-'))) {
-        console.log('Clearing localStorage key before signout:', key);
+        debugLog('Clearing localStorage key before signout:', key);
         localStorage.removeItem(key);
       }
     }
@@ -297,7 +298,7 @@ export async function signOut() {
       throw error;
     }
     
-    console.log('Sign out completed successfully');
+    debugLog('Sign out completed successfully');
   } catch (error) {
     console.error('Error signing out:', error);
     throw error;

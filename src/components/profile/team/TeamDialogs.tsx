@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { TeamCreationDialog } from './TeamCreationDialog';
@@ -31,7 +32,7 @@ export const TeamDialogs = ({
       <TeamCreationDialog 
         isOpen={isCreateTeamDialogOpen} 
         onOpenChange={(isOpen) => {
-          console.log('Team creation dialog state changed to:', isOpen);
+          debugLog('Team creation dialog state changed to:', isOpen);
           setIsCreateTeamDialogOpen(isOpen);
         }} 
       />
@@ -39,7 +40,7 @@ export const TeamDialogs = ({
       <InvitationDialog 
         isOpen={isInviteDialogOpen} 
         onOpenChange={(isOpen) => {
-          console.log('Invitation dialog state changed to:', isOpen);
+          debugLog('Invitation dialog state changed to:', isOpen);
           setIsInviteDialogOpen(isOpen);
         }}
         teamId={selectedTeamId}
@@ -48,7 +49,7 @@ export const TeamDialogs = ({
       <RemoveMemberDialog
         isOpen={!!memberToRemove}
         onOpenChange={(isOpen) => {
-          console.log('Remove member dialog state changed to:', isOpen);
+          debugLog('Remove member dialog state changed to:', isOpen);
           if (!isOpen) setMemberToRemove(null);
         }}
         memberName={memberToRemove?.name || 'this user'}
@@ -58,7 +59,7 @@ export const TeamDialogs = ({
       <DeleteTeamDialog
         isOpen={!!teamToDelete}
         onOpenChange={(isOpen) => {
-          console.log('Delete team dialog state changed to:', isOpen);
+          debugLog('Delete team dialog state changed to:', isOpen);
           if (!isOpen) setTeamToDelete(null);
         }}
         onConfirm={onDeleteTeam}

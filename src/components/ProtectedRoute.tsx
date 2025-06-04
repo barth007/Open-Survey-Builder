@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
@@ -19,15 +20,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   useEffect(() => {
     const checkAndRecoverSession = async () => {
       if (!isLoading && (!user || !session?.access_token) && !recoveryAttempted) {
-        console.log('ProtectedRoute - Attempting session recovery');
+        debugLog('ProtectedRoute - Attempting session recovery');
         setIsRecovering(true);
         
         try {
           const recovered = await refreshSession();
-          console.log('Session recovery result:', recovered);
+          debugLog('Session recovery result:', recovered);
           
           if (!recovered) {
-            console.log('Session recovery failed, will redirect to login');
+            debugLog('Session recovery failed, will redirect to login');
             toast.error("Authentication Required", {
               description: "Please sign in to access this page"
             });
@@ -57,7 +58,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         
         try {
           // Use the centralized approval status check from AuthProvider
-          console.log('ProtectedRoute checking status');
+          debugLog('ProtectedRoute checking status');
           await checkApprovalStatus();
         } finally {
           setIsCheckingStatus(false);
@@ -76,7 +77,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       const periodicRefresh = setInterval(async () => {
         try {
           await refreshSession();
-          console.log('Regular session refresh completed in ProtectedRoute');
+          debugLog('Regular session refresh completed in ProtectedRoute');
         } catch (e) {
           console.error('Regular session refresh failed:', e);
         }
@@ -104,7 +105,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Check that both user and valid session exist
   if (!user || !session?.access_token) {
-    console.log('ProtectedRoute - Redirecting to login from:', location.pathname, 
+    debugLog('ProtectedRoute - Redirecting to login from:', location.pathname, 
       'Auth state:', { user: !!user, session: !!session, recoveryAttempted });
       
     return (
@@ -118,10 +119,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Check if user has approval status
   if (approvalStatus === 'approved') {
-    console.log('ProtectedRoute - Access granted for:', location.pathname);
+    debugLog('ProtectedRoute - Access granted for:', location.pathname);
     return <>{children}</>;
   } else if (approvalStatus === 'pending') {
-    console.log('ProtectedRoute - User not approved, redirecting to pending');
+    debugLog('ProtectedRoute - User not approved, redirecting to pending');
     return <Navigate to="/pending" replace />;
   } else if (approvalStatus === 'unknown') {
     // Show loading state if we don't know the status yet

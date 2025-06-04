@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Home, FileText, Check, RotateCw, WifiOff, Share } from 'lucide-react';
@@ -90,9 +91,9 @@ export function SurveyNavigationHeader({
   }, [isSaving, showSaving]);
 
   // Debug logging
-  console.log("[DEBUG] SurveyNavigationHeader - activeUsers prop:", activeUsers);
-  console.log("[DEBUG] SurveyNavigationHeader - currentUser:", currentUser);
-  console.log("[DEBUG] SurveyNavigationHeader - surveyId:", surveyId);
+  debugLog("[DEBUG] SurveyNavigationHeader - activeUsers prop:", activeUsers);
+  debugLog("[DEBUG] SurveyNavigationHeader - currentUser:", currentUser);
+  debugLog("[DEBUG] SurveyNavigationHeader - surveyId:", surveyId);
 
   const getCurrentSurveyContext = () => {
     if (!surveyId || !surveyData) return null;
@@ -125,8 +126,8 @@ export function SurveyNavigationHeader({
     last_active: new Date(),
   }] : []);
 
-  console.log("[DEBUG] SurveyNavigationHeader - displayUsers:", displayUsers);
-  console.log("[DEBUG] SurveyNavigationHeader - will render", displayUsers.length, "users");
+  debugLog("[DEBUG] SurveyNavigationHeader - displayUsers:", displayUsers);
+  debugLog("[DEBUG] SurveyNavigationHeader - will render", displayUsers.length, "users");
 
   const formatLastSaved = (date: Date | null) => {
     if (!date) return 'Never saved';
@@ -243,7 +244,7 @@ export function SurveyNavigationHeader({
                 .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
                 .slice(0, 4)
                 .map(user => {
-                  console.log("[DEBUG] Rendering user:", user);
+                  debugLog("[DEBUG] Rendering user:", user);
                   const isYou = user.id === currentUser?.id;
                   return (
                     <Tooltip key={user.id}>

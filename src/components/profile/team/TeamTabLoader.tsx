@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -10,7 +11,7 @@ interface TeamTabLoaderProps {
 
 export const TeamTabLoader = ({ isLoading, error }: TeamTabLoaderProps) => {
   if (isLoading) {
-    console.log('TeamTabLoader: Loading teams...');
+    debugLog('TeamTabLoader: Loading teams...');
     return (
       <div className="flex justify-center items-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

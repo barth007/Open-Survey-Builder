@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
@@ -47,7 +48,7 @@ export const InvitationDialog = ({ isOpen, onOpenChange, teamId }: InvitationDia
       return;
     }
     
-    console.log('Sending invitation to', data.email, 'for team', teamId);
+    debugLog('Sending invitation to', data.email, 'for team', teamId);
     
     try {
       await sendInvitation({ teamId, email: data.email });

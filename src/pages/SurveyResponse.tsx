@@ -1,3 +1,4 @@
+import { debugLog, debugWarn } from '@/lib/logger';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -50,7 +51,7 @@ const SurveyResponse = () => {
   };
 
   const handleRecordingComplete = (questionId: string, recordingUrl: string) => {
-    console.log('Recording completed for question:', questionId, 'URL:', recordingUrl);
+    debugLog('Recording completed for question:', questionId, 'URL:', recordingUrl);
     // The recording is already saved to the database, we just log it here
   };
 
