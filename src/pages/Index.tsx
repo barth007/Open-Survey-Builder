@@ -163,7 +163,7 @@ const Index = () => {
             onPublishToggle={togglePublish}
             isTyping={isTyping}
           >
-            <div className="rounded-xl shadow-sm bg-gray-100 p-4 h-full flex flex-col min-h-0">
+            <div className="shadow-sm bg-gray-100 p-4 h-full flex flex-col min-h-0">
               {activeTab === "edit" && (
                 <ResizablePanelGroup direction="horizontal" className="w-full flex-1 overflow-hidden min-w-0 min-h-0 rounded-xl">
                   <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
