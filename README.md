@@ -82,7 +82,7 @@ This survey application provides a comprehensive solution for creating, distribu
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd survey-application
+cd Survey-Builder
 ```
 
 2. Install dependencies:
