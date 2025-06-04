@@ -44,3 +44,13 @@ Contexts and their providers hold shared application state. Components access th
 - Summaries should mention the files modified and the purpose of the change.
 - After making modifications, run `npm run lint` and `npm run build` to verify the project compiles.
 - If these commands fail due to missing dependencies or network restrictions, note the failure in the PR description.
+
+## Agents
+
+### Analysis Agent
+- `src/components/survey/analysis/AnalysisPanel.tsx` manages tabs and renders statistics, scaling and outlier views.
+- `src/components/survey/analysis/StatisticalInsights.tsx` computes metrics like mode and distribution trends.
+- `src/components/survey/analysis/ResponsesProcessor.ts` normalizes survey answers for charting and filtering.
+- `src/components/survey/analysis/useAnswersTab.ts` ties together fetching responses and user interactions in the analysis tab.
+
+These files coordinate to process responses and present insights within the survey analysis UI.
