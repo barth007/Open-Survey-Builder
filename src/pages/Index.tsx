@@ -108,7 +108,7 @@ const Index = () => {
               onPublishToggle={togglePublish}
               isTyping={isTyping}
             >
-              <div className="h-full flex items-center justify-center">
+              <div className="h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
               </div>
             </SurveyLayout>
@@ -163,7 +163,7 @@ const Index = () => {
             onPublishToggle={togglePublish}
             isTyping={isTyping}
           >
-            <div className="shadow-sm bg-gray-100 p-4 h-full flex flex-col min-h-0">
+            <div className="shadow-sm bg-gray-100 p-4 h-screen flex flex-col min-h-0">
               {activeTab === "edit" && (
                 <ResizablePanelGroup direction="horizontal" className="w-full flex-1 overflow-hidden min-w-0 min-h-0 rounded-xl">
                   <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
