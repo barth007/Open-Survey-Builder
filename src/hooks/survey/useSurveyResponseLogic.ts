@@ -26,7 +26,11 @@ export const useSurveyResponseLogic = (surveyId?: string) => {
       value
     }));
 
-    await submitResponse(surveyId, formattedAnswers, isPublished);
+    await submitResponse({
+      surveyId,
+      answers: formattedAnswers,
+      metadata: { isPublished }
+    });
   }, [surveyId, answers, submitResponse]);
 
   const isQuestionVisible = useCallback((question: Question): boolean => {
