@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -98,7 +99,7 @@ const Index = () => {
       <SidebarProvider>
         <div className="flex h-screen w-full">
           <SurveySidebar />
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <SurveyLayout 
               activeTab={activeTab} 
               setActiveTab={setActiveTab}
@@ -108,7 +109,7 @@ const Index = () => {
               onPublishToggle={togglePublish}
               isTyping={isTyping}
             >
-              <div className="h-screen flex items-center justify-center">
+              <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
               </div>
             </SurveyLayout>
@@ -123,7 +124,7 @@ const Index = () => {
       <SidebarProvider>
         <div className="flex h-screen w-full">
           <SurveySidebar />
-          <div className="flex-1">
+          <div className="flex-1 min-h-0">
             <SurveyLayout 
               activeTab={activeTab} 
               setActiveTab={setActiveTab}
@@ -133,7 +134,7 @@ const Index = () => {
               onPublishToggle={togglePublish}
               isTyping={isTyping}
             >
-              <div className="h-screen flex items-center justify-center">
+              <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8 max-w-md text-magma">
                   <h2 className="text-2xl font-semibold mb-4">Error Loading Survey</h2>
                   <p>{error instanceof Error ? error.message : 'An unexpected error occurred'}</p>
@@ -163,9 +164,9 @@ const Index = () => {
             onPublishToggle={togglePublish}
             isTyping={isTyping}
           >
-            <div className="shadow-sm bg-gray-100 p-4 h-screen flex flex-col min-h-0">
+            <div className="bg-gray-100 p-4 h-full flex flex-col min-h-0">
               {activeTab === "edit" && (
-                <ResizablePanelGroup direction="horizontal" className="w-full flex-1 overflow-hidden min-w-0 min-h-0 rounded-xl">
+                <ResizablePanelGroup direction="horizontal" className="w-full flex-1 min-h-0 rounded-xl">
                   <ResizablePanel defaultSize={50} minSize={30} className="min-w-0 min-h-0 bg-white">
                     <div className="flex flex-col h-full w-full overflow-y-auto overflow-x-hidden scrollbar-hover pr-2 gap-4 p-4">
 

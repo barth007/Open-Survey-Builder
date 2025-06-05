@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
 import { SummaryCard } from '@/components/survey/analysis/SummaryCard';
@@ -109,7 +110,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     : null;
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full h-full overflow-hidden">
+    <ResizablePanelGroup direction="horizontal" className="w-full h-full">
       <ResizablePanel defaultSize={50} minSize={20} className="min-w-0 min-h-0">
         <div className="flex flex-col h-full bg-white">
           <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">

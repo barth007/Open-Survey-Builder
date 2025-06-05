@@ -41,7 +41,7 @@ const SurveyLayout: React.FC<SurveyLayoutProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full pt-14 min-height-0">
+    <div className="flex flex-col h-screen min-h-0">
       <SurveyNavigationHeader
         activeUsers={[]}
         isSaving={isSaving}
@@ -51,7 +51,7 @@ const SurveyLayout: React.FC<SurveyLayoutProps> = ({
         statusText={getStatusText()}
       />
       
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-white">
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-white flex-shrink-0">
         <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         
         {shouldShowSaveButton() && onManualSave && (
@@ -68,7 +68,7 @@ const SurveyLayout: React.FC<SurveyLayoutProps> = ({
         )}
       </div>
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {children}
       </div>
     </div>
