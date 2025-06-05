@@ -41,7 +41,7 @@ const SurveyLayout: React.FC<SurveyLayoutProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen min-h-0 pt-14">
+    <div className="flex flex-col h-screen min-h-0">
       <SurveyNavigationHeader
         activeUsers={[]}
         isSaving={isSaving}

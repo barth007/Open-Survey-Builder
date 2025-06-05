@@ -1,4 +1,3 @@
-
 // Import Json type from supabase types
 import { Json } from "@/integrations/supabase/types";
 
@@ -27,6 +26,9 @@ export interface DbSurvey {
   thank_you_message: string | null;
   thank_you_button_text: string | null;
   redirect_url: string | null;
+  // Recording settings - new fields added to match database
+  recording_enabled: boolean | null;
+  recording_required: boolean | null;
 }
 
 /**

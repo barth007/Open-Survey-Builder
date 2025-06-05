@@ -16,6 +16,8 @@ interface QuestionItemProps {
   onAnswerChange: (questionId: string, value: string | string[]) => void;
   responseId?: string;
   onRecordingComplete?: (questionId: string, recordingUrl: string) => void;
+  surveyRecordingEnabled?: boolean;
+  surveyRecordingRequired?: boolean;
 }
 
 export const QuestionItem: React.FC<QuestionItemProps> = ({
@@ -24,7 +26,9 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
   answers,
   onAnswerChange,
   responseId,
-  onRecordingComplete
+  onRecordingComplete,
+  surveyRecordingEnabled = false,
+  surveyRecordingRequired = false
 }) => {
   const isMobile = useIsMobile();
   const { uploadRecording, isUploading, uploadError } = useRecordingUpload();
@@ -44,15 +48,20 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
     }
   };
 
-  const showRecording = question.recordingEnabled && responseId;
-  const recordingRequired = question.recordingRequired && !hasRecording;
+  // Check if recording is enabled at question or survey level
+  const recordingEnabled = question.recordingEnabled || surveyRecordingEnabled;
+  // Check if recording is required at question or survey level
+  const recordingRequired = question.recordingRequired || surveyRecordingRequired;
+  
+  const showRecording = recordingEnabled && responseId;
+  const blockProgress = recordingRequired && !hasRecording;
   
   return (
     <div className={`mb-6 pb-6 border-b border-ice last:border-b-0 ${isMobile ? 'px-2' : ''}`}>
       <h3 className={`font-medium mb-2 text-carbon break-words ${isMobile ? 'text-base' : ''}`}>
         {index + 1}. {question.text} 
         {question.isRequired && <span className="text-magma ml-1">*</span>}
-        {question.recordingRequired && (
+        {recordingRequired && (
           <span className="inline-flex items-center gap-1 ml-2 text-sm text-blue-600">
             <Mic className="h-3 w-3" />
             Recording Required
@@ -112,7 +121,7 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
             </Alert>
           )}
 
-          {recordingRequired && (
+          {blockProgress && (
             <Alert className="mt-2">
               <AlertDescription>
                 A recording is required for this question before you can proceed.

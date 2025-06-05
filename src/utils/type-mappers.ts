@@ -1,4 +1,3 @@
-
 import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
 import { Survey as OrganizationSurvey, convertToOrganizationSurvey } from '@/types/survey-organization';
@@ -17,11 +16,14 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
         isRequired: q.isRequired || false,
         options: Array.isArray(q.options) ? q.options : [],
         maxSelections: q.maxSelections,
-        figmaPrototypeUrl: q.figmaPrototypeUrl,
         media: q.media,
+        figmaPrototypeUrl: q.figmaPrototypeUrl,
+        figmaScreenshot: q.figmaScreenshot,
         conditionalLogic: q.conditionalLogic,
+        customLikertLabels: q.customLikertLabels,
         isVisible: q.isVisible !== undefined ? q.isVisible : true,
-        customLikertLabels: q.customLikertLabels
+        recordingEnabled: q.recordingEnabled || false,
+        recordingRequired: q.recordingRequired || false
       }))
     : [];
 
@@ -35,6 +37,7 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     folderId: dbSurvey.folder_id || undefined,
     teamId: dbSurvey.team_id || undefined,
     publicCode: dbSurvey.public_code || undefined,
+    order: dbSurvey.order || undefined,
     createdAt: dbSurvey.created_at || new Date().toISOString(),
     // Welcome page fields - now including welcome_instructions and welcome_button_text
     welcomeTitle: dbSurvey.welcome_title || undefined,
@@ -45,7 +48,10 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     thankYouTitle: dbSurvey.thank_you_title || undefined,
     thankYouMessage: dbSurvey.thank_you_message || undefined,
     thankYouButtonText: dbSurvey.thank_you_button_text || undefined,
-    redirectUrl: dbSurvey.redirect_url || undefined
+    redirectUrl: dbSurvey.redirect_url || undefined,
+    // Survey-wide recording settings
+    recordingEnabled: dbSurvey.recording_enabled || false,
+    recordingRequired: dbSurvey.recording_required || false
   };
 }
 
@@ -63,6 +69,7 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     folder_id: survey.folderId,
     team_id: survey.teamId,
     public_code: survey.publicCode,
+    order: survey.order,
     // Welcome page fields - now including all fields
     welcome_title: survey.welcomeTitle,
     welcome_message: survey.welcomeMessage,
@@ -72,7 +79,10 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
     thank_you_title: survey.thankYouTitle,
     thank_you_message: survey.thankYouMessage,
     thank_you_button_text: survey.thankYouButtonText,
-    redirect_url: survey.redirectUrl
+    redirect_url: survey.redirectUrl,
+    // Survey-wide recording settings
+    recording_enabled: survey.recordingEnabled,
+    recording_required: survey.recordingRequired
   };
 }
 

@@ -151,6 +151,8 @@ export type Database = {
           order: number | null
           public_code: string | null
           questions: Json | null
+          recording_enabled: boolean | null
+          recording_required: boolean | null
           redirect_url: string | null
           team_id: string | null
           thank_you_button_text: string | null
@@ -172,6 +174,8 @@ export type Database = {
           order?: number | null
           public_code?: string | null
           questions?: Json | null
+          recording_enabled?: boolean | null
+          recording_required?: boolean | null
           redirect_url?: string | null
           team_id?: string | null
           thank_you_button_text?: string | null
@@ -193,6 +197,8 @@ export type Database = {
           order?: number | null
           public_code?: string | null
           questions?: Json | null
+          recording_enabled?: boolean | null
+          recording_required?: boolean | null
           redirect_url?: string | null
           team_id?: string | null
           thank_you_button_text?: string | null
