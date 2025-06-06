@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { Question } from '@/types/survey';
-import { QuestionHeader } from '@/components/question/QuestionHeader';
-import { QuestionTypeAndMaxAnswers } from '@/components/question/QuestionTypeAndMaxAnswers';
-import { QuestionOptions } from '@/components/question/QuestionOptions';
-import { QuestionFooter } from '@/components/question/QuestionFooter';
-import { QuestionCardMedia } from '@/components/question/QuestionCardMedia';
-import { QuestionConditionalLogic } from '@/components/question/QuestionConditionalLogic';
+import QuestionHeader from '@/components/question/QuestionHeader';
+import QuestionTypeAndMaxAnswers from '@/components/question/QuestionTypeAndMaxAnswers';
+import QuestionOptions from '@/components/question/QuestionOptions';
+import QuestionFooter from '@/components/question/QuestionFooter';
+import QuestionCardMedia from '@/components/question/QuestionCardMedia';
+import QuestionConditionalLogic from '@/components/question/QuestionConditionalLogic';
 import { useQuestionCardLogic } from '@/hooks/question/useQuestionCardLogic';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -28,56 +28,71 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   isDragging = false
 }) => {
   const {
-    localQuestion,
-    handleQuestionChange,
-    handleOptionChange,
-    handleDeleteOption,
-    handleAddOption,
+    handleTextChange,
+    handleDescriptionChange,
     handleRequiredChange,
     handleMaxSelectionsChange,
+    addOption,
+    deleteOption,
+    updateOptionText,
     handleMediaUpload,
-    handleMediaRemove,
-    handleFigmaUpload,
-    handleFigmaRemove,
-    handleConditionalLogicChange
-  } = useQuestionCardLogic(question, onQuestionChange);
+    removeQuestionMedia,
+    handleFigmaPrototypeUrlChange,
+    conditionalLogicOpen,
+    setConditionalLogicOpen,
+    handleConditionalLogicChange,
+    isMultipleType,
+    duplicateQuestion
+  } = useQuestionCardLogic(question, questions, onQuestionChange, onDeleteQuestion, onDuplicateQuestion);
 
   return (
     <Card className={`transition-all duration-200 ${isDragging ? 'opacity-50 rotate-2' : ''}`}>
       <CardContent className="p-6 space-y-4">
         <QuestionHeader
-          question={localQuestion}
-          onQuestionChange={handleQuestionChange}
-          onDeleteQuestion={onDeleteQuestion}
-          onDuplicateQuestion={onDuplicateQuestion}
+          text={question.text}
+          description={question.description || ''}
+          figmaPrototypeUrl={question.figmaPrototypeUrl}
+          onTextChange={handleTextChange}
+          onDescriptionChange={handleDescriptionChange}
+          onFigmaPrototypeUrlChange={handleFigmaPrototypeUrlChange}
         />
         
         <QuestionTypeAndMaxAnswers
-          question={localQuestion}
-          onQuestionChange={handleQuestionChange}
-          onRequiredChange={handleRequiredChange}
+          type={question.type}
+          onTypeChange={(type) => onQuestionChange({ ...question, type })}
+          maxSelections={question.maxSelections}
           onMaxSelectionsChange={handleMaxSelectionsChange}
+          isMultipleType={isMultipleType}
+          optionsCount={question.options.length}
         />
 
         <QuestionCardMedia
-          question={localQuestion}
+          media={question.media}
           onMediaUpload={handleMediaUpload}
-          onMediaRemove={handleMediaRemove}
-          onFigmaUpload={handleFigmaUpload}
-          onFigmaRemove={handleFigmaRemove}
+          onMediaRemove={removeQuestionMedia}
         />
 
         <QuestionOptions
-          question={localQuestion}
-          onOptionChange={handleOptionChange}
-          onDeleteOption={handleDeleteOption}
-          onAddOption={handleAddOption}
+          type={question.type}
+          options={question.options}
+          onAddOption={addOption}
+          onUpdateOptionText={updateOptionText}
+          onDeleteOption={deleteOption}
         />
 
         <QuestionConditionalLogic
-          question={localQuestion}
+          question={question}
           questions={questions}
+          conditionalLogicOpen={conditionalLogicOpen}
+          setConditionalLogicOpen={setConditionalLogicOpen}
           onConditionalLogicChange={handleConditionalLogicChange}
+        />
+
+        <QuestionFooter
+          isRequired={question.isRequired}
+          onRequiredChange={handleRequiredChange}
+          onDuplicateQuestion={onDuplicateQuestion ? () => duplicateQuestion() : undefined}
+          onDeleteQuestion={() => onDeleteQuestion(question.id)}
         />
       </CardContent>
     </Card>

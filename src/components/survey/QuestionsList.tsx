@@ -7,7 +7,7 @@ interface QuestionsListProps {
   questions: Question[];
   onQuestionChange: (question: Question) => void;
   onDeleteQuestion: (id: string) => void;
-  onDuplicateQuestion: (question: Question) => void;
+  onDuplicateQuestion: (question: Question) => Question;
 }
 
 const QuestionsList: React.FC<QuestionsListProps> = ({
