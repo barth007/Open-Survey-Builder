@@ -35,9 +35,7 @@ export interface Question {
   conditionalLogic?: ConditionalLogic;
   customLikertLabels?: boolean; // Flag to indicate if the question uses custom Likert labels
   isVisible?: boolean;
-  // New recording settings
-  recordingEnabled?: boolean;
-  recordingRequired?: boolean;
+  // Remove question-level recording settings
 }
 
 /**
@@ -67,7 +65,7 @@ export interface Survey {
   thankYouMessage?: string;
   thankYouButtonText?: string;
   redirectUrl?: string;
-  // Survey-wide recording settings
+  // Survey-wide recording settings (screen + webcam)
   recordingEnabled?: boolean;
   recordingRequired?: boolean;
 }
@@ -101,7 +99,7 @@ export interface QuestionRecording {
   responseId: string;
   questionId: string;
   recordingUrl: string;
-  recordingType: 'audio' | 'video';
+  recordingType: 'screen-webcam'; // Only support screen + webcam recording
   fileFormat: string;
   durationSeconds?: number;
   fileSizeBytes?: number;

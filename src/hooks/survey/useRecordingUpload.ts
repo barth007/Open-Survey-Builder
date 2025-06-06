@@ -6,9 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface UseRecordingUploadReturn {
   uploadRecording: (
     blob: Blob,
-    questionId: string,
-    responseId: string,
-    recordingType: 'audio' | 'video'
+    responseId: string
   ) => Promise<string | null>;
   isUploading: boolean;
   uploadError: string | null;
@@ -20,22 +18,20 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
 
   const uploadRecording = async (
     blob: Blob,
-    questionId: string,
-    responseId: string,
-    recordingType: 'audio' | 'video'
+    responseId: string
   ): Promise<string | null> => {
     setIsUploading(true);
     setUploadError(null);
 
     try {
-      const fileExtension = recordingType === 'video' ? 'webm' : 'webm';
-      const fileName = `${responseId}/${questionId}/${uuidv4()}.${fileExtension}`;
+      const fileExtension = 'webm';
+      const fileName = `${responseId}/survey-recording-${uuidv4()}.${fileExtension}`;
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('survey-recordings')
         .upload(fileName, blob, {
-          contentType: recordingType === 'video' ? 'video/webm' : 'audio/webm',
+          contentType: 'video/webm',
           upsert: false
         });
 
@@ -50,12 +46,11 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
 
       const recordingUrl = urlData.publicUrl;
 
-      // Save recording metadata to database using RPC call since types aren't updated yet
-      const { error: dbError } = await supabase.rpc('create_question_recording', {
+      // Save recording metadata to database using RPC call
+      const { error: dbError } = await supabase.rpc('create_survey_recording', {
         p_response_id: responseId,
-        p_question_id: questionId,
         p_recording_url: recordingUrl,
-        p_recording_type: recordingType,
+        p_recording_type: 'screen-webcam',
         p_file_format: fileExtension,
         p_file_size_bytes: blob.size
       });

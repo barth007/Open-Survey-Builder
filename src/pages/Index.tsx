@@ -1,4 +1,3 @@
-
 import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -21,6 +20,7 @@ import { WelcomePage } from '@/components/survey/WelcomePage';
 import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
+import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -163,6 +163,7 @@ const Index = () => {
             survey={survey}
             onPublishToggle={togglePublish}
             isTyping={isTyping}
+            onManualSave={handleSave}
           >
             <div className="bg-gray-100 p-4 h-full flex flex-col min-h-0">
               {activeTab === "edit" && (
@@ -175,6 +176,11 @@ const Index = () => {
                         description={survey.description}
                         onTitleChange={handleTitleChange}
                         onDescriptionChange={handleDescriptionChange}
+                      />
+
+                      <SurveyRecordingSettings
+                        survey={survey}
+                        onSurveyChange={updateSurveyField}
                       />
 
                       <WelcomeCard

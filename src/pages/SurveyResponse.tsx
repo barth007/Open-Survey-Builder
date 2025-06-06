@@ -7,10 +7,14 @@ import { Button } from "@/components/ui/button";
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { Survey, Question } from '@/types/survey';
 import { QuestionItem } from '@/components/survey/response/QuestionItem';
+import { RecordingWidget } from '@/components/survey/recording/RecordingWidget';
+import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
 
 const SurveyResponse = () => {
   const { id: surveyId } = useParams();
   const { survey: surveyData, isLoading, error } = useQuerySurvey(surveyId);
+  const { uploadRecording, isUploading, uploadError } = useRecordingUpload();
+  
   const { 
     answers, 
     isSubmitting, 
@@ -50,9 +54,18 @@ const SurveyResponse = () => {
     return surveyData.title || "Untitled Survey";
   };
 
-  const handleRecordingComplete = (questionId: string, recordingUrl: string) => {
-    debugLog('Recording completed for question:', questionId, 'URL:', recordingUrl);
-    // The recording is already saved to the database, we just log it here
+  const handleRecordingComplete = async (blob: Blob, duration: number) => {
+    if (!responseId) {
+      console.error('No response ID available for recording upload');
+      return;
+    }
+
+    debugLog('Survey recording completed, uploading...', { duration, size: blob.size });
+    const recordingUrl = await uploadRecording(blob, responseId);
+    
+    if (recordingUrl) {
+      debugLog('Survey recording uploaded successfully:', recordingUrl);
+    }
   };
 
   if (isLoading) {
@@ -76,6 +89,7 @@ const SurveyResponse = () => {
 
   const isPublished = surveyData.isPublished === true;
   const questions = getQuestions();
+  const recordingEnabled = surveyData.recordingEnabled || false;
 
   return (
     <div className="min-h-screen bg-pebble py-8">
@@ -88,6 +102,28 @@ const SurveyResponse = () => {
             <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
               <p className="text-sm font-medium">This survey is in preview mode</p>
               <p className="text-xs">Responses will not be saved until the survey is published</p>
+            </div>
+          )}
+
+          {recordingEnabled && responseId && (
+            <div className="mb-6">
+              <RecordingWidget
+                responseId={responseId}
+                onRecordingComplete={handleRecordingComplete}
+                className="w-full"
+              />
+              
+              {isUploading && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-800 text-sm">
+                  Uploading recording...
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
+                  Failed to upload recording: {uploadError}
+                </div>
+              )}
             </div>
           )}
 
