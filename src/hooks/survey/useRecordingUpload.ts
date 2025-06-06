@@ -46,9 +46,10 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
 
       const recordingUrl = urlData.publicUrl;
 
-      // Save recording metadata to database using RPC call
-      const { error: dbError } = await supabase.rpc('create_survey_recording', {
+      // Save recording metadata to database using existing RPC call
+      const { error: dbError } = await supabase.rpc('create_question_recording', {
         p_response_id: responseId,
+        p_question_id: '', // Empty for survey-wide recordings
         p_recording_url: recordingUrl,
         p_recording_type: 'screen-webcam',
         p_file_format: fileExtension,

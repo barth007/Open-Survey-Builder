@@ -2,7 +2,7 @@
 import React from 'react';
 import { Question } from '@/types/survey';
 import QuestionCard from '@/components/QuestionCard';
-import { AddQuestionButton } from '@/components/AddQuestionButton';
+import AddQuestionButton from '@/components/AddQuestionButton';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableQuestionCard } from './SortableQuestionCard';
@@ -49,7 +49,7 @@ export const QuestionSection: React.FC<QuestionSectionProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Questions</h3>
-        <AddQuestionButton onAddQuestion={onAddQuestion} />
+        <AddQuestionButton onClick={onAddQuestion} />
       </div>
       
       {questions.length > 0 ? (
@@ -74,7 +74,7 @@ export const QuestionSection: React.FC<QuestionSectionProps> = ({
       ) : (
         <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
           <p className="mb-4">No questions added yet</p>
-          <AddQuestionButton onAddQuestion={onAddQuestion} />
+          <AddQuestionButton onClick={onAddQuestion} />
         </div>
       )}
     </div>

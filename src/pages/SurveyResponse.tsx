@@ -1,12 +1,11 @@
-import { debugLog, debugWarn } from '@/lib/logger';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
 import { Button } from "@/components/ui/button";
-import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
-import { Survey, Question } from '@/types/survey';
 import { QuestionItem } from '@/components/survey/response/QuestionItem';
+import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
+import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
+import { debugLog } from '@/lib/logger';
 import { RecordingWidget } from '@/components/survey/recording/RecordingWidget';
 import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
 
@@ -24,34 +23,12 @@ const SurveyResponse = () => {
     responseId
   } = useSurveyResponseLogic(surveyId);
 
-  // Helper function to ensure we're working with an array of questions
-  const getQuestions = (): Question[] => {
-    if (!surveyData || !surveyData.questions) return [];
-    
-    // Make sure we're working with an array and convert to Question type
-    const questions = Array.isArray(surveyData.questions) ? surveyData.questions : [];
-    
-    return questions.map((q: any) => ({
-      id: q.id || "",
-      type: q.type || "text",
-      text: q.text || "",
-      description: q.description,
-      isRequired: q.isRequired || false,
-      options: Array.isArray(q.options) ? q.options : [],
-      maxSelections: q.maxSelections,
-      figmaPrototypeUrl: q.figmaPrototypeUrl,
-      media: q.media,
-      conditionalLogic: q.conditionalLogic,
-      isVisible: q.isVisible !== undefined ? q.isVisible : true,
-      recordingEnabled: q.recordingEnabled || false,
-      recordingRequired: q.recordingRequired || false
-    }));
+  const getSurveyTitle = () => {
+    return surveyData?.title || 'Survey';
   };
 
-  // Helper to get survey title
-  const getSurveyTitle = (): string => {
-    if (!surveyData) return "Untitled Survey";
-    return surveyData.title || "Untitled Survey";
+  const getQuestions = () => {
+    return surveyData?.questions || [];
   };
 
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
@@ -66,6 +43,11 @@ const SurveyResponse = () => {
     if (recordingUrl) {
       debugLog('Survey recording uploaded successfully:', recordingUrl);
     }
+  };
+
+  const handleQuestionRecordingComplete = (questionId: string, recordingUrl: string) => {
+    // This is for individual question recordings if needed in the future
+    debugLog('Question recording completed:', { questionId, recordingUrl });
   };
 
   if (isLoading) {
@@ -136,7 +118,7 @@ const SurveyResponse = () => {
                 answers={answers}
                 onAnswerChange={handleAnswerChange}
                 responseId={responseId}
-                onRecordingComplete={handleRecordingComplete}
+                onRecordingComplete={handleQuestionRecordingComplete}
               />
             )
           ))}
