@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BarChart as BarChartIcon, PieChart as PieChartIcon } from "lucide-react";
+import { BarChart as BarChartIcon, PieChart as PieChartIcon, FileText } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ResponseChartRenderer } from './ResponseChartRenderer';
 
@@ -18,6 +18,7 @@ interface ResponseGroup {
   question: string;
   responses: ResponseData[];
   likert: boolean;
+  questionType: string;
 }
 
 interface ResponseCardItemProps {
@@ -35,6 +36,9 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
   onChartTypeChange,
   onClick
 }) => {
+  // Check if this question type supports charts
+  const supportsCharts = ['multipleChoice', 'checkboxes', 'likert5', 'likert7', 'likert10'].includes(item.questionType);
+  
   return (
     <Card 
       className={`border-ice cursor-pointer transition-colors ${isSelected ? 'border-blue-400 ring-1 ring-blue-300' : ''}`}
@@ -42,33 +46,49 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
     >
       <CardHeader className="border-b border-ice">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg break-words pr-2" style={{ maxWidth: 'calc(100% - 100px)', overflowWrap: 'break-word' }}>
-            {item.question}
-          </CardTitle>
-          <ToggleGroup 
-            type="single" 
-            value={chartType} 
-            onValueChange={(value) => {
-              if (value) onChartTypeChange(item.questionId, value as "bar" | "pie");
-            }}
-          >
-            <ToggleGroupItem value="bar">
-              <BarChartIcon size={18} />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="pie">
-              <PieChartIcon size={18} />
-            </ToggleGroupItem>
-          </ToggleGroup>
+          <div className="flex items-center gap-2 pr-2 flex-1 min-w-0">
+            {item.questionType === 'text' && <FileText size={16} className="text-gray-500 flex-shrink-0" />}
+            <CardTitle className="text-lg break-words overflow-hidden text-ellipsis">
+              {item.question}
+            </CardTitle>
+          </div>
+          {supportsCharts && (
+            <ToggleGroup 
+              type="single" 
+              value={chartType} 
+              onValueChange={(value) => {
+                if (value) onChartTypeChange(item.questionId, value as "bar" | "pie");
+              }}
+              className="flex-shrink-0"
+            >
+              <ToggleGroupItem value="bar">
+                <BarChartIcon size={18} />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="pie">
+                <PieChartIcon size={18} />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
+        </div>
+        <div className="text-sm text-gray-500 capitalize">
+          {item.questionType} • {item.responses.reduce((sum, r) => sum + r.count, 0)} responses
         </div>
       </CardHeader>
       <CardContent className="pt-6 overflow-x-hidden">
-        <div className="overflow-x-hidden">
-          <ResponseChartRenderer 
-            chartType={chartType} 
-            data={item.responses} 
-            isLikert={item.likert} 
-          />
-        </div>
+        {supportsCharts ? (
+          <div className="overflow-x-hidden">
+            <ResponseChartRenderer 
+              chartType={chartType} 
+              data={item.responses} 
+              isLikert={item.likert} 
+            />
+          </div>
+        ) : (
+          <div className="text-center py-4 text-gray-500">
+            <FileText size={32} className="mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Text responses - view details in analysis panel</p>
+          </div>
+        )}
         
         <div className="overflow-x-auto">
           <Table className="mt-4">
@@ -80,10 +100,12 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {item.responses.map((response) => (
-                <TableRow key={response.answer}>
-                  <TableCell className="break-words" style={{ maxWidth: '200px', overflowWrap: 'break-word' }}>
-                    {response.answer}
+              {item.responses.slice(0, 10).map((response, index) => (
+                <TableRow key={`${response.answer}-${index}`}>
+                  <TableCell className="break-words max-w-[200px]">
+                    <div className="overflow-hidden text-ellipsis" title={response.answer}>
+                      {response.answer}
+                    </div>
                   </TableCell>
                   <TableCell>{response.count}</TableCell>
                   <TableCell>
@@ -93,6 +115,13 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
                   </TableCell>
                 </TableRow>
               ))}
+              {item.responses.length > 10 && (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-gray-500 text-sm">
+                    ... and {item.responses.length - 10} more responses
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>

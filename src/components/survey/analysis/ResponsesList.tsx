@@ -20,6 +20,8 @@ export const ResponsesList: React.FC<ResponsesListProps> = ({
   onChartTypeChange,
   onCardClick
 }) => {
+  console.log('Rendering ResponsesList with', responseGroups.length, 'response groups');
+  
   return (
     <>
       {responseGroups.map((item) => {
