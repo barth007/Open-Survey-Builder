@@ -5,7 +5,8 @@ import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses'
 import { 
   processResponses, 
   filterResponseGroups,
-  ProcessedResponseGroup 
+  ProcessedResponseGroup,
+  getResponseProcessingStats
 } from './ResponsesProcessor';
 import { useCSVExporter } from './CSVExporter';
 
@@ -18,11 +19,12 @@ export function useAnswersTab(survey: Survey, surveyId: string | undefined) {
   // Fetch responses data
   const { data: responses, isLoading, error } = useQuerySurveyResponses(surveyId);
   
-  // Process the responses
-  const processedResponses = useMemo(() => 
-    processResponses(survey, responses), 
-    [responses, survey]
-  );
+  // Process the responses with enhanced logic
+  const processedResponses = useMemo(() => {
+    const processed = processResponses(survey, responses);
+    console.log('Enhanced processed responses:', processed);
+    return processed;
+  }, [responses, survey]);
   
   // Filter responses by question text
   const filteredResponses = useMemo(() => 
@@ -30,8 +32,12 @@ export function useAnswersTab(survey: Survey, surveyId: string | undefined) {
     [processedResponses, filterText]
   );
 
-  // Calculate total responses
+  // Calculate total responses and processing stats
   const totalResponses = responses?.length || 0;
+  const processingStats = useMemo(() => 
+    getResponseProcessingStats(survey, responses),
+    [survey, responses]
+  );
   
   // CSV export functionality
   const { exportToCSV } = useCSVExporter(processedResponses, survey.title);
@@ -68,6 +74,7 @@ export function useAnswersTab(survey: Survey, surveyId: string | undefined) {
     processedResponses,
     filteredResponses,
     totalResponses,
+    processingStats,
     exportToCSV,
     handleChartTypeChange,
     handleCardClick,

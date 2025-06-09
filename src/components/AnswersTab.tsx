@@ -7,9 +7,13 @@ import { NoResponsesView } from '@/components/survey/analysis/NoResponsesView';
 import { ResponsesList } from '@/components/survey/analysis/ResponsesList';
 import { DeleteResponsesDialog } from '@/components/survey/analysis/DeleteResponsesDialog';
 import { AnalysisPanel } from '@/components/survey/analysis/AnalysisPanel';
+import { ResponseDebugView } from '@/components/survey/analysis/ResponseDebugView';
 import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
 import { useQueryClient } from '@tanstack/react-query';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Button } from "@/components/ui/button";
+import { Bug, Eye, EyeOff } from "lucide-react";
+import { getResponseProcessingStats } from '@/components/survey/analysis/ResponsesProcessor';
 
 interface AnswersTabProps {
   survey: Survey;
@@ -47,9 +51,13 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
   const [pendingDeletion, setPendingDeletion] = useState<{ id: string; email: string } | null>(null);
   const [participantResponseCount, setParticipantResponseCount] = useState(0);
   const [analysisPanelVisible, setAnalysisPanelVisible] = useState(true);
+  const [debugViewVisible, setDebugViewVisible] = useState(false);
   
   const { deleteResponsesByParticipant, isDeleting } = useDeleteResponses();
   const queryClient = useQueryClient();
+
+  const stats = getResponseProcessingStats(survey, responses);
+  const hasDataIssues = stats.orphanedResponses > 0 || (totalResponses > 0 && filteredResponses.length === 0);
 
   const handleParticipantFilter = (participantId: string, participantEmail: string) => {
     if (!participantId && !participantEmail) {
@@ -113,18 +121,71 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     <ResizablePanelGroup direction="horizontal" className="w-full h-full">
       <ResizablePanel defaultSize={50} minSize={20} className="min-w-0 min-h-0">
         <div className="flex flex-col h-full bg-white">
-          <div className="flex justify-between px-4 py-2 border-b bg-white flex-shrink-0">
+          <div className="flex justify-between items-center px-4 py-2 border-b bg-white flex-shrink-0">
             <div className="font-medium text-sm">Responses</div>
+            <div className="flex items-center gap-2">
+              {hasDataIssues && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDebugViewVisible(!debugViewVisible)}
+                  className="flex items-center gap-2"
+                >
+                  <Bug size={16} />
+                  {debugViewVisible ? 'Hide Debug' : 'Debug Data'}
+                </Button>
+              )}
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
             <div className="space-y-8 pb-8">
               <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
+              {hasDataIssues && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-orange-700 mb-2">
+                    <Bug size={16} />
+                    <span className="font-medium">Data Mismatch Detected</span>
+                  </div>
+                  <p className="text-sm text-orange-600 mb-3">
+                    Some responses may not be showing because question IDs have changed. 
+                    {stats.orphanedResponses > 0 && ` Found ${stats.orphanedResponses} orphaned responses.`}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDebugViewVisible(true)}
+                    className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                  >
+                    View Debug Information
+                  </Button>
+                </div>
+              )}
+
+              {debugViewVisible && (
+                <ResponseDebugView survey={survey} responses={responses} />
+              )}
+
               {totalResponses === 0 ? (
                 <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-              ) : filteredResponses.length === 0 ? (
-                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+              ) : filteredResponses.length === 0 && !debugViewVisible ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 mb-4">
+                    <p className="text-lg font-medium mb-2">No Matching Responses Found</p>
+                    <p className="text-sm">
+                      You have {totalResponses} total responses, but none match the current survey structure.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setDebugViewVisible(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Bug size={16} />
+                    Debug Response Data
+                  </Button>
+                </div>
               ) : (
                 <>
                   <FilterControls
