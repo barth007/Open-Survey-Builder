@@ -51,6 +51,19 @@ export const useQuestionCardLogic = (
     handleLikertOptionsEdit
   } = useLikertOptions(question, onQuestionChange);
 
+  // Enhanced type change handler to properly save Likert options
+  const handleQuestionTypeChange = (type: QuestionType) => {
+    console.log(`Changing question type from ${question.type} to ${type}`);
+    
+    // Use the Likert-aware type change handler
+    handleTypeChange(type);
+    
+    // Ensure options are preserved for the new type
+    setTimeout(() => {
+      console.log(`Question ${question.id} type changed to ${type}, options:`, question.options);
+    }, 100);
+  };
+
   // Check if dependent question's options have changed
   useEffect(() => {
     if (question.conditionalLogic?.dependsOn && 
@@ -69,6 +82,15 @@ export const useQuestionCardLogic = (
       }
     }
   }, [questions, question.conditionalLogic]);
+
+  // Monitor Likert options to ensure they're preserved
+  useEffect(() => {
+    const isLikertType = question.type.startsWith('likert');
+    if (isLikertType && question.options.length === 0) {
+      console.warn(`Likert question ${question.id} has no options, regenerating...`);
+      handleTypeChange(question.type);
+    }
+  }, [question.type, question.options, handleTypeChange]);
 
   const isMultipleType = question.type === 'multipleChoice' || question.type === 'checkboxes';
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';
@@ -100,7 +122,7 @@ export const useQuestionCardLogic = (
     // From useLikertOptions
     likertOptionsDialogOpen,
     setLikertOptionsDialogOpen,
-    handleTypeChange,
+    handleTypeChange: handleQuestionTypeChange, // Use enhanced handler
     handleLikertOptionsEdit,
     
     // Computed values

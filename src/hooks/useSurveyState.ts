@@ -53,7 +53,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyData, surveyId, setQuestions]);
 
-  // Update local cache immediately for preview
+  // Update local cache immediately for preview with conflict prevention
   const updateLocalCache = useCallback((updates: Partial<Survey>) => {
     if (surveyId) {
       debugLog(`Updating local cache for survey ${surveyId}:`, updates);
@@ -62,18 +62,25 @@ export const useSurveyState = (surveyId: string | undefined) => {
           debugWarn(`Cache mismatch for survey ${surveyId}`);
           return oldData;
         }
-        const updatedData = { ...oldData, ...updates };
+        
+        // Prevent overwriting newer changes
+        const updatedData = { 
+          ...oldData, 
+          ...updates,
+          // Preserve questions if not explicitly updating them
+          questions: updates.questions || oldData.questions
+        };
         debugLog(`Cache updated for survey ${surveyId}:`, updatedData);
         return updatedData;
       });
     }
   }, [surveyId, queryClient]);
 
-  // Handle save operation
+  // Enhanced save operation with better error handling
   const handleSave = useCallback(async () => {
     if (!surveyId) {
       console.error('Cannot save: no survey ID');
-      return;
+      throw new Error('No survey ID provided');
     }
 
     debugLog(`Saving survey ${surveyId}`);
@@ -111,6 +118,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
       
       setPendingUpdates({});
       
+      // Invalidate queries after a short delay to prevent conflicts
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['surveys'] });
         queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
@@ -134,14 +142,14 @@ export const useSurveyState = (surveyId: string | undefined) => {
     }
   }, [surveyId, survey, questions, pendingUpdates, updateSurvey, queryClient, toast, updateLocalCache]);
 
-  // Smart auto-save hook
+  // Smart auto-save hook with improved settings
   const smartAutoSave = useSmartAutoSave({
     onSave: handleSave,
-    textFieldDelay: 3000, // 3 seconds for text fields
-    structuralChangeDelay: 1000 // 1 second for structural changes
+    textFieldDelay: 1500, // Reduced from 3000ms
+    structuralChangeDelay: 800 // Reduced from 1000ms
   });
 
-  // Batch update function
+  // Enhanced batch update function with better state management
   const batchUpdate = useCallback((updates: Partial<Survey>) => {
     debugLog(`Batching update for survey ${surveyId}:`, updates);
 
@@ -157,7 +165,10 @@ export const useSurveyState = (surveyId: string | undefined) => {
           );
           return prevSurvey;
         }
-        return { ...prevSurvey, ...mergedUpdates };
+        
+        const newSurvey = { ...prevSurvey, ...mergedUpdates };
+        debugLog(`Survey state updated:`, newSurvey);
+        return newSurvey;
       });
 
       if (!surveyId) {
@@ -173,13 +184,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
     debugLog(`Title change for survey ${surveyId}: ${title}`);
     batchUpdate({ title });
     document.title = title;
-    smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
+    smartAutoSave.markTextChange();
   }, [surveyId, batchUpdate, smartAutoSave]);
 
   const handleDescriptionChange = useCallback((description: string) => {
     debugLog(`Description change for survey ${surveyId}: ${description}`);
     batchUpdate({ description });
-    smartAutoSave.markTextChange(); // Mark as text change for smart debouncing
+    smartAutoSave.markTextChange();
   }, [surveyId, batchUpdate, smartAutoSave]);
 
   const updateSurveyField = useCallback((field: keyof Survey, value: any) => {
@@ -191,7 +202,6 @@ export const useSurveyState = (surveyId: string | undefined) => {
     
     batchUpdate({ [field]: value });
     
-    // Determine if this is a text change or structural change
     const textFields = ['welcomeTitle', 'welcomeMessage', 'welcomeInstructions', 'welcomeButtonText', 
                        'thankYouTitle', 'thankYouMessage', 'thankYouButtonText', 'redirectUrl'];
     
@@ -205,26 +215,26 @@ export const useSurveyState = (surveyId: string | undefined) => {
   const handleQuestionChange = useCallback((updatedQuestion: Question) => {
     debugLog(`Question change for survey ${surveyId}:`, updatedQuestion.id);
     updateQuestion(updatedQuestion);
-    smartAutoSave.markTextChange(); // Question text changes are typically text
+    smartAutoSave.markTextChange();
   }, [surveyId, updateQuestion, smartAutoSave]);
 
   const handleAddQuestion = useCallback(() => {
     debugLog(`Adding question to survey ${surveyId}`);
     const newQuestion = addQuestion();
-    smartAutoSave.markStructuralChange(); // Adding questions is structural
+    smartAutoSave.markStructuralChange();
     return newQuestion;
   }, [surveyId, addQuestion, smartAutoSave]);
 
   const handleDeleteQuestion = useCallback((questionId: string) => {
     debugLog(`Deleting question ${questionId} from survey ${surveyId}`);
     deleteQuestion(questionId);
-    smartAutoSave.markStructuralChange(); // Deleting questions is structural
+    smartAutoSave.markStructuralChange();
   }, [surveyId, deleteQuestion, smartAutoSave]);
 
   const handleDuplicateQuestion = useCallback((question: Question) => {
     debugLog(`Duplicating question ${question.id} in survey ${surveyId}`);
     const newQuestion = duplicateQuestion(question);
-    smartAutoSave.markStructuralChange(); // Duplicating questions is structural
+    smartAutoSave.markStructuralChange();
     return newQuestion;
   }, [surveyId, duplicateQuestion, smartAutoSave]);
 
@@ -299,14 +309,15 @@ export const useSurveyState = (surveyId: string | undefined) => {
     deleteQuestion: handleDeleteQuestion,
     duplicateQuestion: handleDuplicateQuestion,
     togglePublish,
-    handleSave: smartAutoSave.manualSave, // Expose manual save
+    handleSave: smartAutoSave.manualSave,
     pendingChanges: smartAutoSave.hasPendingChanges(),
-    setPendingChanges: () => {}, // No longer needed with smart auto-save
+    setPendingChanges: () => {},
     isLoading,
     error,
     isSaving: smartAutoSave.isSaving,
-    isTyping: smartAutoSave.isTyping, // New: expose typing state
+    isTyping: smartAutoSave.isTyping,
     lastSaved: smartAutoSave.lastSaved,
-    retryCount: smartAutoSave.retryCount
+    retryCount: smartAutoSave.retryCount,
+    saveError: smartAutoSave.saveError
   };
 };

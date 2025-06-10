@@ -7,6 +7,7 @@ import QuestionOptions from '@/components/question/QuestionOptions';
 import QuestionFooter from '@/components/question/QuestionFooter';
 import QuestionCardMedia from '@/components/question/QuestionCardMedia';
 import QuestionConditionalLogic from '@/components/question/QuestionConditionalLogic';
+import LikertScaleOptions from '@/components/question/LikertScaleOptions';
 import { useQuestionCardLogic } from '@/hooks/question/useQuestionCardLogic';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -43,7 +44,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     conditionalLogicOpen,
     setConditionalLogicOpen,
     handleConditionalLogicChange,
+    handleLikertOptionsEdit,
     isMultipleType,
+    isLikertType,
     duplicateQuestion
   } = useQuestionCardLogic(question, questions, onQuestionChange, onDeleteQuestion, onDuplicateQuestion);
 
@@ -82,6 +85,14 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           onUpdateOptionText={updateOptionText}
           onDeleteOption={deleteOption}
         />
+
+        {isLikertType && (
+          <LikertScaleOptions
+            type={question.type}
+            options={question.options}
+            onEditOptions={handleLikertOptionsEdit}
+          />
+        )}
 
         <QuestionConditionalLogic
           question={question}

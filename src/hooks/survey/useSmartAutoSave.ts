@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -18,13 +19,14 @@ interface ChangeBuffer {
 
 export function useSmartAutoSave({ 
   onSave, 
-  textFieldDelay = 3000, // Reduced from 5000 but still reasonable
-  structuralChangeDelay = 1000 // Quick save for structural changes
+  textFieldDelay = 1500, // Reduced from 3000 for faster saves
+  structuralChangeDelay = 800 // Reduced from 1000 for quicker structural saves
 }: UseSmartAutoSaveProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   
   const changeBufferRef = useRef<ChangeBuffer>({
     hasTextChanges: false,
@@ -36,6 +38,7 @@ export function useSmartAutoSave({
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isManualSaveRef = useRef(false);
+  const pendingSaveRef = useRef(false);
   const maxRetries = 3;
 
   // Track when user is actively typing
@@ -47,18 +50,26 @@ export function useSmartAutoSave({
       clearTimeout(typingTimeoutRef.current);
     }
     
-    // Set typing to false after 1 second of no activity
+    // Set typing to false after 800ms of no activity (reduced from 1000ms)
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-    }, 1000);
+    }, 800);
   }, []);
 
   const performSaveWithRetry = useCallback(async (): Promise<boolean> => {
+    if (pendingSaveRef.current) {
+      debugLog("Save already pending, skipping duplicate save");
+      return false;
+    }
+
+    pendingSaveRef.current = true;
+    
     try {
       debugLog(`Attempting save (attempt ${retryCount + 1}/${maxRetries + 1})`);
       await onSave();
       setLastSaved(new Date());
       setRetryCount(0);
+      setSaveError(null);
       
       // Clear the change buffer after successful save
       changeBufferRef.current = {
@@ -74,18 +85,22 @@ export function useSmartAutoSave({
       console.error(`Save failed (attempt ${retryCount + 1}):`, error);
       
       const errorMessage = error instanceof Error ? error.message : String(error);
+      setSaveError(errorMessage);
+      
       const isTemporaryError = errorMessage.includes('rate limit') || 
                               errorMessage.includes('network') || 
                               errorMessage.includes('timeout') ||
-                              errorMessage.includes('429');
+                              errorMessage.includes('429') ||
+                              errorMessage.includes('conflict');
       
       if (isTemporaryError && retryCount < maxRetries) {
         setRetryCount(prev => prev + 1);
-        const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+        const retryDelay = Math.min(800 * Math.pow(2, retryCount), 5000); // Reduced max delay
         debugLog(`Retrying save in ${retryDelay}ms...`);
         
         setTimeout(() => {
           if (!isManualSaveRef.current) {
+            pendingSaveRef.current = false;
             performSaveWithRetry();
           }
         }, retryDelay);
@@ -95,10 +110,18 @@ export function useSmartAutoSave({
         setRetryCount(0);
         throw error;
       }
+    } finally {
+      pendingSaveRef.current = false;
     }
   }, [onSave, retryCount, maxRetries]);
 
   const scheduleSave = useCallback((delay: number) => {
+    // If already saving or manual save in progress, don't schedule new save
+    if (isSaving || isManualSaveRef.current || pendingSaveRef.current) {
+      debugLog("Skipping scheduled save - already saving");
+      return;
+    }
+
     // Clear any existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -107,7 +130,7 @@ export function useSmartAutoSave({
     debugLog(`Scheduling save in ${delay}ms`);
     
     saveTimeoutRef.current = setTimeout(async () => {
-      if (isSaving || isManualSaveRef.current) {
+      if (isSaving || isManualSaveRef.current || pendingSaveRef.current) {
         debugLog("Skipping scheduled save - already saving or manual save in progress");
         return;
       }
@@ -119,6 +142,7 @@ export function useSmartAutoSave({
         await performSaveWithRetry();
       } catch (error) {
         console.error('Scheduled save failed after all retries:', error);
+        setSaveError(error instanceof Error ? error.message : 'Save failed');
       } finally {
         setIsSaving(false);
       }
@@ -167,7 +191,7 @@ export function useSmartAutoSave({
       setTimeout(() => {
         isManualSaveRef.current = false;
         debugLog("Manual save flag reset");
-      }, 1000);
+      }, 500); // Reduced from 1000ms
     }
   }, [performSaveWithRetry]);
 
@@ -185,6 +209,7 @@ export function useSmartAutoSave({
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
+      pendingSaveRef.current = false;
     };
   }, []);
 
@@ -193,6 +218,7 @@ export function useSmartAutoSave({
     lastSaved,
     retryCount,
     isTyping,
+    saveError, // New: expose save errors
     manualSave,
     markTextChange,
     markStructuralChange,
