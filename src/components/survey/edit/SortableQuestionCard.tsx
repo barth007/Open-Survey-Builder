@@ -38,8 +38,6 @@ export const SortableQuestionCard: React.FC<SortableQuestionCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
     >
       <QuestionCard
         question={question}
@@ -48,6 +46,10 @@ export const SortableQuestionCard: React.FC<SortableQuestionCardProps> = ({
         onDeleteQuestion={onDeleteQuestion}
         onDuplicateQuestion={onDuplicateQuestion}
         isDragging={isDragging}
+        dragHandleProps={{
+          ...attributes,
+          ...listeners
+        }}
       />
     </div>
   );

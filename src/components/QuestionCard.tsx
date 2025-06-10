@@ -17,6 +17,7 @@ interface QuestionCardProps {
   onDeleteQuestion: (id: string) => void;
   onDuplicateQuestion?: (question: Question) => Question;
   isDragging?: boolean;
+  dragHandleProps?: any;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -25,7 +26,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   onQuestionChange,
   onDeleteQuestion,
   onDuplicateQuestion,
-  isDragging = false
+  isDragging = false,
+  dragHandleProps
 }) => {
   const {
     handleTextChange,
@@ -55,6 +57,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           onTextChange={handleTextChange}
           onDescriptionChange={handleDescriptionChange}
           onFigmaPrototypeUrlChange={handleFigmaPrototypeUrlChange}
+          dragHandleProps={dragHandleProps}
         />
         
         <QuestionTypeAndMaxAnswers
