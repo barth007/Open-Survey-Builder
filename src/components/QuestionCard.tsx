@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Question } from '@/types/survey';
 import QuestionHeader from '@/components/question/QuestionHeader';
 import QuestionTypeAndMaxAnswers from '@/components/question/QuestionTypeAndMaxAnswers';
@@ -53,6 +53,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     isLikertType,
     duplicateQuestion
   } = useQuestionCardLogic(question, questions, onQuestionChange, onDeleteQuestion, onDuplicateQuestion);
+
+  // Debug logging for option counts
+  useEffect(() => {
+    if (isLikertType) {
+      const expectedCount = question.type === 'likert5' ? 5 : 
+                           question.type === 'likert7' ? 7 : 
+                           question.type === 'likert10' ? 10 : 0;
+      
+      console.log(`[QuestionCard] Likert question ${question.id} (${question.type}):`, {
+        actualOptions: question.options.length,
+        expectedOptions: expectedCount,
+        options: question.options.map(opt => opt.text)
+      });
+
+      if (expectedCount !== question.options.length) {
+        console.warn(`[QuestionCard] Option count mismatch for ${question.type}: expected ${expectedCount}, got ${question.options.length}`);
+      }
+    }
+  }, [question.type, question.options.length, isLikertType, question.id]);
 
   return (
     <>

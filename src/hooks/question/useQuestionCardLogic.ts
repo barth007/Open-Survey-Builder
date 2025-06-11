@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Question, QuestionType } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
 import { useQuestionBasics } from './useQuestionBasics';
@@ -16,6 +16,7 @@ export const useQuestionCardLogic = (
   onDuplicateQuestion?: (question: Question) => void
 ) => {
   const { toast } = useToast();
+  const isChangingTypeRef = useRef(false);
 
   const {
     handleTextChange,
@@ -51,17 +52,21 @@ export const useQuestionCardLogic = (
     handleLikertOptionsEdit
   } = useLikertOptions(question, onQuestionChange);
 
-  // Enhanced type change handler to properly save Likert options
+  // Enhanced type change handler with better coordination
   const handleQuestionTypeChange = (type: QuestionType) => {
-    console.log(`Changing question type from ${question.type} to ${type}`);
+    console.log(`[useQuestionCardLogic] Changing question type from ${question.type} to ${type}`);
+    
+    // Set flag to prevent interference from other effects
+    isChangingTypeRef.current = true;
     
     // Use the Likert-aware type change handler
     handleTypeChange(type);
     
-    // Ensure options are preserved for the new type
+    // Reset flag after a delay to allow the change to complete
     setTimeout(() => {
-      console.log(`Question ${question.id} type changed to ${type}, options:`, question.options);
-    }, 100);
+      isChangingTypeRef.current = false;
+      console.log(`[useQuestionCardLogic] Question ${question.id} type change completed. Final options count:`, question.options.length);
+    }, 200);
   };
 
   // Check if dependent question's options have changed
@@ -83,14 +88,31 @@ export const useQuestionCardLogic = (
     }
   }, [questions, question.conditionalLogic]);
 
-  // Monitor Likert options to ensure they're preserved
+  // Monitor Likert options with better protection against interference
   useEffect(() => {
+    if (isChangingTypeRef.current) {
+      console.log(`[useQuestionCardLogic] Skipping options check - type change in progress`);
+      return;
+    }
+
     const isLikertType = question.type.startsWith('likert');
     if (isLikertType && question.options.length === 0) {
-      console.warn(`Likert question ${question.id} has no options, regenerating...`);
+      console.warn(`[useQuestionCardLogic] Likert question ${question.id} (${question.type}) has no options, regenerating...`);
       handleTypeChange(question.type);
+    } else if (isLikertType) {
+      // Validate option count for Likert types
+      const expectedCount = question.type === 'likert5' ? 5 : 
+                           question.type === 'likert7' ? 7 : 
+                           question.type === 'likert10' ? 10 : 0;
+      
+      if (expectedCount > 0 && question.options.length !== expectedCount) {
+        console.warn(`[useQuestionCardLogic] Likert question ${question.id} (${question.type}) has ${question.options.length} options, expected ${expectedCount}. Regenerating...`);
+        handleTypeChange(question.type);
+      } else {
+        console.log(`[useQuestionCardLogic] Likert question ${question.id} (${question.type}) has correct number of options: ${question.options.length}`);
+      }
     }
-  }, [question.type, question.options, handleTypeChange]);
+  }, [question.type, question.options.length, handleTypeChange]);
 
   const isMultipleType = question.type === 'multipleChoice' || question.type === 'checkboxes';
   const isLikertType = question.type === 'likert5' || question.type === 'likert7' || question.type === 'likert10';

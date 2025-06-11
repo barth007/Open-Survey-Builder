@@ -19,8 +19,8 @@ interface ChangeBuffer {
 
 export function useSmartAutoSave({ 
   onSave, 
-  textFieldDelay = 1500, // Reduced from 3000 for faster saves
-  structuralChangeDelay = 800 // Reduced from 1000 for quicker structural saves
+  textFieldDelay = 2000, // Increased for more stability during option generation
+  structuralChangeDelay = 1000 // Increased to prevent interference with Likert generation
 }: UseSmartAutoSaveProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -50,10 +50,10 @@ export function useSmartAutoSave({
       clearTimeout(typingTimeoutRef.current);
     }
     
-    // Set typing to false after 800ms of no activity (reduced from 1000ms)
+    // Set typing to false after 1000ms of no activity
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-    }, 800);
+    }, 1000);
   }, []);
 
   const performSaveWithRetry = useCallback(async (): Promise<boolean> => {
@@ -95,7 +95,7 @@ export function useSmartAutoSave({
       
       if (isTemporaryError && retryCount < maxRetries) {
         setRetryCount(prev => prev + 1);
-        const retryDelay = Math.min(800 * Math.pow(2, retryCount), 5000); // Reduced max delay
+        const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 8000);
         debugLog(`Retrying save in ${retryDelay}ms...`);
         
         setTimeout(() => {
@@ -167,7 +167,7 @@ export function useSmartAutoSave({
     changeBufferRef.current.hasStructuralChanges = true;
     changeBufferRef.current.lastStructuralChange = now;
     
-    debugLog("Structural change detected, scheduling quick save");
+    debugLog("Structural change detected, scheduling save with longer delay");
     scheduleSave(structuralChangeDelay);
   }, [scheduleSave, structuralChangeDelay]);
 
@@ -191,7 +191,7 @@ export function useSmartAutoSave({
       setTimeout(() => {
         isManualSaveRef.current = false;
         debugLog("Manual save flag reset");
-      }, 500); // Reduced from 1000ms
+      }, 1000);
     }
   }, [performSaveWithRetry]);
 
@@ -218,7 +218,7 @@ export function useSmartAutoSave({
     lastSaved,
     retryCount,
     isTyping,
-    saveError, // New: expose save errors
+    saveError,
     manualSave,
     markTextChange,
     markStructuralChange,
