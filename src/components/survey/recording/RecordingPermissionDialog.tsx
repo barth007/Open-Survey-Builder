@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mic, Video, Shield, ExternalLink } from 'lucide-react';
+import { Mic, Video, Shield, ExternalLink, AlertTriangle } from 'lucide-react';
 
 interface RecordingPermissionDialogProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface RecordingPermissionDialogProps {
   requiresAudio?: boolean;
   requiresVideo?: boolean;
   surveyTitle?: string;
+  isRequired?: boolean;
 }
 
 export const RecordingPermissionDialog: React.FC<RecordingPermissionDialogProps> = ({
@@ -20,7 +21,8 @@ export const RecordingPermissionDialog: React.FC<RecordingPermissionDialogProps>
   onDecline,
   requiresAudio = true,
   requiresVideo = false,
-  surveyTitle = "this survey"
+  surveyTitle = "this survey",
+  isRequired = false
 }) => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,14 +65,25 @@ export const RecordingPermissionDialog: React.FC<RecordingPermissionDialogProps>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Recording Permission Required
+            Recording Permission {isRequired ? 'Required' : 'Requested'}
           </DialogTitle>
           <DialogDescription>
             {surveyTitle} includes audio/video recording to capture your responses.
+            {isRequired && " Recording is required to participate in this survey."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
+          {isRequired && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                This survey requires recording permissions to participate. 
+                If you decline, you will not be able to complete the survey.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-3">
             {requiresAudio && (
               <div className="flex items-center gap-3 p-3 border rounded-md">
@@ -130,7 +143,7 @@ export const RecordingPermissionDialog: React.FC<RecordingPermissionDialogProps>
               onClick={onDecline}
               disabled={isRequesting}
             >
-              Decline & Exit
+              {isRequired ? 'Decline & Exit' : 'Skip Recording'}
             </Button>
           </div>
         </div>

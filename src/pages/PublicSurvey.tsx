@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
@@ -14,13 +15,17 @@ import { Answer } from '@/types/survey';
 import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
 import { WelcomePage } from '@/components/survey/WelcomePage';
 import { ThankYouPage } from '@/components/survey/ThankYouPage';
+import { RecordingPermissionDialog } from '@/components/survey/recording/RecordingPermissionDialog';
+import { RecordingWidget } from '@/components/survey/recording/RecordingWidget';
+import { useRecordingPermissions } from '@/components/survey/recording/useRecordingPermissions';
+import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
 
 interface PublicSurveyProps {
   isPreviewMode?: boolean;
 }
 
 // Define enum for survey flow states
-type SurveyFlowState = 'welcome' | 'questions' | 'thankYou';
+type SurveyFlowState = 'welcome' | 'permissions' | 'questions' | 'thankYou';
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   const { publicCode } = useParams<{ publicCode: string }>();
@@ -29,17 +34,61 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     answers, 
     handleAnswerChange, 
     isSubmitting,
-    isQuestionVisible
+    isQuestionVisible,
+    responseId
   } = useSurveyResponseLogic(survey?.id);
   const { submitResponse } = useSubmitResponse();
+  const { permissions, requestPermissions, hasPermissions } = useRecordingPermissions();
+  const { uploadRecording, isUploading, uploadError } = useRecordingUpload();
   
   // Track the current state of the survey flow
   const [flowState, setFlowState] = useState<SurveyFlowState>('welcome');
+  const [recordingDeclined, setRecordingDeclined] = useState(false);
 
   debugLog('PublicSurvey survey data:', survey);
 
+  // Check if recording is enabled and required
+  const recordingEnabled = survey?.recordingEnabled || false;
+  const recordingRequired = survey?.recordingRequired || false;
+
   const handleStartSurvey = () => {
+    if (recordingEnabled && !permissions) {
+      setFlowState('permissions');
+    } else {
+      setFlowState('questions');
+    }
+  };
+
+  const handlePermissionGranted = (grantedPermissions: { audio: boolean; video: boolean }) => {
+    debugLog('Recording permissions granted:', grantedPermissions);
     setFlowState('questions');
+  };
+
+  const handlePermissionDeclined = () => {
+    debugLog('Recording permissions declined');
+    setRecordingDeclined(true);
+    
+    if (recordingRequired) {
+      // If recording is required and user declines, skip to thank you page
+      setFlowState('thankYou');
+    } else {
+      // If recording is optional, continue to survey
+      setFlowState('questions');
+    }
+  };
+
+  const handleRecordingComplete = async (blob: Blob, duration: number) => {
+    if (!responseId) {
+      console.error('No response ID available for recording upload');
+      return;
+    }
+
+    debugLog('Survey recording completed, uploading...', { duration, size: blob.size });
+    const recordingUrl = await uploadRecording(blob, responseId);
+    
+    if (recordingUrl) {
+      debugLog('Survey recording uploaded successfully:', recordingUrl);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,12 +151,16 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     survey.redirectUrl?.trim()
   );
 
-  // If there's no welcome content, skip directly to questions
+  // If there's no welcome content, skip directly to permissions or questions
   React.useEffect(() => {
     if (survey && !hasWelcomeContent && flowState === 'welcome') {
-      setFlowState('questions');
+      if (recordingEnabled && !permissions) {
+        setFlowState('permissions');
+      } else {
+        setFlowState('questions');
+      }
     }
-  }, [survey, hasWelcomeContent, flowState]);
+  }, [survey, hasWelcomeContent, flowState, recordingEnabled, permissions]);
 
   if (isLoading) {
     return (
@@ -134,6 +187,25 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     );
   }
 
+  // Thank you page logic with recording context
+  const getThankYouProps = () => {
+    if (recordingDeclined && recordingRequired) {
+      return {
+        thankYouTitle: "Recording Required",
+        thankYouMessage: "This survey requires recording permissions to participate. Thank you for your understanding.",
+        thankYouButtonText: survey.thankYouButtonText || "Continue",
+        redirectUrl: survey.redirectUrl || ""
+      };
+    }
+
+    return {
+      thankYouTitle: survey.thankYouTitle || "Thank You",
+      thankYouMessage: survey.thankYouMessage || "Thank you for your participation.",
+      thankYouButtonText: survey.thankYouButtonText || "Continue",
+      redirectUrl: survey.redirectUrl || ""
+    };
+  };
+
   return (
     <PublicSurveyLayout 
       surveyTitle={survey?.title || "Loading..."} 
@@ -152,6 +224,16 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           />
         )}
 
+        {/* Recording Permission Dialog */}
+        <RecordingPermissionDialog
+          isOpen={flowState === 'permissions'}
+          onPermissionGranted={handlePermissionGranted}
+          onDecline={handlePermissionDeclined}
+          requiresAudio={recordingEnabled}
+          requiresVideo={recordingEnabled}
+          surveyTitle={survey?.title}
+        />
+
         {/* Questions */}
         {flowState === 'questions' && (
           <>
@@ -162,6 +244,42 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
               )}
             </div>
 
+            {/* Recording Status */}
+            {recordingEnabled && permissions && responseId && (
+              <div className="mb-6">
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-800">
+                  <p className="text-sm font-medium">Recording is active for this survey</p>
+                  <p className="text-xs">Your responses are being recorded as configured</p>
+                </div>
+
+                <RecordingWidget
+                  responseId={responseId}
+                  onRecordingComplete={handleRecordingComplete}
+                  className="w-full"
+                />
+                
+                {isUploading && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md text-blue-800 text-sm">
+                    Uploading recording...
+                  </div>
+                )}
+
+                {uploadError && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
+                    Failed to upload recording: {uploadError}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Recording declined but optional */}
+            {recordingEnabled && recordingDeclined && !recordingRequired && (
+              <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
+                <p className="text-sm font-medium">Recording was declined</p>
+                <p className="text-xs">You can continue with the survey without recording</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-8">
               {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
                 <QuestionItem
@@ -170,6 +288,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
                   index={index}
                   answers={answers}
                   onAnswerChange={handleAnswerChange}
+                  responseId={responseId}
                 />
               ))}
 
@@ -178,12 +297,6 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
                   type="submit" 
                   className="w-full md:w-auto" 
                   disabled={isSubmitting}
-                  onClick={() => {
-                    // If no thank you content, just show success message instead of changing flow state
-                    if (!hasThankYouContent && !isPreviewMode) {
-                      // The form submission will handle this case
-                    }
-                  }}
                 >
                   {isSubmitting ? (
                     <>
@@ -201,14 +314,9 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
           </>
         )}
 
-        {/* Thank You page - only show if there's thank you content */}
-        {flowState === 'thankYou' && hasThankYouContent && (
-          <ThankYouPage
-            thankYouTitle={survey.thankYouTitle || ''}
-            thankYouMessage={survey.thankYouMessage || ''}
-            thankYouButtonText={survey.thankYouButtonText || ''}
-            redirectUrl={survey.redirectUrl || ''}
-          />
+        {/* Thank You page - only show if there's thank you content or recording was declined */}
+        {flowState === 'thankYou' && (hasThankYouContent || (recordingDeclined && recordingRequired)) && (
+          <ThankYouPage {...getThankYouProps()} />
         )}
       </div>
     </PublicSurveyLayout>
