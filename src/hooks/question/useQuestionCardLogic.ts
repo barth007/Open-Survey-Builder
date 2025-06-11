@@ -119,7 +119,7 @@ export const useQuestionCardLogic = (
     setConditionalLogicOpen,
     handleConditionalLogicChange,
     
-    // From useLikertOptions
+    // From useLikertOptions - expose all needed properties
     likertOptionsDialogOpen,
     setLikertOptionsDialogOpen,
     handleTypeChange: handleQuestionTypeChange, // Use enhanced handler
