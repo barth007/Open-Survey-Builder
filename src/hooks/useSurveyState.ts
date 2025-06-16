@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -30,7 +31,9 @@ export const useSurveyState = (surveyId: string | undefined) => {
     thankYouTitle: '',
     thankYouMessage: '',
     thankYouButtonText: '',
-    redirectUrl: ''
+    redirectUrl: '',
+    recordingEnabled: false,
+    recordingRequired: false
   });
 
   const [pendingUpdates, setPendingUpdates] = useState<Partial<Survey>>({});
@@ -100,6 +103,8 @@ export const useSurveyState = (surveyId: string | undefined) => {
         thankYouMessage: survey.thankYouMessage,
         thankYouButtonText: survey.thankYouButtonText,
         redirectUrl: survey.redirectUrl,
+        recordingEnabled: survey.recordingEnabled,
+        recordingRequired: survey.recordingRequired,
         ...pendingUpdates
       };
 
@@ -180,6 +185,45 @@ export const useSurveyState = (surveyId: string | undefined) => {
     });
   }, [surveyId, updateLocalCache]);
 
+  // Immediate save for critical settings like recording
+  const immediateUpdate = useCallback(async (updates: Partial<Survey>) => {
+    if (!surveyId) {
+      console.error('Cannot immediately update: no survey ID');
+      return;
+    }
+
+    debugLog(`Immediate update for survey ${surveyId}:`, updates);
+
+    // Update local state first
+    setSurvey(prev => ({ ...prev, ...updates }));
+    updateLocalCache(updates);
+
+    try {
+      await updateSurvey({
+        surveyId,
+        updates
+      });
+      
+      debugLog(`Immediate update completed for survey ${surveyId}`);
+    } catch (error) {
+      console.error(`Error in immediate update for survey ${surveyId}:`, error);
+      // Revert local state on error
+      setSurvey(prev => {
+        const reverted = { ...prev };
+        Object.keys(updates).forEach(key => {
+          delete reverted[key as keyof Survey];
+        });
+        return reverted;
+      });
+      
+      toast({
+        title: "Error updating survey",
+        description: "There was an error saving your changes. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [surveyId, updateSurvey, updateLocalCache, toast]);
+
   const handleTitleChange = useCallback((title: string) => {
     debugLog(`Title change for survey ${surveyId}: ${title}`);
     batchUpdate({ title });
@@ -200,6 +244,13 @@ export const useSurveyState = (surveyId: string | undefined) => {
       debugWarn('Invalid URL format for redirectUrl:', value);
     }
     
+    // Recording settings need immediate save to prevent toggle resets
+    if (field === 'recordingEnabled' || field === 'recordingRequired') {
+      debugLog(`Immediate save for recording field: ${field}`);
+      immediateUpdate({ [field]: value });
+      return;
+    }
+    
     batchUpdate({ [field]: value });
     
     const textFields = ['welcomeTitle', 'welcomeMessage', 'welcomeInstructions', 'welcomeButtonText', 
@@ -210,7 +261,7 @@ export const useSurveyState = (surveyId: string | undefined) => {
     } else {
       smartAutoSave.markStructuralChange();
     }
-  }, [surveyId, batchUpdate, smartAutoSave]);
+  }, [surveyId, batchUpdate, immediateUpdate, smartAutoSave]);
 
   const handleQuestionChange = useCallback((updatedQuestion: Question) => {
     debugLog(`Question change for survey ${surveyId}:`, updatedQuestion.id);
