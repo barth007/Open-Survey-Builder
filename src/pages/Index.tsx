@@ -66,6 +66,16 @@ const Index = () => {
     }
   }, [survey.title]);
 
+  // Debug logging for recording settings
+  useEffect(() => {
+    debugLog("Survey data for recording settings:", {
+      surveyId,
+      recordingEnabled: survey.recordingEnabled,
+      recordingRequired: survey.recordingRequired,
+      surveyTitle: survey.title
+    });
+  }, [surveyId, survey.recordingEnabled, survey.recordingRequired, survey.title]);
+
   // Optimized update functions with smart batching
   const updateSurveyWithTracking = (updates: Partial<typeof survey>) => {
     debugLog("Batched update:", updates);
@@ -151,6 +161,8 @@ const Index = () => {
     );
   }
 
+  debugLog("Rendering survey editor with recording settings component");
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
@@ -179,10 +191,12 @@ const Index = () => {
                         onDescriptionChange={handleDescriptionChange}
                       />
 
-                      <SurveyRecordingSettings
-                        survey={survey}
-                        onSurveyChange={updateSurveyField}
-                      />
+                      <div className="debug-recording-container">
+                        <SurveyRecordingSettings
+                          survey={survey}
+                          onSurveyChange={updateSurveyField}
+                        />
+                      </div>
 
                       <WelcomeCard
                         welcomeTitle={survey.welcomeTitle || ''}

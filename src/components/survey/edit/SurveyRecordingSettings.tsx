@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Survey } from '@/types/survey';
 import { Video, Webcam, Monitor, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { debugLog } from '@/lib/logger';
 
 interface SurveyRecordingSettingsProps {
   survey: Survey;
@@ -16,7 +17,18 @@ export const SurveyRecordingSettings: React.FC<SurveyRecordingSettingsProps> = (
   survey,
   onSurveyChange
 }) => {
+  // Debug logging
+  React.useEffect(() => {
+    debugLog("SurveyRecordingSettings mounted with survey:", {
+      id: survey.id,
+      title: survey.title,
+      recordingEnabled: survey.recordingEnabled,
+      recordingRequired: survey.recordingRequired
+    });
+  }, [survey.id, survey.title, survey.recordingEnabled, survey.recordingRequired]);
+
   const updateRecordingSetting = (field: 'recordingEnabled' | 'recordingRequired', value: boolean) => {
+    debugLog(`Updating ${field} to:`, value);
     onSurveyChange(field, value);
     
     // If disabling recording, also disable required
@@ -24,6 +36,8 @@ export const SurveyRecordingSettings: React.FC<SurveyRecordingSettingsProps> = (
       onSurveyChange('recordingRequired', false);
     }
   };
+
+  debugLog("Rendering SurveyRecordingSettings component");
 
   return (
     <Card className="mb-6">
