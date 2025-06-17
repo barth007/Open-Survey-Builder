@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatisticalInsights } from '@/components/survey/analysis/StatisticalInsights';
 import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
 import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
+import { RecordingsAnalysis } from '@/components/survey/analysis/RecordingsAnalysis';
 import { EmptyAnalysisState } from './panel/EmptyAnalysisState';
 import { AnalysisPanelHeader } from './panel/AnalysisPanelHeader';
 import { AnalysisTabs } from './panel/AnalysisTabs';
@@ -34,16 +35,18 @@ interface AnalysisPanelProps {
   responseData: ResponseGroup | null;
   onToggleVisibility?: () => void;
   isCollapsed?: boolean;
+  surveyId: string;
 }
 
 export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   selectedResponseGroup,
   responseData,
   onToggleVisibility,
-  isCollapsed = false
+  isCollapsed = false,
+  surveyId
 }) => {
   const [tags, setTags] = useState<Record<string, string[]>>({});
-  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary'>('tagging');
+  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary' | 'recordings'>('tagging');
   const [researcherNotes, setResearcherNotes] = useState<string>('');
   
   // Initialize scale values based on response data
@@ -112,6 +115,10 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
 
                 {activeTab === 'outliers' && responseData?.likert && (
                   <OutlierDetection responseData={responseData} />
+                )}
+
+                {activeTab === 'recordings' && (
+                  <RecordingsAnalysis surveyId={surveyId} />
                 )}
 
                 {activeTab === 'summary' && responseData && (

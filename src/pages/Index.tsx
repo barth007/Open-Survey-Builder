@@ -24,7 +24,7 @@ import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordin
 import { RecordingsTab } from '@/components/survey/analysis/RecordingsTab';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"edit" | "answers" | "recordings">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -293,12 +293,6 @@ const Index = () => {
                     exportToCSV={exportToCSV}
                     selectedResponseGroup={selectedResponseGroup}
                   />
-                </div>
-              )}
-
-              {activeTab === "recordings" && (
-                <div className="h-full flex-1 min-h-0 p-4">
-                  <RecordingsTab surveyId={surveyId} />
                 </div>
               )}
             </div>

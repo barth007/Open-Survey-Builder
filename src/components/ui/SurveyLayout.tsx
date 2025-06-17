@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -7,8 +8,8 @@ import { Survey } from '@/types/survey';
 
 interface SurveyLayoutProps {
   children: React.ReactNode;
-  activeTab: "edit" | "answers" | "recordings";
-  setActiveTab: (tab: "edit" | "answers" | "recordings") => void;
+  activeTab: "edit" | "answers";
+  setActiveTab: (tab: "edit" | "answers") => void;
   isSaving: boolean;
   lastSaved: Date | null;
   survey: Survey;
@@ -80,16 +81,13 @@ const SurveyLayout = ({
       </div>
 
       <div className="flex justify-between items-center px-6 py-3 bg-white border-b border-gray-200">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "edit" | "answers" | "recordings")} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "edit" | "answers")} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="edit" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
               Edit
             </TabsTrigger>
             <TabsTrigger value="answers" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
               Answers
-            </TabsTrigger>
-            <TabsTrigger value="recordings" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
-              Recordings
             </TabsTrigger>
           </TabsList>
         </Tabs>

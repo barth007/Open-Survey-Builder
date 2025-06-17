@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
 import { SummaryCard } from '@/components/survey/analysis/SummaryCard';
@@ -223,6 +222,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
               selectedResponseGroup={selectedResponseGroup}
               responseData={selectedResponseData}
               onToggleVisibility={() => setAnalysisPanelVisible(false)}
+              surveyId={survey.id}
             />
           </ResizablePanel>
         </>
