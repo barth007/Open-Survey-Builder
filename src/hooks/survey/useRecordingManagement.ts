@@ -25,6 +25,24 @@ export const useRecordingManagement = (surveyId: string) => {
   const { data: recordings = [], isLoading } = useQuery({
     queryKey: ['survey-recordings', surveyId],
     queryFn: async () => {
+      // First get response IDs for this survey
+      const { data: responses, error: responsesError } = await supabase
+        .from('survey_responses')
+        .select('id')
+        .eq('survey_id', surveyId);
+
+      if (responsesError) {
+        console.error('Error fetching survey responses:', responsesError);
+        throw responsesError;
+      }
+
+      if (!responses || responses.length === 0) {
+        return [];
+      }
+
+      const responseIds = responses.map(r => r.id);
+
+      // Then fetch recordings for those responses
       const { data, error } = await supabase
         .from('question_recordings')
         .select(`
@@ -38,12 +56,7 @@ export const useRecordingManagement = (surveyId: string) => {
           response_id,
           question_id
         `)
-        .in('response_id', 
-          supabase
-            .from('survey_responses')
-            .select('id')
-            .eq('survey_id', surveyId)
-        )
+        .in('response_id', responseIds)
         .order('created_at', { ascending: false });
 
       if (error) {

@@ -21,7 +21,7 @@ import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
 import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
-import { RecordingsTab } from '@/components/survey/edit/RecordingsTab';
+import { RecordingsTab } from '@/components/survey/analysis/RecordingsTab';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers" | "recordings">("edit");
@@ -119,6 +119,7 @@ const Index = () => {
               survey={survey}
               onPublishToggle={togglePublish}
               isTyping={isTyping}
+              onManualSave={handleSave}
             >
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
@@ -144,6 +145,7 @@ const Index = () => {
               survey={survey}
               onPublishToggle={togglePublish}
               isTyping={isTyping}
+              onManualSave={handleSave}
             >
               <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8 max-w-md text-magma">
