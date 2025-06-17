@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -21,7 +22,6 @@ import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
 import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
-import { RecordingsTab } from '@/components/survey/analysis/RecordingsTab';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
