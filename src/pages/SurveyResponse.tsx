@@ -40,12 +40,12 @@ const SurveyResponse = () => {
   useEffect(() => {
     if (!surveyData) return;
 
-    if (recordingEnabled && !permissions) {
+    if (recordingEnabled && !permissions && !recordingDeclined) {
       setSurveyState('permissions');
     } else {
       setSurveyState('survey');
     }
-  }, [surveyData, recordingEnabled, permissions]);
+  }, [surveyData, recordingEnabled, permissions, recordingDeclined]);
 
   const handlePermissionGranted = async (grantedPermissions: { audio: boolean; video: boolean }) => {
     debugLog('Recording permissions granted:', grantedPermissions);
@@ -159,7 +159,7 @@ const SurveyResponse = () => {
           />
 
           {/* Recording Status and Widget */}
-          {surveyState === 'survey' && recordingEnabled && permissions && responseId && (
+          {surveyState === 'survey' && recordingEnabled && permissions && responseId && !recordingDeclined && (
             <div className="mb-6">
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-800">
                 <p className="text-sm font-medium">
