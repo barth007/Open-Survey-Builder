@@ -1,4 +1,3 @@
-
 import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -22,9 +21,10 @@ import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
 import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
+import { RecordingsTab } from '@/components/survey/edit/RecordingsTab';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "answers" | "recordings">("edit");
   const { id: surveyId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -291,6 +291,12 @@ const Index = () => {
                     exportToCSV={exportToCSV}
                     selectedResponseGroup={selectedResponseGroup}
                   />
+                </div>
+              )}
+
+              {activeTab === "recordings" && (
+                <div className="h-full flex-1 min-h-0 p-4">
+                  <RecordingsTab surveyId={surveyId} />
                 </div>
               )}
             </div>
