@@ -1,101 +1,74 @@
+
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Save, CheckCircle, AlertTriangle } from "lucide-react";
+import { SurveyNavigationHeader } from '@/components/survey/SurveyNavigationHeader';
+import SurveyTabs from '@/components/survey/SurveyTabs';
 import { Survey } from '@/types/survey';
+import { ActiveUser } from '@/types/survey-organization';
+import { Button } from '@/components/ui/button';
+import { Save } from 'lucide-react';
 
 interface SurveyLayoutProps {
   children: React.ReactNode;
-  activeTab: "edit" | "answers" | "recordings";
-  setActiveTab: (tab: "edit" | "answers" | "recordings") => void;
-  isSaving: boolean;
-  lastSaved: Date | null;
-  survey: Survey;
-  onPublishToggle: () => Promise<void>;
-  isTyping: boolean;
-  onManualSave: () => Promise<void>;
+  activeTab: "edit" | "answers";
+  setActiveTab: (tab: "edit" | "answers") => void;
+  isSaving?: boolean;
+  lastSaved?: Date | null;
+  survey?: Survey;
+  onPublishToggle?: () => void;
+  isTyping?: boolean;
+  onManualSave?: () => void;
 }
 
-const SurveyLayout = ({ 
-  children, 
-  activeTab, 
-  setActiveTab, 
-  isSaving,
-  lastSaved,
+const SurveyLayout: React.FC<SurveyLayoutProps> = ({
+  children,
+  activeTab,
+  setActiveTab,
+  isSaving = false,
+  lastSaved = null,
   survey,
   onPublishToggle,
-  isTyping,
+  isTyping = false,
   onManualSave
-}: SurveyLayoutProps) => {
-  const { toast } = useToast();
+}) => {
+  const getStatusText = () => {
+    if (isTyping) return "Typing...";
+    if (isSaving) return "Saving...";
+    return null;
+  };
 
-  const handleSaveClick = async () => {
-    try {
-      await onManualSave();
-      toast({
-        title: "Survey saved",
-        description: "Your survey has been saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error saving survey",
-        description: "There was an error saving your survey. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const shouldShowSaveButton = () => {
+    return isTyping || onManualSave;
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center px-6 py-4 bg-white border-b border-gray-200">
-        <h1 className="text-2xl font-semibold text-gray-800">{survey.title || "Untitled Survey"}</h1>
-        <div className="flex items-center space-x-4">
-          {isSaving && (
-            <div className="flex items-center text-sm text-gray-500">
-              <Save className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </div>
-          )}
-          {!isSaving && lastSaved && (
-            <div className="flex items-center text-sm text-green-500">
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Saved {lastSaved.toLocaleTimeString()}
-            </div>
-          )}
-          {!survey.isPublished && (
-            <Button variant="outline" size="sm" onClick={onPublishToggle}>
-              Publish
-            </Button>
-          )}
-          {survey.isPublished && (
-            <Button variant="outline" size="sm" onClick={onPublishToggle}>
-              Unpublish
-            </Button>
-          )}
-          <Button onClick={handleSaveClick} disabled={isTyping}>
-            Save
+    <div className="flex flex-col h-screen min-h-0 pt-14">
+      <SurveyNavigationHeader
+        activeUsers={[]}
+        isSaving={isSaving}
+        lastSaved={lastSaved}
+        survey={survey}
+        onPublishToggle={onPublishToggle}
+        statusText={getStatusText()}
+      />
+      
+      <div className="flex items-center justify-between px-4 py-2 border-b bg-white flex-shrink-0">
+        <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        
+        {shouldShowSaveButton() && onManualSave && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onManualSave}
+            disabled={isSaving}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {isSaving ? "Saving..." : "Save now"}
           </Button>
-        </div>
+        )}
       </div>
-
-      <div className="flex justify-between items-center px-6 py-3 bg-white border-b border-gray-200">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "edit" | "answers" | "recordings")} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="edit" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
-              Edit
-            </TabsTrigger>
-            <TabsTrigger value="answers" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
-              Answers
-            </TabsTrigger>
-            <TabsTrigger value="recordings" className="data-[state=active]:bg-sunset data-[state=active]:text-white">
-              Recordings
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <div className="flex-1 overflow-auto">
+      
+      <div className="flex-1 min-h-0 overflow-hidden">
         {children}
       </div>
     </div>
