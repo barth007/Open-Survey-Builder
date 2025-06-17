@@ -55,6 +55,15 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
   const { deleteResponsesByParticipant, isDeleting } = useDeleteResponses();
   const queryClient = useQueryClient();
 
+  // Debug logging for answers tab
+  console.log('[AnswersTab] Rendering with:', {
+    surveyId: survey.id,
+    totalResponses,
+    filteredResponsesCount: filteredResponses.length,
+    selectedResponseGroup,
+    analysisPanelVisible
+  });
+
   const stats = getResponseProcessingStats(survey, responses);
   const hasDataIssues = stats.orphanedResponses > 0 || (totalResponses > 0 && filteredResponses.length === 0);
 
@@ -116,9 +125,11 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     ? filteredResponses.find(r => r.questionId === selectedResponseGroup)
     : null;
 
+  console.log('[AnswersTab] Selected response data:', selectedResponseData);
+
   return (
     <ResizablePanelGroup direction="horizontal" className="w-full h-full">
-      <ResizablePanel defaultSize={50} minSize={20} className="min-w-0 min-h-0">
+      <ResizablePanel defaultSize={analysisPanelVisible ? 50 : 100} minSize={20} className="min-w-0 min-h-0">
         <div className="flex flex-col h-full bg-white">
           <div className="flex justify-between items-center px-4 py-2 border-b bg-white flex-shrink-0">
             <div className="font-medium text-sm">Responses</div>
@@ -132,6 +143,17 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
                 >
                   <Bug size={16} />
                   {debugViewVisible ? 'Hide Debug' : 'Debug Data'}
+                </Button>
+              )}
+              {!analysisPanelVisible && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAnalysisPanelVisible(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Eye size={16} />
+                  Show Analysis
                 </Button>
               )}
             </div>

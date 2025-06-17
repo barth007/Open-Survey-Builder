@@ -21,10 +21,15 @@ export const useRecordingManagement = (surveyId: string) => {
   const queryClient = useQueryClient();
   const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null);
 
+  // Debug logging
+  console.log('[useRecordingManagement] Hook called for surveyId:', surveyId);
+
   // Fetch recordings for a survey
   const { data: recordings = [], isLoading } = useQuery({
     queryKey: ['survey-recordings', surveyId],
     queryFn: async () => {
+      console.log('[useRecordingManagement] Fetching recordings for survey:', surveyId);
+      
       // First get response IDs for this survey
       const { data: responses, error: responsesError } = await supabase
         .from('survey_responses')
@@ -35,6 +40,8 @@ export const useRecordingManagement = (surveyId: string) => {
         console.error('Error fetching survey responses:', responsesError);
         throw responsesError;
       }
+
+      console.log('[useRecordingManagement] Found responses:', responses?.length || 0);
 
       if (!responses || responses.length === 0) {
         return [];
@@ -64,6 +71,7 @@ export const useRecordingManagement = (surveyId: string) => {
         throw error;
       }
 
+      console.log('[useRecordingManagement] Found recordings:', data?.length || 0);
       return data as Recording[];
     },
     enabled: !!surveyId
@@ -121,11 +129,13 @@ export const useRecordingManagement = (surveyId: string) => {
   });
 
   const handlePlay = useCallback((recording: Recording) => {
+    console.log('[useRecordingManagement] Playing recording:', recording.id);
     setSelectedRecording(recording);
   }, []);
 
   const handleDownload = useCallback(async (recording: Recording) => {
     try {
+      console.log('[useRecordingManagement] Downloading recording:', recording.id);
       const response = await fetch(recording.recording_url);
       const blob = await response.blob();
       
@@ -153,10 +163,12 @@ export const useRecordingManagement = (surveyId: string) => {
   }, [toast]);
 
   const handleDelete = useCallback((recordingId: string) => {
+    console.log('[useRecordingManagement] Deleting recording:', recordingId);
     deleteRecordingMutation.mutate(recordingId);
   }, [deleteRecordingMutation]);
 
   const closePlayer = useCallback(() => {
+    console.log('[useRecordingManagement] Closing player');
     setSelectedRecording(null);
   }, []);
 

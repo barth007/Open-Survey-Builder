@@ -49,6 +49,15 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary' | 'recordings'>('tagging');
   const [researcherNotes, setResearcherNotes] = useState<string>('');
   
+  // Debug logging for analysis panel
+  console.log('[AnalysisPanel] Rendering with:', {
+    selectedResponseGroup,
+    responseData: responseData ? { questionId: responseData.questionId, question: responseData.question } : null,
+    activeTab,
+    surveyId,
+    isCollapsed
+  });
+
   // Initialize scale values based on response data
   const [scaleValues, setScaleValues] = useState<ScaleValues>(() => {
     if (!responseData) return {};
@@ -118,7 +127,10 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
                 )}
 
                 {activeTab === 'recordings' && (
-                  <RecordingsAnalysis surveyId={surveyId} />
+                  <div>
+                    <h4 className="text-md font-medium mb-4">Survey Recordings</h4>
+                    <RecordingsAnalysis surveyId={surveyId} />
+                  </div>
                 )}
 
                 {activeTab === 'summary' && responseData && (
