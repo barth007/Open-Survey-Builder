@@ -1,4 +1,3 @@
-
 import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -206,13 +205,6 @@ const Index = () => {
                         onTitleChange={handleTitleChange}
                         onDescriptionChange={handleDescriptionChange}
                       />
-
-                      <div className="debug-recording-container">
-                        <SurveyRecordingSettings
-                          survey={survey}
-                          onSurveyChange={updateSurveyField}
-                        />
-                      </div>
 
                       <WelcomeCard
                         welcomeTitle={survey.welcomeTitle || ''}

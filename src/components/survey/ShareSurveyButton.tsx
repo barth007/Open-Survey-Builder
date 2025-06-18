@@ -11,18 +11,21 @@ import {
 import { Survey } from '@/types/survey';
 import { Separator } from '@/components/ui/separator';
 import { TeamSelector } from '@/components/survey/TeamSelector';
-import { Shield, Globe, Users, Link2, Eye, Check, X, Link2Off } from 'lucide-react';
+import { Shield, Globe, Users, Link2, Eye, Check, X, Link2Off, Video, Webcam, Monitor } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 interface ShareSurveyButtonProps {
   survey: Survey;
   onPublishToggle?: () => void;
+  onSurveyChange?: (field: keyof Survey, value: any) => void;
 }
 
 export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({ 
   survey,
-  onPublishToggle
+  onPublishToggle,
+  onSurveyChange
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -38,6 +41,17 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
     toast(`${type === 'public' ? 'Public' : 'Preview'} link copied!`, {
       description: `The ${type === 'public' ? 'public' : 'preview'} link has been copied to your clipboard.`,
     });
+  };
+
+  const updateRecordingSetting = (field: 'recordingEnabled' | 'recordingRequired', value: boolean) => {
+    if (!onSurveyChange) return;
+    
+    onSurveyChange(field, value);
+    
+    // If disabling recording, also disable required
+    if (field === 'recordingEnabled' && !value) {
+      onSurveyChange('recordingRequired', false);
+    }
   };
   
   return (
@@ -80,6 +94,51 @@ export const ShareSurveyButton: React.FC<ShareSurveyButtonProps> = ({
               survey.isPublished ? "bg-green-500" : "bg-gray-200"
             )}
           />
+        </div>
+        
+        <Separator className="my-2" />
+        
+        <div className="px-4 py-2">
+          <h3 className="font-medium flex items-center gap-2 text-sm mb-3">
+            <Video className="h-4 w-4" />
+            Recording Settings
+          </h3>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label htmlFor="recording-enabled" className="text-sm font-medium">
+                  Enable recording
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Participants share camera and screen
+                </p>
+              </div>
+              <Switch
+                id="recording-enabled"
+                checked={survey.recordingEnabled || false}
+                onCheckedChange={(checked) => updateRecordingSetting('recordingEnabled', checked)}
+              />
+            </div>
+
+            {survey.recordingEnabled && (
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label htmlFor="recording-required" className="text-sm font-medium">
+                    Require recording
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Must grant permissions to participate
+                  </p>
+                </div>
+                <Switch
+                  id="recording-required"
+                  checked={survey.recordingRequired || false}
+                  onCheckedChange={(checked) => updateRecordingSetting('recordingRequired', checked)}
+                />
+              </div>
+            )}
+          </div>
         </div>
         
         <Separator className="my-2" />
