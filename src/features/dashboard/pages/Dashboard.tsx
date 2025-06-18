@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { useSurveyData } from '@/hooks/useSurveyData';
-import { SurveyNavigationHeader } from '@/features/survey-editor/components/SurveyNavigationHeader';;
+import { SurveyNavigationHeader } from '@/features/survey-editor/components/SurveyNavigationHeader';
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
-
 import { FolderCard } from '@/components/dashboard/FolderCard';
 import { SurveyCard } from '@/components/dashboard/SurveyCard';
 import { useActiveUsers } from '@/hooks/useActiveUsers';

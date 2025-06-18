@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Survey } from '@/types/survey';
-import { SummaryCard } from './SummaryCard';;
-import { FilterControls } from './FilterControls';;
-import { NoResponsesView } from './NoResponsesView';;
-import { ResponsesList } from './ResponsesList';
-import { DeleteResponsesDialog } from './DeleteResponsesDialog';
-import { AnalysisPanel } from './AnalysisPanel';
-import { ResponseDebugView } from './ResponseDebugView';
+import { SummaryCard } from '@/features/survey-editor/components/SummaryCard';
+import { FilterControls } from '@/features/survey-editor/components/FilterControls';
+import { NoResponsesView } from '@/features/survey-editor/components/NoResponsesView';
+import { ResponsesList } from '@/features/survey-editor/components/ResponsesList';
+import { DeleteResponsesDialog } from '@/features/survey-editor/components/DeleteResponsesDialog';
+import { AnalysisPanel } from '@/features/survey-editor/components/AnalysisPanel';
+import { ResponseDebugView } from '@/features/survey-editor/components/ResponseDebugView';
 import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
 import { useQueryClient } from '@tanstack/react-query';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Bug, Eye, EyeOff } from "lucide-react";
-import { getResponseProcessingStats } from '../lib/ResponsesProcessor';
+import { getResponseProcessingStats } from '@/features/survey-editor/lib/ResponsesProcessor';
 
 interface AnswersTabProps {
   survey: Survey;

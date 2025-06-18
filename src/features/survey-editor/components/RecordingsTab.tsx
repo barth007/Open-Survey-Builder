@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { useRecordingManagement } from '@/hooks/survey/useRecordingManagement';
-import { RecordingManagement } from '@/components/survey/recording/RecordingManagement';
-import { RecordingPlayer } from '@/components/survey/recording/RecordingPlayer';
+import { RecordingManagement } from '@/features/survey-editor/components/RecordingManagement';
+import { RecordingPlayer } from '@/features/survey-editor/components/RecordingPlayer';
 
 interface RecordingsTabProps {
   surveyId: string;

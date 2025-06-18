@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatisticalInsights } from '@/components/survey/analysis/StatisticalInsights';
 import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
 import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
-import { RecordingsAnalysis } from '@/components/survey/analysis/RecordingsAnalysis';
+import { RecordingsAnalysis } from '@/features/survey-editor/components/RecordingsAnalysis';
 import { EmptyAnalysisState } from '@/components/survey/analysis/panel/EmptyAnalysisState';
 import { AnalysisPanelHeader } from '@/components/survey/analysis/panel/AnalysisPanelHeader';
 import { AnalysisTabs } from '@/components/survey/analysis/panel/AnalysisTabs';
