@@ -1,22 +1,13 @@
+// src/App.tsx
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/providers/AuthProvider";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import PendingApproval from "@/components/PendingApproval";
+import { AuthProvider } from '@/providers/AuthProvider';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
 
-import Index from "@/pages/Index";
-import Dashboard from "@/pages/Dashboard";
-import Login from "@/pages/Login";
-import NotFound from "@/pages/NotFound";
-import SurveyResponse from "@/pages/SurveyResponse";
-import PublicSurvey from "@/pages/PublicSurvey";
-import Profile from './pages/Profile';
-import Landing from './pages/Landing';
-import AdminPanel from './pages/AdminPanel';
+import AppRoutes from './app/routes';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,66 +18,20 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-
-          {/* Routes for public surveys and landing pages */}
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/p/:publicCode" element={<PublicSurvey />} />
-            <Route path="/preview/:publicCode" element={<PublicSurvey isPreviewMode={true} />} />
-            <Route path="/pending" element={<PendingApproval />} />
-
-            {/* Auth routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Login />} />
-
-            {/* Dashboard and protected routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/survey/:id"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/survey-response/:id" element={<SurveyResponse />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

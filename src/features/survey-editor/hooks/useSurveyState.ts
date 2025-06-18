@@ -4,11 +4,12 @@ import { debugLog, debugWarn } from '@/lib/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { Survey, Question } from '@/types/survey';
 import { useToast } from "@/hooks/use-toast";
-import { useQuerySurvey } from './survey/useQuerySurvey';
-import { useMutateSurvey } from './survey/useMutateSurvey';
+import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
+import { useMutateSurvey } from '@/hooks/survey/useMutateSurvey';
 import { useQueryClient } from '@tanstack/react-query';
-import { useQuestionManagement } from './survey/useQuestionManagement';
-import { useSmartAutoSave } from './survey/useSmartAutoSave';
+import { useQuestionManagement } from './useQuestionManagement';
+import { useSmartAutoSave } from './useSmartAutoSave';
+
 
 export const useSurveyState = (surveyId: string | undefined) => {
   const { toast } = useToast();

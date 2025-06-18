@@ -4,7 +4,7 @@ import { Survey, SurveyResponse } from '@/types/survey';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, XCircle, Info } from "lucide-react";
-import { getResponseProcessingStats } from './ResponsesProcessor';
+import { getResponseProcessingStats } from './../lib/ResponsesProcessor';
 
 interface ResponseDebugViewProps {
   survey: Survey;

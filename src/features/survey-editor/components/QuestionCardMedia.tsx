@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Media } from '@/types/survey';
 import { Trash } from "lucide-react";
-import QuestionMediaUpload from '../QuestionMediaUpload';
+import QuestionMediaUpload from './../../../components/QuestionMediaUpload';
 
 interface QuestionCardMediaProps {
   media?: Media;

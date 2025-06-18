@@ -2,7 +2,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionType } from '@/types/survey';
-import QuestionTypeMenu from '../QuestionTypeMenu';
+import QuestionTypeMenu from './../../../components/QuestionTypeMenu';
 
 interface QuestionTypeAndMaxAnswersProps {
   type: QuestionType;

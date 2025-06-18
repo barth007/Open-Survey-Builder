@@ -1,27 +1,37 @@
-import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from "@/hooks/use-toast";
-import { useSurveyState } from '@/hooks/useSurveyState';
+
+import { debugLog, debugWarn } from '@/lib/logger';
+import { useToast } from '@/hooks/use-toast';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ActiveUser } from '@/types/survey-organization';
-import AnswersTab from '@/components/AnswersTab';
-import { useAnswersTab } from '@/components/survey/analysis/useAnswersTab';
-import SurveyLayout from '@/components/ui/SurveyLayout';
-import SurveyTitle from '@/components/SurveyTitle';
-import { WelcomeCard } from '@/components/survey/edit/WelcomeCard';
-import { QuestionSection } from '@/components/survey/edit/QuestionSection';
-import { ThankYouCard } from '@/components/survey/edit/ThankYouCard';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import PreviewTab from '@/components/survey/PreviewTab';
-import { WelcomePage } from '@/components/survey/WelcomePage';
-import { ThankYouPage } from '@/components/survey/ThankYouPage';
-import { SidebarProvider } from "@/components/ui/sidebar";
+
+import { useSurveyState } from '../hooks/useSurveyState'; 
+import { useAnswersTab } from '../hooks/useAnswersTab';   
+import SurveyLayout from '../components/SurveyLayout';     
+import SurveyTitle from '../components/SurveyTitle';       
+import AnswersTab from '../components/AnswersTab';
+
+import { WelcomeCard } from '../components/WelcomeCard';
+import { QuestionSection } from '../components/QuestionSection';
+import { ThankYouCard } from '../components/ThankYouCard';
+import { SurveyRecordingSettings } from '../components/SurveyRecordingSettings';
+import { SurveyNavigationHeader } from '../components/SurveyNavigationHeader';
+import PreviewTab from '../components/PreviewTab';
+import { WelcomePage } from '../components/WelcomePage';
+import { ThankYouPage } from '../components/ThankYouPage';
+
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
-import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
-import { SurveyNavigationHeader } from '@/components/survey/SurveyNavigationHeader';
+
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle
+} from '@/components/ui/resizable';
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");

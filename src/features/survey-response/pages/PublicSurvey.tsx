@@ -13,11 +13,11 @@ import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
 import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
-import { WelcomePage } from '@/components/survey/WelcomePage';
-import { ThankYouPage } from '@/components/survey/ThankYouPage';
-import { RecordingPermissionDialog } from '@/components/survey/recording/RecordingPermissionDialog';
-import { RecordingWidget } from '@/components/survey/recording/RecordingWidget';
-import { useRecordingPermissions } from '@/components/survey/recording/useRecordingPermissions';
+import { WelcomePage } from '../../survey-editor/components/WelcomePage';
+import { ThankYouPage } from '../../survey-editor/components/ThankYouPage';
+import { RecordingPermissionDialog } from '../../survey-editor/components/RecordingPermissionDialog';
+import { RecordingWidget } from '../../survey-editor/components/RecordingWidget';
+import { useRecordingPermissions } from '../../survey-editor/hooks/useRecordingPermissions';
 import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
 
 interface PublicSurveyProps {

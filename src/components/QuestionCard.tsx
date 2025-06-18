@@ -1,13 +1,13 @@
 
 import React, { useEffect } from 'react';
 import { Question } from '@/types/survey';
-import QuestionHeader from '@/components/question/QuestionHeader';
-import QuestionTypeAndMaxAnswers from '@/components/question/QuestionTypeAndMaxAnswers';
-import QuestionOptions from '@/components/question/QuestionOptions';
-import QuestionFooter from '@/components/question/QuestionFooter';
-import QuestionCardMedia from '@/components/question/QuestionCardMedia';
-import QuestionConditionalLogic from '@/components/question/QuestionConditionalLogic';
-import LikertScaleOptions from '@/components/question/LikertScaleOptions';
+import QuestionHeader from './../features/survey-editor/components/QuestionHeader';
+import QuestionTypeAndMaxAnswers from './../features/survey-editor/components/QuestionTypeAndMaxAnswers';
+import QuestionOptions from './../features/survey-editor/components/QuestionOptions';
+import QuestionFooter from './../features/survey-editor/components/QuestionFooter';
+import QuestionCardMedia from './../features/survey-editor/components/QuestionCardMedia';
+import QuestionConditionalLogic from './../features/survey-editor/components/QuestionConditionalLogic';
+import LikertScaleOptions from '@/features/survey-editor/components/LikertScaleOptions';
 import LikertOptionsDialog from '@/components/survey/LikertOptionsDialog';
 import { useQuestionCardLogic } from '@/hooks/question/useQuestionCardLogic';
 import { Card, CardContent } from '@/components/ui/card';

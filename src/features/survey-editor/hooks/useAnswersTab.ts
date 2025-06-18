@@ -2,13 +2,9 @@
 import { useState, useMemo } from 'react';
 import { Survey } from '@/types/survey';
 import { useQuerySurveyResponses } from '@/hooks/survey/useQuerySurveyResponses';
-import { 
-  processResponses, 
-  filterResponseGroups,
-  ProcessedResponseGroup,
-  getResponseProcessingStats
-} from './ResponsesProcessor';
-import { useCSVExporter } from './CSVExporter';
+import { processResponses, filterResponseGroups, getResponseProcessingStats } from '../lib/ResponsesProcessor';
+import { useCSVExporter } from '../lib/CSVExporter';
+
 
 export function useAnswersTab(survey: Survey, surveyId: string | undefined) {
   const [chartType, setChartType] = useState<Record<string, "bar" | "pie">>({});

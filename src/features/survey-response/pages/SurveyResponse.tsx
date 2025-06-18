@@ -6,11 +6,13 @@ import { QuestionItem } from '@/components/survey/response/QuestionItem';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { debugLog } from '@/lib/logger';
-import { RecordingWidget } from '@/components/survey/recording/RecordingWidget';
-import { RecordingPermissionDialog } from '@/components/survey/recording/RecordingPermissionDialog';
-import { ThankYouPage } from '@/components/survey/ThankYouPage';
+import { WelcomePage } from '../../survey-editor/components/WelcomePage';
+import { ThankYouPage } from '../../survey-editor/components/ThankYouPage';
+import { RecordingPermissionDialog } from '../../survey-editor/components/RecordingPermissionDialog';
+import { RecordingWidget } from '../../survey-editor/components/RecordingWidget';
+import { useRecordingPermissions } from '../../survey-editor/hooks/useRecordingPermissions';
 import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
-import { useRecordingPermissions } from '@/components/survey/recording/useRecordingPermissions';
+
 
 type SurveyState = 'permissions' | 'survey' | 'thankYou';
 

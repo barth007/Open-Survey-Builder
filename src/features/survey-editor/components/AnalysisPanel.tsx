@@ -6,12 +6,12 @@ import { StatisticalInsights } from '@/components/survey/analysis/StatisticalIns
 import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
 import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
 import { RecordingsAnalysis } from '@/components/survey/analysis/RecordingsAnalysis';
-import { EmptyAnalysisState } from './panel/EmptyAnalysisState';
-import { AnalysisPanelHeader } from './panel/AnalysisPanelHeader';
-import { AnalysisTabs } from './panel/AnalysisTabs';
-import { TaggingTab } from './panel/TaggingTab';
-import { CollapsedAnalysisPanel } from './panel/CollapsedAnalysisPanel';
-import { InsightsSummary } from './InsightsSummary';
+import { EmptyAnalysisState } from '@/components/survey/analysis/panel/EmptyAnalysisState';
+import { AnalysisPanelHeader } from '@/components/survey/analysis/panel/AnalysisPanelHeader';
+import { AnalysisTabs } from '@/components/survey/analysis/panel/AnalysisTabs';
+import { TaggingTab } from '@/components/survey/analysis/panel/TaggingTab';
+import { CollapsedAnalysisPanel } from '@/components/survey/analysis/panel/CollapsedAnalysisPanel';
+import { InsightsSummary } from '@/components/survey/analysis/InsightsSummary';
 
 interface ResponseData {
   answer: string;
