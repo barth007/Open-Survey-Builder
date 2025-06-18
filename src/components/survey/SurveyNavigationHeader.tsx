@@ -1,3 +1,4 @@
+
 import { debugLog, debugWarn } from '@/lib/logger';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -16,14 +17,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
 import { Survey } from '@/types/survey';
-
-interface ActiveUser {
-  id: string;
-  name?: string;
-  email?: string;
-  avatar_url?: string;
-  last_active: Date;
-}
+import { ActiveUser } from '@/types/survey-organization';
 
 interface SurveyNavigationHeaderProps {
   activeUsers: ActiveUser[];
@@ -121,9 +115,8 @@ export function SurveyNavigationHeader({
   const displayUsers = activeUsers.length > 0 ? activeUsers : (currentUser ? [{
     id: currentUser.id,
     name: currentUser.user_metadata?.full_name || currentUser.email,
-    email: currentUser.email,
-    avatar_url: currentUser.user_metadata?.avatar_url,
-    last_active: new Date(),
+    avatarUrl: currentUser.user_metadata?.avatar_url,
+    lastActive: new Date(),
   }] : []);
 
   debugLog("[DEBUG] SurveyNavigationHeader - displayUsers:", displayUsers);
@@ -241,7 +234,11 @@ export function SurveyNavigationHeader({
           <div className="flex items-center gap-2">
             {displayUsers.length > 0 ? (
               displayUsers
-                .sort((a, b) => b.last_active.getTime() - a.last_active.getTime())
+                .sort((a, b) => {
+                  const aTime = a.lastActive ? new Date(a.lastActive).getTime() : 0;
+                  const bTime = b.lastActive ? new Date(b.lastActive).getTime() : 0;
+                  return bTime - aTime;
+                })
                 .slice(0, 4)
                 .map(user => {
                   debugLog("[DEBUG] Rendering user:", user);
@@ -249,10 +246,10 @@ export function SurveyNavigationHeader({
                   return (
                     <Tooltip key={user.id}>
                       <TooltipTrigger asChild>
-                        {user.avatar_url ? (
+                        {user.avatarUrl ? (
                           <img
-                            src={user.avatar_url}
-                            alt={user.name || user.email || "User"}
+                            src={user.avatarUrl}
+                            alt={user.name || "User"}
                             className={cn(
                               "w-8 h-8 rounded-full border bg-white",
                               isYou && "ring-2 ring-primary"
@@ -270,7 +267,7 @@ export function SurveyNavigationHeader({
                         )}
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{user.name || user.email}{isYou ? " (you)" : ""}</p>
+                        <p>{user.name}{isYou ? " (you)" : ""}</p>
                       </TooltipContent>
                     </Tooltip>
                   );
