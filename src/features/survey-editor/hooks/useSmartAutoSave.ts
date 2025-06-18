@@ -1,8 +1,7 @@
-
 import { debugLog, debugWarn } from '@/lib/logger';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useDebounce } from '../useDebounce';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface UseSmartAutoSaveProps {
   onSave: () => Promise<void>;

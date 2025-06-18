@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Survey } from '@/types/survey';
-import { useRecordingPermissions } from '@/components/survey/recording/useRecordingPermissions';
+import { useRecordingPermissions } from '@/features/survey-editor/hooks/useRecordingPermissions';
 import { debugLog } from '@/lib/logger';
 
 interface UseRecordingFlowReturn {
