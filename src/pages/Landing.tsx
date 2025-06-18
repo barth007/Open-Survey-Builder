@@ -12,7 +12,7 @@ export default function Landing() {
             <Rocket className="h-12 w-12 text-[hsl(var(--ring))]" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Run surveys on your terms.
+            Run Research on your terms.
           </h1>
           <p className="text-lg text-muted-foreground">
             Keep your data private, collaborate with your team, and get the insights you need—without giving up control.
