@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Tag, Filter, Scale, AlertTriangle, FileText } from "lucide-react";
+import { Tag, Filter, Scale, AlertTriangle, FileText, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type TabType = 'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary';
+type TabType = 'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary' | 'recordings';
 
 interface AnalysisTabsProps {
   activeTab: TabType;
@@ -89,6 +89,20 @@ export const AnalysisTabs: React.FC<AnalysisTabsProps> = ({
           </Button>
         </>
       )}
+      <Button 
+        variant={activeTab === 'recordings' ? 'default' : 'outline'}
+        size="sm" 
+        onClick={() => setActiveTab('recordings')}
+        onKeyDown={(e) => handleKeyDown(e, 'recordings')}
+        className="flex-grow md:flex-grow-0"
+        role="tab"
+        aria-selected={activeTab === 'recordings'}
+        aria-controls="recordings-panel"
+        tabIndex={0}
+        aria-label="Recordings tab"
+      >
+        <Video className="mr-1 h-4 w-4" aria-hidden="true" /> Recordings
+      </Button>
       <Button 
         variant={activeTab === 'summary' ? 'default' : 'outline'}
         size="sm" 
