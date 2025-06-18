@@ -5,7 +5,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatisticalInsights } from '@/components/survey/analysis/StatisticalInsights';
 import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
 import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
-import { RecordingsAnalysis } from '@/components/survey/analysis/RecordingsAnalysis';
 import { EmptyAnalysisState } from './panel/EmptyAnalysisState';
 import { AnalysisPanelHeader } from './panel/AnalysisPanelHeader';
 import { AnalysisTabs } from './panel/AnalysisTabs';
@@ -35,29 +34,18 @@ interface AnalysisPanelProps {
   responseData: ResponseGroup | null;
   onToggleVisibility?: () => void;
   isCollapsed?: boolean;
-  surveyId: string;
 }
 
 export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
   selectedResponseGroup,
   responseData,
   onToggleVisibility,
-  isCollapsed = false,
-  surveyId
+  isCollapsed = false
 }) => {
   const [tags, setTags] = useState<Record<string, string[]>>({});
-  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary' | 'recordings'>('tagging');
+  const [activeTab, setActiveTab] = useState<'tagging' | 'statistics' | 'scale' | 'outliers' | 'summary'>('tagging');
   const [researcherNotes, setResearcherNotes] = useState<string>('');
   
-  // Debug logging for analysis panel
-  console.log('[AnalysisPanel] Rendering with:', {
-    selectedResponseGroup,
-    responseData: responseData ? { questionId: responseData.questionId, question: responseData.question } : null,
-    activeTab,
-    surveyId,
-    isCollapsed
-  });
-
   // Initialize scale values based on response data
   const [scaleValues, setScaleValues] = useState<ScaleValues>(() => {
     if (!responseData) return {};
@@ -124,13 +112,6 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({
 
                 {activeTab === 'outliers' && responseData?.likert && (
                   <OutlierDetection responseData={responseData} />
-                )}
-
-                {activeTab === 'recordings' && (
-                  <div>
-                    <h4 className="text-md font-medium mb-4">Survey Recordings</h4>
-                    <RecordingsAnalysis surveyId={surveyId} />
-                  </div>
                 )}
 
                 {activeTab === 'summary' && responseData && (

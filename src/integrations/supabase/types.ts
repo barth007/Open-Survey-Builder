@@ -63,53 +63,6 @@ export type Database = {
         }
         Relationships: []
       }
-      question_recordings: {
-        Row: {
-          created_at: string
-          duration_seconds: number | null
-          file_format: string
-          file_size_bytes: number | null
-          id: string
-          metadata: Json | null
-          question_id: string
-          recording_type: string
-          recording_url: string
-          response_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          duration_seconds?: number | null
-          file_format: string
-          file_size_bytes?: number | null
-          id?: string
-          metadata?: Json | null
-          question_id: string
-          recording_type: string
-          recording_url: string
-          response_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          duration_seconds?: number | null
-          file_format?: string
-          file_size_bytes?: number | null
-          id?: string
-          metadata?: Json | null
-          question_id?: string
-          recording_type?: string
-          recording_url?: string
-          response_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "question_recordings_response_id_fkey"
-            columns: ["response_id"]
-            isOneToOne: false
-            referencedRelation: "survey_responses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       response_deletions: {
         Row: {
           deleted_at: string | null
