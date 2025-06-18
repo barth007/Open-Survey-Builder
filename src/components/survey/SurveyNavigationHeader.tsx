@@ -210,8 +210,34 @@ export function SurveyNavigationHeader({
       {/* Right: Save status and Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-4 pr-2 z-50 relative">
-          {/* Save status and active users remain the same */}
-          {/* ... keep existing code (save status indicator and active users) */}
+          {/* Save Status */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {getSaveStatusIcon()}
+            {shouldShowText() && (
+              <span className="text-xs">{getSaveStatusText()}</span>
+            )}
+          </div>
+
+          {/* Active User Avatars */}
+          <div className="flex items-center -space-x-2">
+            {displayUsers.map((user, index) => (
+              <Tooltip key={user.id} delayDuration={0}>
+                <TooltipTrigger>
+                  <div className="relative">
+                    <img
+                      src={user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}&backgroundColor=6366f1&textColor=ffffff`}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full border-2 border-white bg-gray-200"
+                    />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border border-white rounded-full" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p className="text-xs">{user.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
         </div>
       </TooltipProvider>
     </header>
