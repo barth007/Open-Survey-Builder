@@ -22,6 +22,7 @@ import { ThankYouPage } from '@/components/survey/ThankYouPage';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SurveySidebar } from '@/components/survey/SurveySidebar';
 import { SurveyRecordingSettings } from '@/components/survey/edit/SurveyRecordingSettings';
+import { SurveyNavigationHeader } from '@/components/survey/SurveyNavigationHeader';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"edit" | "answers">("edit");
@@ -100,6 +101,13 @@ const Index = () => {
     selectedResponseData
   } = useAnswersTab(survey, surveyId);
 
+  // Create status text for navigation header
+  const getStatusText = () => {
+    if (isTyping) return "Typing...";
+    if (isSaving) return "Saving...";
+    return null;
+  };
+
   // Don't render anything if no surveyId
   if (!surveyId) {
     return null;
@@ -111,15 +119,17 @@ const Index = () => {
         <div className="flex h-screen w-full">
           <SurveySidebar />
           <div className="flex-1 min-h-0">
-            <SurveyLayout 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab}
+            <SurveyNavigationHeader
+              activeUsers={activeUsers}
               isSaving={isSaving}
               lastSaved={lastSaved}
               survey={survey}
               onPublishToggle={togglePublish}
-              isTyping={isTyping}
-              onManualSave={handleSave}
+              statusText={getStatusText()}
+            />
+            <SurveyLayout 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
             >
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-abyss"></div>
@@ -137,15 +147,17 @@ const Index = () => {
         <div className="flex h-screen w-full">
           <SurveySidebar />
           <div className="flex-1 min-h-0">
-            <SurveyLayout 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab}
+            <SurveyNavigationHeader
+              activeUsers={activeUsers}
               isSaving={isSaving}
               lastSaved={lastSaved}
               survey={survey}
               onPublishToggle={togglePublish}
-              isTyping={isTyping}
-              onManualSave={handleSave}
+              statusText={getStatusText()}
+            />
+            <SurveyLayout 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
             >
               <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8 max-w-md text-magma">
@@ -170,15 +182,17 @@ const Index = () => {
       <div className="flex h-screen w-full">
         <SurveySidebar />
         <div className="flex-1 flex flex-col min-h-0">
-          <SurveyLayout 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab}
+          <SurveyNavigationHeader
+            activeUsers={activeUsers}
             isSaving={isSaving}
             lastSaved={lastSaved}
             survey={survey}
             onPublishToggle={togglePublish}
-            isTyping={isTyping}
-            onManualSave={handleSave}
+            statusText={getStatusText()}
+          />
+          <SurveyLayout 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab}
           >
             <div className="bg-gray-100 p-4 h-full flex flex-col min-h-0">
               {activeTab === "edit" && (
