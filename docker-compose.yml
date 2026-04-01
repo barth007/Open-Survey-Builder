@@ -9,12 +9,35 @@ services:
       - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
+  # ─── Production SMTP (outbound-only Postfix + DKIM) ──────────────────────────
+  # Handles actual email delivery. Requires DNS setup — see README.
+  # After first start, run:
+  #   docker compose exec smtp cat /etc/opendkim/keys/<MAIL_DOMAIN>/mail.txt
+  # and publish the printed TXT record in your domain's DNS.
+  smtp:
+    image: boky/postfix
+    hostname: ${MAIL_HOSTNAME:?Set MAIL_HOSTNAME in .env (e.g. mail.yourdomain.com)}
+    environment:
+      HOSTNAME: ${MAIL_HOSTNAME}
+      ALLOWED_SENDER_DOMAINS: ${MAIL_DOMAIN:?Set MAIL_DOMAIN in .env (e.g. yourdomain.com)}
+      DKIM_AUTOGENERATE: 1
+      LOG_SUBJECT: 1
+    volumes:
+      - dkim_keys:/etc/opendkim/keys
+    restart: unless-stopped
+
+  # ─── Dev-only SMTP catcher (Mailpit) ─────────────────────────────────────────
+  # Captures all outgoing emails — nothing actually leaves the machine.
+  # Web UI: http://localhost:8025
+  # Start with: docker compose --profile dev up
   mailpit:
+    profiles: [dev]
     image: axllent/mailpit:latest
     ports:
-      - "8025:8025"  # web UI  →  http://localhost:8025
-      - "1025:1025"  # SMTP
+      - "8025:8025"
+      - "1025:1025"
     environment:
       MP_MAX_MESSAGES: 500
       MP_SMTP_AUTH_ACCEPT_ANY: 1
@@ -26,21 +49,23 @@ services:
       dockerfile: Dockerfile
     command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
     ports:
-      - "3101:3101"
+      - "3101:3001"
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://graphrag:graphrag@db:5432/postgres?schema=public}
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
       - PORT=3001
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3100}
-      - SMTP_HOST=${SMTP_HOST:-mailpit}
-      - SMTP_PORT=${SMTP_PORT:-1025}
+      # SMTP — defaults to the smtp service above.
+      # For local dev with Mailpit, override: SMTP_HOST=mailpit SMTP_PORT=1025
+      - SMTP_HOST=${SMTP_HOST:-smtp}
+      - SMTP_PORT=${SMTP_PORT:-25}
       - SMTP_SECURE=${SMTP_SECURE:-false}
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
-      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+      - SMTP_FROM=${SMTP_FROM:-noreply@${MAIL_DOMAIN:-localhost}}
     depends_on:
       - db
-      - mailpit
+      - smtp
 
   frontend:
     build:
@@ -55,3 +80,4 @@ services:
 
 volumes:
   postgres_data:
+  dkim_keys:
