@@ -4,7 +4,7 @@ import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/providers/auth/AuthProvider';
 import { Tabs } from '@/components/ui/tabs';
 import { EmptyTeamState } from './team/EmptyTeamState';
 import { TeamProvider, useTeamContext } from '@/contexts/TeamContext';
@@ -55,21 +55,10 @@ const TeamTabInner = () => {
   // Show empty state when no teams exist and no invitations
   if ((!teams || teams.length === 0) && !hasReceivedInvitations) {
     return (
-      <>
-        {hasReceivedInvitations && (
-          <ReceivedInvitations 
-            invitations={receivedInvitations} 
-            onAccept={handleAcceptInvitation}
-            onReject={handleRejectInvitation}
-            isAccepting={isAccepting}
-            isRejecting={isRejecting}
-          />
-        )}
-        <EmptyTeamState onCreateTeam={() => {
-          debugLog('Create team button clicked from empty state');
-          setIsCreateTeamDialogOpen(true);
-        }} />
-      </>
+      <EmptyTeamState onCreateTeam={() => {
+        debugLog('Create team button clicked from empty state');
+        setIsCreateTeamDialogOpen(true);
+      }} />
     );
   }
 
@@ -78,8 +67,8 @@ const TeamTabInner = () => {
       {/* Show received invitations if any */}
       {hasReceivedInvitations && (
         <div className="mb-6">
-          <ReceivedInvitations 
-            invitations={receivedInvitations} 
+          <ReceivedInvitations
+            invitations={receivedInvitations}
             onAccept={handleAcceptInvitation}
             onReject={handleRejectInvitation}
             isAccepting={isAccepting}
@@ -112,17 +101,17 @@ const TeamTabInner = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            <Tabs 
-              value={activeTeamTab || undefined} 
+            <Tabs
+              value={activeTeamTab || undefined}
               onValueChange={(value) => {
                 debugLog('Team tab changed to:', value);
                 setActiveTeamTab(value);
               }}
             >
               <TeamList teams={teams} userRole={userRole} />
-              <TeamContent 
-                teams={teams} 
-                teamMembers={teamMembers} 
+              <TeamContent
+                teams={teams}
+                teamMembers={teamMembers}
                 invitations={invitations}
                 userRole={userRole}
                 currentUserId={user?.id}
@@ -138,11 +127,12 @@ const TeamTabInner = () => {
       <TeamDialogs
         isCreateTeamDialogOpen={isCreateTeamDialogOpen}
         setIsCreateTeamDialogOpen={setIsCreateTeamDialogOpen}
-        isInviteDialogOpen={isInviteDialogOpen} 
+        isInviteDialogOpen={isInviteDialogOpen}
         setIsInviteDialogOpen={setIsInviteDialogOpen}
         selectedTeamId={selectedTeamId}
         onRemoveMember={handleRemoveMember}
         onDeleteTeam={handleDeleteTeam}
+        teamMembers={teamMembers}
       />
     </>
   );

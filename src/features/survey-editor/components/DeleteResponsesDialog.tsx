@@ -11,13 +11,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface DeleteResponsesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (reason: string, softDelete: boolean) => void;
+  onConfirm: (softDelete: boolean) => void;
   participantInfo: string;
   responseCount: number;
   isDeleting: boolean;
@@ -31,12 +30,10 @@ export const DeleteResponsesDialog: React.FC<DeleteResponsesDialogProps> = ({
   responseCount,
   isDeleting
 }) => {
-  const [reason, setReason] = useState('');
   const [softDelete, setSoftDelete] = useState(true);
 
   const handleConfirm = () => {
-    onConfirm(reason, softDelete);
-    setReason('');
+    onConfirm(softDelete);
     setSoftDelete(true);
   };
 
@@ -68,24 +65,11 @@ export const DeleteResponsesDialog: React.FC<DeleteResponsesDialogProps> = ({
             </Label>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="deletion-reason" className="text-sm">
-              Reason for deletion (optional)
-            </Label>
-            <Textarea
-              id="deletion-reason"
-              placeholder="Enter reason for deletion..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="min-h-[60px]"
-            />
-          </div>
-
           <div className="text-xs text-muted-foreground">
             {softDelete ? (
               "Hidden responses can be restored later from the admin panel."
             ) : (
-              "⚠️ Permanent deletion cannot be undone. A backup will be saved in the audit log."
+              "⚠️ Permanent deletion cannot be undone."
             )}
           </div>
         </div>

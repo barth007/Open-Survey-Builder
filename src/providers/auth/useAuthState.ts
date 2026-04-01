@@ -1,115 +1,93 @@
-import { debugLog, debugWarn } from '@/lib/logger';
-
+import { debugLog } from '@/lib/logger';
 import { useState, useEffect, useRef } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { ApprovalStatus, StatusCache } from './types';
-import { toast } from '@/components/ui/sonner';
+import { ApprovalStatus, StatusCache, User, Session } from './types';
+import { refreshSession } from './authService';
 
 export function useAuthState() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('unknown');
-  
-  // Cache for status checks with throttling
+
   const statusCacheRef = useRef<StatusCache>({
     status: 'unknown',
     timestamp: 0,
     attemptCount: 0
   });
-  
-  // Request in progress tracker
+
   const checkingStatusRef = useRef<boolean>(false);
 
-  // Debug function for session state
-  const logSessionState = (prefix: string, currentSession: Session | null) => {
-    debugLog(
-      `${prefix} - Session state:`, 
-      {
-        hasSession: !!currentSession,
-        userId: currentSession?.user?.id || 'none',
-        expires: currentSession?.expires_at ? new Date(currentSession.expires_at * 1000).toISOString() : 'none',
-        storageType: typeof localStorage,
-        accessTokenLength: currentSession?.access_token?.length || 0,
-        refreshTokenLength: currentSession?.refresh_token?.length || 0,
-      }
-    );
-  };
-
-  // Handle user session
   useEffect(() => {
-    debugLog('Setting up auth state listener');
-    let mounted = true;
-    
-    // Set up auth listener first to avoid missing auth events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        debugLog('Auth state changed:', event, currentSession?.user?.id);
-        logSessionState('Auth state change event', currentSession);
-        
-        if (!mounted) return;
-        
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (event === 'SIGNED_IN' && currentSession?.user) {
-          toast("Successfully signed in");
-          // Reset status cache on sign-in
-          statusCacheRef.current = {
-            status: 'unknown',
-            timestamp: 0,
-            attemptCount: 0
-          };
-        } else if (event === 'SIGNED_OUT') {
-          toast("You have been signed out");
-          setApprovalStatus('unknown');
-        } else if (event === 'TOKEN_REFRESHED') {
-          debugLog('Token refreshed automatically');
-        }
-        
-        setIsLoading(false);
-      }
-    );
-
-    // Then check for an existing session
     const initializeAuth = async () => {
       try {
-        debugLog('Initializing auth state...');
-        // Always start with loading state
+        debugLog('Initializing local auth state...');
         setIsLoading(true);
-        
-        // Get the session from storage
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting initial session:', error);
-          setIsLoading(false);
+
+        const token = localStorage.getItem('sb_auth_token');
+        if (!token) {
+          setUser(null);
+          setSession(null);
+          setApprovalStatus('unknown');
           return;
         }
-        
-        logSessionState('Initial auth session', initialSession);
-        
-        if (mounted) {
-          setSession(initialSession);
-          setUser(initialSession?.user ?? null);
+
+        const refreshed = await refreshSession();
+        if (!refreshed) {
+          setUser(null);
+          setSession(null);
+          setApprovalStatus('unknown');
+          return;
+        }
+
+        const userJson = localStorage.getItem('sb_user');
+        if (!userJson) {
+          setUser(null);
+          setSession(null);
+          setApprovalStatus('unknown');
+          return;
+        }
+
+        try {
+          const userData = JSON.parse(userJson) as User;
+          setUser(userData);
+          setSession({ token, user: userData });
+          setApprovalStatus(userData.status as ApprovalStatus);
+        } catch (e) {
+          console.error('Error parsing stored user data', e);
+          localStorage.removeItem('sb_auth_token');
+          localStorage.removeItem('sb_user');
+          setUser(null);
+          setSession(null);
+          setApprovalStatus('unknown');
         }
       } catch (error) {
         console.error('Exception during auth initialization:', error);
+        localStorage.removeItem('sb_auth_token');
+        localStorage.removeItem('sb_user');
+        setUser(null);
+        setSession(null);
+        setApprovalStatus('unknown');
       } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
-    
-    initializeAuth();
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    initializeAuth();
   }, []);
+
+  const REFRESH_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+  useEffect(() => {
+    const id = setInterval(async () => {
+      if (!localStorage.getItem('sb_auth_token')) return;
+      const ok = await refreshSession();
+      if (!ok) {
+        setUser(null);
+        setSession(null);
+        setApprovalStatus('unknown');
+      }
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     user,
@@ -121,7 +99,6 @@ export function useAuthState() {
     approvalStatus,
     setApprovalStatus,
     statusCacheRef,
-    checkingStatusRef,
-    logSessionState
+    checkingStatusRef
   };
 }

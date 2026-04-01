@@ -1,38 +1,46 @@
 import React, { useState } from 'react';
-import { Survey } from '@/types/survey';
-import { SummaryCard } from '@/features/survey-editor/components/SummaryCard';
+import { Bug, Download } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { useQueryClient } from '@tanstack/react-query';
+import { AnalysisPanel } from '@/features/survey-editor/components/AnalysisPanel';
+
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
+import { Survey, SurveyResponse } from '@/types/survey';
+import { DeleteResponsesDialog } from '@/features/survey-editor/components/DeleteResponsesDialog';
 import { FilterControls } from '@/features/survey-editor/components/FilterControls';
 import { NoResponsesView } from '@/features/survey-editor/components/NoResponsesView';
-import { ResponsesList } from '@/features/survey-editor/components/ResponsesList';
-import { DeleteResponsesDialog } from '@/features/survey-editor/components/DeleteResponsesDialog';
-import { AnalysisPanel } from '@/features/survey-editor/components/AnalysisPanel';
 import { ResponseDebugView } from '@/features/survey-editor/components/ResponseDebugView';
-import { useDeleteResponses } from '@/hooks/survey/useDeleteResponses';
-import { useQueryClient } from '@tanstack/react-query';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Button } from "@/components/ui/button";
-import { Bug, Eye, EyeOff } from "lucide-react";
-import { getResponseProcessingStats } from '@/features/survey-editor/lib/ResponsesProcessor';
+import { ResponsesList } from '@/features/survey-editor/components/ResponsesList';
+import { SubmissionsTableView } from '@/features/survey-editor/components/SubmissionsTableView';
+import { SummaryCard } from '@/features/survey-editor/components/SummaryCard';
+import { EditorTabCanvas } from '@/features/survey-editor/components/EditorTabCanvas';
+import { getResponseProcessingStats, ProcessedResponseGroup } from '@/features/survey-editor/lib/ResponsesProcessor';
 
 interface AnswersTabProps {
   survey: Survey;
-  responses: any[];
-  filteredResponses: any[];
+  responses: SurveyResponse[];
+  isLoading?: boolean;
+  error?: Error | null;
+  filteredResponses: ProcessedResponseGroup[];
   totalResponses: number;
   filterText: string;
   setFilterText: (value: string) => void;
-  sortBy: "default" | "count" | "alpha";
-  setSortBy: (value: "default" | "count" | "alpha") => void;
-  chartType: string;
-  handleChartTypeChange: (value: string) => void;
-  onCardClick: (id: string) => void;
+  sortBy: 'default' | 'count' | 'alpha';
+  setSortBy: (value: 'default' | 'count' | 'alpha') => void;
+  chartType: Record<string, 'bar' | 'pie'>;
+  handleChartTypeChange: (questionId: string, type: 'bar' | 'pie') => void;
   exportToCSV: () => void;
-  selectedResponseGroup: string | null;
 }
 
 const AnswersTab: React.FC<AnswersTabProps> = ({
   survey,
   responses,
+  isLoading,
+  error,
   filteredResponses,
   totalResponses,
   filterText,
@@ -41,28 +49,26 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
   setSortBy,
   chartType,
   handleChartTypeChange,
-  onCardClick,
   exportToCSV,
-  selectedResponseGroup,
 }) => {
   const [filteredParticipant, setFilteredParticipant] = useState<{ id: string; email: string } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeletion, setPendingDeletion] = useState<{ id: string; email: string } | null>(null);
   const [participantResponseCount, setParticipantResponseCount] = useState(0);
-  const [analysisPanelVisible, setAnalysisPanelVisible] = useState(true);
   const [debugViewVisible, setDebugViewVisible] = useState(false);
-  
+  const [viewMode, setViewMode] = useState<'summary' | 'submissions'>('summary');
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
   const { deleteResponsesByParticipant, isDeleting } = useDeleteResponses();
   const queryClient = useQueryClient();
 
-  // Debug logging for answers tab
-  console.log('[AnswersTab] Rendering with:', {
-    surveyId: survey.id,
-    totalResponses,
-    filteredResponsesCount: filteredResponses.length,
-    selectedResponseGroup,
-    analysisPanelVisible
-  });
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorState title="Failed to load responses" message={error.message} />;
+  }
 
   const stats = getResponseProcessingStats(survey, responses);
   const hasDataIssues = stats.orphanedResponses > 0 || (totalResponses > 0 && filteredResponses.length === 0);
@@ -74,10 +80,11 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
       return;
     }
 
-    // Count responses for this participant
-    // Note: This is a simplified count. In a real implementation, you'd query the database
-    const count = responses.length; // Placeholder - would need actual filtering logic
-    
+    const count = responses.filter((response) =>
+      (participantId && response.participantId === participantId) ||
+      (participantEmail && response.metadata?.email === participantEmail),
+    ).length;
+
     setFilteredParticipant({ id: participantId, email: participantEmail });
     setParticipantResponseCount(count);
   };
@@ -87,7 +94,7 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async (reason: string, softDelete: boolean) => {
+  const handleDeleteConfirm = async (softDelete: boolean) => {
     if (!pendingDeletion) return;
 
     try {
@@ -96,16 +103,11 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
         pendingDeletion.id || undefined,
         pendingDeletion.email || undefined,
         softDelete,
-        reason || undefined
       );
 
-      // Refresh the responses data
       queryClient.invalidateQueries({ queryKey: ['surveyResponses', survey.id] });
-      
-      // Clear the filter after successful deletion
       setFilteredParticipant(null);
       setParticipantResponseCount(0);
-      
     } catch (error) {
       console.error('Failed to delete responses:', error);
     } finally {
@@ -121,134 +123,134 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
     return 'Unknown participant';
   };
 
-  const selectedResponseData = selectedResponseGroup 
-    ? filteredResponses.find(r => r.questionId === selectedResponseGroup)
-    : null;
-
-  console.log('[AnswersTab] Selected response data:', selectedResponseData);
+  const showNoMatches = totalResponses > 0 && filteredResponses.length === 0 && !debugViewVisible;
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full h-full">
-      <ResizablePanel defaultSize={analysisPanelVisible ? 50 : 100} minSize={20} className="min-w-0 min-h-0">
-        <div className="flex flex-col h-full bg-white">
-          <div className="flex justify-between items-center px-4 py-2 border-b bg-white flex-shrink-0">
-            <div className="font-medium text-sm">Responses</div>
-            <div className="flex items-center gap-2">
-              {hasDataIssues && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDebugViewVisible(!debugViewVisible)}
-                  className="flex items-center gap-2"
-                >
-                  <Bug size={16} />
-                  {debugViewVisible ? 'Hide Debug' : 'Debug Data'}
-                </Button>
+    <EditorTabCanvas width="wide" contentClassName="space-y-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex w-full items-center rounded-2xl border border-border/70 bg-background p-1 shadow-[0_10px_24px_rgba(15,15,15,0.04)] sm:w-auto">
+            <Button
+              variant="ghost"
+              onClick={() => setViewMode('summary')}
+              className={cn(
+                'h-10 flex-1 rounded-2xl px-4 text-sm font-medium sm:flex-none',
+                viewMode === 'summary'
+                  ? 'bg-[#111111] text-white hover:bg-[#111111]/95 hover:text-white'
+                  : 'text-muted-foreground hover:bg-muted/[0.18] hover:text-foreground',
               )}
-              {!analysisPanelVisible && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAnalysisPanelVisible(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Eye size={16} />
-                  Show Analysis
-                </Button>
+            >
+              Summary
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setViewMode('submissions')}
+              className={cn(
+                'h-10 flex-1 rounded-2xl px-4 text-sm font-medium sm:flex-none',
+                viewMode === 'submissions'
+                  ? 'bg-[#111111] text-white hover:bg-[#111111]/95 hover:text-white'
+                  : 'text-muted-foreground hover:bg-muted/[0.18] hover:text-foreground',
               )}
-            </div>
+            >
+              Submissions
+            </Button>
           </div>
-          
-          <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
-            <div className="space-y-8 pb-8">
-              <SummaryCard responses={responses} onExportCSV={exportToCSV} />
 
-              {hasDataIssues && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-orange-700 mb-2">
-                    <Bug size={16} />
-                    <span className="font-medium">Data Mismatch Detected</span>
-                  </div>
-                  <p className="text-sm text-orange-600 mb-3">
-                    Some responses may not be showing because question IDs have changed. 
-                    {stats.orphanedResponses > 0 && ` Found ${stats.orphanedResponses} orphaned responses.`}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDebugViewVisible(true)}
-                    className="text-orange-700 border-orange-300 hover:bg-orange-100"
-                  >
-                    View Debug Information
-                  </Button>
-                </div>
-              )}
+          <div className="flex flex-wrap items-center gap-2">
+            {viewMode === 'summary' && hasDataIssues && (
+              <Button
+                variant="outline"
+                onClick={() => setDebugViewVisible((visible) => !visible)}
+                className="h-10 rounded-full border-border/70 px-4 text-sm font-medium"
+              >
+                <Bug className="mr-2 h-4 w-4" />
+                {debugViewVisible ? 'Hide diagnostics' : 'Diagnostics'}
+              </Button>
+            )}
 
-              {debugViewVisible && (
-                <ResponseDebugView survey={survey} responses={responses} />
-              )}
-
-              {totalResponses === 0 ? (
-                <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
-              ) : filteredResponses.length === 0 && !debugViewVisible ? (
-                <div className="text-center py-8">
-                  <div className="text-gray-500 mb-4">
-                    <p className="text-lg font-medium mb-2">No Matching Responses Found</p>
-                    <p className="text-sm">
-                      You have {totalResponses} total responses, but none match the current survey structure.
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setDebugViewVisible(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Bug size={16} />
-                    Debug Response Data
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <FilterControls
-                    filterText={filterText}
-                    setFilterText={setFilterText}
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    showParticipantFilter={true}
-                    onParticipantFilter={handleParticipantFilter}
-                    onDeleteRequest={handleDeleteRequest}
-                    filteredParticipant={filteredParticipant}
-                    participantResponseCount={participantResponseCount}
-                  />
-
-                  <ResponsesList
-                    responseGroups={filteredResponses}
-                    sortBy={sortBy}
-                    selectedResponseGroup={selectedResponseGroup}
-                    chartTypes={{ [selectedResponseGroup || "default"]: chartType as "bar" | "pie" }}
-                    onChartTypeChange={handleChartTypeChange}
-                    onCardClick={onCardClick}
-                  />
-                </>
-              )}
-            </div>
+            <Button
+              onClick={exportToCSV}
+              variant="outline"
+              className="h-10 rounded-full border-border/70 bg-background px-4 text-sm font-medium shadow-none"
+              disabled={responses.length === 0}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
           </div>
         </div>
-      </ResizablePanel>
 
-      {analysisPanelVisible && (
-        <>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={25} className="min-w-0 min-h-0">
-            <AnalysisPanel 
-              selectedResponseGroup={selectedResponseGroup}
-              responseData={selectedResponseData}
-              onToggleVisibility={() => setAnalysisPanelVisible(false)}
-              surveyId={survey.id}
+        {viewMode === 'summary' ? (
+          <div className="space-y-8">
+            <SummaryCard
+              responses={responses}
+              stats={stats}
             />
-          </ResizablePanel>
-        </>
-      )}
+
+            {hasDataIssues && (
+              <section className="rounded-[30px] border border-orange-200 bg-orange-50/80 px-5 py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-orange-200 bg-white/70">
+                    <Bug className="h-4 w-4 text-orange-700" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-orange-900">
+                      Some submissions no longer match the current survey structure.
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-orange-800/85">
+                      Question IDs or answer shapes changed after data had already been collected.
+                      {stats.orphanedResponses > 0 && ` ${stats.orphanedResponses} orphaned submissions were detected.`}
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {debugViewVisible && (
+              <ResponseDebugView survey={survey} responses={responses} />
+            )}
+
+            {totalResponses === 0 ? (
+              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+            ) : showNoMatches ? (
+              <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+            ) : (
+              <>
+                <FilterControls
+                  filterText={filterText}
+                  setFilterText={setFilterText}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  showParticipantFilter={true}
+                  onParticipantFilter={handleParticipantFilter}
+                  onDeleteRequest={handleDeleteRequest}
+                  filteredParticipant={filteredParticipant}
+                  participantResponseCount={participantResponseCount}
+                />
+
+                <p className="text-sm text-muted-foreground">
+                  {filteredResponses.length} question{filteredResponses.length === 1 ? '' : 's'}
+                </p>
+
+                <ResponsesList
+                  responseGroups={filteredResponses}
+                  sortBy={sortBy}
+                  chartTypes={chartType}
+                  onChartTypeChange={handleChartTypeChange}
+                  onSelectGroup={setSelectedGroupId}
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          totalResponses === 0 ? (
+            <NoResponsesView totalResponses={totalResponses} hasFilteredResponses={false} />
+          ) : (
+            <SubmissionsTableView
+              survey={survey}
+              responses={responses}
+            />
+          )
+        )}
 
       <DeleteResponsesDialog
         open={deleteDialogOpen}
@@ -258,7 +260,17 @@ const AnswersTab: React.FC<AnswersTabProps> = ({
         responseCount={participantResponseCount}
         isDeleting={isDeleting}
       />
-    </ResizablePanelGroup>
+
+      <Sheet open={selectedGroupId !== null} onOpenChange={(open) => { if (!open) setSelectedGroupId(null); }}>
+        <SheetContent side="right" className="w-[480px] sm:max-w-[480px] p-0 overflow-y-auto">
+          <AnalysisPanel
+            selectedResponseGroup={selectedGroupId}
+            responseData={filteredResponses.find(g => g.questionId === selectedGroupId) ?? null}
+            surveyId={survey.id}
+          />
+        </SheetContent>
+      </Sheet>
+    </EditorTabCanvas>
   );
 };
 

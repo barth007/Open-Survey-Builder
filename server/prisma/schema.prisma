@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  avatarUrl    String?
+  emailNotifications Boolean @default(true)
+  marketingEmails    Boolean @default(false)
+  status       String   @default("pending") // "pending", "approved", "rejected"
+  role         String   @default("user") // "user", "admin"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  teams     TeamMember[]
+  surveys   Survey[]
+  folders   Folder[]
+  responses SurveyResponse[] @relation("Participant")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     TeamMember[]
+  surveys     Survey[]
+  folders     Folder[]
+  invitations TeamInvitation[]
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  role      String   @default("member") // "owner", "admin", "member"
+  createdAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  order     Int?     @default(0)
+  teamId    String?
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team    Team?    @relation(fields: [teamId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+  surveys Survey[]
+}
+
+model Survey {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  questions   Json     @default("[]")
+  isPublished Boolean  @default(false)
+  order       Int?     @default(0)
+  publicCode  String?  @unique
+  folderId    String?
+  teamId      String?
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Welcome page fields
+  welcomeTitle        String?
+  welcomeMessage      String?
+  welcomeInstructions String?
+  welcomeButtonText   String?
+
+  // Thank you page fields
+  thankYouTitle      String?
+  thankYouMessage    String?
+  thankYouButtonText String?
+  redirectUrl        String?
+
+  // Recording settings
+  recordingEnabled  Boolean @default(false)
+  recordingRequired Boolean @default(false)
+
+  folder    Folder?            @relation(fields: [folderId], references: [id])
+  team      Team?              @relation(fields: [teamId], references: [id])
+  user      User?              @relation(fields: [userId], references: [id])
+  responses SurveyResponse[]
+  deletions ResponseDeletion[]
+}
+
+model SurveyResponse {
+  id               String    @id @default(uuid())
+  surveyId         String
+  status           String    @default("submitted")
+  answers          Json      @default("[]")
+  submittedAt      DateTime  @default(now())
+  participantId    String?
+  participantEmail String?
+  deletedAt        DateTime?
+  metadata         Json?     @default("{}")
+
+  survey      Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  participant User?  @relation("Participant", fields: [participantId], references: [id])
+  recordings  QuestionRecording[]
+}
+
+model QuestionRecording {
+  id              String   @id @default(uuid())
+  responseId      String
+  questionId      String
+  recordingUrl    String
+  recordingType   String   @default("screen-webcam")
+  fileFormat      String   @default("webm")
+  durationSeconds Int?
+  fileSizeBytes   Int?
+  createdAt       DateTime @default(now())
+
+  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+}
+
+model ResponseDeletion {
+  id               String   @id @default(uuid())
+  surveyId         String
+  participantId    String?
+  participantEmail String?
+  deletedBy        String?
+  deletionReason   String?
+  responsesCount   Int
+  deletedAt        DateTime @default(now())
+  responsesBackup  Json?
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+}
+
+model TeamInvitation {
+  id             String   @id @default(uuid())
+  teamId         String
+  email          String
+  role           String   @default("member")
+  invitationCode String   @unique
+  status         String   @default("pending") // "pending", "accepted", "rejected"
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}

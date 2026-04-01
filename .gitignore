@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 survey.zip
+
+# Environment variables (all levels)
+.env
+.env.*
+!.env.example
