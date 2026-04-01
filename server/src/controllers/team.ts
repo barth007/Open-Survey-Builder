@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { prisma } from '../prisma.js';
 import crypto from 'crypto';
 import { parseInvitationPayload, parseRoleUpdatePayload } from '../validators/team.js';
+import { sendInvitationEmail } from '../mailer.js';
 
 const logControllerError = (scope: string, error: unknown) => {
   const message = error instanceof Error ? error.message : 'Unknown error';
@@ -335,14 +336,28 @@ export const sendInvitation = async (req: Request, res: Response) => {
         expiresAt.setDate(expiresAt.getDate() + 7);
         const invitationCode = crypto.randomUUID();
 
-        const invitation = await prisma.teamInvitation.create({
-            data: {
-                teamId: teamId as string,
-                email,
-                role: invitationResult.data.role ?? 'member',
-                expiresAt,
-                invitationCode
-            }
+        const [invitation, team, inviter] = await Promise.all([
+            prisma.teamInvitation.create({
+                data: {
+                    teamId: teamId as string,
+                    email,
+                    role: invitationResult.data.role ?? 'member',
+                    expiresAt,
+                    invitationCode
+                }
+            }),
+            prisma.team.findUnique({ where: { id: teamId as string }, select: { name: true } }),
+            prisma.user.findUnique({ where: { id: requesterId }, select: { name: true } }),
+        ]);
+
+        // Send email best-effort — never block the response on email failure
+        sendInvitationEmail({
+            to: email,
+            teamName: team?.name ?? 'your team',
+            inviterName: inviter?.name ?? null,
+            invitationCode,
+        }).catch((err: unknown) => {
+            console.error('[team.sendInvitation] Failed to send invitation email:', err);
         });
 
         res.status(201).json(invitation);

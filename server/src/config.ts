@@ -40,6 +40,14 @@ export const createConfig = (env: NodeJS.ProcessEnv = process.env) => ({
   allowedOrigins: parseAllowedOrigins(env),
   uploadsDir: env.UPLOADS_DIR?.trim() || path.join(process.cwd(), 'uploads'),
   capabilities: createSystemCapabilities(env),
+  smtp: {
+    host: env.SMTP_HOST?.trim() || '',
+    port: parseInt(env.SMTP_PORT?.trim() || '587', 10),
+    secure: env.SMTP_SECURE === 'true',
+    user: env.SMTP_USER?.trim() || '',
+    pass: env.SMTP_PASS?.trim() || '',
+    from: env.SMTP_FROM?.trim() || 'noreply@localhost',
+  },
 });
 
 export const config = createConfig();

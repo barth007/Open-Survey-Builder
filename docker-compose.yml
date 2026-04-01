@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: graphrag
+      POSTGRES_PASSWORD: graphrag
+      POSTGRES_DB: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"  # web UI  →  http://localhost:8025
+      - "1025:1025"  # SMTP
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
+    ports:
+      - "3101:3101"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://graphrag:graphrag@db:5432/postgres?schema=public}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+      - PORT=3001
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3100}
+      - SMTP_HOST=${SMTP_HOST:-mailpit}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+    depends_on:
+      - db
+      - mailpit
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+    ports:
+      - "3100:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
