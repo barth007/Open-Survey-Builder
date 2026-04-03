@@ -28,3 +28,4 @@ survey.zip
 .env
 .env.*
 !.env.example
+screenshot-script.mjs
