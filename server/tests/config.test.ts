@@ -22,13 +22,23 @@ describe('config', () => {
     const config = createConfig({
       PORT: '3001',
       DATABASE_URL: 'postgresql://db',
-      JWT_SECRET: 'secret',
+      JWT_SECRET: 'this-is-a-long-production-jwt-secret-value',
       FRONTEND_URL: 'https://app.example.com',
+      NODE_ENV: 'production',
     });
 
     expect(config.port).toBe('3001');
     expect(config.databaseUrl).toBe('postgresql://db');
-    expect(config.jwtSecret).toBe('secret');
+    expect(config.jwtSecret).toBe('this-is-a-long-production-jwt-secret-value');
     expect(config.allowedOrigins).toEqual(['https://app.example.com']);
+  });
+
+  it('rejects weak placeholder jwt secrets in production', () => {
+    expect(() => createConfig({
+      PORT: '3001',
+      DATABASE_URL: 'postgresql://db',
+      JWT_SECRET: 'your-super-secret-jwt-key-replace-in-production',
+      NODE_ENV: 'production',
+    })).toThrow('JWT_SECRET must be at least 32 characters long and not use a known placeholder in production');
   });
 });

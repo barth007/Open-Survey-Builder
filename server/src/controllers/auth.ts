@@ -3,6 +3,15 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma.js';
 import { config } from '../config.js';
+import {
+    adminProfileStatusSchema,
+    deleteAccountSchema,
+    getValidationMessage,
+    loginSchema,
+    profileUpdateSchema,
+    registerSchema,
+    updatePasswordSchema,
+} from '../validators/auth.js';
 
 const logControllerError = (scope: string, error: unknown) => {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -24,8 +33,13 @@ const profileSelect = {
 } as const;
 
 export const register = async (req: Request, res: Response) => {
-    const { password, name } = req.body;
-    const email = typeof req.body?.email === 'string' ? normalizeEmail(req.body.email) : '';
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { password, name } = parsed.data;
+    const email = normalizeEmail(parsed.data.email);
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -60,8 +74,13 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-    const { password } = req.body;
-    const email = typeof req.body?.email === 'string' ? normalizeEmail(req.body.email) : '';
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { password } = parsed.data;
+    const email = normalizeEmail(parsed.data.email);
 
     try {
         const user = await prisma.user.findUnique({ where: { email } });
@@ -109,7 +128,12 @@ export const getProfile = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    const { name, avatarUrl, emailNotifications, marketingEmails } = req.body;
+    const parsed = profileUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { name, avatarUrl, emailNotifications, marketingEmails } = parsed.data;
 
     const data: {
         name?: string | null;
@@ -170,7 +194,12 @@ export const getPendingProfiles = async (req: Request, res: Response) => {
 export const updateProfileStatus = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const { id } = req.params;
-    const { status } = req.body;
+    const parsed = adminProfileStatusSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { status } = parsed.data;
 
     try {
         const adminUser = await prisma.user.findUnique({ where: { id: userId } });
@@ -191,19 +220,17 @@ export const updateProfileStatus = async (req: Request, res: Response) => {
 };
 export const updatePassword = async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    const { currentPassword, password } = req.body;
 
     if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (typeof currentPassword !== 'string' || !currentPassword) {
-        return res.status(400).json({ message: 'Current password is required' });
+    const parsed = updatePasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
     }
 
-    if (typeof password !== 'string' || password.length < 6) {
-        return res.status(400).json({ message: 'New password must be at least 6 characters long' });
-    }
+    const { currentPassword, password } = parsed.data;
 
     try {
         const user = await prisma.user.findUnique({
@@ -311,19 +338,17 @@ export const exportAccountData = async (req: Request, res: Response) => {
 
 export const deleteAccount = async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    const { currentPassword, confirmation } = req.body;
 
     if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (confirmation !== 'DELETE') {
-        return res.status(400).json({ message: 'Deletion confirmation must match DELETE' });
+    const parsed = deleteAccountSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
     }
 
-    if (typeof currentPassword !== 'string' || !currentPassword) {
-        return res.status(400).json({ message: 'Current password is required' });
-    }
+    const { currentPassword } = parsed.data;
 
     try {
         const user = await prisma.user.findUnique({

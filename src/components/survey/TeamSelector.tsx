@@ -2,7 +2,6 @@ import { debugLog, debugWarn } from '@/lib/logger';
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { useTeamSurveys } from '@/hooks/useTeamSurveys';
@@ -16,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { apiFetch } from '@/lib/api';
 
 interface TeamSelectorProps {
   surveyId: string;
@@ -41,32 +41,13 @@ export function TeamSelector({ surveyId, currentTeamId, disabled = false }: Team
       if (!user) return [];
       
       debugLog('Fetching teams for user:', user.id);
-      
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('team_id, role')
-        .eq('user_id', user.id);
-        
-      if (error) {
-        console.error('Error fetching team memberships:', error);
-        throw error;
-      }
-      
-      if (!data || data.length === 0) return [];
-      
-      const teamIds = data.map(member => member.team_id);
-      debugLog('Found team IDs:', teamIds);
-      
-      const { data: teamsData, error: teamsError } = await supabase
-        .from('teams')
-        .select('id, name, description')
-        .in('id', teamIds);
-        
-      if (teamsError) {
-        console.error('Error fetching teams:', teamsError);
-        throw teamsError;
-      }
-      
+
+      const teamsData = await apiFetch('/teams') as Array<{
+        id: string;
+        name: string;
+        description?: string | null;
+      }>;
+
       debugLog('Teams data loaded:', teamsData);
       return teamsData as Team[];
     },

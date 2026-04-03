@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+.env.*
+node_modules
+dist
+coverage
+tests
+backend.log
+server_run.log
+debug_token.js

@@ -1,7 +1,30 @@
-
-import { Session, User } from '@supabase/supabase-js';
-
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'checking' | 'unknown';
+
+export interface UserMetadata {
+  full_name?: string | null;
+  name?: string | null;
+  avatar_url?: string | null;
+}
+
+export interface User {
+  id: string;
+  email: string | null;
+  name?: string | null;
+  role?: 'user' | 'admin' | string;
+  status?: ApprovalStatus | string;
+  avatarUrl?: string | null;
+  emailNotifications?: boolean;
+  marketingEmails?: boolean;
+  updatedAt?: string | null;
+  user_metadata?: UserMetadata;
+}
+
+export interface Session {
+  access_token: string;
+  token_type?: string;
+  expires_at?: number | null;
+  user: User;
+}
 
 export interface StatusCache {
   status: ApprovalStatus;

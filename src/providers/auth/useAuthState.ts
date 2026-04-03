@@ -50,7 +50,7 @@ export function useAuthState() {
         try {
           const userData = JSON.parse(userJson) as User;
           setUser(userData);
-          setSession({ token, user: userData });
+          setSession({ access_token: token, token_type: 'bearer', user: userData });
           setApprovalStatus(userData.status as ApprovalStatus);
         } catch (e) {
           console.error('Error parsing stored user data', e);

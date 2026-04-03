@@ -1,76 +1,41 @@
-import { debugLog, debugWarn } from '@/lib/logger';
-
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+
+import { debugLog } from '@/lib/logger';
+import { apiFetch } from '@/lib/api';
 import { Survey } from '@/types/survey';
 import { dbSurveyToSurvey } from '@/utils/type-mappers';
 import { DbSurvey } from '@/types/database';
+import {
+  buildPublicFormAccessHeaders,
+  getStoredPublicFormAccessToken,
+} from '@/features/survey-response/lib/public-form-access';
 
 /**
- * Custom hook to fetch a survey by its public code
- * @param publicCode The public code of the survey
- * @param isPreviewMode Whether to bypass the is_published check
+ * Custom hook to fetch a survey by its public code.
  */
 export function useQuerySurveyByPublicCode(publicCode: string, isPreviewMode = false) {
   debugLog(`Fetching survey with public code: ${publicCode}, preview mode: ${isPreviewMode}`);
-  
+
   return useQuery({
     queryKey: ['survey', 'public', publicCode, isPreviewMode],
     queryFn: async () => {
-      try {
-        if (!publicCode) {
-          throw new Error('Public code is required');
-        }
-
-        let query = supabase
-          .from('surveys')
-          .select('*')
-          .eq('public_code', publicCode);
-        
-        // Only apply the is_published filter if not in preview mode
-        if (!isPreviewMode) {
-          query = query.eq('is_published', true);
-        }
-        
-        const { data, error } = await query.single();
-        
-        if (error) {
-          // Better error message for 'not found' scenarios
-          if (error.code === 'PGRST116') {
-            if (isPreviewMode) {
-              throw new Error('Survey not found with this preview code');
-            } else {
-              throw new Error('Survey not found or not published');
-            }
-          }
-          throw error;
-        }
-
-        if (!data) {
-          throw new Error('Survey not found');
-        }
-
-        debugLog('Raw survey data from database:', data);
-
-        // Handle possibly missing fields that are now required in DbSurvey
-        const surveyData = {
-          ...data,
-          // Ensure these fields exist and have proper fallbacks
-          welcome_instructions: data.welcome_instructions || null,
-          welcome_button_text: data.welcome_button_text || null,
-          thank_you_button_text: data.thank_you_button_text || null
-        } as DbSurvey;
-
-        // Use the type mapper utility to convert the database format to our frontend format
-        const convertedSurvey = dbSurveyToSurvey(surveyData);
-        debugLog('Converted survey data:', convertedSurvey);
-        
-        return convertedSurvey;
-      } catch (error) {
-        console.error("Error fetching survey by public code:", error);
-        throw error;
+      if (!publicCode) {
+        throw new Error('Public code is required');
       }
+
+      const data = await apiFetch(`/surveys/public/${publicCode}`, {
+        headers: buildPublicFormAccessHeaders(getStoredPublicFormAccessToken(publicCode)),
+      }) as DbSurvey;
+
+      const convertedSurvey = dbSurveyToSurvey(data) as Survey & Record<string, unknown>;
+      return {
+        ...convertedSurvey,
+        ...(typeof data.settings === 'object' && data.settings !== null ? { settings: data.settings } : {}),
+        ...(typeof data.publicAccessState === 'object' && data.publicAccessState !== null
+          ? { publicAccessState: data.publicAccessState }
+          : {}),
+      };
     },
-    enabled: !!publicCode
+    enabled: Boolean(publicCode) && !isPreviewMode,
   });
 }

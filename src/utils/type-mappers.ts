@@ -2,13 +2,30 @@ import { DbSurvey, DbSurveyResponse, Json } from '@/types/database';
 import { Survey, SurveyResponse, Question, Answer } from '@/types/survey';
 import { Survey as OrganizationSurvey, convertToOrganizationSurvey } from '@/types/survey-organization';
 
+const isRecord = (value: unknown): value is Record<string, unknown> => (
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+);
+
+const getValue = <T>(value: Record<string, unknown>, ...keys: string[]) => {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      return value[key] as T;
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * Convert a database survey to a frontend survey
  */
 export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
+  const surveyRecord = dbSurvey as unknown as Record<string, unknown>;
+  const rawQuestions = Array.isArray(dbSurvey.questions) ? dbSurvey.questions : [];
+
   // Parse the questions from JSON to our Question type
-  const parsedQuestions: Question[] = Array.isArray(dbSurvey.questions) 
-    ? dbSurvey.questions.map((q: any) => ({
+  const parsedQuestions: Question[] = rawQuestions
+    .map((q: any) => ({
         id: q.id || "",
         type: q.type || "text",
         text: q.text || "",
@@ -25,33 +42,41 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
         recordingEnabled: q.recordingEnabled || false,
         recordingRequired: q.recordingRequired || false
       }))
-    : [];
 
   return {
     id: dbSurvey.id,
     title: dbSurvey.name,
     description: dbSurvey.description || "",
     questions: parsedQuestions,
-    isPublished: dbSurvey.is_published || false,
+    isPublished: Boolean(getValue<boolean>(surveyRecord, 'isPublished', 'is_published')),
     // Match property names with the Survey type definition
-    folderId: dbSurvey.folder_id || undefined,
-    teamId: dbSurvey.team_id || undefined,
-    publicCode: dbSurvey.public_code || undefined,
-    order: dbSurvey.order || undefined,
-    createdAt: dbSurvey.created_at || new Date().toISOString(),
+    folderId: getValue<string | null>(surveyRecord, 'folderId', 'folder_id') || undefined,
+    teamId: getValue<string | null>(surveyRecord, 'teamId', 'team_id') || undefined,
+    publicCode: getValue<string | null>(surveyRecord, 'publicCode', 'public_code') || undefined,
+    order: getValue<number | null>(surveyRecord, 'order') || undefined,
+    createdAt: getValue<string | null>(surveyRecord, 'createdAt', 'created_at') || new Date().toISOString(),
     // Welcome page fields - now including welcome_instructions and welcome_button_text
-    welcomeTitle: dbSurvey.welcome_title || undefined,
-    welcomeMessage: dbSurvey.welcome_message || undefined,
-    welcomeInstructions: dbSurvey.welcome_instructions || undefined,
-    welcomeButtonText: dbSurvey.welcome_button_text || undefined,
+    welcomeTitle: getValue<string | null>(surveyRecord, 'welcomeTitle', 'welcome_title') || undefined,
+    welcomeMessage: getValue<string | null>(surveyRecord, 'welcomeMessage', 'welcome_message') || undefined,
+    welcomeInstructions: getValue<string | null>(surveyRecord, 'welcomeInstructions', 'welcome_instructions') || undefined,
+    welcomeButtonText: getValue<string | null>(surveyRecord, 'welcomeButtonText', 'welcome_button_text') || undefined,
     // Thank you page fields - now including thank_you_button_text
-    thankYouTitle: dbSurvey.thank_you_title || undefined,
-    thankYouMessage: dbSurvey.thank_you_message || undefined,
-    thankYouButtonText: dbSurvey.thank_you_button_text || undefined,
-    redirectUrl: dbSurvey.redirect_url || undefined,
+    thankYouTitle: getValue<string | null>(surveyRecord, 'thankYouTitle', 'thank_you_title') || undefined,
+    thankYouMessage: getValue<string | null>(surveyRecord, 'thankYouMessage', 'thank_you_message') || undefined,
+    thankYouButtonText: getValue<string | null>(surveyRecord, 'thankYouButtonText', 'thank_you_button_text') || undefined,
+    redirectUrl: getValue<string | null>(surveyRecord, 'redirectUrl', 'redirect_url') || undefined,
     // Survey-wide recording settings
-    recordingEnabled: dbSurvey.recording_enabled || false,
-    recordingRequired: dbSurvey.recording_required || false
+    recordingEnabled: Boolean(getValue<boolean>(surveyRecord, 'recordingEnabled', 'recording_enabled')),
+    recordingRequired: Boolean(getValue<boolean>(surveyRecord, 'recordingRequired', 'recording_required')),
+    ...(isRecord(surveyRecord.settings) ? { settings: surveyRecord.settings } : {}),
+    ...(isRecord(surveyRecord.appearance) ? { appearance: surveyRecord.appearance } : {}),
+    ...(isRecord(surveyRecord.branding) ? { branding: surveyRecord.branding } : {}),
+    ...(isRecord(surveyRecord.shareMeta) ? { shareMeta: surveyRecord.shareMeta } : {}),
+    ...(isRecord(surveyRecord.seo) ? { seo: surveyRecord.seo } : {}),
+    ...(isRecord(surveyRecord.notifications) ? { notifications: surveyRecord.notifications } : {}),
+    ...(isRecord(surveyRecord.retention) ? { retention: surveyRecord.retention } : {}),
+    ...(isRecord(surveyRecord.delivery) ? { delivery: surveyRecord.delivery } : {}),
+    ...(isRecord(surveyRecord.publicAccessState) ? { publicAccessState: surveyRecord.publicAccessState } : {}),
   };
 }
 
@@ -90,14 +115,18 @@ export function surveyToDbSurvey(survey: Survey): Partial<DbSurvey> {
  * Convert a database survey response to a frontend survey response
  */
 export function dbSurveyResponseToSurveyResponse(dbResponse: DbSurveyResponse): SurveyResponse {
+  const responseRecord = dbResponse as unknown as Record<string, unknown>;
+
   return {
     id: dbResponse.id,
-    surveyId: dbResponse.survey_id || "",
+    surveyId: getValue<string | null>(responseRecord, 'surveyId', 'survey_id') || "",
     answers: Array.isArray(dbResponse.answers) ? dbResponse.answers.map((a: any) => ({
       questionId: a.questionId,
       value: a.value
     })) : [],
-    submittedAt: dbResponse.submitted_at || ""
+    submittedAt: getValue<string | null>(responseRecord, 'submittedAt', 'submitted_at') || "",
+    participantId: getValue<string | null>(responseRecord, 'participantId', 'participant_id') || undefined,
+    metadata: (dbResponse.metadata as Record<string, any> | null) || undefined,
   };
 }
 
@@ -118,12 +147,14 @@ export function surveyResponseToDbSurveyResponse(response: SurveyResponse): Part
  * Convert a database survey to an organization survey format (simplified)
  */
 export function dbSurveyToOrganizationSurvey(dbSurvey: DbSurvey): OrganizationSurvey {
+  const surveyRecord = dbSurvey as unknown as Record<string, unknown>;
+
   return {
     id: dbSurvey.id,
     name: dbSurvey.name,
-    createdAt: dbSurvey.created_at || new Date().toISOString(),
-    folderId: dbSurvey.folder_id,
-    isPublished: dbSurvey.is_published || false
+    createdAt: getValue<string | null>(surveyRecord, 'createdAt', 'created_at') || new Date().toISOString(),
+    folderId: getValue<string | null>(surveyRecord, 'folderId', 'folder_id'),
+    isPublished: Boolean(getValue<boolean>(surveyRecord, 'isPublished', 'is_published')),
   };
 }
 

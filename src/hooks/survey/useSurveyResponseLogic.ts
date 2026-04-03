@@ -1,37 +1,139 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useState, useCallback, useMemo } from 'react';
+import { apiFetch } from '@/lib/api';
 import { Question, Answer } from '@/types/survey';
 import { useSubmitResponse } from './useSubmitResponse';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  buildPublicFormAccessHeaders,
+  getStoredPublicFormAccessToken,
+} from '@/features/survey-response/lib/public-form-access';
+import {
+  clearStoredResponseDraft,
+  getStoredResponseDraft,
+  setStoredResponseDraft,
+} from '@/features/survey-response/lib/response-draft-storage';
 
-export const useSurveyResponseLogic = (surveyId?: string) => {
+type ResponseSessionPayload = {
+  responseId: string;
+  responseToken?: string;
+  sessionToken?: string;
+  status?: 'draft' | 'partial' | 'submitted';
+};
+
+export const useSurveyResponseLogic = (surveyId?: string, draftKey?: string, publicCode?: string) => {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [responseId, setResponseId] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [sessionError, setSessionError] = useState<Error | null>(null);
+  const [isStartingSession, setIsStartingSession] = useState(false);
   const { submitResponse, isSubmitting } = useSubmitResponse();
-  
-  // Generate a consistent responseId for this session
-  const responseId = useMemo(() => uuidv4(), []);
+
+  const effectiveDraftKey = useMemo(() => draftKey || surveyId, [draftKey, surveyId]);
+
+  useEffect(() => {
+    const existingDraft = getStoredResponseDraft(effectiveDraftKey);
+    if (existingDraft) {
+      setResponseId(existingDraft.responseId);
+      setSessionToken(existingDraft.sessionToken);
+      setAnswers(existingDraft.answers || {});
+    }
+  }, [effectiveDraftKey]);
+
+  useEffect(() => {
+    if (!surveyId || responseId || isStartingSession) {
+      return;
+    }
+
+    let active = true;
+
+    const startResponseSession = async () => {
+      try {
+        setIsStartingSession(true);
+        setSessionError(null);
+
+        const session = await apiFetch(`/surveys/${surveyId}/response-session`, {
+          method: 'POST',
+          headers: buildPublicFormAccessHeaders(
+            publicCode ? getStoredPublicFormAccessToken(publicCode) : undefined,
+          ),
+          body: JSON.stringify({}),
+        }) as ResponseSessionPayload;
+
+        if (!active) {
+          return;
+        }
+
+        const nextResponseId = session.responseId;
+        const nextSessionToken = session.sessionToken || session.responseToken || '';
+
+        setResponseId(nextResponseId);
+        setSessionToken(nextSessionToken);
+
+        setStoredResponseDraft(effectiveDraftKey, {
+          responseId: nextResponseId,
+          sessionToken: nextSessionToken,
+          status: session.status,
+        });
+      } catch (error) {
+        if (active) {
+          setSessionError(error as Error);
+        }
+      } finally {
+        if (active) {
+          setIsStartingSession(false);
+        }
+      }
+    };
+
+    startResponseSession();
+
+    return () => {
+      active = false;
+    };
+  }, [effectiveDraftKey, isStartingSession, publicCode, responseId, surveyId]);
 
   const handleAnswerChange = useCallback((questionId: string, value: string | string[]) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
-  }, []);
+    setAnswers((prev) => {
+      const nextAnswers = {
+        ...prev,
+        [questionId]: value,
+      };
+
+      if (responseId && sessionToken) {
+        setStoredResponseDraft(effectiveDraftKey, {
+          responseId,
+          sessionToken,
+          answers: nextAnswers,
+          status: 'draft',
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      return nextAnswers;
+    });
+  }, [effectiveDraftKey, responseId, sessionToken]);
 
   const handleSubmit = useCallback(async (isPublished: boolean) => {
-    if (!surveyId) return;
+    if (!surveyId) {
+      return;
+    }
 
     const formattedAnswers: Answer[] = Object.entries(answers).map(([questionId, value]) => ({
       questionId,
-      value
+      value,
     }));
 
     await submitResponse({
       surveyId,
       answers: formattedAnswers,
-      metadata: { isPublished }
+      metadata: { isPublished },
+      responseId: responseId || undefined,
+      sessionToken: sessionToken || undefined,
+      publicCode,
     });
-  }, [surveyId, answers, submitResponse]);
+
+    clearStoredResponseDraft(effectiveDraftKey);
+  }, [answers, effectiveDraftKey, publicCode, responseId, sessionToken, submitResponse, surveyId]);
 
   const isQuestionVisible = useCallback((question: Question): boolean => {
     if (!question.conditionalLogic) return true;
@@ -56,9 +158,12 @@ export const useSurveyResponseLogic = (surveyId?: string) => {
   return {
     answers,
     isSubmitting,
+    isQuestionVisible,
     handleAnswerChange,
     handleSubmit,
-    isQuestionVisible,
-    responseId
+    responseId,
+    sessionToken,
+    isStartingSession,
+    sessionError,
   };
 };

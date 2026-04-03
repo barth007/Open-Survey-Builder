@@ -1,12 +1,13 @@
-
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+
+import { apiFetch } from '@/lib/api';
 
 interface UseRecordingUploadReturn {
   uploadRecording: (
     blob: Blob,
-    responseId: string
+    responseId: string,
+    sessionToken?: string,
   ) => Promise<string | null>;
   isUploading: boolean;
   uploadError: string | null;
@@ -18,54 +19,34 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
 
   const uploadRecording = async (
     blob: Blob,
-    responseId: string
+    responseId: string,
+    sessionToken?: string,
   ): Promise<string | null> => {
     setIsUploading(true);
     setUploadError(null);
 
     try {
       const fileExtension = 'webm';
-      const fileName = `${responseId}/survey-recording-${uuidv4()}.${fileExtension}`;
-
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('survey-recordings')
-        .upload(fileName, blob, {
-          contentType: 'video/webm',
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw new Error(`Upload failed: ${uploadError.message}`);
-      }
-
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from('survey-recordings')
-        .getPublicUrl(fileName);
-
-      const recordingUrl = urlData.publicUrl;
-
-      // Save recording metadata to database using existing RPC call
-      const { error: dbError } = await supabase.rpc('create_question_recording', {
-        p_response_id: responseId,
-        p_question_id: '', // Empty for survey-wide recordings
-        p_recording_url: recordingUrl,
-        p_recording_type: 'screen-webcam',
-        p_file_format: fileExtension,
-        p_file_size_bytes: blob.size
+      const fileName = `survey-recording-${uuidv4()}.${fileExtension}`;
+      const uploadFile = new File([blob], fileName, {
+        type: 'video/webm',
+        lastModified: Date.now(),
       });
+      const formData = new FormData();
 
-      if (dbError) {
-        // If database insert fails, try to clean up the uploaded file
-        await supabase.storage
-          .from('survey-recordings')
-          .remove([fileName]);
-        
-        throw new Error(`Database error: ${dbError.message}`);
-      }
+      formData.append('recording', uploadFile);
+      formData.append('responseId', responseId);
+      formData.append('sessionToken', sessionToken || '');
+      formData.append('questionId', '');
+      formData.append('recordingType', 'screen-webcam');
+      formData.append('fileFormat', fileExtension);
 
-      return recordingUrl;
+      const data = await apiFetch('/surveys/recordings/upload', {
+        method: 'POST',
+        body: formData,
+      }) as { recordingUrl?: string };
+
+      return data.recordingUrl || null;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       setUploadError(errorMessage);
@@ -79,6 +60,6 @@ export const useRecordingUpload = (): UseRecordingUploadReturn => {
   return {
     uploadRecording,
     isUploading,
-    uploadError
+    uploadError,
   };
 };

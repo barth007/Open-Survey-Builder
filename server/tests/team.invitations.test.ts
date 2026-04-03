@@ -118,6 +118,8 @@ describe('team invitation security', () => {
   });
 
   it('accepts invitations case-insensitively against the authenticated user email', async () => {
+    const futureExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       ...currentUser,
       email: 'Me@Example.com',
@@ -128,7 +130,7 @@ describe('team invitation security', () => {
       email: 'me@example.com',
       role: 'member',
       status: 'pending',
-      expiresAt: new Date('2026-04-01T12:00:00.000Z'),
+      expiresAt: futureExpiry,
     } as never);
     vi.mocked(prisma.teamMember.findFirst).mockResolvedValue(null as never);
     vi.mocked(prisma.teamInvitation.update).mockResolvedValue({

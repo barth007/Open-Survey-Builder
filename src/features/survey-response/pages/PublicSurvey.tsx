@@ -19,6 +19,11 @@ import { RecordingPermissionDialog } from '../../survey-editor/components/Record
 import { RecordingWidget } from '../../survey-editor/components/RecordingWidget';
 import { useRecordingPermissions } from '../../survey-editor/hooks/useRecordingPermissions';
 import { useRecordingUpload } from '@/hooks/survey/useRecordingUpload';
+import { PasswordGate } from '@/features/survey-response/components/PasswordGate';
+import {
+  setStoredPublicFormAccessToken,
+  unlockPublicForm,
+} from '@/features/survey-response/lib/public-form-access';
 
 interface PublicSurveyProps {
   isPreviewMode?: boolean;
@@ -29,14 +34,22 @@ type SurveyFlowState = 'welcome' | 'permissions' | 'questions' | 'thankYou';
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   const { publicCode } = useParams<{ publicCode: string }>();
-  const { data: survey, isLoading, error } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
+  const {
+    data: survey,
+    isLoading,
+    error,
+    refetch,
+  } = useQuerySurveyByPublicCode(publicCode || '', isPreviewMode);
   const { 
     answers, 
     handleAnswerChange, 
     isSubmitting,
     isQuestionVisible,
-    responseId
-  } = useSurveyResponseLogic(survey?.id);
+    responseId,
+    sessionToken,
+    isStartingSession,
+    sessionError,
+  } = useSurveyResponseLogic(survey?.id, publicCode || survey?.id, publicCode);
   const { submitResponse } = useSubmitResponse();
   const { permissions, requestPermissions, hasPermissions } = useRecordingPermissions();
   const { uploadRecording, isUploading, uploadError } = useRecordingUpload();
@@ -44,12 +57,16 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
   // Track the current state of the survey flow
   const [flowState, setFlowState] = useState<SurveyFlowState>('welcome');
   const [recordingDeclined, setRecordingDeclined] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
   debugLog('PublicSurvey survey data:', survey);
 
   // Check if recording is enabled and required
   const recordingEnabled = survey?.recordingEnabled || false;
   const recordingRequired = survey?.recordingRequired || false;
+  const passwordRequired = Boolean((survey as Record<string, any> | undefined)?.publicAccessState?.passwordRequired);
 
   const handleStartSurvey = () => {
     if (recordingEnabled && !permissions) {
@@ -84,7 +101,7 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
     }
 
     debugLog('Survey recording completed, uploading...', { duration, size: blob.size });
-    const recordingUrl = await uploadRecording(blob, responseId);
+    const recordingUrl = await uploadRecording(blob, responseId, sessionToken || undefined);
     
     if (recordingUrl) {
       debugLog('Survey recording uploaded successfully:', recordingUrl);
@@ -115,6 +132,9 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       await submitResponse({
         surveyId: survey.id,
         answers: formattedAnswers,
+        responseId: responseId || undefined,
+        sessionToken: sessionToken || undefined,
+        publicCode,
         metadata: {
           submitTime: new Date().toISOString(),
           userAgent: navigator.userAgent,
@@ -132,6 +152,26 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
       toast("Submission failed", {
         description: "There was an error submitting your response",
       });
+    }
+  };
+
+  const handleUnlock = async () => {
+    if (!publicCode) {
+      return;
+    }
+
+    try {
+      setIsUnlocking(true);
+      setPasswordError('');
+      const result = await unlockPublicForm(publicCode, password);
+      setStoredPublicFormAccessToken(publicCode, result.accessToken);
+      setPassword('');
+      await refetch();
+    } catch (unlockError) {
+      console.error('Failed to unlock public form:', unlockError);
+      setPasswordError(unlockError instanceof Error ? unlockError.message : 'Unable to unlock the form');
+    } finally {
+      setIsUnlocking(false);
     }
   };
 
@@ -182,6 +222,23 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
               {error?.message || "This survey does not exist or is not published yet."}
             </p>
           </div>
+        </div>
+      </PublicSurveyLayout>
+    );
+  }
+
+  if (passwordRequired) {
+    return (
+      <PublicSurveyLayout surveyTitle={survey?.title || 'Protected Survey'} isPreviewMode={isPreviewMode}>
+        <div className="container max-w-3xl px-4 py-10">
+          <PasswordGate
+            surveyTitle={survey.title}
+            password={password}
+            errorMessage={passwordError}
+            isUnlocking={isUnlocking}
+            onPasswordChange={setPassword}
+            onUnlock={handleUnlock}
+          />
         </div>
       </PublicSurveyLayout>
     );
@@ -281,6 +338,12 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
+              {sessionError && (
+                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                  {sessionError.message}
+                </div>
+              )}
+
               {survey.questions.filter(question => isQuestionVisible(question)).map((question, index) => (
                 <QuestionItem
                   key={question.id}
@@ -296,12 +359,17 @@ const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
                 <Button 
                   type="submit" 
                   className="w-full md:w-auto" 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isStartingSession || !responseId || !sessionToken}
                 >
                   {isSubmitting ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
                       Submitting...
+                    </>
+                  ) : isStartingSession ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Preparing...
                     </>
                   ) : isPreviewMode ? (
                     "Preview Submit"

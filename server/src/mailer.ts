@@ -14,6 +14,37 @@ function createTransporter() {
   });
 }
 
+export interface TransactionalEmailParams {
+  to: string | string[];
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+  senderName?: string;
+}
+
+export async function sendTransactionalEmail(params: TransactionalEmailParams): Promise<void> {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.warn('[mailer] SMTP_HOST not configured — skipping transactional email to', params.to);
+    return;
+  }
+
+  const from = params.senderName
+    ? `"${params.senderName.replace(/"/g, '\\"')}" <${config.smtp.from}>`
+    : config.smtp.from;
+
+  await transporter.sendMail({
+    from,
+    to: params.to,
+    subject: params.subject,
+    text: params.text,
+    html: params.html,
+    ...(params.replyTo ? { replyTo: params.replyTo } : {}),
+  });
+}
+
 export interface InvitationEmailParams {
   to: string;
   teamName: string;

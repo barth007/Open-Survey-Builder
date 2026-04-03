@@ -1,7 +1,6 @@
 
 import { debugLog, debugWarn } from '@/lib/logger';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 import { ActiveUser } from '@/types/survey-organization';
 
@@ -10,70 +9,20 @@ export const useActiveUsers = (surveyId: string | undefined) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!surveyId || !user) return;
+    if (!surveyId || !user) {
+      setActiveUsers([]);
+      return;
+    }
 
-    const channel = supabase.channel(`survey:${surveyId}`);
-
-    // Function to update user presence
-    const updatePresence = async () => {
-      const result = await channel.track({
-        user_id: user.id,
-        email: user.email,
-        name: user.user_metadata?.full_name || user.email || 'Unknown User',
-        avatar_url: user.user_metadata?.avatar_url,
-        online_at: new Date().toISOString(),
-      });
-      debugLog("[DEBUG] track result:", result);
+    const self: ActiveUser = {
+      id: user.id,
+      name: user.user_metadata?.full_name || user.name || user.email || 'Unknown User',
+      avatarUrl: user.user_metadata?.avatar_url || user.avatarUrl || undefined,
+      lastActive: new Date(),
     };
 
-    // Subscribe to presence changes
-    let presenceInterval: ReturnType<typeof setInterval>;
-
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const newState = channel.presenceState();
-        debugLog("[DEBUG] presenceState raw:", newState);
-        const usersArray: ActiveUser[] = Object.values(newState).map((users: any) => {
-          const userInfo = users[0]; // Taking first presence
-          return {
-            id: userInfo.user_id,
-            name: userInfo.name || userInfo.email || 'Unknown User',
-            avatarUrl: userInfo.avatar_url,
-            lastActive: new Date(userInfo.online_at),
-          };
-        });
-
-        // Also show yourself
-        const self: ActiveUser = {
-          id: user.id,
-          name: user.user_metadata?.full_name || user.email || 'Unknown User',
-          avatarUrl: user.user_metadata?.avatar_url,
-          lastActive: new Date(),
-        };
-
-        const uniqueUsers = [...usersArray.filter(u => u.id !== self.id), self];
-        debugLog("[DEBUG] activeUsers parsed:", uniqueUsers);
-        setActiveUsers(uniqueUsers);
-      })
-      .subscribe(async (status) => {
-        debugLog("[DEBUG] channel status:", status);
-        if (status === 'SUBSCRIBED') {
-          await updatePresence(); // ✅ now it's safe to push
-          presenceInterval = setInterval(updatePresence, 30000);
-        }
-      });
-
-    // Update presence on focus
-    const handleFocus = () => {
-      updatePresence();
-    };
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      clearInterval(presenceInterval);
-      channel.unsubscribe();
-    };
+    debugWarn('Realtime active user presence is disabled because Supabase has been removed');
+    setActiveUsers([self]);
   }, [surveyId, user]);
 
   return { activeUsers };

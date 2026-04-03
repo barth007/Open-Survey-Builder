@@ -1,12 +1,11 @@
-import { debugLog, debugWarn } from '@/lib/logger';
-
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { DbSurvey } from '@/types/database';
+
+import { debugLog } from '@/lib/logger';
+import { apiFetch } from '@/lib/api';
 import { toast } from '@/components/ui/sonner';
 import { dbSurveyToSurvey } from '@/utils/type-mappers';
-import { Survey } from '@/types/survey';
+import { DbSurvey } from '@/types/database';
 
 export function useQuerySurvey(surveyId: string | undefined) {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,52 +18,23 @@ export function useQuerySurvey(surveyId: string | undefined) {
       }
 
       debugLog(`Fetching survey with ID: ${surveyId}`);
-
-      const { data, error } = await supabase
-        .from('surveys')
-        .select('*')
-        .eq('id', surveyId)
-        .maybeSingle();
-
-      if (error) {
-        console.error(`Error fetching survey ${surveyId}:`, error);
-        throw new Error(`Error fetching survey: ${error.message}`);
-      }
-
-      if (!data) {
-        console.error(`Survey with ID "${surveyId}" not found`);
-        throw new Error(`Survey with ID "${surveyId}" not found`);
-      }
-
-      debugLog(`Survey ${surveyId} fetched:`, { 
-        id: data.id, 
-        name: data.name, 
-        description: data.description 
-      });
-
-      // Convert the database survey to the Survey type using our utility function
-      const survey: Survey = dbSurveyToSurvey(data as DbSurvey);
-
-      return survey;
+      const data = await apiFetch(`/surveys/${surveyId}`) as DbSurvey;
+      return dbSurveyToSurvey(data);
     },
-    enabled: !!surveyId,
+    enabled: Boolean(surveyId),
     retry: 1,
     staleTime: 10000,
     gcTime: 600000,
   });
 
   useEffect(() => {
-    if (query.isPending) {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
+    setIsLoading(query.isPending);
   }, [query.isPending]);
 
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to load survey', {
-        description: query.error instanceof Error ? query.error.message : 'An unexpected error occurred'
+        description: query.error instanceof Error ? query.error.message : 'An unexpected error occurred',
       });
     }
   }, [query.error]);
@@ -72,6 +42,6 @@ export function useQuerySurvey(surveyId: string | undefined) {
   return {
     survey: query.data,
     isLoading: isLoading || query.isPending,
-    error: query.error
+    error: query.error,
   };
 }

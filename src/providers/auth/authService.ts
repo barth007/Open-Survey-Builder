@@ -1,13 +1,80 @@
 import { debugLog, debugWarn } from '@/lib/logger';
-import { supabase } from '@/integrations/supabase/client';
 import { ApprovalStatus, StatusCache } from './types';
 import { toast } from '@/components/ui/sonner';
+import { apiFetch } from '@/lib/api';
+import { resolveApiUrl } from '@/lib/api-url';
+
+const AUTH_TOKEN_STORAGE_KEY = 'sb_auth_token';
+const AUTH_USER_STORAGE_KEY = 'sb_user';
 
 // Max retries for failed status checks
 const MAX_STATUS_CHECK_RETRIES = 3;
   
 // Minimum time between status checks (5 seconds)
 const MIN_STATUS_CHECK_INTERVAL = 5000;
+
+type BackendProfile = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  avatarUrl?: string | null;
+  emailNotifications?: boolean;
+  marketingEmails?: boolean;
+  role?: 'user' | 'admin' | string;
+  status?: ApprovalStatus | string;
+  updatedAt?: string | null;
+};
+
+type BackendLoginResponse = {
+  token: string;
+  user: BackendProfile;
+};
+
+const clearStoredAuth = () => {
+  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  localStorage.removeItem(AUTH_USER_STORAGE_KEY);
+};
+
+const normalizeApprovalStatus = (value: unknown): ApprovalStatus => {
+  if (value === 'approved' || value === 'pending' || value === 'rejected' || value === 'checking') {
+    return value;
+  }
+
+  return 'unknown';
+};
+
+const normalizeUser = (input: Partial<BackendProfile> & { id: string }) => {
+  const name = typeof input.name === 'string' ? input.name : null;
+  const avatarUrl = typeof input.avatarUrl === 'string' ? input.avatarUrl : null;
+  const status = normalizeApprovalStatus(input.status);
+
+  return {
+    id: input.id,
+    email: typeof input.email === 'string' ? input.email : null,
+    name,
+    role: input.role || 'user',
+    status,
+    avatarUrl: avatarUrl ? resolveApiUrl(avatarUrl) : null,
+    emailNotifications: Boolean(input.emailNotifications),
+    marketingEmails: Boolean(input.marketingEmails),
+    updatedAt: input.updatedAt || null,
+    user_metadata: {
+      full_name: name,
+      name,
+      avatar_url: avatarUrl ? resolveApiUrl(avatarUrl) : null,
+    },
+  };
+};
+
+const storeAuth = (token: string, user: ReturnType<typeof normalizeUser>) => {
+  localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+  localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+};
+
+const fetchCurrentProfile = async () => {
+  const profile = await apiFetch('/auth/profile') as BackendProfile;
+  return normalizeUser(profile);
+};
 
 export async function checkApprovalStatus(
   userId: string | undefined,
@@ -54,82 +121,18 @@ export async function checkApprovalStatus(
     
     debugLog('Checking profile status for user:', userId, 
       'Attempt:', statusCacheRef.current.attemptCount + 1);
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('status')
-      .eq('id', userId)
-      .maybeSingle();
-      
-    if (error) {
-      console.error('Error checking profile status:', error);
-      // Update cache with error attempt
-      statusCacheRef.current.attemptCount += 1;
-      statusCacheRef.current.timestamp = now;
-      setApprovalStatus('unknown');
-      return 'unknown';
+
+    const profile = await fetchCurrentProfile();
+    const status = normalizeApprovalStatus(profile.status);
+
+    if (profile.id !== userId) {
+      throw new Error('Authenticated profile does not match the requested user');
     }
-    
-    debugLog('Profile status result:', data?.status);
-    
-    if (!data) {
-      debugLog('No profile found, creating one...');
-      
-      try {
-        // Create a profile for this user
-        const userResponse = await supabase.auth.getUser();
-        if (userResponse.error) {
-          console.error('Error getting user for profile creation:', userResponse.error);
-          throw userResponse.error;
-        }
-        
-        const user = userResponse.data.user;
-        
-        // Create new profile
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: user.id,
-            full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-            avatar_url: user.user_metadata?.avatar_url || null,
-            email: user.email,
-            status: 'pending',
-            role: 'user',
-            updated_at: new Date().toISOString()
-          }])
-          .select()
-          .single();
-          
-        if (insertError) {
-          console.error('Error creating profile during status check:', insertError);
-          statusCacheRef.current = {
-            status: 'unknown',
-            timestamp: now,
-            attemptCount: statusCacheRef.current.attemptCount + 1
-          };
-          setApprovalStatus('unknown');
-          return 'unknown';
-        }
-        
-        debugLog('Created new profile during status check:', newProfile);
-        statusCacheRef.current = {
-          status: 'pending',
-          timestamp: now,
-          attemptCount: 0
-        };
-        setApprovalStatus('pending');
-        return 'pending';
-      } catch (err) {
-        console.error('Error in profile creation during status check:', err);
-        statusCacheRef.current.attemptCount += 1;
-        statusCacheRef.current.timestamp = now;
-        setApprovalStatus('unknown');
-        return 'unknown';
-      }
+
+    if (localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)) {
+      localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(profile));
     }
-    
-    // Success - reset attempt counter and update cache
-    const status = data.status as ApprovalStatus;
+
     statusCacheRef.current = {
       status,
       timestamp: now,
@@ -151,156 +154,91 @@ export async function checkApprovalStatus(
 }
 
 export async function refreshSession() {
+  const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  if (!token) {
+    return false;
+  }
+
   try {
-    debugLog('Manually refreshing session...');
-    
-    // First try refreshing the token
-    const { data, error } = await supabase.auth.refreshSession();
-    
-    if (error) {
-      console.error('Error refreshing session:', error);
-      return false;
-    }
-    
-    if (data.session) {
-      debugLog('Session refreshed', {
-        hasSession: !!data.session,
-        userId: data.session?.user?.id || 'none',
-      });
-      return true;
-    } else {
-      debugLog('No session found during refresh');
-      return false;
-    }
+    debugLog('Refreshing local auth state against backend profile');
+    const profile = await fetchCurrentProfile();
+    storeAuth(token, profile);
+    return true;
   } catch (error) {
     console.error('Exception during session refresh:', error);
+    clearStoredAuth();
     return false;
   }
 }
 
 export async function signInWithGoogle() {
-  try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/login', // Redirect back to login, which will then redirect based on status
-      },
-    });
-
-    if (error) {
-      console.error('Google sign-in error:', error.message);
-      toast(error.message);
-      throw error;
-    }
-
-    debugLog('OAuth sign-in initiated:', data);
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
-    toast("Failed to sign in with Google. Please try again.");
-    throw error;
-  }
+  const message = 'Google sign-in is not available in the current backend';
+  toast.error(message);
+  throw new Error(message);
 }
 
 export async function signInWithEmail(email: string, password: string) {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const data = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }) as BackendLoginResponse;
 
-    if (error) {
-      console.error('Email sign-in error:', error.message);
-      toast.error(error.message);
-      throw error;
-    }
+    const user = normalizeUser(data.user);
+    storeAuth(data.token, user);
 
-    debugLog('Email sign-in successful:', data);
-    return data;
+    debugLog('Email sign-in successful:', { userId: user.id });
+    return {
+      user,
+      session: {
+        access_token: data.token,
+        token_type: 'bearer',
+        user,
+      },
+    };
   } catch (error) {
     console.error('Error signing in with email:', error);
-    toast.error("Failed to sign in. Please check your credentials.");
+    toast.error(error instanceof Error ? error.message : 'Failed to sign in. Please check your credentials.');
     throw error;
   }
 }
 
 export async function signUpWithEmail(email: string, password: string, fullName?: string) {
   try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName || '',
-        },
-      },
+    const data = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password,
+        name: fullName || undefined,
+      }),
     });
 
-    if (error) {
-      console.error('Email sign-up error:', error.message);
-      toast.error(error.message);
-      throw error;
-    }
+    toast.success('Account created', {
+      description: 'Your account is pending approval before you can sign in.',
+    });
 
-    debugLog('Email sign-up successful:', data);
-    
-    if (data.user && !data.session) {
-      toast.success("Check your email", {
-        description: "We've sent you a confirmation link to complete your registration."
-      });
-    }
-    
     return data;
   } catch (error) {
     console.error('Error signing up with email:', error);
-    toast.error("Failed to create account. Please try again.");
+    toast.error(error instanceof Error ? error.message : 'Failed to create account. Please try again.');
     throw error;
   }
 }
 
 export async function resetPassword(email: string) {
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login?reset=true',
-    });
-
-    if (error) {
-      console.error('Password reset error:', error.message);
-      toast.error(error.message);
-      throw error;
-    }
-
-    toast.success("Password reset email sent", {
-      description: "Check your email for the password reset link."
-    });
-  } catch (error) {
-    console.error('Error sending password reset:', error);
-    toast.error("Failed to send password reset email. Please try again.");
-    throw error;
-  }
+  debugWarn('Password reset requested without a self-service backend flow', email);
+  toast.info('Password reset is not available yet. Contact an administrator.');
 }
 
 export async function signOut() {
-  try {
-    // Clear supabase-related localStorage items
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.includes('supabase') || key.includes('sb-'))) {
-        debugLog('Clearing localStorage key before signout:', key);
-        localStorage.removeItem(key);
-      }
+  for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('supabase') || key.startsWith('sb_') || key.startsWith('sb-'))) {
+      debugLog('Clearing localStorage key before signout:', key);
+      localStorage.removeItem(key);
     }
-    
-    // Sign out from Supabase
-    const { error } = await supabase.auth.signOut({ scope: 'global' });
-    if (error) {
-      console.error('Error signing out:', error);
-      toast("Failed to sign out. Please try again.");
-      throw error;
-    }
-    
-    debugLog('Sign out completed successfully');
-  } catch (error) {
-    console.error('Error signing out:', error);
-    throw error;
   }
+
+  debugLog('Sign out completed successfully');
 }

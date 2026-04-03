@@ -4,23 +4,22 @@ import path from 'path';
 import type { Request } from 'express';
 import { config } from './config.js';
 
-const avatarMimeTypes = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/svg+xml',
-];
+const avatarMimeTypes = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+} as const;
 
-const recordingMimeTypes = [
-  'audio/ogg',
-  'audio/webm',
-  'audio/wav',
-  'audio/mpeg',
-  'video/webm',
-  'video/mp4',
-  'video/ogg',
-];
+const recordingMimeTypes = {
+  'audio/ogg': '.ogg',
+  'audio/webm': '.webm',
+  'audio/wav': '.wav',
+  'audio/mpeg': '.mp3',
+  'video/webm': '.webm',
+  'video/mp4': '.mp4',
+  'video/ogg': '.ogg',
+} as const;
 
 const ensureDirectory = (directory: string) => {
   if (!fs.existsSync(directory)) {
@@ -30,25 +29,40 @@ const ensureDirectory = (directory: string) => {
 
 const sanitizeFilename = (filename: string) => filename.replace(/[^a-zA-Z0-9._-]/g, '-');
 
-const createStorage = (directory: string, prefix: string) =>
+const createStorage = (
+  directory: string,
+  prefix: string,
+  extensionByMimeType: Record<string, string>,
+) =>
   multer.diskStorage({
     destination: (_req, _file, cb) => {
       ensureDirectory(directory);
       cb(null, directory);
     },
     filename: (_req, file, cb) => {
-      cb(null, `${Date.now()}-${prefix}-${sanitizeFilename(path.basename(file.originalname))}`);
+      const safeExtension = extensionByMimeType[file.mimetype] || path.extname(file.originalname).toLowerCase();
+      const baseName = path.basename(file.originalname, path.extname(file.originalname));
+
+      cb(
+        null,
+        `${Date.now()}-${prefix}-${sanitizeFilename(baseName)}${safeExtension}`,
+      );
     },
   });
 
-const createUploader = (directory: string, allowedMimeTypes: string[], fileSize: number, invalidTypeMessage: string) =>
+const createUploader = (
+  directory: string,
+  allowedMimeTypes: Record<string, string>,
+  fileSize: number,
+  invalidTypeMessage: string,
+) =>
   multer({
-    storage: createStorage(directory, path.basename(directory)),
+    storage: createStorage(directory, path.basename(directory), allowedMimeTypes),
     limits: {
       fileSize,
     },
     fileFilter: (_req, file, cb) => {
-      if (allowedMimeTypes.includes(file.mimetype)) {
+      if (Object.prototype.hasOwnProperty.call(allowedMimeTypes, file.mimetype)) {
         cb(null, true);
         return;
       }
@@ -75,7 +89,7 @@ export const recordingUpload = createUploader(
 );
 
 export const buildAvatarUrl = (req: Request, filename: string) => (
-  `${req.protocol}://${req.get('host')}/uploads/avatars/${filename}`
+  `/uploads/avatars/${filename}`
 );
 
 export const buildRecordingStoragePath = (filename: string) => path.posix.join('recordings', filename);

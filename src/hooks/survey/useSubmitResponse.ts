@@ -1,59 +1,68 @@
-
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+
 import { Answer } from '@/types/survey';
 import { useToast } from '@/hooks/use-toast';
-import { surveyResponseToDbSurveyResponse } from '@/utils/type-mappers';
+import { apiFetch } from '@/lib/api';
+import {
+  buildPublicFormAccessHeaders,
+  getStoredPublicFormAccessToken,
+} from '@/features/survey-response/lib/public-form-access';
+
+type SubmitResponseInput = {
+  surveyId: string;
+  answers: Answer[];
+  metadata?: Record<string, any>;
+  participantEmail?: string;
+  responseId?: string;
+  sessionToken?: string;
+  publicCode?: string;
+  submissionMode?: 'partial' | 'final';
+};
 
 export function useSubmitResponse() {
   const { toast } = useToast();
 
   const mutation = useMutation({
-    mutationFn: async ({ 
-      surveyId, 
-      answers, 
-      metadata 
-    }: { 
-      surveyId: string; 
-      answers: Answer[]; 
-      metadata?: Record<string, any>;
-    }) => {
+    mutationFn: async ({
+      surveyId,
+      answers,
+      metadata,
+      participantEmail,
+      responseId,
+      sessionToken,
+      publicCode,
+      submissionMode,
+    }: SubmitResponseInput) => {
       try {
-        const surveyResponse = {
-          id: crypto.randomUUID(),
-          surveyId,
-          answers,
-          submittedAt: new Date().toISOString(),
-          metadata
-        };
-
-        // Convert to database format
-        const dbResponse = surveyResponseToDbSurveyResponse(surveyResponse);
-
-        const { data, error } = await supabase
-          .from('survey_responses')
-          .insert({
-            survey_id: dbResponse.survey_id,
-            answers: dbResponse.answers,
-            submitted_at: dbResponse.submitted_at,
-            metadata: metadata || {}
-          });
-
-        if (error) {
-          console.error("Error saving response:", error);
-          throw new Error(`Database error: ${error.message}`);
-        }
-
-        return { success: true, data };
+        return await apiFetch('/surveys/respond', {
+          method: 'POST',
+          headers: {
+            ...(buildPublicFormAccessHeaders(
+              publicCode ? getStoredPublicFormAccessToken(publicCode) : undefined,
+            ) || {}),
+            ...(sessionToken ? { 'x-response-session-token': sessionToken } : {}),
+          },
+          body: JSON.stringify({
+            surveyId,
+            responseId,
+            sessionToken,
+            answers,
+            metadata: metadata || {},
+            participantEmail,
+            submissionMode,
+          }),
+        });
       } catch (err) {
-        console.error("Error in submitResponse:", err);
+        console.error('Error in submitResponse:', err);
         throw err;
       }
-    }
+    },
   });
 
   return {
     submitResponse: mutation.mutateAsync,
-    isSubmitting: mutation.isPending
+    isSubmitting: mutation.isPending,
+    error: mutation.error,
+    toast,
   };
 }

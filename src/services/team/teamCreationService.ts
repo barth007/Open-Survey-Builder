@@ -1,89 +1,34 @@
-import { debugLog, debugWarn } from '@/lib/logger';
+import { debugLog } from '@/lib/logger';
 
-import { supabase } from '@/integrations/supabase/client';
+import { apiFetch } from '@/lib/api';
 import { performDeepSessionValidation } from './teamAuthService';
 
-/**
- * Creates a new team with the specified owner
- * @param userId The owner's user ID
- * @param name The team name
- * @param description Optional team description
- * @returns The newly created team data
- */
-export async function createTeam(userId: string, name: string, description?: string) {
-  debugLog('=== TEAM CREATION START ===');
-  debugLog('Creating team with owner_id:', userId);
-  debugLog(`Will insert: { name: "${name}", description: ${description ? `"${description}"` : 'null'}, owner_id: "${userId}" }`);
-  
-  try {
-    // Perform authentication check with the server
-    debugLog('Performing deep authentication validation before team creation...');
-    try {
-      await performDeepSessionValidation();
-    } catch (authError) {
-      console.error('Deep auth validation failed:', authError);
-      throw authError;
-    }
-    
-    // Create the team - the trigger will automatically add the owner as a member
-    debugLog('Executing team insert...');
-    const { data: teamData, error: teamError } = await supabase
-      .from('teams')
-      .insert([{ 
-        name, 
-        description, 
-        owner_id: userId 
-      }])
-      .select()
-      .single();
-    
-    if (teamError) {
-      console.error('Error creating team:', teamError);
-      
-      if (teamError.message?.includes('violates row-level security policy')) {
-        console.error('RLS policy violation details:', {
-          errorCode: teamError.code,
-          hint: teamError.hint,
-          details: teamError.details
-        });
-        throw new Error('Authentication error: Please sign out and sign in again to refresh your session.');
-      }
-      
-      throw teamError;
-    }
-    
-    debugLog('Team created successfully:', teamData);
-    debugLog('=== TEAM CREATION COMPLETE ===');
-    return teamData;
-  } catch (error) {
-    console.error('=== TEAM CREATION FAILED ===', error);
-    throw error;
-  }
+export async function createTeam(_userId: string, name: string, description?: string) {
+  debugLog('Creating team via backend API:', { name, description });
+  await performDeepSessionValidation();
+
+  return apiFetch('/teams', {
+    method: 'POST',
+    body: JSON.stringify({ name, description }),
+  });
 }
 
-/**
- * Helper function to get detailed auth state for debugging
- */
 export async function getAuthStateDebugInfo() {
+  const token = localStorage.getItem('sb_auth_token');
+
   try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      return { error: error.message };
-    }
-    
+    const profile = token ? await apiFetch('/auth/profile') : null;
+
     return {
-      hasSession: !!data.session,
-      userId: data.session?.user?.id || null,
-      expiresAt: data.session?.expires_at 
-        ? new Date(data.session.expires_at * 1000).toISOString()
-        : null,
-      isExpired: data.session?.expires_at 
-        ? new Date(data.session.expires_at * 1000) <= new Date()
-        : null,
-      authHeader: !!data.session?.access_token,
-      jwtLength: data.session?.access_token?.length || 0
+      hasSession: Boolean(token),
+      userId: (profile as { id?: string } | null)?.id || null,
+      authHeader: Boolean(token),
+      jwtLength: token?.length || 0,
     };
-  } catch (e) {
-    return { error: 'Failed to get auth state: ' + (e as Error).message };
+  } catch (error) {
+    return {
+      hasSession: Boolean(token),
+      error: (error as Error).message,
+    };
   }
 }

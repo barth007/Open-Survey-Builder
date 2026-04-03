@@ -104,4 +104,20 @@ describe('auth security', () => {
       where: { email: 'pending@example.com' },
     });
   });
+
+  it('rate limits repeated failed login attempts from the same client', async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null as never);
+
+    let lastResponse;
+
+    for (let attempt = 0; attempt < 11; attempt += 1) {
+      lastResponse = await request(app).post('/api/auth/login').send({
+        email: 'nobody@example.com',
+        password: 'wrong-password',
+      });
+    }
+
+    expect(lastResponse?.status).toBe(429);
+    expect(lastResponse?.body.message).toBe('Too many requests');
+  });
 });

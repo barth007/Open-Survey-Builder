@@ -5,12 +5,31 @@ import { createSystemCapabilities } from './capabilities.js';
 dotenv.config();
 
 const defaultAllowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+const knownWeakJwtSecrets = new Set([
+  'change-me-to-a-long-random-string',
+  'your-super-secret-jwt-key-replace-in-production',
+  'secret',
+]);
 
 const readRequiredEnv = (env: NodeJS.ProcessEnv, key: 'DATABASE_URL' | 'JWT_SECRET') => {
   const value = env[key]?.trim();
 
   if (!value) {
     throw new Error(`${key} is required`);
+  }
+
+  return value;
+};
+
+const validateJwtSecret = (env: NodeJS.ProcessEnv) => {
+  const value = readRequiredEnv(env, 'JWT_SECRET');
+  const isProduction = env.NODE_ENV === 'production';
+
+  if (
+    isProduction
+    && (value.length < 32 || knownWeakJwtSecrets.has(value))
+  ) {
+    throw new Error('JWT_SECRET must be at least 32 characters long and not use a known placeholder in production');
   }
 
   return value;
@@ -35,7 +54,7 @@ const parseAllowedOrigins = (env: NodeJS.ProcessEnv) => {
 export const createConfig = (env: NodeJS.ProcessEnv = process.env) => ({
   port: env.PORT?.trim() || '3001',
   databaseUrl: readRequiredEnv(env, 'DATABASE_URL'),
-  jwtSecret: readRequiredEnv(env, 'JWT_SECRET'),
+  jwtSecret: validateJwtSecret(env),
   frontendUrl: env.FRONTEND_URL?.trim(),
   allowedOrigins: parseAllowedOrigins(env),
   uploadsDir: env.UPLOADS_DIR?.trim() || path.join(process.cwd(), 'uploads'),

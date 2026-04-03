@@ -8,8 +8,8 @@ import { toast } from "@/components/ui/sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Profile } from '@/hooks/useProfile';
 import { Card } from "@/components/ui/card";
-import { supabase } from '@/integrations/supabase/client';
 import { Camera, X } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
 interface PersonalInfoTabProps {
   profile: Profile | null;
@@ -82,27 +82,19 @@ const PersonalInfoTab = ({ profile, updateProfile }: PersonalInfoTabProps) => {
       // Generate a unique file name to prevent collisions
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-      
-      // Upload the file to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Get the public URL for the uploaded file
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const uploadFile = new File([file], fileName, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      const { url } = await apiFetch('/upload', {
+        method: 'POST',
+        body: formData,
+      }) as { url: string };
         
       // Update the avatar URL in state
-      setAvatarUrl(publicUrl);
+      setAvatarUrl(url);
       
       toast("Avatar uploaded successfully!");
     } catch (error: any) {

@@ -1,8 +1,7 @@
 
 import React, { createContext, useContext } from 'react';
-import { Session, User } from '@supabase/supabase-js';
 import { useAuthState } from './useAuthState';
-import { AuthContextType, ApprovalStatus } from './types';
+import { AuthContextType, ApprovalStatus, Session, User } from './types';
 import { 
   checkApprovalStatus, 
   refreshSession, 
@@ -45,19 +44,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkingStatusRef
   } = useAuthState();
 
+  const syncAuthStateFromStorage = () => {
+    const token = localStorage.getItem('sb_auth_token');
+    const userJson = localStorage.getItem('sb_user');
+
+    if (!token || !userJson) {
+      setUser(null);
+      setSession(null);
+      setApprovalStatus('unknown');
+      return null;
+    }
+
+    try {
+      const nextUser = JSON.parse(userJson) as User;
+      const nextSession: Session = {
+        access_token: token,
+        token_type: 'bearer',
+        user: nextUser,
+      };
+      setUser(nextUser);
+      setSession(nextSession);
+      setApprovalStatus((nextUser.status as ApprovalStatus) || 'unknown');
+      return { user: nextUser, session: nextSession };
+    } catch (error) {
+      console.error('Failed to sync auth state from storage:', error);
+      localStorage.removeItem('sb_auth_token');
+      localStorage.removeItem('sb_user');
+      setUser(null);
+      setSession(null);
+      setApprovalStatus('unknown');
+      return null;
+    }
+  };
+
   // Wrapper for checking approval status
   const handleCheckApprovalStatus = async (): Promise<ApprovalStatus> => {
-    return await checkApprovalStatus(
+    const status = await checkApprovalStatus(
       user?.id, 
       statusCacheRef, 
       checkingStatusRef, 
       setApprovalStatus
     );
+    syncAuthStateFromStorage();
+    return status;
   };
 
   // Wrapper for refresh session
   const handleRefreshSession = async (): Promise<boolean> => {
     const result = await refreshSession();
+    syncAuthStateFromStorage();
+    return result;
+  };
+
+  const handleSignInWithEmail = async (email: string, password: string) => {
+    const result = await signInWithEmail(email, password);
+    syncAuthStateFromStorage();
+    return result;
+  };
+
+  const handleSignUpWithEmail = async (email: string, password: string, fullName?: string) => {
+    const result = await signUpWithEmail(email, password, fullName);
+    syncAuthStateFromStorage();
     return result;
   };
 
@@ -75,8 +122,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     approvalStatus,
     signInWithGoogle,
-    signInWithEmail,
-    signUpWithEmail,
+    signInWithEmail: handleSignInWithEmail,
+    signUpWithEmail: handleSignUpWithEmail,
     resetPassword,
     signOut: handleSignOut,
     refreshSession: handleRefreshSession,

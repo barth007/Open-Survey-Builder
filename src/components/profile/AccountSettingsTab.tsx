@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { apiFetch } from '@/lib/api';
 import { 
   Dialog,
   DialogContent,
@@ -57,9 +57,13 @@ const AccountSettingsTab = () => {
     
     try {
       setIsUpdatingPassword(true);
-      const { error } = await supabase.auth.updateUser({ password });
-      
-      if (error) throw error;
+      await apiFetch('/auth/password', {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword,
+          password,
+        }),
+      });
       
       toast("Password updated successfully!");
       setIsPasswordDialogOpen(false);

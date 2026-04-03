@@ -1,7 +1,13 @@
 import type { Request, Response } from 'express';
 import { prisma } from '../prisma.js';
 import crypto from 'crypto';
-import { parseInvitationPayload, parseRoleUpdatePayload } from '../validators/team.js';
+import {
+  getValidationMessage,
+  parseInvitationPayload,
+  parseRoleUpdatePayload,
+  teamCreateSchema,
+  teamUpdateSchema,
+} from '../validators/team.js';
 import { sendInvitationEmail } from '../mailer.js';
 
 const logControllerError = (scope: string, error: unknown) => {
@@ -66,7 +72,12 @@ interface TeamInvitationWithTeam extends TeamInvitationRecord {
 // Creating a Team
 export const createTeam = async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    const { name, description } = req.body;
+    const parsed = teamCreateSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { name, description } = parsed.data;
     try {
         if (!userId) {
             return res.status(401).json({ message: 'Unauthorized' });
@@ -250,7 +261,12 @@ export const removeTeamMember = async (req: Request, res: Response) => {
 export const updateTeam = async (req: Request, res: Response) => {
     const { teamId } = req.params;
     const userId = req.user?.id;
-    const { name, description } = req.body;
+    const parsed = teamUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { name, description } = parsed.data;
     try {
         const membership = await prisma.teamMember.findFirst({
             where: { teamId: teamId as string, userId, role: { in: ['owner', 'admin'] } }
