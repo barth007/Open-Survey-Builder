@@ -1,198 +1,222 @@
+# Survey Builder
 
-# Survey Application - Comprehensive Documentation
-
-A modern, self-hosted survey creation and management platform built for teams who value data privacy and control. Now powered by a dedicated Node.js/Express backend for maximum flexibility.
-
-## Features Showcase
-
-<p align="center">
-  <img src="screenshots/01-dashboard.png" width="800" alt="Dashboard Overview">
-</p>
-<p align="center">
-  <img src="screenshots/02-editor.png" width="800" alt="Survey Editor">
-</p>
-<p align="center">
-  <img src="screenshots/04-blocks-menu.png" width="800" alt="Block Menu">
-</p>
-<p align="center">
-  <img src="screenshots/05-block-options.png" width="800" alt="Block Options">
-</p>
-<p align="center">
-  <img src="screenshots/03-analytics.png" width="800" alt="Advanced Analytics">
-</p>
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Technology Stack](#technology-stack)
-3. [Architecture & Patterns](#architecture--patterns)
-4. [File Structure & Features](#file-structure--features)
-5. [Authentication & Security](#authentication--security)
-6. [Setup & Development](#setup--development)
-7. [Testing](#testing)
-8. [Backend Media & Response Sessions](#backend-media--response-sessions)
-9. [API Integration](#api-integration)
-
-## Project Overview
-
-This survey application provides a comprehensive solution for creating, distributing, and analyzing surveys while maintaining full control over your data.
-
-### Core Capabilities
-- **Survey Creation & Management**: Drag-and-drop interface for creating complex surveys.
-- **Team Collaboration**: Real-time collaboration with role-based access control.
-- **Advanced Analytics**: Real-time response analysis with statistical insights.
-- **Recording Features**: Screen and webcam recording for user testing.
-- **API-Driven**: Now decoupled from direct BaaS calls for better scalability.
-
-## Technology Stack
-
-### Frontend
-- **React 18** with TypeScript
-- **Vite** for build tooling
-- **Tailwind CSS** & **shadcn/ui** for styling
-- **TanStack Query** for state management
-- **Zustand** for lightweight global state
-- **DND Kit** for drag-and-drop
-
-### Backend
-- **Node.js & Express** providing a RESTful API
-- **Prisma ORM** for database interactions
-- **PostgreSQL** for persistent storage
-- **JWT** for secure authentication
-
-## Architecture & Patterns
-
-The application has been migrated from a "BaaS-direct" model to a structured API-driven architecture.
-
-### Data Flow
-1. **Features/Pages**: High-level components that orchestrate data.
-2. **Hooks**: Encapsulate logic and use Services for data fetching.
-3. **Services**: Abstract the `apiFetch` calls and handle data mapping.
-4. **Backend API**: Express controllers handling business logic and DB via Prisma.
-
-### State Management
-- **Server State**: Managed by TanStack Query for caching and synchronization.
-- **Auth State**: Managed by a dedicated `AuthProvider` using JWT tokens.
-- **UI State**: Local React hooks (`useState`, `useReducer`) or Zustand.
-
-## File Structure & Features
-
-The project follows a feature-based organization to improve maintainability.
-
-### Features (`src/features/`)
-- **auth/**: Login, registration, and password recovery.
-- **dashboard/**: Survey listing, folder management, and overview.
-- **survey-editor/**: The core editor interface, including question management and real-time preview.
-- **survey-response/**: The public-facing interface for taking surveys.
-- **user/**: Profile management and account settings.
-- **system/**: Admin panels and system configuration.
-
-### Shared Resources
-- **src/components/**: Generic UI components (shadcn/ui, Layouts, Protection).
-- **src/hooks/**: Cross-feature utility hooks.
-- **src/lib/**: Core utilities like `api.ts`, `logger.ts`, and `utils.ts`.
-- **src/types/**: Centralized TypeScript definitions.
-
-## Authentication & Security
-
-- **JWT-based Authentication**: Secure tokens used for all API requests.
-- **ProtectedRoute**: Higher-order component ensuring only authorized users access private routes.
-- **Role-Based Access**: Permission checks at both frontend and API levels.
-- **Admin Approval**: Workflow for validating new users before granting access.
-
-## Setup & Development
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL instance
-
-### Environment Setup
-1. Create a `.env` in the root (see `.env.example`).
-2. Set `DATABASE_URL` for Prisma.
-3. Set `VITE_API_URL` for the frontend.
-
-### Commands
-```bash
-# Install dependencies
-npm install
-
-# Install backend dependencies
-npm --prefix server install
-
-# Run dev server (Vite)
-npm run dev
-
-# Run Backend (if separate) or use launch script
-./launch.sh
-
-# Run frontend tests
-npm test
-
-# Run backend route/security tests
-npm --prefix server test
-
-# Build frontend and backend
-npm run build
-npm --prefix server run build
-```
-
-## Testing
-
-The repository now has two separate test entry points:
-
-- `npm test`
-  Runs the frontend/unit test suite only. The root Vitest config excludes `server/**`.
-- `npm --prefix server test`
-  Runs the backend route-level security and contract suite with Supertest.
-
-Backend coverage currently includes:
-- app bootstrap/health checks
-- auth approval and backdoor regression checks
-- public survey access boundaries
-- recording session and upload flow
-- survey ownership validation
-- invitation identity, expiry, and duplicate handling
-- team owner invariants
-- upload privacy and avatar MIME handling
-- sensitive error leakage checks
-
-## Backend Media & Response Sessions
-
-Recording uploads no longer use public `/uploads/...` paths or client-generated UUIDs.
-
-### Response session lifecycle
-1. `POST /api/surveys/:surveyId/response-session`
-   Creates a persisted draft `SurveyResponse` and returns:
-   - `responseId`
-   - `sessionToken`
-   - `status`
-2. `POST /api/surveys/recordings/upload`
-   Accepts recording media only when tied to a valid draft response and authorized by:
-   - the draft `sessionToken`, or
-   - the authenticated participant, or
-   - an authorized survey owner/admin
-3. `POST /api/surveys/respond`
-   Finalizes the existing draft response via:
-   - `responseId`
-   - `sessionToken`
-   - `answers`
-   - `metadata`
-   - optional `participantEmail`
-
-### Media access
-- Recordings are stored privately and exposed to managers through `GET /api/surveys/recordings/:id/file`.
-- The recordings list returns that authenticated API path as `recordingUrl`.
-- Public generic `/uploads` serving is gone for recordings.
-- Avatars are the only intentionally public uploaded asset class and are served from `/uploads/avatars/...`.
-
-## API Integration
-
-The application uses a centralized `apiFetch` utility in `src/lib/api.ts` that automatically handles:
-- Base URL prefixing.
-- JWT token injection via Interceptors.
-- Error handling and logging.
-- Consistent response parsing.
+A self-hosted, open-source form and survey builder for teams who want full control over their data. Built with a React frontend and a Node.js/Express backend backed by PostgreSQL.
 
 ---
 
-This documentation reflects the project's modern, feature-sliced architecture. For detailed implementation of specific questions or analysis logic, refer to the corresponding feature directory.
+## Features
+
+- **Inline block editor** — Notion/Tally-style canvas. Click a block to edit it in place; a floating settings popover handles type-specific options without cluttering the canvas.
+- **Rich block types** — short/long text, number, email, phone, date, time, URL, multiple choice, checkboxes, dropdown, multi-select, linear scale, rating, matrix, ranking, file upload, image, video, audio, embed, divider, headings, hidden fields, calculated fields.
+- **Conditional logic** — per-block IF/THEN rules with AND/OR multi-condition support, show/hide, jump-to-page, calculate, require-answer, and disable-completion actions. Expands inline below the block.
+- **Version history** — automatic snapshots on every save; restore any previous revision from the editor header.
+- **Team collaboration** — teams with owner/admin/member roles, shared surveys and folders, real-time active-user indicators.
+- **Recordings** — optional screen + webcam recording per response, with a dedicated Recordings tab and playback UI.
+- **Response analytics** — per-question charts, CSV export, response filtering and tagging.
+- **Custom domains** — map any hostname to a specific form via DNS verification.
+- **Email notifications** — configurable per-survey notification emails via SMTP (Brevo or any relay).
+- **Data retention** — configurable auto-purge policies per survey.
+- **Delivery modes** — link, embed snippet, popup.
+- **Admin approval flow** — new accounts require admin approval before access is granted.
+
+---
+
+## Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, DND Kit |
+| Backend | Node.js, Express, Prisma ORM |
+| Database | PostgreSQL |
+| Auth | JWT (access + refresh tokens) |
+| Email | Nodemailer (SMTP) |
+| Dev mail | Mailpit (local catcher) |
+
+---
+
+## Running with Docker (recommended)
+
+The entire stack — Postgres, backend, and frontend — is defined in `docker-compose.yml`.
+
+### 1. Environment variables
+
+Copy and fill in the required values:
+
+```bash
+cp .env.example .env
+```
+
+Required:
+
+```env
+JWT_SECRET=<long random string>
+SMTP_USER=<brevo or other SMTP username>
+SMTP_PASS=<SMTP password>
+```
+
+Optional overrides (defaults shown):
+
+```env
+DATABASE_URL=postgresql://graphrag:graphrag@db:5432/postgres?schema=public
+FRONTEND_URL=http://localhost:3000
+VITE_API_URL=http://localhost:3001/api
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_FROM=noreply@yourdomain.com
+```
+
+### 2. Start
+
+```bash
+docker compose up --build
+```
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001/api
+- Mailpit (dev email UI): not started by default — use `--profile dev` to enable it
+
+```bash
+# With local email catcher (nothing leaves the machine)
+docker compose --profile dev up --build
+# Mail UI at http://localhost:8025
+```
+
+### 3. First login
+
+The first registered user is automatically given admin status and approved. Subsequent users require manual approval from the admin panel.
+
+---
+
+## Running locally (without Docker)
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+
+
+### Setup
+
+```bash
+# Frontend dependencies
+npm install
+
+# Backend dependencies
+npm --prefix server install
+
+# Copy and configure environment
+cp .env.example .env
+# Set DATABASE_URL, JWT_SECRET, SMTP_* values
+
+# Run database migrations
+npx prisma migrate deploy --schema server/prisma/schema.prisma
+
+# Start frontend dev server (Vite, port 3000)
+npm run dev
+
+# Start backend dev server (port 3001) — in a separate terminal
+npm --prefix server run dev
+```
+
+---
+
+## Project Structure
+
+```
+├── src/                        # Frontend (React)
+│   ├── features/
+│   │   ├── auth/               # Login, registration
+│   │   ├── dashboard/          # Survey list, folder management
+│   │   ├── survey-editor/      # Block editor, settings, responses, recordings
+│   │   │   ├── components/     # Editor canvas, inline editor, popovers, cards
+│   │   │   ├── hooks/          # useSurveyState, useAnswersTab, useSmartAutoSave
+│   │   │   ├── lib/            # editor-blocks, editor-shortcuts, survey-appearance
+│   │   │   └── pages/          # Editor.tsx (main editor page)
+│   │   ├── survey-response/    # Public survey-taking interface
+│   │   └── user/               # Profile, account settings
+│   ├── hooks/                  # Shared hooks (surveys, teams, recordings)
+│   ├── providers/auth/         # AuthProvider, authService, JWT handling
+│   ├── services/team/          # Team mutation and query services
+│   ├── types/                  # Shared TypeScript types (survey, database, etc.)
+│   └── lib/                    # api.ts, logger.ts, survey-routes.ts
+│
+├── server/                     # Backend (Node.js / Express)
+│   ├── src/
+│   │   ├── controllers/        # auth, survey, team, custom-domains, insights, revisions
+│   │   ├── validators/         # Zod request validators
+│   │   ├── mailer.ts           # Nodemailer SMTP wrapper
+│   │   └── app.ts              # Express app and route registration
+│   ├── prisma/
+│   │   ├── schema.prisma       # Database schema
+│   │   └── migrations/         # Migration history
+│   └── tests/                  # Backend Supertest suite
+│
+└── docker-compose.yml
+```
+
+---
+
+## Testing
+
+```bash
+# Frontend unit tests (Vitest)
+npm test
+
+# Backend integration tests (Supertest)
+npm --prefix server test
+```
+
+Backend test coverage includes: auth approval, survey ownership, invitation flow, recording upload, team invariants, public form access boundaries, sensitive error leakage, custom domains, survey insights, partial submissions, password-gated forms.
+
+---
+
+## Editor architecture
+
+The editor uses an **inline block editing** model:
+
+- Each block is rendered as a borderless card on the canvas (`QuestionInlineEditor`).
+- Clicking a block selects it and opens a small **floating settings popover** to the left — block type, required toggle, type-specific options (badge style, scale labels, etc.), delete/duplicate/hide, turn into, bulk insert.
+- **Conditional logic** opens as a full-width panel that expands directly below the active block, giving enough room for multi-condition rules.
+- Blocks can be reordered via drag-and-drop (DND Kit) using the handle in the left gutter.
+- A `BlockInserter` palette (triggered by the `+` button or `/` shortcut) lets you insert any block type at any position.
+
+### Keyboard shortcuts (when a block is selected)
+
+| Shortcut | Action |
+|---|---|
+| `Esc` | Deselect block |
+| `Del` | Delete block |
+| `⌘D` | Duplicate block |
+| `⌘⇧H` | Toggle block visibility |
+| `⌘⇧L` | Toggle conditional logic panel |
+| `⌘⇧O` | Bulk insert options (choice blocks) |
+| `/` | Open block inserter |
+
+---
+
+## API overview
+
+All endpoints are prefixed with `/api`. Authentication uses a `Bearer` token in the `Authorization` header.
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/auth/register` | Register a new user |
+| `POST` | `/auth/login` | Login, returns JWT |
+| `GET` | `/surveys` | List surveys for the authenticated user |
+| `POST` | `/surveys` | Create a survey |
+| `GET` | `/surveys/:id` | Get a single survey |
+| `PUT` | `/surveys/:id` | Update a survey |
+| `DELETE` | `/surveys/:id` | Delete a survey |
+| `GET` | `/surveys/:id/revisions` | List version history |
+| `POST` | `/surveys/:id/revisions/:revId/restore` | Restore a revision |
+| `GET` | `/surveys/:id/responses` | List responses |
+| `POST` | `/surveys/respond` | Submit a response (public) |
+| `POST` | `/surveys/recordings/upload` | Upload a recording |
+| `GET` | `/surveys/recordings/:id/file` | Stream a recording file |
+| `GET` | `/surveys/public/:publicCode` | Get a published survey (public) |
+| `GET` | `/teams` | List teams |
+| `POST` | `/teams` | Create a team |
+| `POST` | `/teams/:id/invite` | Invite a member |
+| `GET` | `/custom-domains` | List custom domains |
+| `POST` | `/custom-domains` | Register a custom domain |
+
+The frontend uses a single `apiFetch` utility (`src/lib/api.ts`) that injects the JWT, handles base URL prefixing, and normalizes errors.
