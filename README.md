@@ -12,6 +12,12 @@ A modern, self-hosted survey creation and management platform built for teams wh
   <img src="screenshots/02-editor.png" width="800" alt="Survey Editor">
 </p>
 <p align="center">
+  <img src="screenshots/04-blocks-menu.png" width="800" alt="Block Menu">
+</p>
+<p align="center">
+  <img src="screenshots/05-block-options.png" width="800" alt="Block Options">
+</p>
+<p align="center">
   <img src="screenshots/03-analytics.png" width="800" alt="Advanced Analytics">
 </p>
 
