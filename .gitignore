@@ -29,3 +29,10 @@ survey.zip
 .env.*
 !.env.example
 screenshot-script.mjs
+
+# Internal working files
+AGENTS.md
+findings.md
+progress.md
+task_plan.md
+docs/
