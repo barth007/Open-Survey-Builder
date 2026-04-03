@@ -1,80 +1,112 @@
-
 import React from 'react';
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
 import { Question } from '@/types/survey';
-import QuestionCard from '@/components/QuestionCard';
-import AddQuestionButton from '@/components/AddQuestionButton';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { EditorInsertGuide } from './EditorInsertGuide';
 import { SortableQuestionCard } from './SortableQuestionCard';
 
 interface QuestionSectionProps {
   questions: Question[];
-  onQuestionChange: (updatedQuestion: Question) => void;
+  activeQuestionId: string | null;
+  logicQuestionId?: string | null;
+  onSelectQuestion: (questionId: string) => void;
+  onActivateQuestion: (questionId: string, element: HTMLElement) => void;
+  updateQuestion: (updatedQuestion: Question) => void;
+  onUpdateQuestions: (updatedQuestions: Question[]) => void;
   onDeleteQuestion: (id: string) => void;
   onDuplicateQuestion?: (question: Question) => Question;
-  onAddQuestion: () => Question;
+  onOpenInserter: (insertIndex?: number, rect?: DOMRect) => void;
+  onCloseLogic?: () => void;
 }
 
 export const QuestionSection: React.FC<QuestionSectionProps> = ({
   questions,
-  onQuestionChange,
+  activeQuestionId,
+  logicQuestionId = null,
+  onSelectQuestion,
+  onActivateQuestion,
+  updateQuestion,
+  onUpdateQuestions,
   onDeleteQuestion,
   onDuplicateQuestion,
-  onAddQuestion
+  onOpenInserter,
+  onCloseLogic,
 }) => {
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
-      const oldIndex = questions.findIndex(q => q.id === active.id);
-      const newIndex = questions.findIndex(q => q.id === over.id);
-      
-      const newQuestions = arrayMove(questions, oldIndex, newIndex);
-      
-      // Update each question's position
-      newQuestions.forEach((question, index) => {
-        onQuestionChange({ ...question });
-      });
+      const oldIndex = questions.findIndex((q) => q.id === active.id);
+      const newIndex = questions.findIndex((q) => q.id === over.id);
+      onUpdateQuestions(arrayMove(questions, oldIndex, newIndex));
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Questions</h3>
-        <AddQuestionButton onClick={onAddQuestion} />
-      </div>
-      
-      {questions.length > 0 ? (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={questions.map(q => q.id)} strategy={verticalListSortingStrategy}>
-            {questions.map((question) => (
-              <SortableQuestionCard
-                key={question.id}
-                question={question}
-                questions={questions}
-                onQuestionChange={onQuestionChange}
-                onDeleteQuestion={onDeleteQuestion}
-                onDuplicateQuestion={onDuplicateQuestion}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+    <div className="animate-fade-in-up px-1" onClick={(e) => e.stopPropagation()}>
+      {questions.length === 0 ? (
+        <EditorInsertGuide
+          prominent
+          label="Add your first block"
+          description="Insert a question, content, or media block between the start page and the completion page."
+          onInsert={(rect) => onOpenInserter(0, rect)}
+        />
       ) : (
-        <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="mb-4">No questions added yet</p>
-          <AddQuestionButton onClick={onAddQuestion} />
+        <div className="space-y-1">
+          <EditorInsertGuide
+            label="Insert block here"
+            onInsert={(rect) => onOpenInserter(0, rect)}
+          />
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-1">
+                {questions.map((question, index) => (
+                  <SortableQuestionCard
+                    key={question.id}
+                    question={question}
+                    questions={questions}
+                    isActive={question.id === activeQuestionId}
+                    logicOpen={question.id === logicQuestionId}
+                    onSelectQuestion={onSelectQuestion}
+                    onActivateQuestion={onActivateQuestion}
+                    onQuestionChange={updateQuestion}
+                    onDeleteQuestion={onDeleteQuestion}
+                    onDuplicateQuestion={onDuplicateQuestion}
+                    onAddQuestionBelow={(rect) => onOpenInserter(index + 1, rect)}
+                    onCloseLogic={onCloseLogic}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          <EditorInsertGuide
+            label="Insert block here"
+            onInsert={(rect) => onOpenInserter(questions.length, rect)}
+          />
         </div>
       )}
     </div>
