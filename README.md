@@ -2,6 +2,24 @@
 
 A self-hosted, open-source form and survey builder for teams who want full control over their data. Built with a React frontend and a Node.js/Express backend backed by PostgreSQL.
 
+## Features Showcase
+
+<p align="center">
+  <img src="screenshots/01-dashboard.png" width="800" alt="Dashboard Overview">
+</p>
+<p align="center">
+  <img src="screenshots/02-editor.png" width="800" alt="Survey Editor">
+</p>
+<p align="center">
+  <img src="screenshots/03-analytics.png" width="800" alt="Advanced Analytics">
+</p>
+<p align="center">
+  <img src="screenshots/04-blocks-menu.png" width="800" alt="Block Menu">
+</p>
+<p align="center">
+  <img src="screenshots/05-block-options.png" width="800" alt="Block Options">
+</p>
+
 ---
 
 ## Features
