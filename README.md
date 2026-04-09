@@ -4,20 +4,44 @@ A self-hosted, open-source form and survey builder for teams who want full contr
 
 ## Features Showcase
 
+**Dashboard** — all your surveys at a glance, with live response counts and sharing status.
 <p align="center">
-  <img src="screenshots/01-dashboard.png" width="800" alt="Dashboard Overview">
+  <img src="screenshots/02-dashboard.png" width="800" alt="Dashboard">
 </p>
+
+**Block editor** — Notion-style canvas. Click any block to edit it in place; drag handles in the left gutter let you reorder.
 <p align="center">
-  <img src="screenshots/02-editor.png" width="800" alt="Survey Editor">
+  <img src="screenshots/03-editor-canvas.png" width="800" alt="Block editor canvas">
 </p>
+
+**Block options** — a floating panel opens beside the active block with type switcher, required toggle, logic rules, duplicate, and hide controls.
 <p align="center">
-  <img src="screenshots/03-analytics.png" width="800" alt="Advanced Analytics">
+  <img src="screenshots/04-block-options-popover.png" width="800" alt="Block options popover">
 </p>
+
+**Block inserter** — press `/` anywhere on the canvas to pick from every available question and content type.
 <p align="center">
-  <img src="screenshots/04-blocks-menu.png" width="800" alt="Block Menu">
+  <img src="screenshots/05-block-inserter.png" width="800" alt="Block inserter palette">
 </p>
+
+**Design tab** — control colors, fonts, card style, spacing, and progress-bar position with a live preview.
 <p align="center">
-  <img src="screenshots/05-block-options.png" width="800" alt="Block Options">
+  <img src="screenshots/09-editor-design.png" width="800" alt="Design and theming">
+</p>
+
+**Form settings** — configure locale, completion redirect, access controls, max submissions, and the closed-state message.
+<p align="center">
+  <img src="screenshots/06-editor-settings.png" width="800" alt="Form settings">
+</p>
+
+**Response analytics** — per-question bar and distribution charts with a breakdown table, CSV export, and participant filters.
+<p align="center">
+  <img src="screenshots/08-editor-analysis-chart.png" width="800" alt="Response analytics chart">
+</p>
+
+**Respondent view** — clean, focused survey-taking experience served from a public link or custom domain.
+<p align="center">
+  <img src="screenshots/11-public-question.png" width="800" alt="Public survey respondent view">
 </p>
 
 ---
