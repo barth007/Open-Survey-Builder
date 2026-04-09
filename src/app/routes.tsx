@@ -16,6 +16,7 @@ import {
 
 // Lazy-loaded pages
 const Login = lazy(() => import('@/features/auth/pages/Login'));
+const ResetPassword = lazy(() => import('@/features/auth/pages/ResetPassword'));
 const Dashboard = lazy(() => import('@/features/dashboard/pages/Dashboard'));
 const Editor = lazy(() => import('@/features/survey-editor/pages/Editor'));
 const PublicSurvey = lazy(() => import('@/features/survey-response/pages/PublicSurvey'));
@@ -30,6 +31,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path={PENDING_APPROVAL_ROUTE} element={<PendingApproval />} />
         <Route
           path="/dashboard"

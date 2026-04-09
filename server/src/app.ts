@@ -11,6 +11,8 @@ import {
   deleteAccount,
   getPendingProfiles,
   updateProfileStatus,
+  requestPasswordReset,
+  resetPasswordWithToken,
 } from './controllers/auth.js';
 import {
   trackSurveyInsightEvent,
@@ -129,6 +131,8 @@ app.get('/api/system/capabilities', (_req, res) => {
 
 app.post('/api/auth/register', authRateLimit, register);
 app.post('/api/auth/login', authRateLimit, login);
+app.post('/api/auth/request-reset', authRateLimit, requestPasswordReset);
+app.post('/api/auth/reset-password', authRateLimit, resetPasswordWithToken);
 
 app.get('/api/auth/admin/pending', auth, getPendingProfiles);
 app.put('/api/auth/admin/profiles/:id', auth, updateProfileStatus);

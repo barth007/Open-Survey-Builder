@@ -83,6 +83,15 @@ export const deleteAccountSchema = z.object({
   ),
 }).strict();
 
+export const requestPasswordResetSchema = z.object({
+  email: emailSchema,
+}).strict();
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  password: passwordSchema,
+}).strict();
+
 export const getValidationMessage = (issues: { message?: string }[]) => (
   issues[0]?.message || 'Invalid request body'
 );

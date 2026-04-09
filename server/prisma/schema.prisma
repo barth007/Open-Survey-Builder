@@ -22,11 +22,12 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  teams         TeamMember[]
-  surveys       Survey[]
-  folders       Folder[]
-  responses     SurveyResponse[] @relation("Participant")
-  customDomains CustomDomain[]
+  teams              TeamMember[]
+  surveys            Survey[]
+  folders            Folder[]
+  responses          SurveyResponse[] @relation("Participant")
+  customDomains      CustomDomain[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Team {
@@ -223,6 +224,17 @@ model CustomDomain {
 
   user   User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   routes DomainRoute[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DomainRoute {

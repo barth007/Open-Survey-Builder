@@ -14,6 +14,9 @@ const mapSurveyToApiPayload = (survey: Partial<Survey> & Record<string, unknown>
     delete payload.title;
   }
 
+  // id is passed in the URL, not the body — backend strict schema rejects it
+  delete payload.id;
+
   return payload;
 };
 

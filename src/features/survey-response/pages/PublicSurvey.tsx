@@ -4,7 +4,7 @@ import { debugLog, debugWarn } from '@/lib/logger';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuerySurveyByPublicCode } from '@/hooks/survey/useQuerySurveyByPublicCode';
-import { QuestionItem } from '@/components/survey/response/QuestionItem';
+import { QuestionItem } from '@/features/survey-response/components/QuestionItem';
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { useSubmitResponse } from '@/hooks/survey/useSubmitResponse';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { toast } from '@/components/ui/sonner';
 import { Loader } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Answer } from '@/types/survey';
-import { PublicSurveyLayout } from '@/components/survey/PublicSurveyLayout';
+import { PublicSurveyLayout } from '@/features/survey-editor/components/PublicSurveyLayout';
 import { WelcomePage } from '../../survey-editor/components/WelcomePage';
 import { ThankYouPage } from '../../survey-editor/components/ThankYouPage';
 import { RecordingPermissionDialog } from '../../survey-editor/components/RecordingPermissionDialog';
@@ -33,7 +33,7 @@ interface PublicSurveyProps {
 type SurveyFlowState = 'welcome' | 'permissions' | 'questions' | 'thankYou';
 
 const PublicSurvey = ({ isPreviewMode = false }: PublicSurveyProps) => {
-  const { publicCode } = useParams<{ publicCode: string }>();
+  const { code: publicCode } = useParams<{ code: string }>();
   const {
     data: survey,
     isLoading,

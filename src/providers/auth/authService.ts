@@ -227,8 +227,18 @@ export async function signUpWithEmail(email: string, password: string, fullName?
 }
 
 export async function resetPassword(email: string) {
-  debugWarn('Password reset requested without a self-service backend flow', email);
-  toast.info('Password reset is not available yet. Contact an administrator.');
+  try {
+    await apiFetch('/auth/request-reset', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    toast.success('Check your email', {
+      description: 'If that email is registered, a reset link has been sent.',
+    });
+  } catch (error) {
+    toast.error('Failed to send reset email. Please try again.');
+    throw error;
+  }
 }
 
 export async function signOut() {

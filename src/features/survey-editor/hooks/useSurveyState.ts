@@ -116,10 +116,10 @@ export const useSurveyState = (surveyId: string | undefined) => {
         updates: completeUpdates
       });
       
-      if (result.public_code && result.public_code !== survey.publicCode) {
-        debugLog(`Received updated public code from database: ${result.public_code}`);
-        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
-        updateLocalCache({ publicCode: result.public_code });
+      if (result.publicCode && result.publicCode !== survey.publicCode) {
+        debugLog(`Received updated public code from database: ${result.publicCode}`);
+        setSurvey(prev => ({ ...prev, publicCode: result.publicCode }));
+        updateLocalCache({ publicCode: result.publicCode });
       }
       
       setPendingUpdates({});
@@ -149,10 +149,15 @@ export const useSurveyState = (surveyId: string | undefined) => {
   }, [surveyId, survey, questions, pendingUpdates, updateSurvey, queryClient, toast, updateLocalCache]);
 
   // Smart auto-save hook with improved settings
+  const initialLastSaved = surveyData?.updatedAt
+    ? new Date(surveyData.updatedAt as string)
+    : null;
+
   const smartAutoSave = useSmartAutoSave({
     onSave: handleSave,
-    textFieldDelay: 1500, // Reduced from 3000ms
-    structuralChangeDelay: 800 // Reduced from 1000ms
+    initialLastSaved,
+    textFieldDelay: 1500,
+    structuralChangeDelay: 800,
   });
 
   // Enhanced batch update function with better state management
@@ -311,10 +316,10 @@ export const useSurveyState = (surveyId: string | undefined) => {
         updates
       });
       
-      if (result.public_code && result.public_code !== survey.publicCode) {
-        debugLog(`Received new public code from database: ${result.public_code}`);
-        setSurvey(prev => ({ ...prev, publicCode: result.public_code }));
-        updateLocalCache({ publicCode: result.public_code });
+      if (result.publicCode && result.publicCode !== survey.publicCode) {
+        debugLog(`Received new public code from database: ${result.publicCode}`);
+        setSurvey(prev => ({ ...prev, publicCode: result.publicCode }));
+        updateLocalCache({ publicCode: result.publicCode });
       }
       
       setTimeout(() => {

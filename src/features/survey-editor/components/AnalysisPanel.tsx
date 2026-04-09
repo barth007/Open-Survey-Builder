@@ -2,16 +2,16 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { StatisticalInsights } from '@/components/survey/analysis/StatisticalInsights';
-import { ScaleMapping } from '@/components/survey/analysis/ScaleMapping';
-import { OutlierDetection } from '@/components/survey/analysis/OutlierDetection';
+import { StatisticalInsights } from '@/features/survey-analysis/components/StatisticalInsights';
+import { ScaleMapping } from '@/features/survey-analysis/components/ScaleMapping';
+import { OutlierDetection } from '@/features/survey-analysis/components/OutlierDetection';
 import { RecordingsAnalysis } from '@/features/survey-editor/components/RecordingsAnalysis';
-import { EmptyAnalysisState } from '@/components/survey/analysis/panel/EmptyAnalysisState';
-import { AnalysisPanelHeader } from '@/components/survey/analysis/panel/AnalysisPanelHeader';
-import { AnalysisTabs } from '@/components/survey/analysis/panel/AnalysisTabs';
-import { TaggingTab } from '@/components/survey/analysis/panel/TaggingTab';
-import { CollapsedAnalysisPanel } from '@/components/survey/analysis/panel/CollapsedAnalysisPanel';
-import { InsightsSummary } from '@/components/survey/analysis/InsightsSummary';
+import { EmptyAnalysisState } from '@/features/survey-analysis/components/panel/EmptyAnalysisState';
+import { AnalysisPanelHeader } from '@/features/survey-analysis/components/panel/AnalysisPanelHeader';
+import { AnalysisTabs } from '@/features/survey-analysis/components/panel/AnalysisTabs';
+import { TaggingTab } from '@/features/survey-analysis/components/panel/TaggingTab';
+import { CollapsedAnalysisPanel } from '@/features/survey-analysis/components/panel/CollapsedAnalysisPanel';
+import { InsightsSummary } from '@/features/survey-analysis/components/InsightsSummary';
 
 interface ResponseData {
   answer: string;

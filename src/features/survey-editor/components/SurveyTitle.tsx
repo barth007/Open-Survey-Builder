@@ -1,6 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { GripVertical } from 'lucide-react';
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useParams } from 'react-router-dom';
@@ -33,27 +31,22 @@ const SurveyTitle: React.FC<SurveyTitleProps> = ({
   };
 
   return (
-    <Card className="w-full rounded-lg bg-white min-h-[180px] flex flex-col">
-      <CardContent className="flex flex-col gap-4 pt-6 px-6 flex-1">
-        <div className="flex items-center gap-3">
-          <Input
-            ref={titleInputRef}
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="Survey Title"
-            className="text-xl font-bold border-none px-0 focus-visible:ring-0 w-full h-auto min-h-[40px]"
-          />
-        </div>
-
-        <Textarea
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder="Survey Description"
-          className="border-none resize-none px-0 focus-visible:ring-0 w-full min-h-[60px]"
-          rows={3}
-        />
-      </CardContent>
-    </Card>
+    <div className="w-full rounded-[32px] border border-border/70 bg-background px-8 py-7 shadow-[0_10px_40px_rgba(15,15,15,0.05)]">
+      <Input
+        ref={titleInputRef}
+        value={title}
+        onChange={(e) => handleTitleChange(e.target.value)}
+        placeholder="Survey Title"
+        className="h-auto min-h-[44px] border-none bg-transparent px-0 text-3xl font-semibold tracking-tight shadow-none focus-visible:ring-0"
+      />
+      <Textarea
+        value={description}
+        onChange={(e) => onDescriptionChange(e.target.value)}
+        placeholder="Add a description or instructions for respondents..."
+        className="mt-3 min-h-[56px] resize-none border-none bg-transparent px-0 text-base leading-7 text-muted-foreground shadow-none focus-visible:ring-0"
+        rows={2}
+      />
+    </div>
   );
 };
 

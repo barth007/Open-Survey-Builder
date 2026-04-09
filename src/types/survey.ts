@@ -48,13 +48,15 @@ export interface Survey {
   questions: Question[];
   isPublished: boolean;
   folderId?: string;
-  teamId?: string; 
+  teamId?: string;
+  teamName?: string;
   sharableLink?: string;
   responseLimit?: number;
   responses?: SurveyResponse[];
   publicCode?: string;
   order?: number;
-  createdAt?: string | Date; // Added createdAt field for compatibility
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   // Welcome page fields
   welcomeTitle?: string;
   welcomeMessage?: string;

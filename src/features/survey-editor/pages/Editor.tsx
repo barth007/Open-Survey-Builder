@@ -289,7 +289,7 @@ const SurveyEditorPage = () => {
         onInsert={handleBulkInsert}
       />
 
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex h-screen w-full overflow-hidden bg-background">
         <SurveySidebar />
         <SidebarInset className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
           <SurveyNavigationHeader
@@ -299,7 +299,7 @@ const SurveyEditorPage = () => {
             survey={survey}
             onPublishToggle={togglePublish}
           />
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             {isLoading ? (
               <EditorSkeleton />
             ) : error ? (
@@ -432,9 +432,9 @@ const SurveyEditorPage = () => {
                 )}
 
                 {activeTab === 'recordings' && (
-                  <div className="flex-1 overflow-hidden">
+                  <EditorTabCanvas contentClassName="space-y-8">
                     <RecordingsTab surveyId={surveyId} />
-                  </div>
+                  </EditorTabCanvas>
                 )}
               </SurveyLayout>
             )}

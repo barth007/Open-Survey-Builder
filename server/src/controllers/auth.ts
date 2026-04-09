@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma.js';
 import { config } from '../config.js';
+import { sendTransactionalEmail } from '../mailer.js';
 import {
     adminProfileStatusSchema,
     deleteAccountSchema,
@@ -10,6 +12,8 @@ import {
     loginSchema,
     profileUpdateSchema,
     registerSchema,
+    requestPasswordResetSchema,
+    resetPasswordSchema,
     updatePasswordSchema,
 } from '../validators/auth.js';
 
@@ -47,14 +51,18 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        // First registered user is automatically approved as admin
+        const userCount = await prisma.user.count();
+        const isFirstUser = userCount === 0;
+
         const passwordHash = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: {
                 email,
                 passwordHash,
                 name,
-                status: 'pending',
-                role: 'user',
+                status: isFirstUser ? 'approved' : 'pending',
+                role: isFirstUser ? 'admin' : 'user',
             },
         });
 
@@ -333,6 +341,121 @@ export const exportAccountData = async (req: Request, res: Response) => {
     } catch (error) {
         logControllerError('auth.exportAccountData', error);
         res.status(500).json({ message: 'Error exporting account data' });
+    }
+};
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+    const parsed = requestPasswordResetSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const email = normalizeEmail(parsed.data.email);
+
+    // Always respond with the same message to prevent email enumeration
+    const successMessage = 'If that email is registered, a reset link has been sent.';
+
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            return res.json({ message: successMessage });
+        }
+
+        // Invalidate any existing unused tokens for this user
+        await prisma.passwordResetToken.updateMany({
+            where: { userId: user.id, usedAt: null },
+            data: { usedAt: new Date() },
+        });
+
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+        await prisma.passwordResetToken.create({
+            data: { userId: user.id, token, expiresAt },
+        });
+
+        const frontendUrl = config.frontendUrl || 'http://localhost:3100';
+        const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+        await sendTransactionalEmail({
+            to: email,
+            subject: 'Reset your password',
+            text: [
+                'You requested a password reset for your Survey Builder account.',
+                '',
+                `Reset your password here: ${resetUrl}`,
+                '',
+                'This link expires in 1 hour.',
+                '',
+                'If you did not request this, you can safely ignore this email.',
+            ].join('\n'),
+            html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#111">
+  <h2 style="margin-bottom:4px">Reset your password</h2>
+  <p style="color:#555;margin-top:0">
+    You requested a password reset for your Survey Builder account.
+  </p>
+  <p style="margin:24px 0">
+    <a href="${resetUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600">
+      Reset Password
+    </a>
+  </p>
+  <p style="color:#888;font-size:13px">
+    Or copy this link: <a href="${resetUrl}" style="color:#6366f1">${resetUrl}</a>
+  </p>
+  <p style="color:#888;font-size:12px;margin-top:32px;border-top:1px solid #eee;padding-top:16px">
+    This link expires in 1 hour. If you did not request this, you can safely ignore this email.
+  </p>
+</body>
+</html>
+`.trim(),
+        });
+
+        res.json({ message: successMessage });
+    } catch (error) {
+        logControllerError('auth.requestPasswordReset', error);
+        res.status(500).json({ message: 'Error sending reset email' });
+    }
+};
+
+export const resetPasswordWithToken = async (req: Request, res: Response) => {
+    const parsed = resetPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+        return res.status(400).json({ message: getValidationMessage(parsed.error.issues) });
+    }
+
+    const { token, password } = parsed.data;
+
+    try {
+        const resetToken = await prisma.passwordResetToken.findUnique({
+            where: { token },
+            include: { user: { select: { id: true } } },
+        });
+
+        if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+            return res.status(400).json({ message: 'Invalid or expired reset token.' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: resetToken.userId },
+                data: { passwordHash },
+            }),
+            prisma.passwordResetToken.update({
+                where: { id: resetToken.id },
+                data: { usedAt: new Date() },
+            }),
+        ]);
+
+        res.json({ message: 'Password updated successfully.' });
+    } catch (error) {
+        logControllerError('auth.resetPasswordWithToken', error);
+        res.status(500).json({ message: 'Error resetting password' });
     }
 };
 

@@ -16,24 +16,24 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ responses, onExportCSV
     : 'No responses yet';
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-ice p-6 mb-8">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h2 className="text-xl font-bold mb-2 text-carbon">Response Summary</h2>
-          <p className="text-gray-600 mb-2">Total responses: <span className="font-medium">{totalResponses}</span></p>
-          <p className="text-gray-600">Last response: <span className="font-medium">{lastResponseDate}</span></p>
+    <div className="rounded-[28px] border border-border/70 bg-background px-6 py-5 shadow-[0_8px_30px_rgba(15,15,15,0.05)]">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Response Summary</p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">{totalResponses}</span> total &mdash; last received {lastResponseDate}
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={onExportCSV} 
-            variant="outline" 
-            className="flex gap-2"
-            disabled={!responses || responses.length === 0}
-          >
-            <Download size={18} />
-            Export CSV
-          </Button>
-        </div>
+        <Button
+          onClick={onExportCSV}
+          variant="outline"
+          size="sm"
+          className="shrink-0 gap-2 rounded-full border-border/70"
+          disabled={!responses || responses.length === 0}
+        >
+          <Download className="h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
     </div>
   );

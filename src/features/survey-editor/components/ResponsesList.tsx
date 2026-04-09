@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ProcessedResponseGroup, sortResponses } from './../lib/ResponsesProcessor';
-import { ResponseCardItem } from '@/components/survey/analysis/ResponseCardItem';
+import { ResponseCardItem } from '@/features/survey-analysis/components/ResponseCardItem';
 
 interface ResponsesListProps {
   responseGroups: ProcessedResponseGroup[];

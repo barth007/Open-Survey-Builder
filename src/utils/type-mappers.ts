@@ -52,9 +52,11 @@ export function dbSurveyToSurvey(dbSurvey: DbSurvey): Survey {
     // Match property names with the Survey type definition
     folderId: getValue<string | null>(surveyRecord, 'folderId', 'folder_id') || undefined,
     teamId: getValue<string | null>(surveyRecord, 'teamId', 'team_id') || undefined,
+    teamName: isRecord(surveyRecord.team) ? (surveyRecord.team.name as string | undefined) : undefined,
     publicCode: getValue<string | null>(surveyRecord, 'publicCode', 'public_code') || undefined,
     order: getValue<number | null>(surveyRecord, 'order') || undefined,
     createdAt: getValue<string | null>(surveyRecord, 'createdAt', 'created_at') || new Date().toISOString(),
+    updatedAt: getValue<string | null>(surveyRecord, 'updatedAt', 'updated_at') || undefined,
     // Welcome page fields - now including welcome_instructions and welcome_button_text
     welcomeTitle: getValue<string | null>(surveyRecord, 'welcomeTitle', 'welcome_title') || undefined,
     welcomeMessage: getValue<string | null>(surveyRecord, 'welcomeMessage', 'welcome_message') || undefined,
@@ -155,6 +157,8 @@ export function dbSurveyToOrganizationSurvey(dbSurvey: DbSurvey): OrganizationSu
     createdAt: getValue<string | null>(surveyRecord, 'createdAt', 'created_at') || new Date().toISOString(),
     folderId: getValue<string | null>(surveyRecord, 'folderId', 'folder_id'),
     isPublished: Boolean(getValue<boolean>(surveyRecord, 'isPublished', 'is_published')),
+    teamId: getValue<string | null>(surveyRecord, 'teamId', 'team_id'),
+    teamName: isRecord(surveyRecord.team) ? (surveyRecord.team.name as string | undefined) : undefined,
   };
 }
 

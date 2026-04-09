@@ -31,10 +31,9 @@ export function SurveyCard({ survey }: SurveyCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Team info - placeholder for now since we don't have team data in the survey type */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4" />
-          <span>Personal</span>
+          <span>{survey.teamName ?? 'Personal'}</span>
         </div>
 
         {/* Sharing status */}

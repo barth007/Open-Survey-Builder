@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from '@/components/ui/sonner';
 import { Loader2 } from 'lucide-react';
 import EmailAuthForm from '@/components/auth/EmailAuthForm';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Login = () => {
   const { user, isLoading, session, checkApprovalStatus } = useAuth();
@@ -18,11 +19,11 @@ const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Debug current URL and search parameters
   useEffect(() => {
     debugLog('Login page loaded at:', window.location.href);
-    
+
     // Only log URL details on first load
     const urlParams = new URLSearchParams(window.location.search);
     for (const [key, value] of urlParams.entries()) {
@@ -38,7 +39,7 @@ const Login = () => {
     try {
       const hasLocalStorage = !!window.localStorage;
       debugLog('LocalStorage available:', hasLocalStorage);
-      
+
       if (hasLocalStorage) {
         const supabaseSession = localStorage.getItem('sb-gtzcjxzllsrtaieopsgc-auth-token');
         debugLog('Supabase session in storage:', !!supabaseSession);
@@ -50,7 +51,7 @@ const Login = () => {
 
   // Get the path to redirect to after login
   const from = location.state?.from || '/dashboard';
-  
+
   // Handle authenticated user and redirection
   useEffect(() => {
     // Don't try to check status if we're already redirecting or don't have a user/session
@@ -63,18 +64,18 @@ const Login = () => {
       try {
         setRedirecting(true);
         setCheckingStatus(true);
-        
+
         // Check user approval status using the throttled function
         debugLog('Login page checking approval status');
         const status = await checkApprovalStatus();
-        
+
         debugLog('Login page: User status is', status);
-        
+
         if (status === 'approved') {
           debugLog('User is approved, redirecting to dashboard');
           navigate('/dashboard', { replace: true });
         } else if (status === 'pending') {
-          toast("Your account is pending approval", { 
+          toast("Your account is pending approval", {
             description: "An administrator will review your request soon."
           });
           navigate('/pending', { replace: true });
@@ -106,7 +107,7 @@ const Login = () => {
         }, 5000);
       }
     };
-    
+
     handleAuthenticatedUser();
   }, [user, session, isLoading, redirecting, checkingStatus, navigate, from, checkApprovalStatus]);
 
@@ -148,7 +149,7 @@ const Login = () => {
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </CardTitle>
           <CardDescription className="text-center">
-            {isSignUp 
+            {isSignUp
               ? 'Sign up to create and manage your surveys'
               : 'Sign in to create and manage your surveys'
             }
@@ -157,9 +158,27 @@ const Login = () => {
         <CardContent className="space-y-4">
           <EmailAuthForm onToggleMode={toggleAuthMode} isSignUp={isSignUp} />
 
-          <div className="rounded-lg border border-border/70 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            Email/password authentication is active. Google OAuth has been removed with the Supabase path.
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
           </div>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="w-full">
+                  <Button variant="outline" className="w-full" disabled>
+                    Continue with Google
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>On the roadmap</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardContent>
         <CardFooter className="text-center text-sm text-gray-500 justify-center">
           By signing in, you agree to our Terms of Service and Privacy Policy

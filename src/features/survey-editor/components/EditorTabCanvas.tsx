@@ -19,7 +19,7 @@ export const EditorTabCanvas: React.FC<EditorTabCanvasProps> = ({
 }) => {
   return (
     <div
-      className={cn('w-full h-full flex-1 overflow-y-auto overflow-x-hidden bg-background', className)}
+      className={cn('w-full h-full flex-1 overflow-y-auto overflow-x-hidden bg-[#f6f5f3]', className)}
       onClick={onCanvasClick}
     >
       <div

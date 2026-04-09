@@ -28,6 +28,8 @@ interface ResponseCardItemProps {
   item: ResponseGroup;
   chartType: 'bar' | 'pie';
   onChartTypeChange: (questionId: string, type: 'bar' | 'pie') => void;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
 const getQuestionTypeLabel = (questionType: string, isOrphaned: boolean): string => {
@@ -44,6 +46,8 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
   item,
   chartType,
   onChartTypeChange,
+  isSelected,
+  onClick,
 }) => {
   const supportsCharts = ['multipleChoice', 'checkboxes', 'likert5', 'likert7', 'likert10'].includes(item.questionType);
   const isOrphaned = item.isOrphaned;
@@ -51,8 +55,10 @@ export const ResponseCardItem: React.FC<ResponseCardItemProps> = ({
 
   return (
     <Card
+      onClick={onClick}
       className={cn(
-        'overflow-hidden rounded-[32px] border border-border/70 bg-background shadow-[0_14px_36px_rgba(15,15,15,0.04)]',
+        'overflow-hidden rounded-[32px] border border-border/70 bg-background shadow-[0_14px_36px_rgba(15,15,15,0.04)] cursor-pointer transition-all duration-200',
+        isSelected && 'ring-2 ring-blue-500 border-blue-200',
         isOrphaned && 'border-orange-200 bg-orange-50/50',
       )}
     >

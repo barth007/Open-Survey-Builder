@@ -55,10 +55,22 @@ const TeamTabInner = () => {
   // Show empty state when no teams exist and no invitations
   if ((!teams || teams.length === 0) && !hasReceivedInvitations) {
     return (
-      <EmptyTeamState onCreateTeam={() => {
-        debugLog('Create team button clicked from empty state');
-        setIsCreateTeamDialogOpen(true);
-      }} />
+      <>
+        <EmptyTeamState onCreateTeam={() => {
+          debugLog('Create team button clicked from empty state');
+          setIsCreateTeamDialogOpen(true);
+        }} />
+        <TeamDialogs
+          isCreateTeamDialogOpen={isCreateTeamDialogOpen}
+          setIsCreateTeamDialogOpen={setIsCreateTeamDialogOpen}
+          isInviteDialogOpen={isInviteDialogOpen}
+          setIsInviteDialogOpen={setIsInviteDialogOpen}
+          selectedTeamId={selectedTeamId}
+          onRemoveMember={handleRemoveMember}
+          onDeleteTeam={handleDeleteTeam}
+          teamMembers={teamMembers}
+        />
+      </>
     );
   }
 

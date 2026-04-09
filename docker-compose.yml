@@ -32,12 +32,12 @@ services:
       dockerfile: Dockerfile
     command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
     ports:
-      - "3101:3001"
+      - "3001:3001"
     environment:
       - DATABASE_URL=${DATABASE_URL:-postgresql://graphrag:graphrag@db:5432/postgres?schema=public}
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
       - PORT=3001
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3100}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - SMTP_HOST=${SMTP_HOST:-smtp-relay.brevo.com}
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_SECURE=${SMTP_SECURE:-false}
@@ -54,7 +54,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
     ports:
-      - "3100:3000"
+      - "3000:3000"
     depends_on:
       - backend
 

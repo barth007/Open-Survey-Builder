@@ -9,6 +9,8 @@ export type Survey = {
   createdAt: string | Date;
   folderId?: string | null;
   isPublished?: boolean;
+  teamId?: string | null;
+  teamName?: string | null;
 }
 
 export type SurveyFolder = {
@@ -37,6 +39,8 @@ export function convertToOrganizationSurvey(fullSurvey: FullSurvey): Survey {
     name: fullSurvey.title,
     createdAt: fullSurvey.createdAt || new Date(),
     folderId: fullSurvey.folderId,
-    isPublished: fullSurvey.isPublished
+    isPublished: fullSurvey.isPublished,
+    teamId: fullSurvey.teamId,
+    teamName: fullSurvey.teamName,
   };
 }

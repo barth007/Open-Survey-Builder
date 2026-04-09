@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { Prisma, type QuestionRecording } from '@prisma/client';
+import { randomBytes } from 'node:crypto';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
@@ -303,6 +304,11 @@ export const getSurveys = async (req: Request, res: Response) => {
           },
         ],
       },
+      include: {
+        team: {
+          select: { id: true, name: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -524,6 +530,11 @@ export const updateSurvey = async (req: Request, res: Response) => {
         ? { folderId: associations.folderId }
         : {}),
     };
+
+    // Auto-generate publicCode when publishing for the first time
+    if (updates.isPublished === true && !survey.publicCode) {
+      updates.publicCode = randomBytes(8).toString('base64url');
+    }
 
     const updated = await prisma.survey.update({
       where: { id: id as string },

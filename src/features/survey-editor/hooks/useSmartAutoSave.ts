@@ -5,8 +5,9 @@ import { useDebounce } from '@/hooks/useDebounce';
 
 interface UseSmartAutoSaveProps {
   onSave: () => Promise<void>;
-  textFieldDelay?: number; // For text inputs like title, description
-  structuralChangeDelay?: number; // For structural changes like add/delete questions
+  initialLastSaved?: Date | null;
+  textFieldDelay?: number;
+  structuralChangeDelay?: number;
 }
 
 interface ChangeBuffer {
@@ -16,13 +17,15 @@ interface ChangeBuffer {
   lastStructuralChange: number;
 }
 
-export function useSmartAutoSave({ 
-  onSave, 
-  textFieldDelay = 2000, // Increased for more stability during option generation
-  structuralChangeDelay = 1000 // Increased to prevent interference with Likert generation
+export function useSmartAutoSave({
+  onSave,
+  initialLastSaved = null,
+  textFieldDelay = 2000,
+  structuralChangeDelay = 1000,
 }: UseSmartAutoSaveProps) {
   const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(initialLastSaved ?? null);
+  const initializedRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -39,6 +42,14 @@ export function useSmartAutoSave({
   const isManualSaveRef = useRef(false);
   const pendingSaveRef = useRef(false);
   const maxRetries = 3;
+
+  // Sync initialLastSaved once when it arrives from the server
+  useEffect(() => {
+    if (!initializedRef.current && initialLastSaved) {
+      setLastSaved(initialLastSaved);
+      initializedRef.current = true;
+    }
+  }, [initialLastSaved]);
 
   // Track when user is actively typing
   const markAsTyping = useCallback(() => {

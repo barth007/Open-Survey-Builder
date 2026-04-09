@@ -45,6 +45,7 @@ const readCapabilityState = (
 export const createSystemCapabilities = (env: Env = process.env): SystemCapabilities => {
   const accountExportEnabled = parseBooleanOverride(env.ACCOUNT_EXPORT_ENABLED) ?? true;
   const accountDeletionEnabled = parseBooleanOverride(env.ACCOUNT_DELETION_ENABLED) ?? true;
+  const passwordResetEnabled = parseBooleanOverride(env.PASSWORD_RESET_ENABLED) ?? !!env.SMTP_HOST?.trim();
 
   return {
     googleAuth: readCapabilityState(
@@ -53,8 +54,8 @@ export const createSystemCapabilities = (env: Env = process.env): SystemCapabili
       env.GOOGLE_AUTH_REASON,
     ),
     passwordReset: readCapabilityState(
-      false,
-      'Password reset is not implemented in this build',
+      passwordResetEnabled,
+      'Password reset requires SMTP to be configured',
       env.PASSWORD_RESET_REASON,
     ),
     twoFactor: readCapabilityState(

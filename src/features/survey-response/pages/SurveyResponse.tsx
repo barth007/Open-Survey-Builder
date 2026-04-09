@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { QuestionItem } from '@/components/survey/response/QuestionItem';
+import { QuestionItem } from '@/features/survey-response/components/QuestionItem';
 import { useQuerySurvey } from '@/hooks/survey/useQuerySurvey';
 import { useSurveyResponseLogic } from '@/hooks/survey/useSurveyResponseLogic';
 import { debugLog } from '@/lib/logger';

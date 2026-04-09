@@ -14,7 +14,7 @@ import {
 import { useAuth } from '@/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/components/ui/sidebar';
-import { ShareSurveyButton } from '@/components/survey/ShareSurveyButton';
+import { ShareSurveyButton } from '@/features/survey-editor/components/ShareSurveyButton';
 import { Survey } from '@/types/survey';
 import { ActiveUser } from '@/types/survey-organization';
 
@@ -40,6 +40,13 @@ export function SurveyNavigationHeader({
   const { surveyData } = useSurveyData();
   const { user: currentUser } = useAuth();
   const { collapsed } = useSidebar();
+
+  // Tick every 30s to refresh relative time display
+  const [, setTick] = React.useState(0);
+  React.useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Check if user is online
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
@@ -142,6 +149,7 @@ export function SurveyNavigationHeader({
   };
 
   const getSaveStatusText = () => {
+    if (showSaving) return 'Saving...';
     if (statusText) return statusText;
     if (!isOnline) return 'Offline';
     return formatLastSaved(lastSaved);
@@ -169,9 +177,8 @@ export function SurveyNavigationHeader({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 border-b bg-background px-4 flex items-center justify-between">
-      {/* Left: Share button and Navigation path */}
+      {/* Left: Navigation path */}
       <div className="flex items-center gap-4">
-
         <div style={{ width: "224px" }}>
           <Button
             variant="ghost"
@@ -198,25 +205,23 @@ export function SurveyNavigationHeader({
             </div>
           </>
         )}
-         <Separator orientation="vertical" className="h-4" />
-         {survey && surveyId && (
-          <ShareSurveyButton
-            survey={survey}
-            onPublishToggle={onPublishToggle}
-          />
-        )}
       </div>
 
-      {/* Right: Save status and Active user avatars */}
+      {/* Right: Share button, Save status, Active user avatars */}
       <TooltipProvider>
         <div className="flex items-center gap-4 pr-2 z-50 relative">
           {/* Save Status */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {getSaveStatusIcon()}
-            {shouldShowText() && (
-              <span className="text-xs">{getSaveStatusText()}</span>
-            )}
+            <span className="text-xs">{getSaveStatusText()}</span>
           </div>
+
+          {survey && surveyId && (
+            <ShareSurveyButton
+              survey={survey}
+              onPublishToggle={onPublishToggle}
+            />
+          )}
 
           {/* Active User Avatars */}
           <div className="flex items-center -space-x-2">
