@@ -4,7 +4,13 @@ import { createSystemCapabilities } from './capabilities.js';
 
 dotenv.config();
 
-const defaultAllowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+];
 const knownWeakJwtSecrets = new Set([
   'change-me-to-a-long-random-string',
   'your-super-secret-jwt-key-replace-in-production',
@@ -36,6 +42,7 @@ const validateJwtSecret = (env: NodeJS.ProcessEnv) => {
 };
 
 const parseAllowedOrigins = (env: NodeJS.ProcessEnv) => {
+  const isProduction = env.NODE_ENV === 'production';
   const configuredOrigins = env.ALLOWED_ORIGINS?.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -44,11 +51,25 @@ const parseAllowedOrigins = (env: NodeJS.ProcessEnv) => {
     return configuredOrigins;
   }
 
+  const origins = new Set<string>();
+
   if (env.FRONTEND_URL?.trim()) {
-    return [env.FRONTEND_URL.trim()];
+    const frontendUrl = env.FRONTEND_URL.trim();
+    origins.add(frontendUrl);
+
+    // Automatically add 127.0.0.1 if localhost is used, and vice versa
+    if (frontendUrl.includes('localhost')) {
+      origins.add(frontendUrl.replace('localhost', '127.0.0.1'));
+    } else if (frontendUrl.includes('127.0.0.1')) {
+      origins.add(frontendUrl.replace('127.0.0.1', 'localhost'));
+    }
   }
 
-  return env.NODE_ENV === 'production' ? [] : defaultAllowedOrigins;
+  if (!isProduction) {
+    defaultAllowedOrigins.forEach((o) => origins.add(o));
+  }
+
+  return Array.from(origins);
 };
 
 export const createConfig = (env: NodeJS.ProcessEnv = process.env) => ({
