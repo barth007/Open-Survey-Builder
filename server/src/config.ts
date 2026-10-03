@@ -73,7 +73,7 @@ const parseAllowedOrigins = (env: NodeJS.ProcessEnv) => {
 };
 
 export const createConfig = (env: NodeJS.ProcessEnv = process.env) => ({
-  port: env.PORT?.trim() || '3001',
+  port:Number( env.PORT?.trim() || 3001),
   databaseUrl: readRequiredEnv(env, 'DATABASE_URL'),
   jwtSecret: validateJwtSecret(env),
   frontendUrl: env.FRONTEND_URL?.trim(),

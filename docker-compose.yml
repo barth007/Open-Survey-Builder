@@ -1,20 +1,60 @@
+name: my_own
+
 services:
+ 
+  frontend:
+    build:
+      context: . 
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
+    expose:
+      - "3001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://admin:admin@db:5432/my_database?schema=public}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-long-random-string}
+      - PORT=3001
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - SMTP_HOST=${SMTP_HOST:-mailpit}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-any}
+      - SMTP_PASS=${SMTP_PASS:-any}
+      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   db:
     image: postgres:15-alpine
+    container_name: my_postgres
     environment:
-      POSTGRES_USER: graphrag
-      POSTGRES_PASSWORD: graphrag
-      POSTGRES_DB: postgres
-    ports:
-      - "5435:5432"
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: my_database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d my_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    expose:
+      - "5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - db_data:/var/lib/postgresql/data
 
-  # ─── Dev-only SMTP catcher (Mailpit) ─────────────────────────────────────────
-  # Captures all outgoing emails — nothing actually leaves the machine.
-  # Web UI: http://localhost:8025
-  # Start with: docker compose --profile dev up
   mailpit:
     profiles: [dev]
     image: axllent/mailpit:latest
@@ -26,37 +66,29 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
-  backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
+  redis:
+    image: redis:7-alpine
+    container_name: my_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+  
+  nginx:
+    image: nginx:alpine
+    container_name: my_nginx
     ports:
-      - "3001:3001"
-    environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://graphrag:graphrag@db:5432/postgres?schema=public}
-      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-long-random-string}
-      - PORT=3001
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
-      - SMTP_HOST=${SMTP_HOST:-smtp-relay.brevo.com}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_SECURE=${SMTP_SECURE:-false}
-      - SMTP_USER=${SMTP_USER:-any}
-      - SMTP_PASS=${SMTP_PASS:-any}
-      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - db
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
-    ports:
-      - "3000:3000"
-    depends_on:
+      - frontend
       - backend
-
 volumes:
-  postgres_data:
+  db_data:
+  redis_data:

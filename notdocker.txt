@@ -1,0 +1,63 @@
+services:
+  namespace: myown
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: graphrag
+      POSTGRES_PASSWORD: graphrag
+      POSTGRES_DB: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # ─── Dev-only SMTP catcher (Mailpit) ─────────────────────────────────────────
+  # Captures all outgoing emails — nothing actually leaves the machine.
+  # Web UI: http://localhost:8025
+  # Start with: docker compose --profile dev up
+  mailpit:
+    profiles: [dev]
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://graphrag:graphrag@db:5432/postgres?schema=public}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-long-random-string}
+      - PORT=3001
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - SMTP_HOST=${SMTP_HOST:-smtp-relay.brevo.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-any}
+      - SMTP_PASS=${SMTP_PASS:-any}
+      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
