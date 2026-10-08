@@ -7,7 +7,7 @@ services:
       context: . 
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+        VITE_API_URL: ${VITE_API_URL:?set VITE_API_URL in .env}
     expose:
       - "3000"
     depends_on:
@@ -20,18 +20,20 @@ services:
     command: sh -c "(npx prisma migrate deploy || npx prisma db push) && npm start"
     expose:
       - "3001"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://admin:admin@db:5432/my_database?schema=public}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
-      - JWT_SECRET=${JWT_SECRET:-tyuioiuytrewsxcvbnhgtrewqe45po98765432qwertg}
-      - PORT=3001
-      - FRONTEND_URL=${FRONTEND_URL:-/api}
-      - SMTP_HOST=${SMTP_HOST:-mailpit}
-      - SMTP_PORT=${SMTP_PORT:-1025}
-      - SMTP_SECURE=${SMTP_SECURE:-false}
-      - SMTP_USER=${SMTP_USER:-any}
-      - SMTP_PASS=${SMTP_PASS:-any}
-      - SMTP_FROM=${SMTP_FROM:-noreply@localhost}
+      DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER in .env}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:?set POSTGRES_DB in .env}?schema=public
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      PORT: 3001
+      FRONTEND_URL: ${FRONTEND_URL:?set FRONTEND_URL in .env}
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:?set SMTP_PORT in .env}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:?set SMTP_USER in .env}
+      SMTP_PASS: ${SMTP_PASS:?set SMTP_PASS in .env}
+      SMTP_FROM: ${SMTP_FROM:?set SMTP_FROM in .env}
     depends_on:
       db:
         condition: service_healthy
@@ -42,11 +44,11 @@ services:
     image: postgres:15-alpine
     container_name: my_postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: my_database
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d my_database"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
